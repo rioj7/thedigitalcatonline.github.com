@@ -1,0 +1,758 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en" prefix="og: http://ogp.me/ns# fb: https://www.facebook.com/2008/fbml">
+<head>
+    <title>Python Mocks: a gentle introduction - Part 1 - The Digital Cat</title>
+    <!-- Using the latest rendering mode for IE -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Liquid tags START -->
+    <!-- Liquid tags START -->
+    
+    <link href="http://blog.thedigitalcatonline.com/images/TheDigitalCat_favicon_32.png" rel="icon">
+
+<link rel="canonical" href="http://blog.thedigitalcatonline.com/blog/2016/03/06/python-mocks-a-gentle-introduction-part-1/">
+
+        <meta name="author" content="Leonardo Giordani" />
+        <meta name="keywords" content="decorators,OOP,Python,Python2,Python3,TDD" />
+
+        <meta property="og:site_name" content="The Digital Cat" />
+        <meta property="og:type" content="article"/>
+        <meta property="og:title" content="Python Mocks: a gentle introduction - Part 1"/>
+        <meta property="og:url" content="http://blog.thedigitalcatonline.com/blog/2016/03/06/python-mocks-a-gentle-introduction-part-1/"/>
+        <meta property="og:description" content=""/>
+        <meta property="article:published_time" content="2016-03-06" />
+            <meta property="article:section" content="Programming" />
+            <meta property="article:tag" content="decorators" />
+            <meta property="article:tag" content="OOP" />
+            <meta property="article:tag" content="Python" />
+            <meta property="article:tag" content="Python2" />
+            <meta property="article:tag" content="Python3" />
+            <meta property="article:tag" content="TDD" />
+            <meta property="article:author" content="Leonardo Giordani" />
+
+
+    <!-- Bootstrap and Bootswatch CSS START -->
+            <link href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.5/spacelab/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap and Bootswatch CSS END -->
+
+    <!-- Font Awesome CSS START -->
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- Font Awesome CSS END -->
+
+    <!-- Pygments CSS START -->
+    <link href="http://blog.thedigitalcatonline.com/theme/css/pygments/monokai.css" rel="stylesheet">
+    <!-- Pygments CSS END -->
+
+    <!-- Custom CSS START -->
+    <!-- Custom CSS END -->
+    
+    <!-- Docutils CSS START -->
+    <!-- Docutils CSS START -->
+    
+
+
+    
+    <link rel="stylesheet" href="http://blog.thedigitalcatonline.com/theme/css/style.css" type="text/css"/>
+    
+
+
+        <link href="http://blog.thedigitalcatonline.com/atom.xml" type="application/atom+xml" rel="alternate"
+              title="The Digital Cat ATOM Feed"/>
+
+
+
+        <link href="http://blog.thedigitalcatonline.com/category/programming/atom.xml" type="application/atom+xml" rel="alternate"
+              title="The Digital Cat Programming ATOM Feed"/>
+
+    <!-- Google Analytics Universal -->
+    <script type="text/javascript">
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+        ga('create', 'UA-74364524-1', 'auto');
+        ga('send', 'pageview');
+    </script>
+    <!-- End Google Analytics Universal Code -->
+
+</head>
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+	<div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a href="http://blog.thedigitalcatonline.com/" class="navbar-brand">
+
+
+<i class="fa fa-paw fa-lg"></i>                <span class="icon-label">The Digital Cat</span>
+               
+            </a>
+        </div>
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav">
+                         <li><a href="http://blog.thedigitalcatonline.com/pages/about.html">
+                             About
+                          </a></li>
+                        <li class="active">
+                            <a href="http://blog.thedigitalcatonline.com/category/programming/">Programming</a>
+                        </li>
+                        <li >
+                            <a href="http://blog.thedigitalcatonline.com/category/projects/">Projects</a>
+                        </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="http://blog.thedigitalcatonline.com/archives"><i class="fa fa-th-list"></i><span class="icon-label">Archives</span></a></li>
+            </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+</div> <!-- /.navbar -->
+
+<!-- Banner START -->
+<!-- Banner END -->
+
+<div class="container">
+    <div class="row">
+        <div class="col-sm-9">
+    <article>
+        <header class="page-header">
+            <h1>
+                <a href="http://blog.thedigitalcatonline.com/blog/2016/03/06/python-mocks-a-gentle-introduction-part-1/"
+                   rel="bookmark"
+                   title="Permalink to Python Mocks: a gentle introduction - Part 1">
+                    Python Mocks: a gentle introduction - Part 1
+                </a>
+            </h1>
+        </header>
+
+        <section id="content">
+            <div class="entry-content">
+                <div class="panel">
+                    <div class="panel-body">
+<footer class="post-info">
+
+
+            <span class="label label-default">By</span>
+            <a href="http://blog.thedigitalcatonline.com/authors/leonardo-giordani/">Leonardo Giordani</a>
+
+            <span class="label label-default">On</span>
+            <span class="published">
+                <time datetime="2016-03-06T18:00:00+01:00"> 06/03/2016</time>
+            </span>
+
+
+
+
+
+
+
+
+
+
+
+    
+
+        <span class="label label-default">Tags</span>
+	<a href="http://blog.thedigitalcatonline.com/categories/decorators/">decorators</a>
+        /
+	<a href="http://blog.thedigitalcatonline.com/categories/oop/">OOP</a>
+        /
+	<a href="http://blog.thedigitalcatonline.com/categories/python/">Python</a>
+        /
+	<a href="http://blog.thedigitalcatonline.com/categories/python2/">Python2</a>
+        /
+	<a href="http://blog.thedigitalcatonline.com/categories/python3/">Python3</a>
+        /
+	<a href="http://blog.thedigitalcatonline.com/categories/tdd/">TDD</a>
+    
+
+
+    
+</footer><!-- /.post-info -->                    </div>
+                </div>
+                <p>As already stressed in the two introductory posts on TDD (you can find them <a href="/categories/tdd/">here</a>) testing requires to write some code that uses the functions and objects you are going to develop. This means that you need to isolate a given (external) function that is part of your public API and demonstrate that it works with standard inputs and in edge cases.</p>
+<p>For example, if you are going to develop an object that stores percentages (such as for example poll results), you should test the following conditions: the class can store a standard percentage such as 42%, the class shall give an error if you try to store a negative percentage, the class shall give an error if you store a percentage greater than 100%.</p>
+<p>Tests shall be <em>idempotent</em> and <em>isolated</em>. Idempotent in mathematics and computer science identifies a process that can be run multiple times without changing the status of the system. Isolated means that a test shall not change its behaviour depending on previous executions of itself, nor depend on the previous execution (or missing execution) of other tests.</p>
+<p>Such restrictions, which guarantee that your tests are not passing due to a temporary configuration of the system or the order in which they are run, can raise big issues when dealing with external libraries and systems, or with intrinsically mutable concepts such as time. In the testing discipline, such issues are mostly faced using mocks, that is objects that pretend to be other objects.</p>
+<p>In this series of posts I am going to review the Python <code>mock</code> library and exemplify its use. I will not cover everything you may do with mock, obviously, but hopefully I'll give you the information you need to start using this powerful library.</p>
+<h2>Installation</h2>
+<p>First of all, mock is a Python library which development started around 2008. It was selected to be included in the standard library as of Python 3.3, which however does not prevent you to use other libraries if you prefer.</p>
+<p>Python 3 users, thus, are not required to take any step, while for Python 2 projects you are still required to issue a <code>pip install mock</code> to install it into the system or the current virtualenv.</p>
+<p>You may find the official documentation <a href="https://docs.python.org/dev/library/unittest.mock.html">here</a>. It is very detailed, and as always I strongly recommend taking your time to run through it.</p>
+<h2>Basic concepts</h2>
+<p>A mock, in the testing lingo, is an object that simulates the behaviour of another (more complex) object. When you (unit)test an object of your library you need sometimes to access other systems your object want to connect to, but you do not really want to be forced to run them, for several reasons.</p>
+<p>The first one is that connecting with external systems means having a complex testing environment, that is you are dropping the isolation requirement of you tests. If your object wants to connect with a website, for example, you are forced to have a running Internet connection, and if the remote website is down you cannot test your library.</p>
+<p>The second reason is that the setup of an external system is usually slow in comparison with the speed of unit tests. We expect to run hundred of tests in seconds, and if we have to fetch information from a remote server for each of them the time easily increases by several orders of magnitude. Remember: having slow tests means that you cannot run them while you develop, which in turn means that you will not really use them for TDD.</p>
+<p>The third reason is more subtle, and has to to with the mutable nature of an external system, thus I'll postpone the discussion of this issue for the moment.</p>
+<p>Let us try and work with a mock in Python and see what it can do. First of all fire up a Python shell or a <a href="jupyter.org">Jupyter Notebook</a> and import the library </p>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">unittest</span> <span class="kn">import</span> <span class="n">mock</span>
+</pre></div>
+
+
+<p>If you are using Python 2 you have to install it and use</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">mock</span>
+</pre></div>
+
+
+<p>The main object that the library provides is <code>Mock</code> and you can instantiate it without any argument</p>
+<div class="highlight"><pre><span></span><span class="n">m</span> <span class="o">=</span> <span class="n">mock</span><span class="o">.</span><span class="n">Mock</span><span class="p">()</span>
+</pre></div>
+
+
+<p>This object has the peculiar property of creating methods and attributes on the fly when you require them. Let us first look inside the object to take a glance of what it provides</p>
+<div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">dir</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+<span class="go">[&#39;assert_any_call&#39;, &#39;assert_called_once_with&#39;, &#39;assert_called_with&#39;, &#39;assert_has_calls&#39;, &#39;attach_mock&#39;, &#39;call_args&#39;, &#39;call_args_list&#39;, &#39;call_count&#39;, &#39;called&#39;, &#39;configure_mock&#39;, &#39;method_calls&#39;, &#39;mock_add_spec&#39;, &#39;mock_calls&#39;, &#39;reset_mock&#39;, &#39;return_value&#39;, &#39;side_effect&#39;]</span>
+</pre></div>
+
+
+<p>As you can see there are some methods which are already defined into the <code>Mock</code> object. Let us read a non-existent attribute</p>
+<div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">some_attribute</span>
+<span class="go">&lt;Mock name=&#39;mock.some_attribute&#39; id=&#39;140222043808432&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">dir</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+<span class="go">[&#39;assert_any_call&#39;, &#39;assert_called_once_with&#39;, &#39;assert_called_with&#39;, &#39;assert_has_calls&#39;, &#39;attach_mock&#39;, &#39;call_args&#39;, &#39;call_args_list&#39;, &#39;call_count&#39;, &#39;called&#39;, &#39;configure_mock&#39;, &#39;method_calls&#39;, &#39;mock_add_spec&#39;, &#39;mock_calls&#39;, &#39;reset_mock&#39;, &#39;return_value&#39;, &#39;side_effect&#39;, &#39;some_attribute&#39;]</span>
+</pre></div>
+
+
+<p>Well, as you can see this class is somehow different from what you are accustomed to. First of all its instances do not raise an <code>AttributeError</code> when asked for a non-existent attribute, but they happily return another instance of <code>Mock</code> itself. Second, the attribute you tried to access has now been created inside the object and accessing it returns the same mock object as before.</p>
+<div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">some_attribute</span>
+<span class="go">&lt;Mock name=&#39;mock.some_attribute&#39; id=&#39;140222043808432&#39;&gt;</span>
+</pre></div>
+
+
+<p>Mock objects are callables, which means that they may act both as attributes and as methods. If you try to call the mock it just returns you another mock with a name that includes parentheses to remarks its callable nature</p>
+<div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">some_attribute</span><span class="p">()</span>
+<span class="go">&lt;Mock name=&#39;mock.some_attribute()&#39; id=&#39;140247621475856&#39;&gt;</span>
+</pre></div>
+
+
+<p>As you can understand, such objects are the perfect tool to mimic other objects or systems, since they may expose any API without raising exceptions. To use them in tests, however, we need them to behave just like the original, which implies returning sensible values or performing operations.</p>
+<h2>Return value</h2>
+<p>The simplest thing a mock can do for you is to return a given value every time you call it. This is configured setting the <code>return_value</code> attribute of a mock object</p>
+<div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">some</span> <span class="n">attribute</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="mi">42</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">some</span> <span class="n">attribute</span><span class="p">()</span>
+<span class="go">42</span>
+</pre></div>
+
+
+<p>Now the object does not return a mock object any more, instead it just returns the static value stored in the <code>return_value</code> attribute. Obviously you can also store a callable such as a function or an object, and the method will return it, but it will not run it. Let me give you an example</p>
+<div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">print_answer</span><span class="p">():</span>
+<span class="gp">... </span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;42&quot;</span><span class="p">)</span>
+<span class="gp">... </span>
+<span class="gp">&gt;&gt;&gt; </span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">some_attribute</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="n">print_answer</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">some_attribute</span><span class="p">()</span>
+<span class="go">&lt;function print_answer at 0x7f8df1e3f400&gt;</span>
+</pre></div>
+
+
+<p>As you can see calling <code>some_attribute()</code> just returns the value stored in <code>return_value</code>, that is the function itself. To return values that come from a function we have to use a slightly more complex attribute of mock objects called <code>side_effect</code>.</p>
+<h2>Side effect</h2>
+<p>The <code>side_effect</code> parameter of mock objects is a very powerful tool. It accepts three different flavours of objects, callables, iterables, and exceptions, and changes its behaviour accordingly.</p>
+<p>If you pass an exception the mock will raise it</p>
+<div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">some_attribute</span><span class="o">.</span><span class="n">side_effect</span> <span class="o">=</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;A custom value error&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">some_attribute</span><span class="p">()</span>
+<span class="gt">Traceback (most recent call last):</span>
+  File <span class="nb">&quot;&lt;stdin&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
+  File <span class="nb">&quot;/usr/lib/python3.4/unittest/mock.py&quot;</span>, line <span class="m">902</span>, in <span class="n">__call__</span>
+    <span class="k">return</span> <span class="n">_mock_self</span><span class="o">.</span><span class="n">_mock_call</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+  File <span class="nb">&quot;/usr/lib/python3.4/unittest/mock.py&quot;</span>, line <span class="m">958</span>, in <span class="n">_mock_call</span>
+    <span class="k">raise</span> <span class="n">effect</span>
+<span class="gr">ValueError</span>: <span class="n">A custom value error</span>
+</pre></div>
+
+
+<p>If you pass an iterable, such as for example a generator, or a plain list, tuple, or similar objects, the mock will yield the values of that iterable, i.e. return every value contained in the iterable on subsequent calls of the mock. Let me give you an example</p>
+<div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">some_attribute</span><span class="o">.</span><span class="n">side_effect</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">some_attribute</span><span class="p">()</span>
+<span class="go">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">some_attribute</span><span class="p">()</span>
+<span class="go">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">some_attribute</span><span class="p">()</span>
+<span class="go">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">some_attribute</span><span class="p">()</span>
+<span class="gt">Traceback (most recent call last):</span>
+  File <span class="nb">&quot;&lt;stdin&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
+  File <span class="nb">&quot;/usr/lib/python3.4/unittest/mock.py&quot;</span>, line <span class="m">902</span>, in <span class="n">__call__</span>
+    <span class="k">return</span> <span class="n">_mock_self</span><span class="o">.</span><span class="n">_mock_call</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+  File <span class="nb">&quot;/usr/lib/python3.4/unittest/mock.py&quot;</span>, line <span class="m">961</span>, in <span class="n">_mock_call</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">effect</span><span class="p">)</span>
+<span class="gr">StopIteration</span>
+</pre></div>
+
+
+<p>As promised, the mock just returns every object found in the iterable (in this case a <code>range</code> object) once at a time until the generator is exhausted. According to the iterator protocol (see <a href="blog/2013/03/25/python-generators-from-iterators-to-cooperative-multitasking/">this post</a>) once every item has been returned the object raises the <code>StopIteration</code> exception, which means that you can correctly use it in a loop.</p>
+<p>The last and perhaps most used case is that of passing a callable to <code>side_effect</code>, which shamelessly executes it with its own same parameters. This is very powerful, especially if you stop thinking about "functions" and start considering "callables". Indeed, <code>side_effect</code> also accepts a class and calls it, that is it can instantiate objects. Let us consider a simple example with a function without arguments</p>
+<div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">print_answer</span><span class="p">():</span>
+<span class="gp">... </span>    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;42&quot;</span><span class="p">)</span>       
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">some_attribute</span><span class="o">.</span><span class="n">side_effect</span> <span class="o">=</span> <span class="n">print_answer</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">some_attribute</span><span class="o">.</span><span class="n">side_effect</span><span class="p">()</span>
+<span class="go">42</span>
+</pre></div>
+
+
+<p>A slightly more complex example: a function with arguments</p>
+<div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">print_number</span><span class="p">(</span><span class="n">num</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Number:&quot;</span><span class="p">,</span> <span class="n">num</span><span class="p">)</span>
+<span class="gp">... </span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">some_attribute</span><span class="o">.</span><span class="n">side_effect</span> <span class="o">=</span> <span class="n">print_number</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">some_attribute</span><span class="o">.</span><span class="n">side_effect</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="go">Number: 5</span>
+</pre></div>
+
+
+<p>And finally an example with a class</p>
+<div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">Number</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">_value</span> <span class="o">=</span> <span class="n">value</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">print_value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Value:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_value</span><span class="p">)</span>
+<span class="gp">... </span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">some_attribute</span><span class="o">.</span><span class="n">side_effect</span> <span class="o">=</span> <span class="n">Number</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">n</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">some_attribute</span><span class="o">.</span><span class="n">side_effect</span><span class="p">(</span><span class="mi">26</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">n</span>
+<span class="go">&lt;__main__.Number object at 0x7f8df1aa4470&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">n</span><span class="o">.</span><span class="n">print_value</span><span class="p">()</span>
+<span class="go">Value: 26</span>
+</pre></div>
+
+
+<h2>Testing with mocks</h2>
+<p>Now we know how to build a mock and how to give it a static return value or make it call a callable object. It is time to see how to use a mock in a test and what facilities do mocks provide. I'm going to use <a href="http://pytest.org">pytest</a> as a testing framework. You can find a quick introduction to pytest and TDD <a href="/categories/tdd/">here</a>).</p>
+<h3>Setup</h3>
+<p>If you want to quickly setup a pytest playground you may execute this code in a terminal (you need to have Python 3 and virtualenv installed in your system) </p>
+<div class="highlight"><pre><span></span>mkdir mockplayground
+<span class="nb">cd</span> mockplayground
+virtualenv venv3 -p python3
+<span class="nb">source</span> venv3/bin/activate
+pip install --upgrade pip
+pip install pytest
+<span class="nb">echo</span> <span class="s2">&quot;[pytest]&quot;</span> &gt;&gt; pytest.ini
+<span class="nb">echo</span> <span class="s2">&quot;norecursedirs=venv*&quot;</span> &gt;&gt; pytest.ini
+mkdir tests
+touch myobj.py
+touch tests/test_mock.py
+<span class="nv">PYTHONPATH</span><span class="o">=</span><span class="s2">&quot;.&quot;</span> py.test
+</pre></div>
+
+
+<p>The <code>PYTHONPATH</code> environment variable is an easy way to avoid having to setup a whole Python project to just test some simple code.</p>
+<h3>The three test types</h3>
+<p>According to Sandy Metz we need to test only three types of messages (calls) between objects:</p>
+<ul>
+<li>Incoming queries (assertion on result)</li>
+<li>Incoming commands (assertion on direct public side effects)</li>
+<li>Outgoing commands (expectation on call and arguments)</li>
+</ul>
+<p>You can see the original talk <a href="https://www.youtube.com/watch?v=URSWYvyc42M">here</a> or read the slides <a href="https://speakerdeck.com/skmetz/magic-tricks-of-testing-railsconf">here</a>. The final table is shown in slide number 176.</p>
+<p>As you can see when dealing with external objects we are only interested in knowing IF a method was called and WHAT PARAMETERS the caller passed to the object. We are not testing if the remote object returns the correct result, this is faked by the mock, which indeed returns exactly the result we need.</p>
+<p>So the purpose of the methods provided by mock objects is to allow us to check what methods we called on the mock itself and what parameters we used in the call.</p>
+<h3>Asserting calls</h3>
+<p>To show how to use Python mocks in testing I will follow the TDD methodology, writing tests first and then writing the code that makes the tests pass. In this post I want to give you a simple overview of the mock objects, so I will not implement a real world use case, and the code will be very trivial. In the second part of this series I will test and implement a real class, in order to show some more interesting use cases.</p>
+<p>The first thing we are usually interested in when dealing with an external object is to know that a given method has been called on it. Python mocks provide the <code>assert_called_with()</code> method to check this condition.</p>
+<p>The use case we are going to test is the following. <em>We instantiate the <code>myobj.MyObj</code> class, which requires an external object. The class shall call the <code>connect()</code> method of the external object without any parameter.</em></p>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">unittest</span> <span class="kn">import</span> <span class="n">mock</span>
+<span class="kn">import</span> <span class="nn">myobj</span>
+
+<span class="k">def</span> <span class="nf">test_instantiation</span><span class="p">():</span>
+    <span class="n">external_obj</span> <span class="o">=</span> <span class="n">mock</span><span class="o">.</span><span class="n">Mock</span><span class="p">()</span>
+    <span class="n">myobj</span><span class="o">.</span><span class="n">MyObj</span><span class="p">(</span><span class="n">external_obj</span><span class="p">)</span>
+    <span class="n">external_obj</span><span class="o">.</span><span class="n">connect</span><span class="o">.</span><span class="n">assert_called_with</span><span class="p">()</span>
+</pre></div>
+
+
+<p>The <code>myobj.MyObj</code> class, in this simple example, needs to connect to an external object, for example a remote repository or a database. The only thing we need to know for testing purposes is if the class called the <code>connect()</code> method of the external object without any parameter.</p>
+<p>So the first thing we do in this test is to instantiate the mock object. This is a fake version of the external object, and its only purpose is to accept calls from the <code>MyObj</code> object under test and return sensible values. Then we instantiate the <code>MyObj</code> class passing the external object. We expect the class to call the <code>connect()</code> method so we express this expectation calling <code>external_obj.connect.assert_called_with()</code>.</p>
+<p>What happens behind the scenes? The <code>MyObj</code> class receives the external object and somewhere is its initialization process calls the <code>connect()</code> method of the mock object and this creates the method itself as a mock object. This new mock records the parameters used to call it and the subsequent call to <code>assert_called_with()</code> checks that the method was called and that no parameters were passed.</p>
+<p>Running pytest the test obviously fails.</p>
+<div class="highlight"><pre><span></span>$ <span class="nv">PYTHONPATH</span><span class="o">=</span><span class="s2">&quot;.&quot;</span> py.test
+<span class="o">==========================================</span> <span class="nb">test</span> session <span class="nv">starts</span> <span class="o">==========================================</span>
+platform linux -- Python 3.4.3+, pytest-2.9.0, py-1.4.31, pluggy-0.3.1
+rootdir: /home/leo/devel/mockplayground, inifile: pytest.ini
+collected <span class="m">1</span> items 
+
+tests/test_mock.py <span class="nv">F</span>
+
+<span class="o">===============================================</span> <span class="nv">FAILURES</span> <span class="o">================================================</span>
+___________________________________________ test_instantiation __________________________________________
+
+    def test_instantiation<span class="o">()</span>:
+        <span class="nv">external_obj</span> <span class="o">=</span> mock.Mock<span class="o">()</span>
+&gt;       myobj.MyObj<span class="o">(</span>external_obj<span class="o">)</span>
+E       AttributeError: <span class="s1">&#39;module&#39;</span> object has no attribute <span class="s1">&#39;MyObj&#39;</span>
+
+tests/test_mock.py:6: <span class="nv">AttributeError</span>
+<span class="o">=======================================</span> <span class="m">1</span> failed in 0.03 <span class="nv">seconds</span> <span class="o">========================================</span>
+$
+</pre></div>
+
+
+<p>Putting this code in <code>myobj.py</code> is enough to make the test pass</p>
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MyObj</span><span class="p">():</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">repo</span><span class="p">):</span>
+        <span class="n">repo</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+</pre></div>
+
+
+<p>As you can see, the <code>__init__()</code> method actually calls <code>repo.connect()</code>, where <code>repo</code> is expected to be a full-featured external object that provides a given API. In this case (for the moment) the API is just its <code>connect()</code> method. Calling <code>repo.connect()</code> when <code>repo</code> is a mock object silently creates the method as a mock object, as shown before.</p>
+<p>The <code>assert_called_with()</code> method also allows us to check the parameters we passed when calling. To show this let us pretend that we expect the <code>MyObj.setup()</code> method to call <code>setup(cache=True, max_connections=256)</code> on the external object. As you can see we pass a couple of arguments (namely <code>cache</code> and <code>max_connections</code>) to the called method, and we want to be sure that the call was exactly in this form. The new test is thus</p>
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">test_setup</span><span class="p">():</span>
+    <span class="n">external_obj</span> <span class="o">=</span> <span class="n">mock</span><span class="o">.</span><span class="n">Mock</span><span class="p">()</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="n">myobj</span><span class="o">.</span><span class="n">MyObj</span><span class="p">(</span><span class="n">external_obj</span><span class="p">)</span>
+    <span class="n">obj</span><span class="o">.</span><span class="n">setup</span><span class="p">()</span>
+    <span class="n">external_obj</span><span class="o">.</span><span class="n">setup</span><span class="o">.</span><span class="n">assert_called_with</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">max_connections</span><span class="o">=</span><span class="mi">256</span><span class="p">)</span>
+</pre></div>
+
+
+<p>As usual the first run fails. Be sure to check this, it is part of the TDD methodology. You must have a test that DOES NOT PASS, then write some code that make it pass.</p>
+<div class="highlight"><pre><span></span>$ <span class="nv">PYTHONPATH</span><span class="o">=</span><span class="s2">&quot;.&quot;</span> py.test
+<span class="o">==========================================</span> <span class="nb">test</span> session <span class="nv">starts</span> <span class="o">==========================================</span>
+platform linux -- Python 3.4.3+, pytest-2.9.0, py-1.4.31, pluggy-0.3.1
+rootdir: /home/leo/devel/mockplayground, inifile: pytest.ini
+collected <span class="m">2</span> items 
+
+tests/test_mock.py .F
+
+<span class="o">===============================================</span> <span class="nv">FAILURES</span> <span class="o">================================================</span>
+______________________________________________ test_setup _______________________________________________
+
+    def test_setup<span class="o">()</span>:
+        <span class="nv">external_obj</span> <span class="o">=</span> mock.Mock<span class="o">()</span>
+        <span class="nv">obj</span> <span class="o">=</span> myobj.MyObj<span class="o">(</span>external_obj<span class="o">)</span>
+&gt;       obj.setup<span class="o">()</span>
+E       AttributeError: <span class="s1">&#39;MyObj&#39;</span> object has no attribute <span class="s1">&#39;setup&#39;</span>
+
+tests/test_mock.py:14: <span class="nv">AttributeError</span>
+<span class="o">==================================</span> <span class="m">1</span> failed, <span class="m">1</span> passed in 0.03 <span class="nv">seconds</span> <span class="o">===================================</span>
+$
+</pre></div>
+
+
+<p>To show you what type of check the mock object provides let me implement a partially correct solution</p>
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MyObj</span><span class="p">():</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">repo</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_repo</span> <span class="o">=</span> <span class="n">repo</span>
+        <span class="n">repo</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_repo</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></div>
+
+
+<p>As you can see the external object has been stored in <code>self._repo</code> and the call to <code>self._repo.setup()</code> is not exactly what the test expects, lacking the <code>max_connections</code> parameter. Running pytest we obtain the following result (I removed most of the pytest output)</p>
+<div class="highlight"><pre><span></span>E           AssertionError: Expected call: setup<span class="o">(</span><span class="nv">cache</span><span class="o">=</span>True, <span class="nv">max_connections</span><span class="o">=</span>256<span class="o">)</span>
+E           Actual call: setup<span class="o">(</span><span class="nv">cache</span><span class="o">=</span>True<span class="o">)</span>
+</pre></div>
+
+
+<p>and you see that the error message is very clear about what we expected and what happened in our code.</p>
+<p>As you can read in the official documentation, the <code>Mock</code> object also provides the following methods and attributes: <code>assert_called_once_with</code>, <code>assert_any_call</code>, <code>assert_has_calls</code>, <code>assert_not_called</code>, <code>called</code>, <code>call_count</code>. Each of them explores a different aspect of the mock behaviour concerning calls, make sure to check their description and the examples provided along.</p>
+<h2>Final words</h2>
+<p>In this first part of the series I described the behaviour of mock objects and the methods they provide to simulate return values and to test calls. They are a very powerful tool that allows you to avoid creating complex and slow tests that depend on external facilities to run, thus missing the main purpose of tests, which is that of <em>continuously</em> helping you to check your code.</p>
+<p>In the next issue of the series I will explore the automatic creation of mock methods from a given object and the very important patching mechanism provided by the <code>patch</code> decorator and context manager.</p>
+<h2>Feedback</h2>
+<p>Feel free to use <a href="https://plus.google.com/u/0/111444750762335924049">the blog Google+ page</a> to comment the post. The <a href="http://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues">GitHub issues</a> page is the best place to submit corrections.</p>
+            </div> <!-- /.entry-content -->
+
+<section class="well" id="related-posts">
+    <h4>Related Posts:</h4>
+    <ul>
+        <li><a href="http://blog.thedigitalcatonline.com/blog/2014/10/14/decorators-and-metaclasses/">Advanced use of Python decorators and metaclasses</a></li>
+        <li><a href="http://blog.thedigitalcatonline.com/blog/2015/09/10/python-oop-tdd-example-part2/">A simple example of Python OOP development (with TDD) - Part 2</a></li>
+        <li><a href="http://blog.thedigitalcatonline.com/blog/2015/05/13/python-oop-tdd-example-part1/">A simple example of Python OOP development (with TDD) - Part 1</a></li>
+        <li><a href="http://blog.thedigitalcatonline.com/blog/2014/07/04/oop-concepts-in-python-2-dot-x-part-3/">OOP concepts in Python 2.x - Part 3</a></li>
+        <li><a href="http://blog.thedigitalcatonline.com/blog/2015/09/22/clojure-sequential-data-types-for-python-programmers/">Clojure sequential data types for Python programmers</a></li>
+    </ul>
+</section>
+
+<hr />
+<!-- AddThis Button BEGIN -->
+<div class="addthis_toolbox addthis_default_style">
+        <a class="addthis_button_facebook_like" fb:like:layout="button_count"></a>
+        <a class="addthis_button_tweet"></a>
+        <a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+</div>
+<!-- AddThis Button END -->
+
+                
+        </section>
+    </article>
+
+        </div>
+        <div class="col-sm-3" id="sidebar">
+            <aside>
+<section class="well well-sm">
+    <ul class="list-group list-group-flush">
+            <li class="list-group-item"><h4><i class="fa fa-cloud fa-lg"></i><span class="icon-label">Social</span></h4>
+              <ul class="list-group" id="social">
+                <li class="list-group-item"><a href="https://twitter.com/thedigicat"><i class="fa fa-twitter-square fa-lg"></i> Twitter</a></li>
+                <li class="list-group-item"><a href="https://plus.google.com/u/0/111444750762335924049"><i class="fa fa-google-plus-square fa-lg"></i> Google+</a></li>
+                <li class="list-group-item"><a href="https://github.com/TheDigitalCatOnline"><i class="fa fa-github-square fa-lg"></i> GitHub</a></li>
+              </ul>
+            </li>
+
+            <li class="list-group-item"><h4><i class="fa fa-feed fa-lg"></i><span class="icon-label">Feeds</span></h4>
+                <ul class="list-group">
+                        <li class="list-group-item"><a href="http://blog.thedigitalcatonline.com/atom.xml">The Digital Cat</a></li>
+
+
+                        <li class="list-group-item"><a href="http://blog.thedigitalcatonline.com/category/programming/atom.xml">Programming</a></li>
+                </ul>
+            </li>
+
+            <li class="list-group-item"><h4><i class="fa fa-calendar fa-lg"></i><span class="icon-label">Recent Posts</span></h4>
+                <ul class="list-group" id="recentposts">
+                    <li class="list-group-item">
+                        <a href="http://blog.thedigitalcatonline.com/blog/2016/03/06/python-mocks-a-gentle-introduction-part-1/">
+                            Python Mocks: a gentle introduction - Part 1
+                        </a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="http://blog.thedigitalcatonline.com/blog/2015/09/22/clojure-sequential-data-types-for-python-programmers/">
+                            Clojure sequential data types for Python programmers
+                        </a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="http://blog.thedigitalcatonline.com/blog/2015/09/10/python-oop-tdd-example-part2/">
+                            A simple example of Python OOP development (with TDD) - Part 2
+                        </a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="http://blog.thedigitalcatonline.com/blog/2015/06/22/using-gitflow-with-github-a-simple-procedure/">
+                            Using gitflow with GitHub: a simple procedure
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
+
+            <li class="list-group-item"><a href="http://blog.thedigitalcatonline.com/"><h4><i class="fa fa-tags fa-lg"></i><span class="icon-label">Tags</span></h4></a>
+                <ul class="list-group list-inline tagcloud" id="tags-side">
+                    <li class="list-group-item tag-4">
+                        <a href="http://blog.thedigitalcatonline.com/categories/amqp/">
+                            AMQP
+                        </a>
+                    </li>
+                    <li class="list-group-item tag-2">
+                        <a href="http://blog.thedigitalcatonline.com/categories/c/">
+                            C
+                        </a>
+                    </li>
+                    <li class="list-group-item tag-4">
+                        <a href="http://blog.thedigitalcatonline.com/categories/clojure/">
+                            Clojure
+                        </a>
+                    </li>
+                    <li class="list-group-item tag-2">
+                        <a href="http://blog.thedigitalcatonline.com/categories/concurrent-programming/">
+                            concurrent programming
+                        </a>
+                    </li>
+                    <li class="list-group-item tag-4">
+                        <a href="http://blog.thedigitalcatonline.com/categories/cpp/">
+                            C++
+                        </a>
+                    </li>
+                    <li class="list-group-item tag-2">
+                        <a href="http://blog.thedigitalcatonline.com/categories/decorators/">
+                            decorators
+                        </a>
+                    </li>
+                    <li class="list-group-item tag-2">
+                        <a href="http://blog.thedigitalcatonline.com/categories/django/">
+                            Django
+                        </a>
+                    </li>
+                    <li class="list-group-item tag-3">
+                        <a href="http://blog.thedigitalcatonline.com/categories/erlang/">
+                            Erlang
+                        </a>
+                    </li>
+                    <li class="list-group-item tag-1">
+                        <a href="http://blog.thedigitalcatonline.com/categories/functional-programming/">
+                            functional programming
+                        </a>
+                    </li>
+                    <li class="list-group-item tag-2">
+                        <a href="http://blog.thedigitalcatonline.com/categories/generators/">
+                            generators
+                        </a>
+                    </li>
+                    <li class="list-group-item tag-3">
+                        <a href="http://blog.thedigitalcatonline.com/categories/git/">
+                            Git
+                        </a>
+                    </li>
+                    <li class="list-group-item tag-2">
+                        <a href="http://blog.thedigitalcatonline.com/categories/metaclasses/">
+                            metaclasses
+                        </a>
+                    </li>
+                    <li class="list-group-item tag-2">
+                        <a href="http://blog.thedigitalcatonline.com/categories/metaprogramming/">
+                            metaprogramming
+                        </a>
+                    </li>
+                    <li class="list-group-item tag-4">
+                        <a href="http://blog.thedigitalcatonline.com/categories/notebook/">
+                            Notebook
+                        </a>
+                    </li>
+                    <li class="list-group-item tag-1">
+                        <a href="http://blog.thedigitalcatonline.com/categories/oop/">
+                            OOP
+                        </a>
+                    </li>
+                    <li class="list-group-item tag-2">
+                        <a href="http://blog.thedigitalcatonline.com/categories/operating-systems/">
+                            operating systems
+                        </a>
+                    </li>
+                    <li class="list-group-item tag-4">
+                        <a href="http://blog.thedigitalcatonline.com/categories/pika/">
+                            Pika
+                        </a>
+                    </li>
+                    <li class="list-group-item tag-4">
+                        <a href="http://blog.thedigitalcatonline.com/categories/postage/">
+                            Postage
+                        </a>
+                    </li>
+                    <li class="list-group-item tag-1">
+                        <a href="http://blog.thedigitalcatonline.com/categories/python/">
+                            Python
+                        </a>
+                    </li>
+                    <li class="list-group-item tag-2">
+                        <a href="http://blog.thedigitalcatonline.com/categories/python2/">
+                            Python2
+                        </a>
+                    </li>
+                    <li class="list-group-item tag-1">
+                        <a href="http://blog.thedigitalcatonline.com/categories/python3/">
+                            Python3
+                        </a>
+                    </li>
+                    <li class="list-group-item tag-4">
+                        <a href="http://blog.thedigitalcatonline.com/categories/qt/">
+                            Qt
+                        </a>
+                    </li>
+                    <li class="list-group-item tag-3">
+                        <a href="http://blog.thedigitalcatonline.com/categories/rabbitmq/">
+                            RabbitMQ
+                        </a>
+                    </li>
+                    <li class="list-group-item tag-1">
+                        <a href="http://blog.thedigitalcatonline.com/categories/scala/">
+                            Scala
+                        </a>
+                    </li>
+                    <li class="list-group-item tag-2">
+                        <a href="http://blog.thedigitalcatonline.com/categories/tdd/">
+                            TDD
+                        </a>
+                    </li>
+                    <li class="list-group-item tag-4">
+                        <a href="http://blog.thedigitalcatonline.com/categories/versioning/">
+                            versioning
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
+
+
+
+    </ul>
+</section>
+            </aside>
+        </div>
+    </div>
+</div>
+<footer>
+    <div class="container">
+        <hr>
+        <div class="row">
+            <div class="col-xs-10">&copy; 2016 Leonardo Giordani
+                &middot; Powered by <a href="https://github.com/lgiordani/laces3" target="_blank">laces3</a>,
+                <a href="http://docs.getpelican.com/" target="_blank">Pelican</a>,
+                <a href="http://getbootstrap.com" target="_blank">Bootstrap 3</a>
+
+
+                <p><small>  <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="//i.creativecommons.org/l/by-sa/4.0/80x15.png" /></a>
+    Content
+  licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>, except where indicated otherwise.
+</small></p>
+
+            </div>
+            <div class="col-xs-2"><p class="pull-right"><i class="fa fa-arrow-up"></i> <a href="#">Back to top</a></p></div>
+        </div>
+    </div>
+</footer>
+<!-- JQuery JS START -->
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+<!-- JQuery JS END -->
+
+<!-- Bootstrap JS START -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+<!-- Bootstrap JS END -->
+
+
+<!-- Enable responsive features in IE8 with Respond.js (https://github.com/scottjehl/Respond) -->
+<!-- Respond JS START -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/respond.js/1.4.2/respond.min.js"></script>
+<!-- Respond JS END -->
+
+
+
+<!-- Begin Cookie Consent -->
+<script>
+    window.cookieconsent_options = {
+        
+        message: "This website uses cookies to ensure you get the best experience on our website.",
+        learnMore: "More info",
+        link: "http://cookielawinfo.com/about/",
+        theme: 'http://blog.thedigitalcatonline.com/theme/css/cookieconsent2/dark-top.css',
+    };
+</script>
+<script src="http://blog.thedigitalcatonline.com/theme/js/cookieconsent.min.js"></script>
+<!-- End Cookie Consent -->
+
+        <script type="text/javascript">var addthis_config = {"data_track_addressbar": true};</script>
+    <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-56d7f22eee8b0ddf"></script>
+
+
+</body>
+</html>
