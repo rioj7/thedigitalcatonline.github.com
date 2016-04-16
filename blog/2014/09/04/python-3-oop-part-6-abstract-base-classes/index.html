@@ -266,13 +266,13 @@
 </pre></div>
 
 
-<p>since <code>isinstance()</code> does not check the content of the class or its behaviour, it just consider the class and its ancestors.</p>
+<p>since <code>isinstance()</code> does not check the content of the class or its behaviour, it just considers the class and its ancestors.</p>
 <p>The problem, thus, may be summed up with the following question: what is the best way to test that an object exposes a given interface? Here, the word <em>interface</em> is used for its natural meaning, without any reference to other programming solutions, which however address the same problem.</p>
 <p>A good way to address the problem could be to write inside an attribute of the object the list of interfaces it promises to implement, and to agree that any time we want to test the behaviour of an object we simply have to check the content of this attribute. This is exactly the path followed by Python, and it is very important to understand that the whole system is just about a promised behaviour.</p>
 <p>The solution proposed through PEP 3119 is, in my opinion, very simple and elegant, and it perfectly fits the nature of Python, where things are usually agreed rather than being enforced. Not only, the solution follows the spirit of polymorphism, where information is provided by the object itself and not extracted by the calling code.</p>
 <p>In the next sections I am going to try and describe this solution in its main building blocks. The matter is complex so my explanation will lack some details: please refer to the forementioned PEP 3119 for a complete description.</p>
 <h4>Who Framed the Metaclasses</h4>
-<p>As already described, Python provides two built-ins to inspect objects and classes, which are <code>isinstance()</code> and <code>issubclass()</code> and it would be desirable that a solution to the inspection problem allows the programmer to go on with using those two functions.</p>
+<p>As already described, Python provides two built-ins to inspect objects and classes, which are <code>isinstance()</code> and <code>issubclass()</code> and a solution to the inspection problem should allow the programmer to go on with using those two functions.</p>
 <p>This means that we need to find a way to inject the "behaviour promise" into both classes and instances. This is the reason why metaclasses come in play. Recall what we said about them in the fifth issue of this series: metaclasses are the classes used to build classes, which means that they are the preferred way to change the structure of a class, and, in consequence, of its instances.</p>
 <p>Another way to do the same job would be to leverage the inheritance mechanism, injecting the behaviour through a dedicated parent class. This solution has many downsides, which I'm am not going to detail. It is enough to say that affecting the class hierarchy may lead to complex situations or subtle bugs. Metaclasses may provide here a different entry point for the introduction of a "virtual base class" (as PEP 3119 specifies, this is not the same concept as in C++).</p>
 <h4>Overriding Places</h4>
@@ -303,7 +303,7 @@
 </pre></div>
 
 
-<p>Here, the <code>MyABC</code> class is provided the <code>ABCMeta</code> metaclass. This puts the two <code>__isinstancecheck__()</code> and <code>__subclasscheck__()</code> methods inside <code>MyABC</code> so that, when issuing <code>isinstance()</code>, what Python actually ececutes is</p>
+<p>Here, the <code>MyABC</code> class is provided the <code>ABCMeta</code> metaclass. This puts the two <code>__instancecheck__()</code> and <code>__subclasscheck__()</code> methods inside <code>MyABC</code> so that, when issuing <code>isinstance()</code>, what Python actually ececutes is</p>
 <div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">MyABC</span><span class="p">)</span>
 <span class="go">False</span>
@@ -334,11 +334,11 @@
 <section class="well" id="related-posts">
     <h4>Related Posts:</h4>
     <ul>
-        <li><a href="http://blog.thedigitalcatonline.com/blog/2014/09/01/python-3-oop-part-5-metaclasses/">Python 3 OOP Part 5 - Metaclasses</a></li>
         <li><a href="http://blog.thedigitalcatonline.com/blog/2014/10/14/decorators-and-metaclasses/">Advanced use of Python decorators and metaclasses</a></li>
-        <li><a href="http://blog.thedigitalcatonline.com/blog/2015/04/23/python-decorators-metaprogramming-with-style/">Python decorators: metaprogramming with style</a></li>
-        <li><a href="http://blog.thedigitalcatonline.com/blog/2015/09/10/python-oop-tdd-example-part2/">A simple example of Python OOP development (with TDD) - Part 2</a></li>
-        <li><a href="http://blog.thedigitalcatonline.com/blog/2014/08/20/python-3-oop-part-3-delegation-composition-and-inheritance/">Python 3 OOP Part 3 - Delegation: composition and inheritance</a></li>
+        <li><a href="http://blog.thedigitalcatonline.com/blog/2014/09/01/python-3-oop-part-5-metaclasses/">Python 3 OOP Part 5 - Metaclasses</a></li>
+        <li><a href="http://blog.thedigitalcatonline.com/blog/2016/04/03/abstract-base-classes-in-python/">Abstract Base Classes in Python</a></li>
+        <li><a href="http://blog.thedigitalcatonline.com/blog/2014/08/20/python-3-oop-part-1-objects-and-types/">Python 3 OOP Part 1 - Objects and types</a></li>
+        <li><a href="http://blog.thedigitalcatonline.com/blog/2014/08/21/python-3-oop-part-4-polymorphism/">Python 3 OOP Part 4 - Polymorphism</a></li>
     </ul>
 </section>
 <section class="well" id="related-posts">
@@ -365,6 +365,7 @@
         </section>
     </article>
 
+            <!--PIPPOPO-->
         </div>
         <div class="col-sm-3" id="sidebar">
             <aside>
@@ -390,6 +391,11 @@
             <li class="list-group-item"><h4><i class="fa fa-calendar fa-lg"></i><span class="icon-label">Recent Posts</span></h4>
                 <ul class="list-group" id="recentposts">
                     <li class="list-group-item">
+                        <a href="http://blog.thedigitalcatonline.com/blog/2016/04/03/abstract-base-classes-in-python/">
+                            Abstract Base Classes in Python
+                        </a>
+                    </li>
+                    <li class="list-group-item">
                         <a href="http://blog.thedigitalcatonline.com/blog/2016/03/06/python-mocks-a-gentle-introduction-part-1/">
                             Python Mocks: a gentle introduction - Part 1
                         </a>
@@ -402,11 +408,6 @@
                     <li class="list-group-item">
                         <a href="http://blog.thedigitalcatonline.com/blog/2015/09/10/python-oop-tdd-example-part2/">
                             A simple example of Python OOP development (with TDD) - Part 2
-                        </a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="http://blog.thedigitalcatonline.com/blog/2015/06/22/using-gitflow-with-github-a-simple-procedure/">
-                            Using gitflow with GitHub: a simple procedure
                         </a>
                     </li>
                 </ul>
@@ -445,7 +446,7 @@
                             decorators
                         </a>
                     </li>
-                    <li class="list-group-item tag-2">
+                    <li class="list-group-item tag-3">
                         <a href="http://blog.thedigitalcatonline.com/categories/django/">
                             Django
                         </a>
@@ -460,7 +461,7 @@
                             functional programming
                         </a>
                     </li>
-                    <li class="list-group-item tag-2">
+                    <li class="list-group-item tag-3">
                         <a href="http://blog.thedigitalcatonline.com/categories/generators/">
                             generators
                         </a>
@@ -480,7 +481,7 @@
                             metaprogramming
                         </a>
                     </li>
-                    <li class="list-group-item tag-4">
+                    <li class="list-group-item tag-3">
                         <a href="http://blog.thedigitalcatonline.com/categories/notebook/">
                             Notebook
                         </a>
@@ -535,7 +536,7 @@
                             Scala
                         </a>
                     </li>
-                    <li class="list-group-item tag-2">
+                    <li class="list-group-item tag-3">
                         <a href="http://blog.thedigitalcatonline.com/categories/tdd/">
                             TDD
                         </a>
