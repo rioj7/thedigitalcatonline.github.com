@@ -259,6 +259,7 @@ cookiecutter https://github.com/audreyr/cookiecutter-pypackage
 rm -fR venv3
 <span class="nb">cd</span> rentomatic
 virtualenv venv3 -p python3
+<span class="nb">source</span> venv3/bin/activate
 </pre></div>
 
 
@@ -299,6 +300,11 @@ Sphinx
 <p>Obviously you are free to find the project structure that better suits your need or preferences. This is the structure we are going to use in this project but nothing forces you to follow it in your personal projects.</p>
 <p>This separation allows you to install a full-fledged development environment on your machine, while installing only testing tools in a testing environment like the Travis platform and to further reduce the amount of dependencies in the production case. </p>
 <p>As you can see, I am not using version tags in the requirements files. This is because this project is not going to be run in a production environment, so we do not need to freeze the environment.</p>
+<p>Remember at this point to install the development requirements in your virtualenv</p>
+<div class="highlight"><pre><span></span>$ pip install -r requirements/dev.txt
+</pre></div>
+
+
 <h2>Miscellaneous configuration</h2>
 <p>The <code>pytest</code> testing library needs to be configured. This is the <code>pytest.ini</code> file that you can create in the root directory (where the <code>setup.py</code> file is located)</p>
 <div class="highlight"><pre><span></span>[pytest]
@@ -344,19 +350,19 @@ max-complexity = 10
 
 <span class="k">def</span> <span class="nf">test_storageroom_model_init</span><span class="p">():</span>
     <span class="n">code</span> <span class="o">=</span> <span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span>
-    <span class="n">artist</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">StorageRoom</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">price</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">storageroom</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">StorageRoom</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">price</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
                            <span class="n">longitude</span><span class="o">=</span><span class="s1">&#39;-0.09998975&#39;</span><span class="p">,</span>
                            <span class="n">latitude</span><span class="o">=</span><span class="s1">&#39;51.75436293&#39;</span><span class="p">)</span>
-    <span class="k">assert</span> <span class="n">artist</span><span class="o">.</span><span class="n">code</span> <span class="o">==</span> <span class="n">code</span>
-    <span class="k">assert</span> <span class="n">artist</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">200</span>
-    <span class="k">assert</span> <span class="n">artist</span><span class="o">.</span><span class="n">price</span> <span class="o">==</span> <span class="mi">10</span>
-    <span class="k">assert</span> <span class="n">artist</span><span class="o">.</span><span class="n">longitude</span> <span class="o">==</span> <span class="o">-</span><span class="mf">0.09998975</span>
-    <span class="k">assert</span> <span class="n">artist</span><span class="o">.</span><span class="n">latitude</span> <span class="o">==</span> <span class="mf">51.75436293</span>
+    <span class="k">assert</span> <span class="n">storageroom</span><span class="o">.</span><span class="n">code</span> <span class="o">==</span> <span class="n">code</span>
+    <span class="k">assert</span> <span class="n">storageroom</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">200</span>
+    <span class="k">assert</span> <span class="n">storageroom</span><span class="o">.</span><span class="n">price</span> <span class="o">==</span> <span class="mi">10</span>
+    <span class="k">assert</span> <span class="n">storageroom</span><span class="o">.</span><span class="n">longitude</span> <span class="o">==</span> <span class="o">-</span><span class="mf">0.09998975</span>
+    <span class="k">assert</span> <span class="n">storageroom</span><span class="o">.</span><span class="n">latitude</span> <span class="o">==</span> <span class="mf">51.75436293</span>
 
 
 <span class="k">def</span> <span class="nf">test_storageroom_model_from_dict</span><span class="p">():</span>
     <span class="n">code</span> <span class="o">=</span> <span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span>
-    <span class="n">artist</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">StorageRoom</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span>
+    <span class="n">storageroom</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">StorageRoom</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span>
         <span class="p">{</span>
             <span class="s1">&#39;code&#39;</span><span class="p">:</span> <span class="n">code</span><span class="p">,</span>
             <span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
@@ -365,11 +371,11 @@ max-complexity = 10
             <span class="s1">&#39;latitude&#39;</span><span class="p">:</span> <span class="s1">&#39;51.75436293&#39;</span>
         <span class="p">}</span>
     <span class="p">)</span>
-    <span class="k">assert</span> <span class="n">artist</span><span class="o">.</span><span class="n">code</span> <span class="o">==</span> <span class="n">code</span>
-    <span class="k">assert</span> <span class="n">artist</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">200</span>
-    <span class="k">assert</span> <span class="n">artist</span><span class="o">.</span><span class="n">price</span> <span class="o">==</span> <span class="mi">10</span>
-    <span class="k">assert</span> <span class="n">artist</span><span class="o">.</span><span class="n">longitude</span> <span class="o">==</span> <span class="o">-</span><span class="mf">0.09998975</span>
-    <span class="k">assert</span> <span class="n">artist</span><span class="o">.</span><span class="n">latitude</span> <span class="o">==</span> <span class="mf">51.75436293</span>
+    <span class="k">assert</span> <span class="n">storageroom</span><span class="o">.</span><span class="n">code</span> <span class="o">==</span> <span class="n">code</span>
+    <span class="k">assert</span> <span class="n">storageroom</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">200</span>
+    <span class="k">assert</span> <span class="n">storageroom</span><span class="o">.</span><span class="n">price</span> <span class="o">==</span> <span class="mi">10</span>
+    <span class="k">assert</span> <span class="n">storageroom</span><span class="o">.</span><span class="n">longitude</span> <span class="o">==</span> <span class="o">-</span><span class="mf">0.09998975</span>
+    <span class="k">assert</span> <span class="n">storageroom</span><span class="o">.</span><span class="n">latitude</span> <span class="o">==</span> <span class="mf">51.75436293</span>
 </pre></div>
 
 
@@ -1167,8 +1173,8 @@ max-complexity = 10
         <span class="bp">self</span><span class="o">.</span><span class="n">repo</span> <span class="o">=</span> <span class="n">repo</span>
 
     <span class="k">def</span> <span class="nf">process_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request_object</span><span class="p">):</span>
-        <span class="n">domain_artists</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">repo</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">request_object</span><span class="o">.</span><span class="n">filters</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">res</span><span class="o">.</span><span class="n">ResponseSuccess</span><span class="p">(</span><span class="n">domain_artists</span><span class="p">)</span>
+        <span class="n">domain_storageroom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">repo</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">request_object</span><span class="o">.</span><span class="n">filters</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">res</span><span class="o">.</span><span class="n">ResponseSuccess</span><span class="p">(</span><span class="n">domain_storageroom</span><span class="p">)</span>
 </pre></div>
 
 
@@ -1728,6 +1734,8 @@ Rule                     Endpoint
 </ul>
 <p>While you develop your code always try to work following the TDD approach. Testability is one of the main features of a clean architecture, so don't ignore it.</p>
 <p>Whether you decide to use a clean architecture or not, I really hope this post helped you to get a fresh view on software architectures, as happened to me when I first discovered the concepts exemplified here.</p>
+<h2>Updates</h2>
+<p>2016-11-15: Two tests contained variables with a wrong name (artist), which came from an initial version of the project. The name did not affect the tests. Added some instructions on the virtual environment and the development requirements.</p>
 <h2>Feedback</h2>
 <p>Feel free to use <a href="https://plus.google.com/u/0/111444750762335924049">the blog Google+ page</a> to comment the post. The <a href="http://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues">GitHub issues</a> page is the best place to submit corrections.</p>
             </div> <!-- /.entry-content -->
