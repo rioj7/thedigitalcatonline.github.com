@@ -241,8 +241,8 @@ line : assignment | expression
 <ul>
 <li><strong>Token</strong>: a token is the minimal element of the language syntax, like an integer (not a digit, but a group of them), a name (not a letter but a group of them), or a symbol (like the mathematical operations).</li>
 <li><strong>Buffer</strong>: the input text (the program) has to be managed by a specific component. Parsing the input text has many requirements, among them being able to read upcoming parts of the text and to move back, or to move to specific locations.</li>
-<li><strong>Lexer</strong>: this is the first component of standard interpreters. Its job is to divide the stream of input charachters into meaningful chunks called tokens. It will process a string like "123 + x" and output three tokens: an integer, a symbol and a variable name.</li>
-<li><strong>Parser</strong>: the second component of standard interpreters. It analyses the stream of tokens produced by the lexer and produces a data structure that representes the whole program.</li>
+<li><strong>Lexer</strong>: this is the first component of standard interpreters. Its job is to divide the stream of input characters into meaningful chunks called tokens. It will process a string like "123 + x" and output three tokens: an integer, a symbol and a variable name.</li>
+<li><strong>Parser</strong>: the second component of standard interpreters. It analyses the stream of tokens produced by the lexer and produces a data structure that represents the whole program.</li>
 <li><strong>Visitor</strong>: the output of the parser is processed by a component that will either write the equivalent in another language or execute it.</li>
 <li><strong>Command Line Interface (CLI)</strong>: the whole stack can be directly used by a REPL (Read, Evaluate, Print Loop), a command line interface similar to the one Python provides. There each line is lexed, parsed, and visited, and the result is printed immediately.</li>
 </ul>
@@ -491,8 +491,8 @@ integer: [0-9]
 </pre></div>
 
 
-<p>The <code>node</code> variable is an instance of a specific class that contains integers, <code>IntegerNode</code> (but you are free to name it as you want, as this is not tested). Please note that this class doesn't consider the value as a string anymore, but as a proper (Python) integer. Now edit the file <code>smallcalc/calc_parser.py</code> and write some code that passes the test.</p>
-<p>Does it work? Well, you just wrote your first parser! Congratulations! From here to somethings that understands C++ or Python the journey is pretty long, but the initial steps are promising.</p>
+<p>The <code>node</code> variable is an instance of a specific class that contains integers, <code>IntegerNode</code> (but you are free to name it as you want, as this is not tested). Please note that this class doesn't consider the value as a string any more, but as a proper (Python) integer. Now edit the file <code>smallcalc/calc_parser.py</code> and write some code that passes the test.</p>
+<p>Does it work? Well, you just wrote your first parser! Congratulations! From here to something that understands C++ or Python the journey is pretty long, but the initial steps are promising.</p>
 <h2>Visitor</h2>
 <p>Let us consider the visitor, now. This is the run-time component of our language, the part that actually runs through the tree of nodes and executes it. This part, thus, is where most of the actual behaviour of the language happens. For instance, the fact that the symbol "+" actually sums integers is because the visitor implements that operation.</p>
 <p>This can seem a trivial consideration, but if you think about the division between integers you immediately understand that the visitor has a great responsibility. Does the symbol <code>/</code> divide integers with or without floating point math? Python 3, for instance, opted for a floating point division, and introduced the <code>//</code> operator for the integer version of the operation, but other languages behave differently.</p>
@@ -605,7 +605,7 @@ expression: integer addsymbol integer
 </pre></div>
 
 
-<p>I want to resume here the discussion about methematical operators and the role of the visitor that I started in the previous section. As you can see the expression is a generic binary operator, with a <code>left</code> term, a <code>right</code> term, and an <code>operator</code>. The operator, furthermore, is just a literal which value is the symbol we use for that binary operation.</p>
+<p>I want to resume here the discussion about mathematical operators and the role of the visitor that I started in the previous section. As you can see the expression is a generic binary operator, with a <code>left</code> term, a <code>right</code> term, and an <code>operator</code>. The operator, furthermore, is just a literal which value is the symbol we use for that binary operation.</p>
 <p>This parser, thus, is pretty ignorant of the different operations we can perform, giving the whole responsibility to the visitor. We could, however, implement the parser to make it produce something more specific, like for example a <code>binary_sum</code> or <code>addition</code> node, which represents only the addition, and which wouldn't need the <code>'operator'</code> key, as it is implicit in the node type.</p>
 <p>The amount of work done by the parser and by the visitor is a peculiarity of the specific language or program, so feel free to experiment. For the moment you have to stick to one solution as you are guided by the tests that I wrote, but as soon as you grasped the concepts and start writing a new language, you will be free to implement each component as you prefer.</p>
 <p>Finally, the visitor shall implement the actual mathematical operation. The test is</p>
@@ -707,7 +707,7 @@ expression: integer addsymbol integer
 
 
 <p>The second limitation that our language has at the moment is that it cannot handle whitespaces. If you try to input an expression like <code>3 + 4</code> in the CLI the program will crash with an exception (why?). Traditionally, whitespaces are completely ignored by programming languages: in Python, as well as in C and many other languages, writing <code>3+4</code>, <code>3 + 4</code>, <code>3+ 4</code>, or <code>3   +   4</code> doesn't change the meaning at all.</p>
-<p>How can we put such a behavious in our language? Again, the lexer is the component in charge, as it should just skip whitespaces. So add this test to <code>tests/test_calc_lexer.py</code></p>
+<p>How can we put such a behaviour in our language? Again, the lexer is the component in charge, as it should just skip whitespaces. So add this test to <code>tests/test_calc_lexer.py</code></p>
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">test_get_tokens_ignores_spaces</span><span class="p">():</span>
     <span class="n">l</span> <span class="o">=</span> <span class="n">clex</span><span class="o">.</span><span class="n">CalcLexer</span><span class="p">()</span>
 
@@ -825,7 +825,7 @@ expression: integer (addsymbol expression)
 <p>Before we dive into the fascinating but complex topic of nested operations, let us take a look and implement multiple operations, that is the application of a chain of "similar" operators with the same priority.</p>
 <p>Since this tutorial is a practical approach to the construction of an interpreter, I will not go too deep into the subject matter. Feel free to check the references if you are interested in such topics. For the moment, it is sufficient to understand that addition and subtraction are two operations that have the same precedence, which means that their order can be changed without affecting the result.</p>
 <p>For instance: the expression <code>3 + 4 - 5</code> gives <code>2</code> as a result. The result is the same if we perform <code>(3 + 4) - 5 = 7 - 5 = 2</code> or <code>3 + (4 - 5) = 3 - 1 = 2</code>, where the expressions between parenthesis are executed first.</p>
-<p>From the interpreter's point of view, then, we can process a chain of additions and subtractions without being concerned about precedence, which greatly simplyfies our job. As the output of the parser is a tree, however, we need to find a way to represent such a chain of operations in that form. One way is to nest expressions, which means that each operation is a single <code>binary</code> node, with the left term containing an integer and the right one the rest of the expression. In the previous example <code>3 + 4 - 5</code> is represented by an addition between <code>3</code> and <code>4 - 5</code>. <code>4 - 5</code>, in turn, is another binary node, asubtraction between <code>4</code> and <code>5</code>.</p>
+<p>From the interpreter's point of view, then, we can process a chain of additions and subtractions without being concerned about precedence, which greatly simplifies our job. As the output of the parser is a tree, however, we need to find a way to represent such a chain of operations in that form. One way is to nest expressions, which means that each operation is a single <code>binary</code> node, with the left term containing an integer and the right one the rest of the expression. In the previous example <code>3 + 4 - 5</code> is represented by an addition between <code>3</code> and <code>4 - 5</code>. <code>4 - 5</code>, in turn, is another binary node, a subtraction between <code>4</code> and <code>5</code>.</p>
 <p>Let us start checking if the lexer understand multiple operations</p>
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">test_get_tokens_understands_multiple_operations</span><span class="p">():</span>
     <span class="n">l</span> <span class="o">=</span> <span class="n">clex</span><span class="o">.</span><span class="n">CalcLexer</span><span class="p">()</span>
@@ -972,9 +972,9 @@ expression: integer (addsymbol expression)
     <h4>Related Posts:</h4>
     <ul>
         <li><a href="http://blog.thedigitalcatonline.com/blog/2017/07/12/a-game-of-tokens-solution-part-1/">A game of tokens: solution - Part 1</a></li>
-        <li><a href="http://blog.thedigitalcatonline.com/blog/2017/07/21/refactoring-with-test-in-python-a-practical-example/">Refactoring with tests in Python: a practical example</a></li>
         <li><a href="http://blog.thedigitalcatonline.com/blog/2015/09/10/python-oop-tdd-example-part2/">A simple example of Python OOP development (with TDD) - Part 2</a></li>
         <li><a href="http://blog.thedigitalcatonline.com/blog/2016/09/27/python-mocks-a-gentle-introduction-part-2/">Python Mocks: a gentle introduction - Part 2</a></li>
+        <li><a href="http://blog.thedigitalcatonline.com/blog/2017/07/21/refactoring-with-test-in-python-a-practical-example/">Refactoring with tests in Python: a practical example</a></li>
         <li><a href="http://blog.thedigitalcatonline.com/blog/2016/03/06/python-mocks-a-gentle-introduction-part-1/">Python Mocks: a gentle introduction - Part 1</a></li>
     </ul>
 </section>

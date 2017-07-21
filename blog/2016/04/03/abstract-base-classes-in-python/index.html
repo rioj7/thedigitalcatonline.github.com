@@ -221,7 +221,7 @@
 </pre></div>
 
 
-<p>does not check if the object is a <code>list</code> or a <code>dictionary</code> (both would allow the <code>[1]</code> notation), but if the object can be accessed by key (or index). When you accept a parameter in a function Python does not specify the type (leaving aside type hints) because you are not interestend in accepting a given type or one of its derived types. You are interested in accepting something that provides the methods you will use.</p>
+<p>does not check if the object is a <code>list</code> or a <code>dictionary</code> (both would allow the <code>[1]</code> notation), but if the object can be accessed by key (or index). When you accept a parameter in a function Python does not specify the type (leaving aside type hints) because you are not interested in accepting a given type or one of its derived types. You are interested in accepting something that provides the methods you will use.</p>
 <p>The behaviour, in an object-oriented environment, is the run-time interface of the object. This is different from the static interface, which is the collection of the methods provided by the object. The run-time interface is the actual interface the object shows when it is used, and this encompasses the methods provided by its class, but also methods provided by parent classes, the metaclass and other entry points provided by <code>__getattr__</code>.</p>
 <h2>Complex checks</h2>
 <p>Sometimes, however, you need to perform complex checks, such as "it behaves like a list". How can you test this condition? You could test if the incoming object has some standard methods, but this is not only incomplete but also wrong. For example, I could write the following test</p>
@@ -268,7 +268,7 @@
 
 <p>This is very natural because, after all, <code>someclass</code> is the best source of judgement about being a subclass of itself.</p>
 <h2>A new type of subclass</h2>
-<p>With the introduction of delegation-based instance and sublcass checks, Python provides a new type of subclass, and thus a new way to relate classes together. Now a subclass may be a real subclass, obtained using inheritance</p>
+<p>With the introduction of delegation-based instance and subclass checks, Python provides a new type of subclass, and thus a new way to relate classes together. Now a subclass may be a real subclass, obtained using inheritance</p>
 <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">ChildClass</span><span class="p">(</span><span class="n">ParentClass</span><span class="p">):</span>
     <span class="k">pass</span>
 </pre></div>
@@ -316,7 +316,7 @@
 
 
 <p>As you can see, the <code>MyClass</code> class is initially not recognized as a subclass of <code>collections.Sequence</code>, but after the registration <code>issubclass()</code> returns <code>True</code>, even if the class is still empty.</p>
-<h2>Hot to create ABCs</h2>
+<h2>How to create ABCs</h2>
 <p>The example given by the official documentation is very simple and clear</p>
 <div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABCMeta</span>
 
@@ -346,13 +346,13 @@
 <h2>Are you scared of metaclasses?</h2>
 <p>Metaclasses are a strange topic in Python. Most of the times the advice given to the novice is "Don't use them", like they were an error of the language and something that shall be avoided.</p>
 <p>I don't think so. As a matter of facts I definitely disagree with such position, for many reasons.</p>
-<p>First of all, if you are programming in Python its better for you to understand everything Python provides you, both the good and the bad parts. Programming languages are tools, and you shall know their strengths and their limitations. Most of the times what we call "limitations" are just features that become a restraint just because we are not aware of them. The C language, for example, is not object-oriented. Is this a strenght or a limitation? Python provides you a very powerful inspection mechanism. Is this a strength or a limitations? I could give countless other examples.</p>
+<p>First of all, if you are programming in Python its better for you to understand everything Python provides you, both the good and the bad parts. Programming languages are tools, and you shall know their strengths and their limitations. Most of the times what we call "limitations" are just features that become a restraint just because we are not aware of them. The C language, for example, is not object-oriented. Is this a strength or a limitation? Python provides you a very powerful inspection mechanism. Is this a strength or a limitations? I could give countless other examples.</p>
 <p>Second, powerful features are the one you should know better. After all, we use a language for the unique features it provides, not for the features it shares with other languages. I use Python because of its powerful polymorphism implementation, not because of loops and inheritance. Those are provided by Java and C++, too, for example. I write a device driver in C because of the closeness to the machine language and its speed, not because of the <code>int</code> and <code>float</code> types, which are provided by many other languages. So, since powerful features are what let the language do what others cannot, those are the ones you have to master.</p>
 <p>Third, if a feature of a language is a design error, and it can be, you need to understand why it is an error, and how you can avoid using it. Before ES6, JavaScript had some issues with scopes, given by the behaviour of the <code>var</code> keyword. You cannot afford being ignorant about those limitations, otherwise your software will be buggy. So, while studying the <code>for</code> loop in JavaScript took me a couple of minutes (it is a C-like for loop, after all), I spent a lot of time in dealing with <code>var</code>, which is the dangerous button of the whole device.</p>
 <p>Back to Python. Metaclasses are not a last-minute feature put into the language just for fun. They are the foundation of Python itself, and the relationship between <code>object</code> and <code>type</code> is something so beautiful that it is a pity that basically no one talks about it. So, plase stop complaining against metaclasses and telling people that they are dangerous or complex.</p>
 <p>Metaclasses are part of the language. And they are not complex to understand.</p>
 <h2>Why metaclasses for ABCs?</h2>
-<p>If you program in Python you should be somehow familiar with classes and instances. You know that when you build an instance you usa a class (like a blueprint) and that the class can put things into the instance. For example</p>
+<p>If you program in Python you should be somehow familiar with classes and instances. You know that when you build an instance you use a class (like a blueprint) and that the class can put things into the instance. For example</p>
 <div class="highlight"><pre><span></span><span class="c1"># Class definition</span>
 <span class="k">class</span> <span class="nc">Child</span><span class="p">():</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -391,7 +391,7 @@
 
 
 <h2>Metaclasses and MRO</h2>
-<p>A slightly advanced annotation: when I say that the metaclass <em>puts</em> the methods into the class I'm simplifiying the whole thing. As a matter of fact, like a class provides methods to the instance at runtime through the <code>__class__</code> attribute and the MRO protocol, the metaclass provides methods for the class. Attributes, instead, are put inside the class by the <code>__new__</code> or <code>__init__</code> methods of the metaclass.</p>
+<p>A slightly advanced annotation: when I say that the metaclass <em>puts</em> the methods into the class I'm simplifying the whole thing. As a matter of fact, like a class provides methods to the instance at runtime through the <code>__class__</code> attribute and the MRO protocol, the metaclass provides methods for the class. Attributes, instead, are put inside the class by the <code>__new__</code> or <code>__init__</code> methods of the metaclass.</p>
 <p>Let us review the MRO mechanism for instances and classes first. When you call a method on an instance Python automatically looks for that method in the instance first, then in the parent class and in every class in its hierarchy.</p>
 <p>So in this example</p>
 <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">GrandParent</span><span class="p">():</span> <span class="k">pass</span>
@@ -474,7 +474,7 @@
 <h2>Final words</h2>
 <p>I hope this post helped you understand that Abstract Base Classes, and in particular the standard collections, are useful and easy to understand. Metaclasses are also not that scary and dangerous, even if using them obviously requires some skill.</p>
 <h2>Sources</h2>
-<p>The official documentation of the <code>abc</code> module is very well written. <a href="https://docs.python.org/3.5/library/abc.html">Here</a> you find the version for Python 3.5. I also suggest to read the original <a href="https://www.python.org/dev/peps/pep-3119">PEP 3119</a> and the realated <a href="https://www.python.org/dev/peps/pep-3141">PEP 3141</a> for a deeper undestanding of the topic.</p>
+<p>The official documentation of the <code>abc</code> module is very well written. <a href="https://docs.python.org/3.5/library/abc.html">Here</a> you find the version for Python 3.5. I also suggest to read the original <a href="https://www.python.org/dev/peps/pep-3119">PEP 3119</a> and the related <a href="https://www.python.org/dev/peps/pep-3141">PEP 3141</a> for a deeper understanding of the topic.</p>
 <h2>Feedback</h2>
 <p>Feel free to use <a href="https://plus.google.com/u/0/111444750762335924049">the blog Google+ page</a> to comment the post. The <a href="http://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues">GitHub issues</a> page is the best place to submit corrections.</p>
             </div> <!-- /.entry-content -->
