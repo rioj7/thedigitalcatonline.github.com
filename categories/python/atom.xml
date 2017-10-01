@@ -1,5 +1,432 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>The Digital Cat</title><link href="http://blog.thedigitalcatonline.com/" rel="alternate"></link><link href="http://blog.thedigitalcatonline.com/categories/python/atom.xml" rel="self"></link><id>http://blog.thedigitalcatonline.com/</id><updated>2017-07-21T09:30:00+01:00</updated><entry><title>Refactoring with tests in Python: a practical example</title><link href="http://blog.thedigitalcatonline.com/blog/2017/07/21/refactoring-with-test-in-python-a-practical-example/" rel="alternate"></link><published>2017-07-21T09:30:00+01:00</published><updated>2017-07-21T09:30:00+01:00</updated><author><name>Leonardo Giordani</name></author><id>tag:blog.thedigitalcatonline.com,2017-07-21:blog/2017/07/21/refactoring-with-test-in-python-a-practical-example/</id><summary type="html">&lt;p&gt;This post contains a step-by-step example of a refactoring session guided by tests. When dealing with untested or legacy code refactoring is dangerous and tests can help us do it the right way, minimizing the amount of bugs we introduce, and possibly completely avoiding them.&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>The Digital Cat</title><link href="http://blog.thedigitalcatonline.com/" rel="alternate"></link><link href="http://blog.thedigitalcatonline.com/categories/python/atom.xml" rel="self"></link><id>http://blog.thedigitalcatonline.com/</id><updated>2017-10-01T15:00:00+01:00</updated><entry><title>A game of tokens: write an interpreter in Python with TDD - Part 2</title><link href="http://blog.thedigitalcatonline.com/blog/2017/10/01/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-2/" rel="alternate"></link><published>2017-10-01T15:00:00+01:00</published><updated>2017-10-01T15:00:00+01:00</updated><author><name>Leonardo Giordani</name></author><id>tag:blog.thedigitalcatonline.com,2017-10-01:blog/2017/10/01/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-2/</id><summary type="html">&lt;p&gt;My solution to the &lt;a href="/blog/2017/05/09/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-1"&gt;first part&lt;/a&gt; can be found &lt;a href="https://github.com/lgiordani/smallcalc/tree/part1"&gt;here&lt;/a&gt;, and a discussion about the code has been published &lt;a href="/blog/2017/07/12/a-game-of-tokens-solution-part-1"&gt;here&lt;/a&gt; Remember that this is only one possible solution, and that giving you the tests I already biased the whole project towards my implementation of choice, so feel free to experiment on your own!&lt;/p&gt;
+&lt;p&gt;In this instalment I'll give you new tests that will guide you through the implementation of a decent calculator, with multiplication, division, parenthesis, and unary operators. I will reference the structure I used in my solution, but you mileage may vary, so feel free to ignore the comments or the suggested solutions in case your code is different.&lt;/p&gt;
+&lt;h1&gt;Level 8 - Multiplication and division&lt;/h1&gt;
+&lt;p&gt;&lt;em&gt;"They're coming outta the walls. They're coming outta the goddamn walls."&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;As you remember from the previous post our interpreter is made of three different components, the lexer, the parser, and the visitor. So, to implement the missing basic operations, multiplication and division, we need to start with the lexer and ensure that it understands the traditional symbols &lt;code&gt;*&lt;/code&gt; and &lt;code&gt;/&lt;/code&gt;&lt;/p&gt;
+&lt;h2&gt;Lexer&lt;/h2&gt;
+&lt;p&gt;Put the following tests in the &lt;code&gt;tests/test_calc_lexer.py&lt;/code&gt; file&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_get_tokens_understands_multiplication&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+    &lt;span class="n"&gt;l&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;clex&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;CalcLexer&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+    &lt;span class="n"&gt;l&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;load&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;3 * 5&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;get_tokens&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+        &lt;span class="n"&gt;token&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Token&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;clex&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;INTEGER&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;3&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;
+        &lt;span class="n"&gt;token&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Token&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;clex&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;LITERAL&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;*&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;
+        &lt;span class="n"&gt;token&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Token&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;clex&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;INTEGER&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;5&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;
+        &lt;span class="n"&gt;token&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Token&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;clex&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;EOL&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;
+        &lt;span class="n"&gt;token&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Token&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;clex&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;EOF&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="p"&gt;]&lt;/span&gt;
+
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_get_tokens_understands_division&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+    &lt;span class="n"&gt;l&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;clex&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;CalcLexer&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+    &lt;span class="n"&gt;l&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;load&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;3 / 5&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;get_tokens&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+        &lt;span class="n"&gt;token&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Token&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;clex&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;INTEGER&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;3&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;
+        &lt;span class="n"&gt;token&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Token&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;clex&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;LITERAL&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;/&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;
+        &lt;span class="n"&gt;token&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Token&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;clex&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;INTEGER&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;5&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;
+        &lt;span class="n"&gt;token&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Token&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;clex&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;EOL&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;
+        &lt;span class="n"&gt;token&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Token&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;clex&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;EOF&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="p"&gt;]&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Do the tests fail? Why? Please remember that when tests pass without requiring any code change you have to ask yourself "Why do they pass?", and be sure that you understood the answer before going further.&lt;/p&gt;
+&lt;h2&gt;Parser&lt;/h2&gt;
+&lt;p&gt;Now that the lexer understands the symbols we can start considering the parser. The parser has to output a sensible structure that represents the new operations, which is not different from what it outputs for the sum and the difference. Add the following tests to &lt;code&gt;tests/test_calc_parser.py&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_parse_term&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+    &lt;span class="n"&gt;p&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;cpar&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;CalcParser&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+    &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;lexer&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;load&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;2 * 3&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="n"&gt;node&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;parse_term&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+    &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;node&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;asdict&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;binary&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="s1"&gt;&amp;#39;left&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;integer&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;value&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;
+        &lt;span class="p"&gt;},&lt;/span&gt;
+        &lt;span class="s1"&gt;&amp;#39;right&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;integer&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;value&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;
+        &lt;span class="p"&gt;},&lt;/span&gt;
+        &lt;span class="s1"&gt;&amp;#39;operator&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;literal&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;value&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;*&amp;#39;&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_parse_term_with_multiple_operations&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+    &lt;span class="n"&gt;p&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;cpar&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;CalcParser&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+    &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;lexer&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;load&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;2 * 3 / 4&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="n"&gt;node&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;parse_term&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+    &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;node&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;asdict&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;binary&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="s1"&gt;&amp;#39;left&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;integer&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;value&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;
+        &lt;span class="p"&gt;},&lt;/span&gt;
+        &lt;span class="s1"&gt;&amp;#39;right&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;binary&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;left&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+                &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;integer&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                &lt;span class="s1"&gt;&amp;#39;value&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;
+            &lt;span class="p"&gt;},&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;right&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+                &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;integer&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                &lt;span class="s1"&gt;&amp;#39;value&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;
+            &lt;span class="p"&gt;},&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;operator&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+                &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;literal&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                &lt;span class="s1"&gt;&amp;#39;value&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;/&amp;#39;&lt;/span&gt;
+            &lt;span class="p"&gt;}&lt;/span&gt;
+        &lt;span class="p"&gt;},&lt;/span&gt;
+        &lt;span class="s1"&gt;&amp;#39;operator&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;literal&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;value&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;*&amp;#39;&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;This time you should have some failures, so go and edit the &lt;code&gt;CalcParser&lt;/code&gt; class in order to pass the tests. As the two new binary operations are at this level the same as sum and difference you &lt;em&gt;could&lt;/em&gt; change the &lt;code&gt;parse_expression()&lt;/code&gt; method (try it!). This will however make things harder later when we will prioritise operations (multiplications have to be performed before sums), so my advice is to introduce a &lt;code&gt;parse_term()&lt;/code&gt; method in the parser.&lt;/p&gt;
+&lt;h2&gt;Visitor&lt;/h2&gt;
+&lt;p&gt;Now it's the visitor's turn, where the syntax tree gets analysed and actually executed. Add the following tests to the &lt;code&gt;tests/test_calc_visitor.py&lt;/code&gt; file and then make them pass changing the &lt;code&gt;CalcVisitor&lt;/code&gt; class accordingly.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_visitor_term_multiplication&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+    &lt;span class="n"&gt;ast&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;binary&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="s1"&gt;&amp;#39;left&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;integer&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;value&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;5&lt;/span&gt;
+        &lt;span class="p"&gt;},&lt;/span&gt;
+        &lt;span class="s1"&gt;&amp;#39;right&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;integer&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;value&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;
+        &lt;span class="p"&gt;},&lt;/span&gt;
+        &lt;span class="s1"&gt;&amp;#39;operator&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;literal&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;value&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;*&amp;#39;&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+
+    &lt;span class="n"&gt;v&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;cvis&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;CalcVisitor&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+    &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;v&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;visit&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;ast&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;20&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;integer&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_visitor_term_division&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+    &lt;span class="n"&gt;ast&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;binary&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="s1"&gt;&amp;#39;left&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+                &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;integer&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                &lt;span class="s1"&gt;&amp;#39;value&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;11&lt;/span&gt;
+        &lt;span class="p"&gt;},&lt;/span&gt;
+        &lt;span class="s1"&gt;&amp;#39;right&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;integer&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;value&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;
+        &lt;span class="p"&gt;},&lt;/span&gt;
+        &lt;span class="s1"&gt;&amp;#39;operator&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;literal&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;value&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;/&amp;#39;&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+
+    &lt;span class="n"&gt;v&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;cvis&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;CalcVisitor&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+    &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;v&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;visit&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;ast&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;integer&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h1&gt;Level 9 - Mixing operators&lt;/h1&gt;
+&lt;p&gt;&lt;em&gt;"Don't cross the streams."&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;Ok, it's time to do some serious math. What happens if you mix sums and multiplications? Let's try it and see how our interpreter reacts. We already know that the lexer happily digests all the four symbols so we can head straight to the parser and add the following test to &lt;code&gt;tests/test_calc_parser.py&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_parse_expression_with_term&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+    &lt;span class="n"&gt;p&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;cpar&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;CalcParser&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+    &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;lexer&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;load&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;2 * 3 + 4&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="n"&gt;node&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;parse_expression&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+    &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;node&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;asdict&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;binary&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="s1"&gt;&amp;#39;left&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;binary&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;left&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+                &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;integer&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                &lt;span class="s1"&gt;&amp;#39;value&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;
+            &lt;span class="p"&gt;},&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;right&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+                &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;integer&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                &lt;span class="s1"&gt;&amp;#39;value&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;
+            &lt;span class="p"&gt;},&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;operator&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+                &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;literal&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                &lt;span class="s1"&gt;&amp;#39;value&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;*&amp;#39;&lt;/span&gt;
+            &lt;span class="p"&gt;}&lt;/span&gt;
+        &lt;span class="p"&gt;},&lt;/span&gt;
+        &lt;span class="s1"&gt;&amp;#39;right&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;integer&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;value&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;
+        &lt;span class="p"&gt;},&lt;/span&gt;
+        &lt;span class="s1"&gt;&amp;#39;operator&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;literal&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;value&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;+&amp;#39;&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Chances are that this will fail miserably. Probably you have to rework a bit &lt;code&gt;parse_expression()&lt;/code&gt; as it is ignoring the new entry, &lt;code&gt;parse_term()&lt;/code&gt;. Please note that &lt;code&gt;2 * 3 + 4&lt;/code&gt; must give &lt;code&gt;10&lt;/code&gt; according to the standard math rules, and not &lt;code&gt;14&lt;/code&gt;. This happens because multiplication is performed before sum, and the order depends uniquely on the structure created by the parser, and not by the visitor (which is at this point a pretty dumb component).&lt;/p&gt;
+&lt;p&gt;Once the parser outputs the correct structure the visitor shouldn't have issues, as it is already behaving in a recursive way. If you want to check feel free to add relevant tests, however.&lt;/p&gt;
+&lt;h1&gt;Level 10 - Parentheses&lt;/h1&gt;
+&lt;p&gt;&lt;em&gt;"When nine hundred years old you reach, look as good you will not."&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://en.wikipedia.org/wiki/Bracket#Parentheses"&gt;Parentheses&lt;/a&gt;) are curved brackets used in mathematics to change the order of operations. As this part is pretty important I will spend some time on it, because the order of operations will be of concerns also when it comes to language operators, and not only when dealing with mathematical operations. As explained in the previous section almost everything at this point happens in the parser, as the resulting structure that we will give to the visitor is the one that rules the precedence of operations.&lt;/p&gt;
+&lt;p&gt;Let's start to check that the lexer understands the parentheses&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_get_tokens_understands_parentheses&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+    &lt;span class="n"&gt;l&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;clex&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;CalcLexer&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+    &lt;span class="n"&gt;l&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;load&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;3 * ( 5 + 7 )&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;get_tokens&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+        &lt;span class="n"&gt;token&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Token&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;clex&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;INTEGER&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;3&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;
+        &lt;span class="n"&gt;token&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Token&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;clex&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;LITERAL&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;*&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;
+        &lt;span class="n"&gt;token&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Token&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;clex&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;LITERAL&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;(&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;
+        &lt;span class="n"&gt;token&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Token&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;clex&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;INTEGER&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;5&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;
+        &lt;span class="n"&gt;token&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Token&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;clex&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;LITERAL&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;+&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;
+        &lt;span class="n"&gt;token&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Token&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;clex&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;INTEGER&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;7&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;
+        &lt;span class="n"&gt;token&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Token&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;clex&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;LITERAL&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;)&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;
+        &lt;span class="n"&gt;token&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Token&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;clex&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;EOL&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;
+        &lt;span class="n"&gt;token&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Token&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;clex&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;EOF&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="p"&gt;]&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;As our lexer is pretty open-minded it shouldn't raise any objections and happily pass the test (why?). &lt;/p&gt;
+&lt;p&gt;The parser is not that forgiving, however, and I bet it will make a fuss. Let's try and feed it with some simple expression with parentheses&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_parse_expression_with_parentheses&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+    &lt;span class="n"&gt;p&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;cpar&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;CalcParser&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+    &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;lexer&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;load&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;(2 + 3)&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="n"&gt;node&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;parse_expression&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+    &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;node&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;asdict&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;binary&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="s1"&gt;&amp;#39;left&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;integer&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;value&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;
+        &lt;span class="p"&gt;},&lt;/span&gt;
+        &lt;span class="s1"&gt;&amp;#39;right&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;integer&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;value&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;
+        &lt;span class="p"&gt;},&lt;/span&gt;
+        &lt;span class="s1"&gt;&amp;#39;operator&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;literal&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;value&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;+&amp;#39;&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;To make this test pass my suggestion is to introduce a &lt;code&gt;parse_factor()&lt;/code&gt; method, where the term &lt;em&gt;factor&lt;/em&gt; encompasses both the integers and the expressions between parentheses. In this latter case obviously, you will need to call &lt;code&gt;parse_expression()&lt;/code&gt;, which somehow breaks the hierarchical structure of methods in the parser.&lt;/p&gt;
+&lt;h1&gt;Level 11 - Priorities&lt;/h1&gt;
+&lt;p&gt;&lt;em&gt;"You got issues, Quill."&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;As parentheses have been introduced to change the default priority rules between operators we need to be sure that this happens. We can test is very simply with this code&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_parse_parentheses_change_priority&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+    &lt;span class="n"&gt;p&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;cpar&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;CalcParser&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+    &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;lexer&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;load&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;(2 + 3) * 4&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="n"&gt;node&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;parse_expression&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+    &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;node&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;asdict&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;binary&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="s1"&gt;&amp;#39;left&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;binary&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;left&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+                &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;integer&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                &lt;span class="s1"&gt;&amp;#39;value&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;
+            &lt;span class="p"&gt;},&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;right&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+                &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;integer&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                &lt;span class="s1"&gt;&amp;#39;value&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;
+            &lt;span class="p"&gt;},&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;operator&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+                &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;literal&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                &lt;span class="s1"&gt;&amp;#39;value&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;+&amp;#39;&lt;/span&gt;
+            &lt;span class="p"&gt;}&lt;/span&gt;
+        &lt;span class="p"&gt;},&lt;/span&gt;
+        &lt;span class="s1"&gt;&amp;#39;right&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;integer&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;value&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;
+        &lt;span class="p"&gt;},&lt;/span&gt;
+        &lt;span class="s1"&gt;&amp;#39;operator&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;literal&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;value&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;*&amp;#39;&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Now when your parser passes this test you have a full-fledged calculator that supports parentheses. Make sure to test the new features in the CLI. Does multiple parentheses work? Why?&lt;/p&gt;
+&lt;h1&gt;Level 12 - Unary operators&lt;/h1&gt;
+&lt;p&gt;&lt;em&gt;"There can be only one!"&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;Now it's time to introduce unary operators, which are very important in programming languages. Just think at &lt;code&gt;not x&lt;/code&gt; and you will immediately understand why you need them. Unary operators do not fit in the current structure of our interpreter as the parser is always expecting either an integer or a parentheses as the first token.&lt;/p&gt;
+&lt;p&gt;Let's first write a test for the most simple unary operator, which is a minus (as in &lt;code&gt;-2&lt;/code&gt;). Remember that we are testing the parser here, as the lexer is already able to parse the minus sign.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_parse_factor_supports_unary_operator&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+    &lt;span class="n"&gt;p&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;cpar&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;CalcParser&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+    &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;lexer&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;load&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;-5&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="n"&gt;node&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;parse_factor&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+    &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;node&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;asdict&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;unary&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="s1"&gt;&amp;#39;operator&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;literal&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;value&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;-&amp;#39;&lt;/span&gt;
+        &lt;span class="p"&gt;},&lt;/span&gt;
+        &lt;span class="s1"&gt;&amp;#39;content&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;integer&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;value&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;5&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;When your parser passes this test we have to make sure that the unary minus can be applied also to expressions between parentheses&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_parse_factor_supports_negative_expressions&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+    &lt;span class="n"&gt;p&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;cpar&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;CalcParser&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+    &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;lexer&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;load&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;-(2 + 3)&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="n"&gt;node&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;parse_factor&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+    &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;node&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;asdict&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;unary&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="s1"&gt;&amp;#39;operator&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;literal&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;value&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;-&amp;#39;&lt;/span&gt;
+        &lt;span class="p"&gt;},&lt;/span&gt;
+        &lt;span class="s1"&gt;&amp;#39;content&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;binary&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;left&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+                &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;integer&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                &lt;span class="s1"&gt;&amp;#39;value&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;
+            &lt;span class="p"&gt;},&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;right&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+                &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;integer&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                &lt;span class="s1"&gt;&amp;#39;value&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;
+            &lt;span class="p"&gt;},&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;operator&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+                &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;literal&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                &lt;span class="s1"&gt;&amp;#39;value&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;+&amp;#39;&lt;/span&gt;
+            &lt;span class="p"&gt;}&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Once the parser is able to pass these two tests we are confident that the unary minus can be used in front of all the basic elements of our expressions. At this point it is time to execute the unary expressions produced by the parsing layer, so include this test for the visitor&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_visitor_unary_minus&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+    &lt;span class="n"&gt;ast&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;unary&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="s1"&gt;&amp;#39;operator&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;literal&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;value&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;-&amp;#39;&lt;/span&gt;
+        &lt;span class="p"&gt;},&lt;/span&gt;
+        &lt;span class="s1"&gt;&amp;#39;content&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;binary&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;left&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+                &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;integer&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                &lt;span class="s1"&gt;&amp;#39;value&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;
+            &lt;span class="p"&gt;},&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;right&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+                &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;integer&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                &lt;span class="s1"&gt;&amp;#39;value&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;
+            &lt;span class="p"&gt;},&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;operator&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+                &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;literal&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                &lt;span class="s1"&gt;&amp;#39;value&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;+&amp;#39;&lt;/span&gt;
+            &lt;span class="p"&gt;}&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+
+    &lt;span class="n"&gt;v&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;cvis&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;CalcVisitor&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+    &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;v&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;visit&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;ast&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;integer&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Change the visitor to pass this test and you can go straight to the CLI and start using negative numbers or negative expressions. Can you execute something like &lt;code&gt;--2&lt;/code&gt; (minus minus 2)? What is the result? Why?&lt;/p&gt;
+&lt;p&gt;Now let's go back to the parser and ensure that the unary plus can be used as well. This is the test&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_parse_factor_supports_unary_plus&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+    &lt;span class="n"&gt;p&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;cpar&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;CalcParser&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+    &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;lexer&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;load&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;+(2 + 3)&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="n"&gt;node&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;parse_factor&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+    &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;node&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;asdict&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;unary&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="s1"&gt;&amp;#39;operator&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;literal&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;value&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;+&amp;#39;&lt;/span&gt;
+        &lt;span class="p"&gt;},&lt;/span&gt;
+        &lt;span class="s1"&gt;&amp;#39;content&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;binary&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;left&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+                &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;integer&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                &lt;span class="s1"&gt;&amp;#39;value&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;
+            &lt;span class="p"&gt;},&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;right&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+                &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;integer&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                &lt;span class="s1"&gt;&amp;#39;value&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;
+            &lt;span class="p"&gt;},&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;operator&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+                &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;literal&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                &lt;span class="s1"&gt;&amp;#39;value&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;+&amp;#39;&lt;/span&gt;
+            &lt;span class="p"&gt;}&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;and the code should be trivial, as you already manage the unary minus. The relative test for the visitor is&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_visitor_unary_plus&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+    &lt;span class="n"&gt;ast&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;unary&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="s1"&gt;&amp;#39;operator&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;literal&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;value&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;+&amp;#39;&lt;/span&gt;
+        &lt;span class="p"&gt;},&lt;/span&gt;
+        &lt;span class="s1"&gt;&amp;#39;content&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;binary&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;left&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+                &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;integer&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                &lt;span class="s1"&gt;&amp;#39;value&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;
+            &lt;span class="p"&gt;},&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;right&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+                &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;integer&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                &lt;span class="s1"&gt;&amp;#39;value&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;
+            &lt;span class="p"&gt;},&lt;/span&gt;
+            &lt;span class="s1"&gt;&amp;#39;operator&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+                &lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;literal&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                &lt;span class="s1"&gt;&amp;#39;value&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;+&amp;#39;&lt;/span&gt;
+            &lt;span class="p"&gt;}&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+
+    &lt;span class="n"&gt;v&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;cvis&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;CalcVisitor&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+    &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;v&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;visit&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;ast&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;integer&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Once your code passes all the tests head to the CLI and try to run something like &lt;code&gt;-+--++-3&lt;/code&gt;. Does it work?&lt;/p&gt;
+&lt;h1&gt;Conclusion&lt;/h1&gt;
+&lt;p&gt;That's all for this time. If you feel brave or do not like to wait for the next post go and try adding new operators! Next issue will cover variables, assignments and postfix-operators like the power operation (&lt;code&gt;2^3&lt;/code&gt;). I will also publish my solution to the tests presented here before moving on.&lt;/p&gt;
+&lt;h1&gt;Titles&lt;/h1&gt;
+&lt;p&gt;The section quotes comes from some good films: "Aliens" (1986), "Ghostbusters" (1984), "Return of the Jedi" (1983), "Guardians of the Galaxy" (2014), "Highlander" (1986).&lt;/p&gt;
+&lt;h2&gt;Feedback&lt;/h2&gt;
+&lt;p&gt;Feel free to use &lt;a href="https://plus.google.com/u/0/111444750762335924049"&gt;the blog Google+ page&lt;/a&gt; to comment the post. Feel free to reach me on &lt;a href="https://twitter.com/thedigicat"&gt;Twitter&lt;/a&gt; if you have questions. The &lt;a href="http://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues"&gt;GitHub issues&lt;/a&gt; page is the best place to submit corrections.&lt;/p&gt;</summary><category term="Python"></category><category term="Python3"></category><category term="TDD"></category><category term="testing"></category><category term="compilers"></category></entry><entry><title>Refactoring with tests in Python: a practical example</title><link href="http://blog.thedigitalcatonline.com/blog/2017/07/21/refactoring-with-test-in-python-a-practical-example/" rel="alternate"></link><published>2017-07-21T09:30:00+01:00</published><updated>2017-07-21T09:30:00+01:00</updated><author><name>Leonardo Giordani</name></author><id>tag:blog.thedigitalcatonline.com,2017-07-21:blog/2017/07/21/refactoring-with-test-in-python-a-practical-example/</id><summary type="html">&lt;p&gt;This post contains a step-by-step example of a refactoring session guided by tests. When dealing with untested or legacy code refactoring is dangerous and tests can help us do it the right way, minimizing the amount of bugs we introduce, and possibly completely avoiding them.&lt;/p&gt;
 &lt;p&gt;Refactoring is not easy. It requires a double effort to understand code that others wrote, or that we wrote in the past, and moving around parts of it, simplifying it, in one word &lt;strong&gt;improving&lt;/strong&gt; it, is by no means something for the faint-hearted. Like programming, refactoring has its rules and best practices, but it can be described as a mixture of technique, intuition, experience, risk.&lt;/p&gt;
 &lt;p&gt;Programming, after all, is craftsmanship.&lt;/p&gt;
 &lt;h1&gt;The starting point&lt;/h1&gt;
@@ -761,7 +1188,7 @@ collected &lt;span class="m"&gt;0&lt;/span&gt; &lt;span class="nv"&gt;items&lt;/
 &lt;p&gt;Now I can start an iterative process:&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;I will copy one of the tests of &lt;code&gt;DataStats&lt;/code&gt; and adapt it to &lt;code&gt;NewDataStats&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;I will copy come code from &lt;code&gt;DataStats&lt;/code&gt; to &lt;code&gt;NewDataStats&lt;/code&gt;, adapting it to the new API and making it pass the test.&lt;/li&gt;
+&lt;li&gt;I will copy some code from &lt;code&gt;DataStats&lt;/code&gt; to &lt;code&gt;NewDataStats&lt;/code&gt;, adapting it to the new API and making it pass the test.&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;At this point iteratively removing methods from &lt;code&gt;DataStats&lt;/code&gt; and replacing them with a call to &lt;code&gt;NewDataStats&lt;/code&gt; would be overkill. I'll show you in the next section why, and what we can do to avoid  that.&lt;/p&gt;
 &lt;p&gt;An example of the resulting tests for &lt;code&gt;NewDataStats&lt;/code&gt; is the following&lt;/p&gt;
@@ -786,7 +1213,7 @@ collected &lt;span class="m"&gt;0&lt;/span&gt; &lt;span class="nv"&gt;items&lt;/
 &lt;/pre&gt;&lt;/div&gt;
 
 
-&lt;p&gt;It is time to replace the methods of &lt;code&gt;DataStats&lt;/code&gt; with calls to &lt;code&gt;NewDataStats&lt;/code&gt;. We could do it method by method, bu actually the only thing that we really need is to replace &lt;code&gt;stats()&lt;/code&gt;. So the new code is&lt;/p&gt;
+&lt;p&gt;It is time to replace the methods of &lt;code&gt;DataStats&lt;/code&gt; with calls to &lt;code&gt;NewDataStats&lt;/code&gt;. We could do it method by method, but actually the only thing that we really need is to replace &lt;code&gt;stats()&lt;/code&gt;. So the new code is&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;stats&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;iage&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;isalary&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
         &lt;span class="n"&gt;nds&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;NewDataStats&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
         &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;nds&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;stats&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;iage&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;isalary&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
@@ -2001,6 +2428,8 @@ expression: integer (addsymbol expression)
 &lt;li&gt;&lt;a href="https://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_form"&gt;Extended Backus-Naur form on Wikipedia&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="http://matt.might.net/articles/grammars-bnf-ebnf/"&gt;The language of languages&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
+&lt;h1&gt;Solution&lt;/h1&gt;
+&lt;p&gt;You can find my solution to this part &lt;a href="/blog/2017/07/12/a-game-of-tokens-solution-part-1/"&gt;here&lt;/a&gt;.&lt;/p&gt;
 &lt;h1&gt;Titles&lt;/h1&gt;
 &lt;p&gt;The section quotes comes from some good movies, the complete list is: "The Lord of the Rings - The Return of the King" (2003), "Iron Man" (2008), "Raiders of the Lost Ark" (1981), "Braveheart" (1995), "The Matrix" (1999), "The Bourne Identity" (2002), "The Prestige" (2006).&lt;/p&gt;
 &lt;h2&gt;Feedback&lt;/h2&gt;
