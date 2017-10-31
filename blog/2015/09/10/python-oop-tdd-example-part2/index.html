@@ -331,11 +331,11 @@
 <p>Composition could be another viable solution, with a <code>Binary</code> value stored internally and accessed whenever we call <code>super()</code> in the inheritance version. In this case, however, inheritance and composition lead to very similar results, with the latter being somehow counter-intuitive and thus not the best choice.</p>
 <p>We need to reimplement many of the special methods already implemented in the <code>Binary</code> class. This because Python resolves magic methods through a dedicated channel that avoids the <code>__getattr__()</code> and <code>__getattribute__()</code> methods, making the whole thing faster. This makes impossible to automatically delegate magic methods, except by means of metaclasses, which are however too complex to be a useful addition to this post.</p>
 <p>The initialization function shall store the bit length and initialize a flag to signal the overflow condition. Since I also want to have a <code>set()</code> function that changes the value I implement it and call it in the <code>__init__()</code> method.</p>
-<div class="highlight"><pre><span></span>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bits</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<div class="highlight"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bits</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bits</span> <span class="o">=</span> <span class="n">bits</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">overflow</span> <span class="o">=</span> <span class="bp">False</span>
 
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
@@ -361,15 +361,15 @@
 <p>do not fail, even if the result of the addition is a <code>Binary</code> and not a <code>SizeBinary</code>.</p>
 <p>Let us check why this happens. The <code>SizeBinary</code> object is also a <code>Binary</code> object, and its <code>__add__()</code> method returns a <code>Binary</code>. The subsequent comparison is made using the <code>__eq__()</code> method of the <code>Binary</code> class, since the <code>SizeBinary</code> one does not provide its own version of the comparison. Since <code>Binary</code> classes just compare their value the test ends successfully.</p>
 <p>Let us add some code to implement the correct comparision</p>
-<div class="highlight"><pre><span></span>    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
-        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">bits</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">bits</span>
+<div class="highlight"><pre><span></span>    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">bits</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">bits</span>
 </pre></div>
 
 
 <p>which adds a check on the number of bits to the check already made by the <code>Binary</code> class. This results in 35 failed tests and 16 passed, showing that the previous result was biased by "inaccurate" tests. As a matter of fact, the presence of a test that shows if the comparison is correct or not makes perfectly reasonable to have tests that take it for granted.</p>
 <p>One simple thing to add is the right padding with zeros that shall be provided for input values that are shorter than the given number of bits</p>
-<div class="highlight"><pre><span></span>    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">s</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+<div class="highlight"><pre><span></span>    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">s</span><span class="o">.</span><span class="n">rjust</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bits</span><span class="p">,</span> <span class="s1">&#39;0&#39;</span><span class="p">)</span>
 </pre></div>
 
@@ -396,11 +396,11 @@
 
 <p>As a matter of fact this function doesn't make the relative test (<code>test_size_binary_TC</code>) pass, because it depends on the correct implementation of the sum operation, which is still not implemented. So now the updated battle report is: 27 failed, 24 passed.</p>
 <p>Right and left shifts are the same of the <code>Binary</code> class, except that the result shall fit into the given bits. So we may delegate them to the <code>Binary</code> class implementation</p>
-<div class="highlight"><pre><span></span>    <span class="k">def</span> <span class="nf">__lshift__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">SizeBinary</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bits</span><span class="p">,</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__lshift__</span><span class="p">(</span><span class="n">pos</span><span class="p">))</span>
+<div class="highlight"><pre><span></span>    <span class="k">def</span> <span class="fm">__lshift__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">SizeBinary</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bits</span><span class="p">,</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__lshift__</span><span class="p">(</span><span class="n">pos</span><span class="p">))</span>
 
-    <span class="k">def</span> <span class="nf">__rshift__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">SizeBinary</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bits</span><span class="p">,</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__rshift__</span><span class="p">(</span><span class="n">pos</span><span class="p">))</span>
+    <span class="k">def</span> <span class="fm">__rshift__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">SizeBinary</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bits</span><span class="p">,</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__rshift__</span><span class="p">(</span><span class="n">pos</span><span class="p">))</span>
 </pre></div>
 
 
@@ -420,15 +420,15 @@
 
 
 <p>It checks if the <code>other</code> argument has a <code>bits</code> attribute, otherwise converts it into a <code>SizeBinary</code>. Then it returns the converted argument and the greatest length between this latter and <code>self</code>. Using this function I can then implement some magic methods such as</p>
-<div class="highlight"><pre><span></span>    <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+<div class="highlight"><pre><span></span>    <span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="n">bits</span><span class="p">,</span> <span class="n">sb_other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_and_convert</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">SizeBinary</span><span class="p">(</span><span class="n">bits</span><span class="p">,</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__add__</span><span class="p">(</span><span class="n">sb_other</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">SizeBinary</span><span class="p">(</span><span class="n">bits</span><span class="p">,</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__add__</span><span class="p">(</span><span class="n">sb_other</span><span class="p">))</span>
 </pre></div>
 
 
 <p>This template is used to implement <code>__add__()</code>, <code>__sub__()</code>, <code>__mul__()</code>, <code>__truediv__()</code>, <code>__and__()</code>, <code>__or__()</code>, <code>__xor__()</code>. The <code>__invert__()</code> method is simpler, missing the second argument</p>
-<div class="highlight"><pre><span></span>    <span class="k">def</span> <span class="nf">__invert__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">SizeBinary</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bits</span><span class="p">,</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__invert__</span><span class="p">())</span>
+<div class="highlight"><pre><span></span>    <span class="k">def</span> <span class="fm">__invert__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">SizeBinary</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bits</span><span class="p">,</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__invert__</span><span class="p">())</span>
 </pre></div>
 
 
@@ -439,8 +439,8 @@
 
 
 <p>The second needs some consideration: slicing depends on the <code>__getitem__()</code> magic method, which is used also for the simple indexing, tested by <code>test_binary_get_bit</code> and <code>test_binary_negative_index</code>, for example. The requested behaviour of the <code>SizeBinary</code> class is to return a single character when indexing a single bit and a <code>SizeBinary</code> or the correct length when slicing. The following code handles both situations</p>
-<div class="highlight"><pre><span></span>    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
-        <span class="n">res</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__getitem__</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+<div class="highlight"><pre><span></span>    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
         <span class="n">bits</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">res</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="n">bits</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
@@ -467,11 +467,11 @@
 <section class="well" id="related-posts">
     <h4>Related Posts:</h4>
     <ul>
-        <li><a href="http://blog.thedigitalcatonline.com/blog/2017/07/21/refactoring-with-test-in-python-a-practical-example/">Refactoring with tests in Python: a practical example</a></li>
         <li><a href="http://blog.thedigitalcatonline.com/blog/2015/05/13/python-oop-tdd-example-part1/">A simple example of Python OOP development (with TDD) - Part 1</a></li>
-        <li><a href="http://blog.thedigitalcatonline.com/blog/2016/03/06/python-mocks-a-gentle-introduction-part-1/">Python Mocks: a gentle introduction - Part 1</a></li>
+        <li><a href="http://blog.thedigitalcatonline.com/blog/2017/07/21/refactoring-with-test-in-python-a-practical-example/">Refactoring with tests in Python: a practical example</a></li>
         <li><a href="http://blog.thedigitalcatonline.com/blog/2016/09/27/python-mocks-a-gentle-introduction-part-2/">Python Mocks: a gentle introduction - Part 2</a></li>
-        <li><a href="http://blog.thedigitalcatonline.com/blog/2017/10/01/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-2/">A game of tokens: write an interpreter in Python with TDD - Part 2</a></li>
+        <li><a href="http://blog.thedigitalcatonline.com/blog/2016/03/06/python-mocks-a-gentle-introduction-part-1/">Python Mocks: a gentle introduction - Part 1</a></li>
+        <li><a href="http://blog.thedigitalcatonline.com/blog/2017/10/31/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-3/">A game of tokens: write an interpreter in Python with TDD - Part 3</a></li>
     </ul>
 </section>
 <section class="well" id="related-posts">
@@ -511,6 +511,16 @@
             <li class="list-group-item"><h4><i class="fa fa-calendar fa-lg"></i><span class="icon-label">Recent Posts</span></h4>
                 <ul class="list-group" id="recentposts">
                     <li class="list-group-item">
+                        <a href="http://blog.thedigitalcatonline.com/blog/2017/10/31/a-game-of-tokens-solution-part-3/">
+                            A game of tokens: solution - Part 3
+                        </a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="http://blog.thedigitalcatonline.com/blog/2017/10/31/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-3/">
+                            A game of tokens: write an interpreter in Python with TDD - Part 3
+                        </a>
+                    </li>
+                    <li class="list-group-item">
                         <a href="http://blog.thedigitalcatonline.com/blog/2017/10/17/a-game-of-tokens-solution-part-2/">
                             A game of tokens: solution - Part 2
                         </a>
@@ -518,16 +528,6 @@
                     <li class="list-group-item">
                         <a href="http://blog.thedigitalcatonline.com/blog/2017/10/01/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-2/">
                             A game of tokens: write an interpreter in Python with TDD - Part 2
-                        </a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="http://blog.thedigitalcatonline.com/blog/2017/07/21/refactoring-with-test-in-python-a-practical-example/">
-                            Refactoring with tests in Python: a practical example
-                        </a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="http://blog.thedigitalcatonline.com/blog/2017/07/12/a-game-of-tokens-solution-part-1/">
-                            A game of tokens: solution - Part 1
                         </a>
                     </li>
                 </ul>
@@ -671,7 +671,7 @@
                             Scala
                         </a>
                     </li>
-                    <li class="list-group-item tag-2">
+                    <li class="list-group-item tag-1">
                         <a href="http://blog.thedigitalcatonline.com/categories/tdd/">
                             TDD
                         </a>

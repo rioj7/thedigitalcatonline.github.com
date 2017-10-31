@@ -225,7 +225,7 @@
     <span class="k">def</span> <span class="nf">fakemethod</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span>
 
-    <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;append&#39;</span><span class="p">,</span> <span class="s1">&#39;count&#39;</span><span class="p">,</span> <span class="s1">&#39;extend&#39;</span><span class="p">,</span> <span class="s1">&#39;index&#39;</span><span class="p">,</span> <span class="s1">&#39;insert&#39;</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fakemethod</span>
 </pre></div>
@@ -278,10 +278,10 @@
 <h4>Overriding Places</h4>
 <p>As said, <code>isinstance()</code> and <code>issubclass()</code> are built-in functions, not object methods, so we cannot simply override them providing a different implementation in a given class. So the first part of the solution is to change the behaviour of those two functions to first check if the class or the instance contain a special method, which is <code>__instancecheck__()</code> for <code>isinstance()</code> and <code>__subclasscheck__()</code> for <code>issubclass()</code>. So both built-ins try to run the respective special method, reverting to the standard algorithm if it is not present.</p>
 <p>A note about naming. Methods must accept the object they belong to as the first argument, so the two special methods shall have the form</p>
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">__instancecheck__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">inst</span><span class="p">):</span>
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__instancecheck__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">inst</span><span class="p">):</span>
    <span class="p">[</span><span class="o">...</span><span class="p">]</span>
 
-<span class="k">def</span> <span class="nf">__subclasscheck__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">sub</span><span class="p">):</span>
+<span class="k">def</span> <span class="fm">__subclasscheck__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">sub</span><span class="p">):</span>
    <span class="p">[</span><span class="o">...</span><span class="p">]</span>
 </pre></div>
 
@@ -307,11 +307,11 @@
 <div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">MyABC</span><span class="p">)</span>
 <span class="go">False</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">MyABC</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__instancecheck__</span><span class="p">(</span><span class="n">MyABC</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">MyABC</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="fm">__instancecheck__</span><span class="p">(</span><span class="n">MyABC</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
 <span class="go">False</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">isinstance</span><span class="p">((),</span> <span class="n">MyABC</span><span class="p">)</span>
 <span class="go">True</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">MyABC</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__instancecheck__</span><span class="p">(</span><span class="n">MyABC</span><span class="p">,</span> <span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">MyABC</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="fm">__instancecheck__</span><span class="p">(</span><span class="n">MyABC</span><span class="p">,</span> <span class="p">())</span>
 <span class="go">True</span>
 </pre></div>
 
@@ -334,11 +334,11 @@
 <section class="well" id="related-posts">
     <h4>Related Posts:</h4>
     <ul>
+        <li><a href="http://blog.thedigitalcatonline.com/blog/2016/04/03/abstract-base-classes-in-python/">Abstract Base Classes in Python</a></li>
         <li><a href="http://blog.thedigitalcatonline.com/blog/2014/09/01/python-3-oop-part-5-metaclasses/">Python 3 OOP Part 5 - Metaclasses</a></li>
         <li><a href="http://blog.thedigitalcatonline.com/blog/2014/10/14/decorators-and-metaclasses/">Advanced use of Python decorators and metaclasses</a></li>
-        <li><a href="http://blog.thedigitalcatonline.com/blog/2016/04/03/abstract-base-classes-in-python/">Abstract Base Classes in Python</a></li>
-        <li><a href="http://blog.thedigitalcatonline.com/blog/2015/01/12/accessing-attributes-in-python/">Accessing attributes in Python</a></li>
         <li><a href="http://blog.thedigitalcatonline.com/blog/2014/08/20/python-3-oop-part-3-delegation-composition-and-inheritance/">Python 3 OOP Part 3 - Delegation: composition and inheritance</a></li>
+        <li><a href="http://blog.thedigitalcatonline.com/blog/2015/05/13/python-oop-tdd-example-part1/">A simple example of Python OOP development (with TDD) - Part 1</a></li>
     </ul>
 </section>
 <section class="well" id="related-posts">
@@ -382,6 +382,16 @@
             <li class="list-group-item"><h4><i class="fa fa-calendar fa-lg"></i><span class="icon-label">Recent Posts</span></h4>
                 <ul class="list-group" id="recentposts">
                     <li class="list-group-item">
+                        <a href="http://blog.thedigitalcatonline.com/blog/2017/10/31/a-game-of-tokens-solution-part-3/">
+                            A game of tokens: solution - Part 3
+                        </a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="http://blog.thedigitalcatonline.com/blog/2017/10/31/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-3/">
+                            A game of tokens: write an interpreter in Python with TDD - Part 3
+                        </a>
+                    </li>
+                    <li class="list-group-item">
                         <a href="http://blog.thedigitalcatonline.com/blog/2017/10/17/a-game-of-tokens-solution-part-2/">
                             A game of tokens: solution - Part 2
                         </a>
@@ -389,16 +399,6 @@
                     <li class="list-group-item">
                         <a href="http://blog.thedigitalcatonline.com/blog/2017/10/01/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-2/">
                             A game of tokens: write an interpreter in Python with TDD - Part 2
-                        </a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="http://blog.thedigitalcatonline.com/blog/2017/07/21/refactoring-with-test-in-python-a-practical-example/">
-                            Refactoring with tests in Python: a practical example
-                        </a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="http://blog.thedigitalcatonline.com/blog/2017/07/12/a-game-of-tokens-solution-part-1/">
-                            A game of tokens: solution - Part 1
                         </a>
                     </li>
                 </ul>
@@ -542,7 +542,7 @@
                             Scala
                         </a>
                     </li>
-                    <li class="list-group-item tag-2">
+                    <li class="list-group-item tag-1">
                         <a href="http://blog.thedigitalcatonline.com/categories/tdd/">
                             TDD
                         </a>

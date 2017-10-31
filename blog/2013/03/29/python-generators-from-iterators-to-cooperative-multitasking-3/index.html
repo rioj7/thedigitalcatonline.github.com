@@ -220,7 +220,7 @@
 &gt;&gt;&gt; g
 &lt;generator object main at 0xb74331e4&gt;
 &gt;&gt;&gt; g.next<span class="o">()</span>
-1
+<span class="m">1</span>
 </pre></div>
 
 
@@ -278,7 +278,7 @@
 <p>This snippet encompasses the behaviour described above. We have two lists, <code>active_microthreads</code> with all the tasks that shall be executed in the current loop and <code>scheduled_microthreads</code> with all the tasks that are goig to be executed in the next loop. At each loop of the scheduler all microthreads in <code>active_microthreads</code> are executed, that is they are granted one execution of their <code>next()</code> function. After this the thread is scheduled again, i.e. it is appended to the <code>scheduled_microthreads</code> list. If the thread raises the <code>StopIteration</code> exception during its execution it is simply not scheduled again. When the <code>active_microthreads</code> list is exhausted the loop ends and the scheduled threads list is transferred in the <code>active_threads</code> one; after this the loop starts again.</p>
 <p>So the first implementation of the scheduler is the following:</p>
 <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Scheduler</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">active_microthreads</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">scheduled_microthreads</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -310,7 +310,7 @@
 <span class="kn">import</span> <span class="nn">time</span>
 
 <span class="k">class</span> <span class="nc">TestMicroThread</span><span class="p">(</span><span class="n">mthread</span><span class="o">.</span><span class="n">MicroThread</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">number</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">number</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">num</span> <span class="o">=</span> <span class="n">number</span>
 
     <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -333,12 +333,12 @@
 <p><a href="/code/python-generators/test_scheduler.py">source code</a></p>
 <p>Here the <code>TestMicroThread</code> is a microthread but the <code>step()</code> method was reimplemented to print a number and wait 1 second. Three microthreads are instanced and added to the scheduler and the <code>run()</code> method of the scheduler is executed. Not surprisingly the result is the following</p>
 <div class="highlight"><pre><span></span>$ python test_scheduler.py
-Number: 1
-Number: 2
-Number: 3
-Number: 1
-Number: 2
-Number: 3
+Number: <span class="m">1</span>
+Number: <span class="m">2</span>
+Number: <span class="m">3</span>
+Number: <span class="m">1</span>
+Number: <span class="m">2</span>
+Number: <span class="m">3</span>
 <span class="o">[</span>...<span class="o">]</span>
 </pre></div>
 
@@ -348,7 +348,7 @@ Number: 3
 <h4>Microschedulers</h4>
 <p>The scheduler could however be more flexible, specifically it could be converted to a microthread itself. The scheduler, when executed, will return a generator, and each call of its <code>next()</code> method will run one of its microthreads. After this the scheduler will freeze and give control back.</p>
 <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MicroScheduler</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">active_microthreads</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">scheduled_microthreads</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -383,7 +383,7 @@ Number: 3
 <span class="kn">import</span> <span class="nn">time</span>
 
 <span class="k">class</span> <span class="nc">TestMicroThread</span><span class="p">(</span><span class="n">mthread</span><span class="o">.</span><span class="n">MicroThread</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">number</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">number</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">num</span> <span class="o">=</span> <span class="n">number</span>
 
     <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -417,11 +417,11 @@ Number: 3
 <section class="well" id="related-posts">
     <h4>Related Posts:</h4>
     <ul>
-        <li><a href="http://blog.thedigitalcatonline.com/blog/2013/03/26/python-generators-from-iterators-to-cooperative-multitasking-2/">Python Generators - From Iterators to Cooperative Multitasking - 2</a></li>
         <li><a href="http://blog.thedigitalcatonline.com/blog/2013/03/25/python-generators-from-iterators-to-cooperative-multitasking/">Python generators - from iterators to cooperative multitasking</a></li>
-        <li><a href="http://blog.thedigitalcatonline.com/blog/2014/09/04/python-3-oop-part-6-abstract-base-classes/">Python 3 OOP Part 6 - Abstract Base Classes</a></li>
-        <li><a href="http://blog.thedigitalcatonline.com/blog/2013/10/28/digging-up-django-class-based-views-1/">Digging up Django class-based views - 1</a></li>
-        <li><a href="http://blog.thedigitalcatonline.com/blog/2015/01/12/accessing-attributes-in-python/">Accessing attributes in Python</a></li>
+        <li><a href="http://blog.thedigitalcatonline.com/blog/2013/03/26/python-generators-from-iterators-to-cooperative-multitasking-2/">Python Generators - From Iterators to Cooperative Multitasking - 2</a></li>
+        <li><a href="http://blog.thedigitalcatonline.com/blog/2014/08/20/python-3-oop-part-3-delegation-composition-and-inheritance/">Python 3 OOP Part 3 - Delegation: composition and inheritance</a></li>
+        <li><a href="http://blog.thedigitalcatonline.com/blog/2014/05/19/method-overriding-in-python/">Method overriding in Python</a></li>
+        <li><a href="http://blog.thedigitalcatonline.com/blog/2015/05/13/python-oop-tdd-example-part1/">A simple example of Python OOP development (with TDD) - Part 1</a></li>
     </ul>
 </section>
 <section class="well" id="related-posts">
@@ -462,6 +462,16 @@ Number: 3
             <li class="list-group-item"><h4><i class="fa fa-calendar fa-lg"></i><span class="icon-label">Recent Posts</span></h4>
                 <ul class="list-group" id="recentposts">
                     <li class="list-group-item">
+                        <a href="http://blog.thedigitalcatonline.com/blog/2017/10/31/a-game-of-tokens-solution-part-3/">
+                            A game of tokens: solution - Part 3
+                        </a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="http://blog.thedigitalcatonline.com/blog/2017/10/31/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-3/">
+                            A game of tokens: write an interpreter in Python with TDD - Part 3
+                        </a>
+                    </li>
+                    <li class="list-group-item">
                         <a href="http://blog.thedigitalcatonline.com/blog/2017/10/17/a-game-of-tokens-solution-part-2/">
                             A game of tokens: solution - Part 2
                         </a>
@@ -469,16 +479,6 @@ Number: 3
                     <li class="list-group-item">
                         <a href="http://blog.thedigitalcatonline.com/blog/2017/10/01/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-2/">
                             A game of tokens: write an interpreter in Python with TDD - Part 2
-                        </a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="http://blog.thedigitalcatonline.com/blog/2017/07/21/refactoring-with-test-in-python-a-practical-example/">
-                            Refactoring with tests in Python: a practical example
-                        </a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="http://blog.thedigitalcatonline.com/blog/2017/07/12/a-game-of-tokens-solution-part-1/">
-                            A game of tokens: solution - Part 1
                         </a>
                     </li>
                 </ul>
@@ -622,7 +622,7 @@ Number: 3
                             Scala
                         </a>
                     </li>
-                    <li class="list-group-item tag-2">
+                    <li class="list-group-item tag-1">
                         <a href="http://blog.thedigitalcatonline.com/categories/tdd/">
                             TDD
                         </a>

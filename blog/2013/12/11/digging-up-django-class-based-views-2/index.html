@@ -221,23 +221,23 @@
 <p>Now, <a href="https://docs.djangoproject.com/en/1.5/topics/http/urls/">you know</a> that you can collect parameters contained in the URL parsing it with a regular expression; what we need to discover is how class-based views receive and process them.</p>
 <p>In the previous post we already discussed the <code>as_view()</code> method that shall instance the class and return the result of <code>dispatch()</code> (<a href="https://github.com/django/django/blob/stable/1.5.x/django/views/generic/base.py#L46">views/generic/base.py#L46</a>).</p>
 <div class="highlight"><pre><span></span>    <span class="nd">@classonlymethod</span>
-    <span class="k">def</span> <span class="nf">as_view</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">initkwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">as_view</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">initkwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Main entry point for a request-response process.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># sanitize keyword arguments</span>
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">initkwargs</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">cls</span><span class="o">.</span><span class="n">http_method_names</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">http_method_names</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;You tried to pass in the </span><span class="si">%s</span><span class="s2"> method name as a &quot;</span>
                                 <span class="s2">&quot;keyword argument to </span><span class="si">%s</span><span class="s2">(). Don&#39;t do that.&quot;</span>
-                                <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">cls</span><span class="o">.</span><span class="n">__name__</span><span class="p">))</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+                                <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">() received an invalid keyword </span><span class="si">%r</span><span class="s2">. as_view &quot;</span>
                                 <span class="s2">&quot;only accepts arguments that are already &quot;</span>
-                                <span class="s2">&quot;attributes of the class.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">key</span><span class="p">))</span>
+                                <span class="s2">&quot;attributes of the class.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">key</span><span class="p">))</span>
 
         <span class="k">def</span> <span class="nf">view</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-            <span class="bp">self</span> <span class="o">=</span> <span class="n">cls</span><span class="p">(</span><span class="o">**</span><span class="n">initkwargs</span><span class="p">)</span>
+            <span class="bp">self</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="o">**</span><span class="n">initkwargs</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;get&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;head&#39;</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">head</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">request</span> <span class="o">=</span> <span class="n">request</span>
@@ -246,11 +246,11 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dispatch</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="c1"># take name and docstring from class</span>
-        <span class="n">update_wrapper</span><span class="p">(</span><span class="n">view</span><span class="p">,</span> <span class="n">cls</span><span class="p">,</span> <span class="n">updated</span><span class="o">=</span><span class="p">())</span>
+        <span class="n">update_wrapper</span><span class="p">(</span><span class="n">view</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">updated</span><span class="o">=</span><span class="p">())</span>
 
         <span class="c1"># and possible attributes set by decorators</span>
         <span class="c1"># like csrf_exempt from dispatch</span>
-        <span class="n">update_wrapper</span><span class="p">(</span><span class="n">view</span><span class="p">,</span> <span class="n">cls</span><span class="o">.</span><span class="n">dispatch</span><span class="p">,</span> <span class="n">assigned</span><span class="o">=</span><span class="p">())</span>
+        <span class="n">update_wrapper</span><span class="p">(</span><span class="n">view</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">dispatch</span><span class="p">,</span> <span class="n">assigned</span><span class="o">=</span><span class="p">())</span>
         <span class="k">return</span> <span class="n">view</span>
 </pre></div>
 
@@ -302,7 +302,7 @@
     <span class="n">model</span> <span class="o">=</span> <span class="n">Book</span>
 
 <span class="n">urlpatterns</span> <span class="o">=</span> <span class="n">patterns</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
-    <span class="n">url</span><span class="p">(</span><span class="s1">r&#39;^(?P&lt;pk&gt;\d+)/$&#39;</span><span class="p">,</span>
+    <span class="n">url</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;^(?P&lt;pk&gt;\d+)/$&#39;</span><span class="p">,</span>
         <span class="n">BookDetail</span><span class="o">.</span><span class="n">as_view</span><span class="p">(),</span>
         <span class="n">name</span><span class="o">=</span><span class="s1">&#39;detail&#39;</span><span class="p">),</span>
     <span class="p">)</span>
@@ -320,7 +320,7 @@
         <span class="k">return</span> <span class="n">context</span>
 
 <span class="n">urlpatterns</span> <span class="o">=</span> <span class="n">patterns</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
-    <span class="n">url</span><span class="p">(</span><span class="s1">r&#39;^(?P&lt;pk&gt;\d+)/$&#39;</span><span class="p">,</span>
+    <span class="n">url</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;^(?P&lt;pk&gt;\d+)/$&#39;</span><span class="p">,</span>
         <span class="n">BookDetail</span><span class="o">.</span><span class="n">as_view</span><span class="p">(),</span>
         <span class="n">name</span><span class="o">=</span><span class="s1">&#39;detail&#39;</span><span class="p">),</span>
     <span class="p">)</span>
@@ -346,11 +346,11 @@
 <section class="well" id="related-posts">
     <h4>Related Posts:</h4>
     <ul>
-        <li><a href="http://blog.thedigitalcatonline.com/blog/2013/10/28/digging-up-django-class-based-views-1/">Digging up Django class-based views - 1</a></li>
         <li><a href="http://blog.thedigitalcatonline.com/blog/2014/02/14/digging-up-django-class-based-views-3/">Digging up Django class-based views - 3</a></li>
-        <li><a href="http://blog.thedigitalcatonline.com/blog/2014/09/04/python-3-oop-part-6-abstract-base-classes/">Python 3 OOP Part 6 - Abstract Base Classes</a></li>
-        <li><a href="http://blog.thedigitalcatonline.com/blog/2015/01/12/accessing-attributes-in-python/">Accessing attributes in Python</a></li>
-        <li><a href="http://blog.thedigitalcatonline.com/blog/2014/09/01/python-3-oop-part-5-metaclasses/">Python 3 OOP Part 5 - Metaclasses</a></li>
+        <li><a href="http://blog.thedigitalcatonline.com/blog/2013/10/28/digging-up-django-class-based-views-1/">Digging up Django class-based views - 1</a></li>
+        <li><a href="http://blog.thedigitalcatonline.com/blog/2014/08/20/python-3-oop-part-3-delegation-composition-and-inheritance/">Python 3 OOP Part 3 - Delegation: composition and inheritance</a></li>
+        <li><a href="http://blog.thedigitalcatonline.com/blog/2014/05/19/method-overriding-in-python/">Method overriding in Python</a></li>
+        <li><a href="http://blog.thedigitalcatonline.com/blog/2015/05/13/python-oop-tdd-example-part1/">A simple example of Python OOP development (with TDD) - Part 1</a></li>
     </ul>
 </section>
 <section class="well" id="related-posts">
@@ -394,6 +394,16 @@
             <li class="list-group-item"><h4><i class="fa fa-calendar fa-lg"></i><span class="icon-label">Recent Posts</span></h4>
                 <ul class="list-group" id="recentposts">
                     <li class="list-group-item">
+                        <a href="http://blog.thedigitalcatonline.com/blog/2017/10/31/a-game-of-tokens-solution-part-3/">
+                            A game of tokens: solution - Part 3
+                        </a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="http://blog.thedigitalcatonline.com/blog/2017/10/31/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-3/">
+                            A game of tokens: write an interpreter in Python with TDD - Part 3
+                        </a>
+                    </li>
+                    <li class="list-group-item">
                         <a href="http://blog.thedigitalcatonline.com/blog/2017/10/17/a-game-of-tokens-solution-part-2/">
                             A game of tokens: solution - Part 2
                         </a>
@@ -401,16 +411,6 @@
                     <li class="list-group-item">
                         <a href="http://blog.thedigitalcatonline.com/blog/2017/10/01/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-2/">
                             A game of tokens: write an interpreter in Python with TDD - Part 2
-                        </a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="http://blog.thedigitalcatonline.com/blog/2017/07/21/refactoring-with-test-in-python-a-practical-example/">
-                            Refactoring with tests in Python: a practical example
-                        </a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="http://blog.thedigitalcatonline.com/blog/2017/07/12/a-game-of-tokens-solution-part-1/">
-                            A game of tokens: solution - Part 1
                         </a>
                     </li>
                 </ul>
@@ -554,7 +554,7 @@
                             Scala
                         </a>
                     </li>
-                    <li class="list-group-item tag-2">
+                    <li class="list-group-item tag-1">
                         <a href="http://blog.thedigitalcatonline.com/categories/tdd/">
                             TDD
                         </a>

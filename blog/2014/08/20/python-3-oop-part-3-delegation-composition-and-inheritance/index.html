@@ -232,11 +232,11 @@
 
 <p>This shows us that Python tries to resolve instance members not only looking into the class the instance comes from, but also investigating the parent classes. In this case <code>sdoor.colour</code> becomes <code>SecurityDoor.colour</code>, that in turn becomes <code>Door.colour</code>. <code>SecurityDoor</code> <em>is</em> a <code>Door</code>.</p>
 <p>If we investigate the content of <code>__dict__</code> we can catch a glimpse of the inheritance mechanism in action</p>
-<div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">sdoor</span><span class="o">.</span><span class="n">__dict__</span>
+<div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">sdoor</span><span class="o">.</span><span class="vm">__dict__</span>
 <span class="go">{&#39;number&#39;: 1, &#39;status&#39;: &#39;closed&#39;}</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">sdoor</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__dict__</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sdoor</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__dict__</span>
 <span class="go">mappingproxy({&#39;__doc__&#39;: None, &#39;__module__&#39;: &#39;__main__&#39;})</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">Door</span><span class="o">.</span><span class="n">__dict__</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Door</span><span class="o">.</span><span class="vm">__dict__</span>
 <span class="go">mappingproxy({&#39;__dict__&#39;: &lt;attribute &#39;__dict__&#39; of &#39;Door&#39; objects&gt;,</span>
 <span class="go">    &#39;colour&#39;: &#39;yellow&#39;,</span>
 <span class="go">    &#39;open&#39;: &lt;function Door.open at 0xb687e224&gt;,</span>
@@ -251,13 +251,13 @@
 
 
 <p>As you can see the content of <code>__dict__</code> for <code>SecurityDoor</code> is very narrow compared to that of <code>Door</code>. The inheritance mechanism takes care of the missing elements by climbing up the classes tree. Where does Python get the parent classes? A class always contains a <code>__bases__</code> tuple that lists them</p>
-<div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">SecurityDoor</span><span class="o">.</span><span class="n">__bases__</span>
+<div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">SecurityDoor</span><span class="o">.</span><span class="vm">__bases__</span>
 <span class="go">(&lt;class &#39;__main__.Door&#39;&gt;,)</span>
 </pre></div>
 
 
 <p>So an example of what Python does to resolve a class method call through the inheritance tree is</p>
-<div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">sdoor</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__bases__</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;knock&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">__get__</span><span class="p">(</span><span class="n">sdoor</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">sdoor</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__bases__</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">&#39;knock&#39;</span><span class="p">]</span><span class="o">.</span><span class="fm">__get__</span><span class="p">(</span><span class="n">sdoor</span><span class="p">)</span>
 <span class="go">&lt;bound method type.knock of &lt;class &#39;__main__.SecurityDoor&#39;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">sdoor</span><span class="o">.</span><span class="n">knock</span>
 <span class="go">&lt;bound method type.knock of &lt;class &#39;__main__.SecurityDoor&#39;&gt;&gt;</span>
@@ -277,7 +277,7 @@
 
 
 <p>As you can forecast, the overridden members now are present in the <code>__dict__</code> of the <code>SecurityDoor</code> class</p>
-<div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">SecurityDoor</span><span class="o">.</span><span class="n">__dict__</span>
+<div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">SecurityDoor</span><span class="o">.</span><span class="vm">__dict__</span>
 <span class="go">mappingproxy({&#39;__doc__&#39;: None,</span>
 <span class="go">    &#39;__module__&#39;: &#39;__main__&#39;,</span>
 <span class="go">    &#39;open&#39;: &lt;function SecurityDoor.open at 0xb6fcf89c&gt;,</span>
@@ -336,7 +336,7 @@
     <span class="n">colour</span> <span class="o">=</span> <span class="s1">&#39;gray&#39;</span>
     <span class="n">locked</span> <span class="o">=</span> <span class="bp">True</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">number</span><span class="p">,</span> <span class="n">status</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">number</span><span class="p">,</span> <span class="n">status</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">door</span> <span class="o">=</span> <span class="n">Door</span><span class="p">(</span><span class="n">number</span><span class="p">,</span> <span class="n">status</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -356,7 +356,7 @@
 <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">SecurityDoor</span><span class="p">:</span>
     <span class="n">locked</span> <span class="o">=</span> <span class="bp">True</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">number</span><span class="p">,</span> <span class="n">status</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">number</span><span class="p">,</span> <span class="n">status</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">door</span> <span class="o">=</span> <span class="n">Door</span><span class="p">(</span><span class="n">number</span><span class="p">,</span> <span class="n">status</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -364,17 +364,17 @@
             <span class="k">return</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">door</span><span class="o">.</span><span class="n">open</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">door</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span>
 </pre></div>
 
 
 <p>Using <code>__getattr__()</code> blends the separation line between inheritance and composition since after all the former is a form of automatic delegation of every member access.</p>
 <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">ComposedDoor</span><span class="p">:</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">number</span><span class="p">,</span> <span class="n">status</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">number</span><span class="p">,</span> <span class="n">status</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">door</span> <span class="o">=</span> <span class="n">Door</span><span class="p">(</span><span class="n">number</span><span class="p">,</span> <span class="n">status</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">door</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span>
 </pre></div>
 
@@ -392,11 +392,11 @@
 <section class="well" id="related-posts">
     <h4>Related Posts:</h4>
     <ul>
-        <li><a href="http://blog.thedigitalcatonline.com/blog/2014/09/04/python-3-oop-part-6-abstract-base-classes/">Python 3 OOP Part 6 - Abstract Base Classes</a></li>
-        <li><a href="http://blog.thedigitalcatonline.com/blog/2015/01/12/accessing-attributes-in-python/">Accessing attributes in Python</a></li>
-        <li><a href="http://blog.thedigitalcatonline.com/blog/2014/09/01/python-3-oop-part-5-metaclasses/">Python 3 OOP Part 5 - Metaclasses</a></li>
-        <li><a href="http://blog.thedigitalcatonline.com/blog/2016/09/27/python-mocks-a-gentle-introduction-part-2/">Python Mocks: a gentle introduction - Part 2</a></li>
-        <li><a href="http://blog.thedigitalcatonline.com/blog/2014/08/21/python-3-oop-part-4-polymorphism/">Python 3 OOP Part 4 - Polymorphism</a></li>
+        <li><a href="http://blog.thedigitalcatonline.com/blog/2015/05/13/python-oop-tdd-example-part1/">A simple example of Python OOP development (with TDD) - Part 1</a></li>
+        <li><a href="http://blog.thedigitalcatonline.com/blog/2015/03/14/python-3-oop-notebooks/">Python 3 OOP Notebooks</a></li>
+        <li><a href="http://blog.thedigitalcatonline.com/blog/2016/04/03/abstract-base-classes-in-python/">Abstract Base Classes in Python</a></li>
+        <li><a href="http://blog.thedigitalcatonline.com/blog/2014/08/20/python-3-oop-part-1-objects-and-types/">Python 3 OOP Part 1 - Objects and types</a></li>
+        <li><a href="http://blog.thedigitalcatonline.com/blog/2017/07/21/refactoring-with-test-in-python-a-practical-example/">Refactoring with tests in Python: a practical example</a></li>
     </ul>
 </section>
 <section class="well" id="related-posts">
@@ -443,6 +443,16 @@
             <li class="list-group-item"><h4><i class="fa fa-calendar fa-lg"></i><span class="icon-label">Recent Posts</span></h4>
                 <ul class="list-group" id="recentposts">
                     <li class="list-group-item">
+                        <a href="http://blog.thedigitalcatonline.com/blog/2017/10/31/a-game-of-tokens-solution-part-3/">
+                            A game of tokens: solution - Part 3
+                        </a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="http://blog.thedigitalcatonline.com/blog/2017/10/31/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-3/">
+                            A game of tokens: write an interpreter in Python with TDD - Part 3
+                        </a>
+                    </li>
+                    <li class="list-group-item">
                         <a href="http://blog.thedigitalcatonline.com/blog/2017/10/17/a-game-of-tokens-solution-part-2/">
                             A game of tokens: solution - Part 2
                         </a>
@@ -450,16 +460,6 @@
                     <li class="list-group-item">
                         <a href="http://blog.thedigitalcatonline.com/blog/2017/10/01/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-2/">
                             A game of tokens: write an interpreter in Python with TDD - Part 2
-                        </a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="http://blog.thedigitalcatonline.com/blog/2017/07/21/refactoring-with-test-in-python-a-practical-example/">
-                            Refactoring with tests in Python: a practical example
-                        </a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="http://blog.thedigitalcatonline.com/blog/2017/07/12/a-game-of-tokens-solution-part-1/">
-                            A game of tokens: solution - Part 1
                         </a>
                     </li>
                 </ul>
@@ -603,7 +603,7 @@
                             Scala
                         </a>
                     </li>
-                    <li class="list-group-item tag-2">
+                    <li class="list-group-item tag-1">
                         <a href="http://blog.thedigitalcatonline.com/categories/tdd/">
                             TDD
                         </a>

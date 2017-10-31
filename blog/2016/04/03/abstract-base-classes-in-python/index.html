@@ -242,7 +242,7 @@
     <span class="k">def</span> <span class="nf">fakemethod</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span>
 
-    <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;append&#39;</span><span class="p">,</span> <span class="s1">&#39;count&#39;</span><span class="p">,</span> <span class="s1">&#39;extend&#39;</span><span class="p">,</span> <span class="s1">&#39;index&#39;</span><span class="p">,</span> <span class="s1">&#39;insert&#39;</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fakemethod</span>
 </pre></div>
@@ -262,7 +262,7 @@
 
 
 <p>does no more perform a pure external check of the relationship between <code>someclass</code> and <code>myclass</code>. The first thing that <code>issubclass()</code> does now is the following</p>
-<div class="highlight"><pre><span></span><span class="n">someclass</span><span class="o">.</span><span class="n">__subclasscheck__</span><span class="p">(</span><span class="n">myclass</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><span class="n">someclass</span><span class="o">.</span><span class="fm">__subclasscheck__</span><span class="p">(</span><span class="n">myclass</span><span class="p">)</span>
 </pre></div>
 
 
@@ -355,7 +355,7 @@
 <p>If you program in Python you should be somehow familiar with classes and instances. You know that when you build an instance you use a class (like a blueprint) and that the class can put things into the instance. For example</p>
 <div class="highlight"><pre><span></span><span class="c1"># Class definition</span>
 <span class="k">class</span> <span class="nc">Child</span><span class="p">():</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">answer</span> <span class="o">=</span> <span class="mi">42</span>
 
 <span class="c1"># Link instance and class</span>
@@ -369,7 +369,7 @@
 <p>Now, when you build a class you use a metaclass (like a blueprint) and the metaclass can put things into the class.</p>
 <div class="highlight"><pre><span></span><span class="c1"># Metaclass definition</span>
 <span class="k">class</span> <span class="nc">NewType</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">namespace</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">namespace</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">answer</span> <span class="o">=</span> <span class="mi">42</span>
 
 <span class="c1"># Link class and metaclass</span>
@@ -384,7 +384,7 @@
 <p>This is all you need to understand metaclasses. When you build a class you need to put things into it, for example you need to put the <code>__getattribute__</code> or the <code>__new__()</code> methods. This is done by the metaclass, which is usually <code>type</code> for every class. Indeed, if you check the <code>__class__</code> attribute into a class you get exactly this</p>
 <div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">int</span>
 <span class="go">&lt;class &#39;int&#39;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">int</span><span class="o">.</span><span class="n">__class__</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">int</span><span class="o">.</span><span class="vm">__class__</span>
 <span class="go">&lt;class &#39;type&#39;&gt;</span>
 <span class="go">&gt;&gt;&gt;</span>
 </pre></div>
@@ -419,7 +419,7 @@
 <p>Metaclasses are not part of the MRO however, since the MRO just deals with standard inheritance. If you check the MRO of the <code>Child</code> class, you will see that the metaclass is not included</p>
 <div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Child</span><span class="o">.</span><span class="n">mro</span><span class="p">()</span>
 <span class="go">[&lt;class &#39;__main__.Child&#39;&gt;, &lt;class &#39;__main__.Parent&#39;&gt;, &lt;class &#39;__main__.GrandParent&#39;&gt;, &lt;class &#39;object&#39;&gt;]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">Child</span><span class="o">.</span><span class="n">__class__</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Child</span><span class="o">.</span><span class="vm">__class__</span>
 <span class="go">&lt;class &#39;__main__.NewType&#39;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span>
 </pre></div>
@@ -484,9 +484,9 @@
     <ul>
         <li><a href="http://blog.thedigitalcatonline.com/blog/2014/10/14/decorators-and-metaclasses/">Advanced use of Python decorators and metaclasses</a></li>
         <li><a href="http://blog.thedigitalcatonline.com/blog/2014/09/04/python-3-oop-part-6-abstract-base-classes/">Python 3 OOP Part 6 - Abstract Base Classes</a></li>
+        <li><a href="http://blog.thedigitalcatonline.com/blog/2016/09/27/python-mocks-a-gentle-introduction-part-2/">Python Mocks: a gentle introduction - Part 2</a></li>
         <li><a href="http://blog.thedigitalcatonline.com/blog/2014/09/01/python-3-oop-part-5-metaclasses/">Python 3 OOP Part 5 - Metaclasses</a></li>
         <li><a href="http://blog.thedigitalcatonline.com/blog/2016/03/06/python-mocks-a-gentle-introduction-part-1/">Python Mocks: a gentle introduction - Part 1</a></li>
-        <li><a href="http://blog.thedigitalcatonline.com/blog/2016/09/27/python-mocks-a-gentle-introduction-part-2/">Python Mocks: a gentle introduction - Part 2</a></li>
     </ul>
 </section>
 
@@ -520,6 +520,16 @@
             <li class="list-group-item"><h4><i class="fa fa-calendar fa-lg"></i><span class="icon-label">Recent Posts</span></h4>
                 <ul class="list-group" id="recentposts">
                     <li class="list-group-item">
+                        <a href="http://blog.thedigitalcatonline.com/blog/2017/10/31/a-game-of-tokens-solution-part-3/">
+                            A game of tokens: solution - Part 3
+                        </a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="http://blog.thedigitalcatonline.com/blog/2017/10/31/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-3/">
+                            A game of tokens: write an interpreter in Python with TDD - Part 3
+                        </a>
+                    </li>
+                    <li class="list-group-item">
                         <a href="http://blog.thedigitalcatonline.com/blog/2017/10/17/a-game-of-tokens-solution-part-2/">
                             A game of tokens: solution - Part 2
                         </a>
@@ -527,16 +537,6 @@
                     <li class="list-group-item">
                         <a href="http://blog.thedigitalcatonline.com/blog/2017/10/01/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-2/">
                             A game of tokens: write an interpreter in Python with TDD - Part 2
-                        </a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="http://blog.thedigitalcatonline.com/blog/2017/07/21/refactoring-with-test-in-python-a-practical-example/">
-                            Refactoring with tests in Python: a practical example
-                        </a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="http://blog.thedigitalcatonline.com/blog/2017/07/12/a-game-of-tokens-solution-part-1/">
-                            A game of tokens: solution - Part 1
                         </a>
                     </li>
                 </ul>
@@ -680,7 +680,7 @@
                             Scala
                         </a>
                     </li>
-                    <li class="list-group-item tag-2">
+                    <li class="list-group-item tag-1">
                         <a href="http://blog.thedigitalcatonline.com/categories/tdd/">
                             TDD
                         </a>
