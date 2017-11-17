@@ -42,7 +42,7 @@
 &lt;h1&gt;Source code&lt;/h1&gt;
 &lt;p&gt;You can find the source code in &lt;a href="https://github.com/lgiordani/rentomatic"&gt;this GitHub repository&lt;/a&gt;. Feel free to fork it and experiment, change it, and find better solutions to the problem I will discuss in this post. The source code contains tagged commits to allow you to follow the actual development as presented in the post. You can find the current tag in the &lt;strong&gt;Git tag: &lt;code&gt;&amp;lt;tag name&amp;gt;&lt;/code&gt;&lt;/strong&gt; label under the section titles. The label is actually a link to the tagged commit on GitHub, if you want to see the code without cloning it.&lt;/p&gt;
 &lt;h1&gt;Project initialization&lt;/h1&gt;
-&lt;p&gt;&lt;strong&gt;Git tag: &lt;a href="https://github.com/lgiordani/rentomatic/tree/step01"&gt;&lt;code&gt;step01&lt;/code&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;h4&gt;&lt;strong&gt;Git tag: &lt;a href="https://github.com/lgiordani/rentomatic/tree/step01"&gt;step01&lt;/a&gt;&lt;/strong&gt;&lt;/h4&gt;
 &lt;p&gt;&lt;em&gt;Update&lt;/em&gt;: &lt;a href="https://github.com/ardydedase/cookiecutter-pypackage"&gt;this&lt;/a&gt; Cookiecutter package creates an environment like the one I am creating in this section. I will keep the following explanation so that you can see how to manage requirements and configurations, but for your next project consider using this automated tool.&lt;/p&gt;
 &lt;p&gt;I usually like maintaining a Python virtual environment inside the project, so I will create a temporary virtualenv to install cookiecutter, create the project, and remove the virtualenv. Cookiecutter is going to ask you some questions about you and the project, to provide an initial file structure. We are going to build our own testing environment, so it is safe to answer no to &lt;code&gt;use_pytest&lt;/code&gt;. Since this is a demo project we are not going to need any publishing feature, so you can answer no to &lt;code&gt;use_pypi_deployment_with_travis&lt;/code&gt; as well. The project does not have a command line interface, and you can safely create the author file and use any license.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;virtualenv venv3 -p python3
@@ -139,7 +139,7 @@ max-complexity = 10
 &lt;p&gt;Flake8 documentation is available &lt;a href="http://flake8.pycqa.org/en/latest/"&gt;here&lt;/a&gt;.&lt;/p&gt;
 &lt;p&gt;Note that every step in this post produces tested code and a of coverage of 100%. One of the benefits of a clean architecture is the separation between layers, and this guarantees a great degree of testability. Note however that in this tutorial, in particular in the REST sections, some tests have been omitted in favour of a simpler description of the architecture. &lt;/p&gt;
 &lt;h1&gt;Domain models&lt;/h1&gt;
-&lt;p&gt;&lt;strong&gt;Git tag: &lt;a href="https://github.com/lgiordani/rentomatic/tree/step02"&gt;&lt;code&gt;step02&lt;/code&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Git tag: &lt;a href="https://github.com/lgiordani/rentomatic/tree/step02"&gt;step02&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;Let us start with a simple definition of the &lt;code&gt;StorageRoom&lt;/code&gt; model. As said before, the clean architecture models are very lightweight, or at least they are lighter than their counterparts in a framework.&lt;/p&gt;
 &lt;p&gt;Following the TDD methodology the first thing that I write are the tests. Create the &lt;code&gt;tests/domain/test_storageroom.py&lt;/code&gt; and put this code inside it&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;uuid&lt;/span&gt;
@@ -213,7 +213,7 @@ max-complexity = 10
 &lt;p&gt;One could be tempted to try to simplify the &lt;code&gt;from_dict&lt;/code&gt; function, abstracting it and providing it through a &lt;code&gt;Model&lt;/code&gt; class. Given that a certain level of abstraction and generalization is possible and desirable, the initialization part of the models shall probably deal with various different cases, and thus is better off being implemented directly in the class.&lt;/p&gt;
 &lt;p&gt;The &lt;code&gt;DomainModel&lt;/code&gt; abstract base class is an easy way to categorize the model for future uses like checking if a class is a model in the system. For more information about this use of Abstract Base Classes in Python see &lt;a href="/blog/2016/04/03/abstract-base-classes-in-python/"&gt;this post&lt;/a&gt;.&lt;/p&gt;
 &lt;h1&gt;Serializers&lt;/h1&gt;
-&lt;p&gt;&lt;strong&gt;Git tag: &lt;a href="https://github.com/lgiordani/rentomatic/tree/step03"&gt;&lt;code&gt;step03&lt;/code&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Git tag: &lt;a href="https://github.com/lgiordani/rentomatic/tree/step03"&gt;step03&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;Our model needs to be serialized if we want to return it as a result of an API call. The typical serialization format is JSON, as this is a broadly accepted standard for web-based API. The serializer is not part of the model, but is an external specialized class that receives the model instance and produces a representation of its structure and values.&lt;/p&gt;
 &lt;p&gt;To test the JSON serialization of our &lt;code&gt;StorageRoom&lt;/code&gt; class put in the &lt;code&gt;tests/serializers/test_storageroom_serializer.py&lt;/code&gt; file the following code&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;json&lt;/span&gt;
@@ -267,7 +267,7 @@ max-complexity = 10
 &lt;p&gt;Providing a class that inherits from &lt;code&gt;json.JSONEncoder&lt;/code&gt; let us use the &lt;code&gt;json.dumps(room, cls=StorageRoomEncoder)&lt;/code&gt; syntax to serialize the model.&lt;/p&gt;
 &lt;p&gt;There is a certain degree of repetition in the code we wrote, and this is the annoying part of a clean architecture. Since we want to isolate layers as much as possible and create lightweight classes we end up somehow repeating certain types of actions. For example the serialization code that assigns attributes of a &lt;code&gt;StorageRoom&lt;/code&gt; to JSON attributes is very similar to that we use to create the object from a dictionary. Not exactly the same, obviously, but the two functions are very close.&lt;/p&gt;
 &lt;h1&gt;Use cases (part 1)&lt;/h1&gt;
-&lt;p&gt;&lt;strong&gt;Git tag: &lt;a href="https://github.com/lgiordani/rentomatic/tree/step04"&gt;&lt;code&gt;step04&lt;/code&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Git tag: &lt;a href="https://github.com/lgiordani/rentomatic/tree/step04"&gt;step04&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;It's time to implement the actual business logic our application wants to expose to the outside world. Use cases are the place where we implement classes that query the repository, apply business rules, logic, and whatever transformation we need for our data, and return the results.&lt;/p&gt;
 &lt;p&gt;With those requirements in mind, let us start to build a use case step by step. The simplest use case we can create is one that fetches all the storage rooms from the repository and returns them. Please note that we did not implement any repository layer yet, so our tests will mock it.&lt;/p&gt;
 &lt;p&gt;This is the skeleton for a basic test of a use case that lists all the storage rooms. Put this code in the &lt;code&gt;tests/use_cases/test_storageroom_list_use_case.py&lt;/code&gt;&lt;/p&gt;
@@ -342,7 +342,7 @@ max-complexity = 10
 &lt;p&gt;With such an implementation of the use case, however, we will soon experience issues. For starters, we do not have a standard way to transport the call parameters, which means that we do not have a standard way to check for their correctness either. The second problem is that we miss a standard way to return the call results and consequently we lack a way to communicate if the call was successful of if it failed, and in the latter case what are the reasons of the failure. This applies also to the case of bad parameters discussed in the previous point.&lt;/p&gt;
 &lt;p&gt;We want thus to introduce some structures to wrap input and outputs of our use cases. Those structures are called request and response objects.&lt;/p&gt;
 &lt;h1&gt;Requests and responses&lt;/h1&gt;
-&lt;p&gt;&lt;strong&gt;Git tag: &lt;a href="https://github.com/lgiordani/rentomatic/tree/step05"&gt;&lt;code&gt;step05&lt;/code&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Git tag: &lt;a href="https://github.com/lgiordani/rentomatic/tree/step05"&gt;step05&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;Request and response objects are an important part of a clean architecture, as they transport call parameters, inputs and results from outside the application into the use cases layer.&lt;/p&gt;
 &lt;p&gt;More specifically, requests are objects created from incoming API calls, thus they shall deal with things like incorrect values, missing parameters, wrong formats, etc. Responses, on the other hand, have to contain the actual results of the API calls, but shall also be able to represent error cases and to deliver rich information on what happened.&lt;/p&gt;
 &lt;p&gt;The actual implementation of request and response objects is completely free, the clean architecture says nothing about them. The decision on how to pack and represent data is up to us.&lt;/p&gt;
@@ -397,7 +397,7 @@ max-complexity = 10
 
 
 &lt;h1&gt;Use cases (part 2)&lt;/h1&gt;
-&lt;p&gt;&lt;strong&gt;Git tag: &lt;a href="https://github.com/lgiordani/rentomatic/tree/step06"&gt;&lt;code&gt;step06&lt;/code&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Git tag: &lt;a href="https://github.com/lgiordani/rentomatic/tree/step06"&gt;step06&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;Now that we have implemented the request and response object we can change the test code to include those structures. Change the &lt;code&gt;tests/use_cases/test_storageroom_list_use_case.py&lt;/code&gt; to contain this code&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;pytest&lt;/span&gt;
 &lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;unittest&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;mock&lt;/span&gt;
@@ -479,7 +479,7 @@ max-complexity = 10
 &lt;p&gt;We are missing some objects, however. For example, we have not implemented any unsuccessful response object or validated the incoming request object.&lt;/p&gt;
 &lt;p&gt;To explore these missing parts of the architecture let us improve the current use case to accept a &lt;code&gt;filters&lt;/code&gt; parameter that represents some filters that we want to apply to the extracted list of models. This will generate some possible error conditions for the input, forcing us to introduce some validation for the incoming request object.&lt;/p&gt;
 &lt;h1&gt;Requests and validation&lt;/h1&gt;
-&lt;p&gt;&lt;strong&gt;Git tag: &lt;a href="https://github.com/lgiordani/rentomatic/tree/step07"&gt;&lt;code&gt;step07&lt;/code&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Git tag: &lt;a href="https://github.com/lgiordani/rentomatic/tree/step07"&gt;step07&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;I want to add a &lt;code&gt;filters&lt;/code&gt; parameter to the request. Through that parameter the caller can add different filters by specifying a name and a value for each filter (for instance &lt;code&gt;{'price_lt': 100}&lt;/code&gt; to get all results with a price lesser than 100).&lt;/p&gt;
 &lt;p&gt;The first thing to do is to change the request object, starting from the test. The new version of the &lt;code&gt;tests/use_cases/test_storageroom_list_request_objects.py&lt;/code&gt; file is the following&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;rentomatic.use_cases&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;request_objects&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;ro&lt;/span&gt;
@@ -595,7 +595,7 @@ max-complexity = 10
 &lt;p&gt;Last, the &lt;code&gt;from_dict()&lt;/code&gt; method performs the validation of the &lt;code&gt;filters&lt;/code&gt; parameter, if it is present. I leverage the &lt;code&gt;collections.Mapping&lt;/code&gt; abstract base class to check if the incoming parameter is a dictionary-like object and return either an &lt;code&gt;InvalidRequestObject&lt;/code&gt; or a &lt;code&gt;ValidRequestObject&lt;/code&gt; instance.&lt;/p&gt;
 &lt;p&gt;Since we can now tell bad requests from good ones we need to introduce a new type of response as well, to manage bad requests or other errors in the use case.&lt;/p&gt;
 &lt;h1&gt;Responses and failures&lt;/h1&gt;
-&lt;p&gt;&lt;strong&gt;Git tag: &lt;a href="https://github.com/lgiordani/rentomatic/tree/step08"&gt;&lt;code&gt;step08&lt;/code&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Git tag: &lt;a href="https://github.com/lgiordani/rentomatic/tree/step08"&gt;step08&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;What happens if the use case encounter an error? Use cases can encounter a wide set of errors: validation errors, as we just discussed in the previous section, but also business logic errors or errors that come from the repository layer. Whatever the error, the use case shall always return an object with a known structure (the response), so we need a new object that provides a good support for different types of failures.&lt;/p&gt;
 &lt;p&gt;As happened for the requests there is no unique way to provide such an object, and the following code is just one of the possible solutions.&lt;/p&gt;
 &lt;p&gt;The first thing to do is to expand the &lt;code&gt;tests/shared/test_response_object.py&lt;/code&gt; file, adding tests for failures.&lt;/p&gt;
@@ -773,7 +773,7 @@ max-complexity = 10
 
 
 &lt;h1&gt;Use cases (part 3)&lt;/h1&gt;
-&lt;p&gt;&lt;strong&gt;Git tag: &lt;a href="https://github.com/lgiordani/rentomatic/tree/step09"&gt;&lt;code&gt;step09&lt;/code&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Git tag: &lt;a href="https://github.com/lgiordani/rentomatic/tree/step09"&gt;step09&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;Our implementation of responses and requests is finally complete, so now we can implement the last version of our use case. The use case correctly returns a &lt;code&gt;ResponseSuccess&lt;/code&gt; object but is still missing a proper validation of the incoming request.&lt;/p&gt;
 &lt;p&gt;Let's change the test in the &lt;code&gt;tests/use_cases/test_storageroom_list_use_case.py&lt;/code&gt; file and add two more tests. The resulting set of tests (after the &lt;code&gt;domain_storagerooms&lt;/code&gt; fixture) is the following&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;pytest&lt;/span&gt;
@@ -881,7 +881,7 @@ max-complexity = 10
 
 &lt;p&gt;As you can see the first thing that the &lt;code&gt;execute()&lt;/code&gt; method does is to check if the request is valid, otherwise returns a &lt;code&gt;ResponseFailure&lt;/code&gt; build with the same request object. Then the actual business logic is implemented, calling the repository and returning a success response. If something goes wrong in this phase the exception is caught and returned as an aptly formatted &lt;code&gt;ResponseFailure&lt;/code&gt;.&lt;/p&gt;
 &lt;h1&gt;Intermezzo: refactoring&lt;/h1&gt;
-&lt;p&gt;&lt;strong&gt;Git tag: &lt;a href="https://github.com/lgiordani/rentomatic/tree/step10"&gt;&lt;code&gt;step10&lt;/code&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Git tag: &lt;a href="https://github.com/lgiordani/rentomatic/tree/step10"&gt;step10&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;A clean architecture is &lt;em&gt;not&lt;/em&gt; a framework, so it provides very few generic features, unlike products like for example Django, which provide models, ORM, and all sorts of structures and libraries. Nevertheless, some classes can be isolated from our code and provided as a library, so that we can reuse the code. In this section I will guide you through a refactoring of the code we already have, during which we will isolate common features for requests, responses, and use cases.&lt;/p&gt;
 &lt;p&gt;We already isolated the response object. We can move the &lt;code&gt;test_valid_request_object_cannot_be_used&lt;/code&gt; from &lt;code&gt;tests/use_cases/test_storageroom_list_request_objects.py&lt;/code&gt; to &lt;code&gt;tests/shared/test_response_object.py&lt;/code&gt; since it tests a generic behaviour and not something related to the &lt;code&gt;StorageRoom&lt;/code&gt; model and use cases.&lt;/p&gt;
 &lt;p&gt;Then we can move the &lt;code&gt;InvalidRequestObject&lt;/code&gt; and &lt;code&gt;ValidRequestObject&lt;/code&gt; classes from &lt;code&gt;rentomatic/use_cases/request_objects.py&lt;/code&gt; to &lt;code&gt;rentomatic/shared/request_object.py&lt;/code&gt;, making the necessary changes to the &lt;code&gt;StorageRoomListRequestObject&lt;/code&gt; class that now inherits from an external class.&lt;/p&gt;
@@ -977,7 +977,7 @@ max-complexity = 10
 
 
 &lt;h1&gt;The repository layer&lt;/h1&gt;
-&lt;p&gt;&lt;strong&gt;Git tag: &lt;a href="https://github.com/lgiordani/rentomatic/tree/step11"&gt;&lt;code&gt;step11&lt;/code&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Git tag: &lt;a href="https://github.com/lgiordani/rentomatic/tree/step11"&gt;step11&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;The repository layer is the one in which we run the data storage system. As you saw when we implemented the use case we access the data storage through an API, in this case the &lt;code&gt;list()&lt;/code&gt; method of the repository. The level of abstraction provided by a repository level is higher than that provided by an ORM or by a tool like SQLAlchemy. The repository layer provides only the endpoints that the application needs, with an interface which is tailored on the specific business problems the application implements.&lt;/p&gt;
 &lt;p&gt;To clarify the matter in terms of concrete technologies, SQLAlchemy is a wonderful tool to abstract the access to an SQL database, so the internal implementation of the repository layer could use it to access a PostgreSQL database. But the external API of the layer is not that provided by SQLAlchemy. The API is a (usually reduced) set of functions that the use cases call to get the data, and indeed the internal implementation could also use raw SQL queries on a proprietary network interface. The repository does not even need to be based on a database. We can have a repository layer that fetches data from a REST service, for example, or that makes remote procedure calls through a RabbitMQ network.&lt;/p&gt;
 &lt;p&gt;A very important feature of the repository layer is that it always returns domain models, and this is in line with what framework ORMs usually do.&lt;/p&gt;
@@ -1130,7 +1130,7 @@ max-complexity = 10
 
 
 &lt;h1&gt;The REST layer (part1)&lt;/h1&gt;
-&lt;p&gt;&lt;strong&gt;Git tag: &lt;a href="https://github.com/lgiordani/rentomatic/tree/step12"&gt;&lt;code&gt;step12&lt;/code&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Git tag: &lt;a href="https://github.com/lgiordani/rentomatic/tree/step12"&gt;step12&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;This is the last step of our journey into the clean architecture. We created the domain models, the serializers, the use cases and the repository. We are actually missing an interface that glues everything together, that is gets the call parameters from the user, initializes a use case with a repository, runs the use case that fetches the domain models from the repository and converts them to a standard format. This layer can be represented by a wide number of interfaces and technologies. For example a command line interface (CLI) can implement exactly those steps, getting the parameters via command line switches, and returning the results as plain text on the console. The same underlying system, however, can be leveraged by a web page that gets the call parameters from a set of widgets, perform the steps described above, and parses the returned JSON data to show the result on the same page.&lt;/p&gt;
 &lt;p&gt;Whatever technology we want to use to interact with the user to collect inputs and provide results we need to interface with the clean architecture we just built, so now we will create a layer to expose an HTTP API. This can be done with a server that exposes a set of HTTP addresses (API endpoints) that once accessed return some data. Such a layer is commonly called a REST layer, because usually the semantic of the addresses comes from the REST recommendations.&lt;/p&gt;
 &lt;p&gt;Flask is a lightweight web server with a modular structure that provides just the parts that the user needs. In particular, we will not use any database/ORM, since we already implemented our own repository layer.&lt;/p&gt;
@@ -1343,7 +1343,7 @@ pytest-flask
 
 &lt;p&gt;This code demonstrates how the clean architecture works in a nutshell. The function we wrote is however not complete, as it doesn't consider querystring parameters and error cases.&lt;/p&gt;
 &lt;h1&gt;The server in action&lt;/h1&gt;
-&lt;p&gt;&lt;strong&gt;Git tag: &lt;a href="https://github.com/lgiordani/rentomatic/tree/step13"&gt;&lt;code&gt;step13&lt;/code&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Git tag: &lt;a href="https://github.com/lgiordani/rentomatic/tree/step13"&gt;step13&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;Before I fix the missing parts of the endpoint let us see the server in action, so we can finally enjoy the product we have been building during this long post.&lt;/p&gt;
 &lt;p&gt;To actually see some results when accessing the endpoint we need to fill the repository with some data. This part is obviously required only because of the ephemeral nature of the repository we are using. A real repository would wrap a persistent source of data and providing data at this point wouldn't be necessary. To initialize the repository we have to define some data&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;storageroom1&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
@@ -1393,7 +1393,7 @@ Rule                     Endpoint
 
 &lt;p&gt;If you open your browser and navigate to &lt;a href="http://127.0.0.1:5000/storagerooms"&gt;http://127.0.0.1:5000/storagerooms&lt;/a&gt;, you can see the API call results. I recommend installing a formatter extension for the browser to better check the output. If you are using Chrome try &lt;a href="https://github.com/callumlocke/json-formatter"&gt;JSON Formatter&lt;/a&gt;.&lt;/p&gt;
 &lt;h1&gt;The REST layer (part2)&lt;/h1&gt;
-&lt;p&gt;&lt;strong&gt;Git tag: &lt;a href="https://github.com/lgiordani/rentomatic/tree/step14"&gt;&lt;code&gt;step14&lt;/code&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Git tag: &lt;a href="https://github.com/lgiordani/rentomatic/tree/step14"&gt;step14&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;Let us cover the two missing cases in the endpoint. First I introduce a test to check if the endpoint correctly handles querystring parameters&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nd"&gt;@mock.patch&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;rentomatic.use_cases.storageroom_use_cases.StorageRoomListUseCase&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_get_failed_response&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;mock_use_case&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;client&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
