@@ -139,27 +139,27 @@
     <span class="k">assert</span> <span class="n">node</span><span class="o">.</span><span class="n">asdict</span><span class="p">()</span> <span class="o">==</span> <span class="p">{</span>
         <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;binary&#39;</span><span class="p">,</span>
         <span class="s1">&#39;left&#39;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;integer&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="mi">2</span>
-        <span class="p">},</span>
-        <span class="s1">&#39;right&#39;</span><span class="p">:</span> <span class="p">{</span>
             <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;binary&#39;</span><span class="p">,</span>
             <span class="s1">&#39;left&#39;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;integer&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="mi">3</span>
+                <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="mi">2</span>
             <span class="p">},</span>
             <span class="s1">&#39;right&#39;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;integer&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="mi">4</span>
+                <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="mi">3</span>
             <span class="p">},</span>
             <span class="s1">&#39;operator&#39;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;literal&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="s1">&#39;/&#39;</span>
+                <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="s1">&#39;*&#39;</span>
             <span class="p">}</span>
+        <span class="p">},</span>
+        <span class="s1">&#39;right&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;integer&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="mi">4</span>
         <span class="p">},</span>
         <span class="s1">&#39;operator&#39;</span><span class="p">:</span> <span class="p">{</span>
             <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;literal&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="s1">&#39;*&#39;</span>
+            <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="s1">&#39;/&#39;</span>
         <span class="p">}</span>
     <span class="p">}</span>
 </pre></div>
@@ -216,30 +216,30 @@
 <p>Ok, it's time to do some serious math. What happens if you mix sums and multiplications? Let's try it and see how our interpreter reacts. We already know that the lexer happily digests all the four symbols so we can head straight to the parser and add the following test to <code>tests/test_calc_parser.py</code></p>
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">test_parse_expression_with_term</span><span class="p">():</span>
     <span class="n">p</span> <span class="o">=</span> <span class="n">cpar</span><span class="o">.</span><span class="n">CalcParser</span><span class="p">()</span>
-    <span class="n">p</span><span class="o">.</span><span class="n">lexer</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;2 * 3 + 4&quot;</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">lexer</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;2 + 3 * 4&quot;</span><span class="p">)</span>
 
     <span class="n">node</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">parse_expression</span><span class="p">()</span>
 
     <span class="k">assert</span> <span class="n">node</span><span class="o">.</span><span class="n">asdict</span><span class="p">()</span> <span class="o">==</span> <span class="p">{</span>
         <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;binary&#39;</span><span class="p">,</span>
         <span class="s1">&#39;left&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;integer&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="mi">2</span>
+        <span class="p">},</span>
+        <span class="s1">&#39;right&#39;</span><span class="p">:</span> <span class="p">{</span>
             <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;binary&#39;</span><span class="p">,</span>
             <span class="s1">&#39;left&#39;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;integer&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="mi">2</span>
+                <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="mi">3</span>
             <span class="p">},</span>
             <span class="s1">&#39;right&#39;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;integer&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="mi">3</span>
+                <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="mi">4</span>
             <span class="p">},</span>
             <span class="s1">&#39;operator&#39;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;literal&#39;</span><span class="p">,</span>
                 <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="s1">&#39;*&#39;</span>
             <span class="p">}</span>
-        <span class="p">},</span>
-        <span class="s1">&#39;right&#39;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;integer&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="mi">4</span>
         <span class="p">},</span>
         <span class="s1">&#39;operator&#39;</span><span class="p">:</span> <span class="p">{</span>
             <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;literal&#39;</span><span class="p">,</span>
@@ -494,7 +494,9 @@
 <p>That's all for this time. If you feel brave or do not like to wait for the next post go and try adding new operators! Next issue will cover variables, assignments and postfix-operators like the power operation (<code>2^3</code>). I will also publish my solution to the tests presented here before moving on.</p>
 <h1>Titles</h1>
 <p>The section quotes come from some good films: "Aliens" (1986), "Ghostbusters" (1984), "Return of the Jedi" (1983), "Guardians of the Galaxy" (2014), "Highlander" (1986).</p>
-<h2>Feedback</h2>
+<h1>Updates</h1>
+<p>2017-12-24: <code>test_parse_term_with_multiple_operations</code> has been changed after Victor Uriarte spotted an error in the tree construction. See the updates section of the first post in the series for a full explanation of the issue.</p>
+<h1>Feedback</h1>
 <p>Feel free to use <a href="https://plus.google.com/u/0/111444750762335924049">the blog Google+ page</a> to comment the post. Feel free to reach me on <a href="https://twitter.com/thedigicat">Twitter</a> if you have questions. The <a href="http://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues">GitHub issues</a> page is the best place to submit corrections.</p>
         </section>
 
@@ -502,10 +504,10 @@
     <h2>Related Posts</h2>
     <div class="box">
         <ul>
-            <li><a href="http://blog.thedigitalcatonline.com/blog/2017/10/17/a-game-of-tokens-solution-part-2/">A game of tokens: solution - Part 2</a></li>
-            <li><a href="http://blog.thedigitalcatonline.com/blog/2017/05/09/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-1/">A game of tokens: write an interpreter in Python with TDD - Part 1</a></li>
             <li><a href="http://blog.thedigitalcatonline.com/blog/2017/07/12/a-game-of-tokens-solution-part-1/">A game of tokens: solution - Part 1</a></li>
+            <li><a href="http://blog.thedigitalcatonline.com/blog/2017/10/17/a-game-of-tokens-solution-part-2/">A game of tokens: solution - Part 2</a></li>
             <li><a href="http://blog.thedigitalcatonline.com/blog/2017/10/31/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-3/">A game of tokens: write an interpreter in Python with TDD - Part 3</a></li>
+            <li><a href="http://blog.thedigitalcatonline.com/blog/2017/05/09/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-1/">A game of tokens: write an interpreter in Python with TDD - Part 1</a></li>
             <li><a href="http://blog.thedigitalcatonline.com/blog/2017/10/31/a-game-of-tokens-solution-part-3/">A game of tokens: solution - Part 3</a></li>
         </ul>
     </div>

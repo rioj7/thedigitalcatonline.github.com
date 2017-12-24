@@ -72,7 +72,7 @@
 <p>Speaking of TDD I realised that I hadn't followed it very strictly, as sometimes I wrote more code than needed, usually forecasting future changes. I do not believe in a inflexible and uncompromising application of rules, so I do not consider this a big issue, as long as the result is a working code that is not blatantly overengineered.</p>
 <p>You can find the code for this part in <a href="https://github.com/lgiordani/smallcalc">this repository</a>. The branch called <code>part1</code> contains all the commits explained in this post, and every commit contains both the test(s) and the code that makes the test(s) pass.</p>
 <h1>Level 1 - End of file</h1>
-<p>The base class to pass the test leverages the provided <code>text_buffer.TextBuffer</code> class, that exposes a <code>load()</code> method, directly composed here to <code>CalcLexer.load()</code>. As the test is not providing a text the easiest solution is just to return the tested token. I extracted <code>get_token()</code> from <code>get_tokens()</code> to have a method that is specifically focused on dealing with the current token.</p>
+<p>The base class to pass the test leverages the provided <code>text_buffer.TextBuffer</code> class, that exposes a <code>load()</code> method, directly composed here to <code>CalcLexer.load()</code>. As the test is not providing a text the easiest solution is just to return the tested token. I extracted <code>get_token()</code> from <code>get_tokens()</code> to have a method that is specifically focused on dealing with the current token. The file <code>smallcalc/calc_lexer.py</code> is then</p>
 <div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">smallcalc</span> <span class="kn">import</span> <span class="n">text_buffer</span>
 <span class="kn">from</span> <span class="nn">smallcalc</span> <span class="kn">import</span> <span class="n">tok</span> <span class="k">as</span> <span class="n">token</span>
 
@@ -174,10 +174,16 @@
 
 
 <p>At this point of the development the incoming token can only be <code>EOL</code>, <code>EOF</code>, or an integer. So the <code>_process_integer()</code> function doesn't need to return <code>None</code>. So I just create an integer token with the current char and return it.</p>
-<div class="highlight"><pre><span></span>def _process_integer(self):
-    return self._set_current_token_and_skip(
-        token.Token(INTEGER, self._current_char)
-    )
+<div class="highlight"><pre><span></span>    <span class="k">def</span> <span class="nf">_process_integer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_current_token_and_skip</span><span class="p">(</span>
+            <span class="n">token</span><span class="o">.</span><span class="n">Token</span><span class="p">(</span><span class="n">INTEGER</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_char</span><span class="p">)</span>
+        <span class="p">)</span>
+</pre></div>
+
+
+<p>The above methods use two new global variables <code>EOL</code> and <code>INTEGER</code> that are defined at the beginning of the file along with <code>EOF</code></p>
+<div class="highlight"><pre><span></span><span class="n">EOL</span> <span class="o">=</span> <span class="s1">&#39;EOL&#39;</span>
+<span class="n">INTEGER</span> <span class="o">=</span> <span class="s1">&#39;INTEGER&#39;</span>
 </pre></div>
 
 
@@ -224,6 +230,10 @@
 <h1>Level 3 - Binary operations: addition</h1>
 <h2>Lexer</h2>
 <p>The <code>_process_literal()</code> helper does what <code>_process_integer()</code> did before, which is to blindly return a token, this time with the <code>LITERAL</code> type.</p>
+<div class="highlight"><pre><span></span><span class="n">LITERAL</span> <span class="o">=</span> <span class="s1">&#39;LITERAL&#39;</span>
+</pre></div>
+
+
 <div class="highlight"><pre><span></span>    <span class="k">def</span> <span class="nf">_process_literal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_current_token_and_skip</span><span class="p">(</span>
             <span class="n">token</span><span class="o">.</span><span class="n">Token</span><span class="p">(</span><span class="n">LITERAL</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_char</span><span class="p">)</span>
@@ -361,12 +371,16 @@
             <span class="n">lvalue</span><span class="p">,</span> <span class="n">ltype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="s1">&#39;left&#39;</span><span class="p">])</span>
             <span class="n">rvalue</span><span class="p">,</span> <span class="n">rtype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="s1">&#39;right&#39;</span><span class="p">])</span>
 
-            <span class="k">return</span> <span class="n">lvalue</span> <span class="o">+</span> <span class="n">rvalue</span><span class="p">,</span> <span class="n">ltype</span>
+            <span class="k">return</span> <span class="n">lvalue</span> <span class="o">+</span> <span class="n">rvalue</span><span class="p">,</span> <span class="n">rtype</span>
 </pre></div>
 
 
 <h1>Level 4 - Multi-digit integers</h1>
 <p>To provide support for multi-digit integers we just need to change the <code>_process_integer()</code> method of the lexer. The new version makes use of a very simple regular expressions.</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">re</span>
+</pre></div>
+
+
 <div class="highlight"><pre><span></span>    <span class="k">def</span> <span class="nf">_process_integer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">regexp</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s1">&#39;\d+&#39;</span><span class="p">)</span>
 
@@ -438,9 +452,9 @@
             <span class="n">operator</span> <span class="o">=</span> <span class="n">node</span><span class="p">[</span><span class="s1">&#39;operator&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span>
 
             <span class="k">if</span> <span class="n">operator</span> <span class="o">==</span> <span class="s1">&#39;+&#39;</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">lvalue</span> <span class="o">+</span> <span class="n">rvalue</span><span class="p">,</span> <span class="n">ltype</span>
+                <span class="k">return</span> <span class="n">lvalue</span> <span class="o">+</span> <span class="n">rvalue</span><span class="p">,</span> <span class="n">rtype</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">lvalue</span> <span class="o">-</span> <span class="n">rvalue</span><span class="p">,</span> <span class="n">ltype</span>
+                <span class="k">return</span> <span class="n">lvalue</span> <span class="o">-</span> <span class="n">rvalue</span><span class="p">,</span> <span class="n">rtype</span>
 </pre></div>
 
 
@@ -489,19 +503,23 @@
 
         <span class="n">next_token</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lexer</span><span class="o">.</span><span class="n">peek_token</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="n">next_token</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">clex</span><span class="o">.</span><span class="n">LITERAL</span><span class="p">:</span>
+        <span class="k">while</span> <span class="n">next_token</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">clex</span><span class="o">.</span><span class="n">LITERAL</span><span class="p">:</span>
             <span class="n">operator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_addsymbol</span><span class="p">()</span>
-            <span class="n">right</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_expression</span><span class="p">()</span>
+            <span class="n">right</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_integer</span><span class="p">()</span>
 
-            <span class="k">return</span> <span class="n">BinaryNode</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">operator</span><span class="p">,</span> <span class="n">right</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">IntegerNode</span><span class="p">(</span><span class="n">left</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+            <span class="n">left</span> <span class="o">=</span> <span class="n">BinaryNode</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">operator</span><span class="p">,</span> <span class="n">right</span><span class="p">)</span>
+
+            <span class="n">next_token</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lexer</span><span class="o">.</span><span class="n">peek_token</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">left</span>
 </pre></div>
 
 
-<h2>Final words</h2>
+<h1>Final words</h1>
 <p>Again, it is worth mentioning that this solution of mine is just one of the possible ones, not the <strong>correct</strong> one. If your code passes the tests it is correct; it can be ugly, overengineered, slow, but definitely correct. I hope that reading my solution helped you better understand the underlying concepts of lexer, parser, and visitor. Feel free to get in touch if you want to discuss your solution or if you have questions about the code I posted here.</p>
-<h2>Feedback</h2>
+<h1>Updates</h1>
+<p>2017-12-24: As mentioned in the updates section of the previous post, Victor Uriarte spotted an error in <code>parse_expression()</code>. The previous version was building a right-growing tree instead of a left-growing one. The current version is correct and corretly handles cases like the one that Victor pointed out in the <a href="https://github.com/lgiordani/smallcalc/issues/4">issue</a> he posted. Thanks Victor!</p>
+<h1>Feedback</h1>
 <p>Feel free to use <a href="https://plus.google.com/u/0/111444750762335924049">the blog Google+ page</a> to comment the post. Feel free to reach me on <a href="https://twitter.com/thedigicat">Twitter</a> if you have questions. The <a href="http://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues">GitHub issues</a> page is the best place to submit corrections.</p>
         </section>
 
@@ -510,8 +528,8 @@
     <div class="box">
         <ul>
             <li><a href="http://blog.thedigitalcatonline.com/blog/2017/10/17/a-game-of-tokens-solution-part-2/">A game of tokens: solution - Part 2</a></li>
-            <li><a href="http://blog.thedigitalcatonline.com/blog/2017/05/09/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-1/">A game of tokens: write an interpreter in Python with TDD - Part 1</a></li>
             <li><a href="http://blog.thedigitalcatonline.com/blog/2017/10/31/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-3/">A game of tokens: write an interpreter in Python with TDD - Part 3</a></li>
+            <li><a href="http://blog.thedigitalcatonline.com/blog/2017/05/09/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-1/">A game of tokens: write an interpreter in Python with TDD - Part 1</a></li>
             <li><a href="http://blog.thedigitalcatonline.com/blog/2017/10/31/a-game-of-tokens-solution-part-3/">A game of tokens: solution - Part 3</a></li>
             <li><a href="http://blog.thedigitalcatonline.com/blog/2017/10/01/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-2/">A game of tokens: write an interpreter in Python with TDD - Part 2</a></li>
         </ul>

@@ -96,26 +96,30 @@
 
         <span class="n">next_token</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lexer</span><span class="o">.</span><span class="n">peek_token</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="n">next_token</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">clex</span><span class="o">.</span><span class="n">LITERAL</span><span class="p">:</span>
+        <span class="k">while</span> <span class="n">next_token</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">clex</span><span class="o">.</span><span class="n">LITERAL</span><span class="p">:</span>
             <span class="n">operator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_addsymbol</span><span class="p">()</span>
-            <span class="n">right</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_term</span><span class="p">()</span>
+            <span class="n">right</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_integer</span><span class="p">()</span>
 
-            <span class="k">return</span> <span class="n">BinaryNode</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">operator</span><span class="p">,</span> <span class="n">right</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">IntegerNode</span><span class="p">(</span><span class="n">left</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+            <span class="n">left</span> <span class="o">=</span> <span class="n">BinaryNode</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">operator</span><span class="p">,</span> <span class="n">right</span><span class="p">)</span>
+
+            <span class="n">next_token</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lexer</span><span class="o">.</span><span class="n">peek_token</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">left</span>
 
     <span class="k">def</span> <span class="nf">parse_expression</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">left</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_integer</span><span class="p">()</span>
 
         <span class="n">next_token</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lexer</span><span class="o">.</span><span class="n">peek_token</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="n">next_token</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">clex</span><span class="o">.</span><span class="n">LITERAL</span><span class="p">:</span>
+        <span class="k">while</span> <span class="n">next_token</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">clex</span><span class="o">.</span><span class="n">LITERAL</span><span class="p">:</span>
             <span class="n">operator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_addsymbol</span><span class="p">()</span>
-            <span class="n">right</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_expression</span><span class="p">()</span>
+            <span class="n">right</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_integer</span><span class="p">()</span>
 
-            <span class="k">return</span> <span class="n">BinaryNode</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">operator</span><span class="p">,</span> <span class="n">right</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">IntegerNode</span><span class="p">(</span><span class="n">left</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+            <span class="n">left</span> <span class="o">=</span> <span class="n">BinaryNode</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">operator</span><span class="p">,</span> <span class="n">right</span><span class="p">)</span>
+
+            <span class="n">next_token</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lexer</span><span class="o">.</span><span class="n">peek_token</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">left</span>
 </pre></div>
 
 
@@ -134,50 +138,50 @@
             <span class="n">operator</span> <span class="o">=</span> <span class="n">node</span><span class="p">[</span><span class="s1">&#39;operator&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span>
 
             <span class="k">if</span> <span class="n">operator</span> <span class="o">==</span> <span class="s1">&#39;+&#39;</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">lvalue</span> <span class="o">+</span> <span class="n">rvalue</span><span class="p">,</span> <span class="n">ltype</span>
+                <span class="k">return</span> <span class="n">lvalue</span> <span class="o">+</span> <span class="n">rvalue</span><span class="p">,</span> <span class="n">rtype</span>
             <span class="k">elif</span> <span class="n">operator</span> <span class="o">==</span> <span class="s1">&#39;-&#39;</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">lvalue</span> <span class="o">-</span> <span class="n">rvalue</span><span class="p">,</span> <span class="n">ltype</span>
+                <span class="k">return</span> <span class="n">lvalue</span> <span class="o">-</span> <span class="n">rvalue</span><span class="p">,</span> <span class="n">rtype</span>
             <span class="k">elif</span> <span class="n">operator</span> <span class="o">==</span> <span class="s1">&#39;*&#39;</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">lvalue</span> <span class="o">*</span> <span class="n">rvalue</span><span class="p">,</span> <span class="n">ltype</span>
+                <span class="k">return</span> <span class="n">lvalue</span> <span class="o">*</span> <span class="n">rvalue</span><span class="p">,</span> <span class="n">rtype</span>
             <span class="k">elif</span> <span class="n">operator</span> <span class="o">==</span> <span class="s1">&#39;/&#39;</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">lvalue</span> <span class="o">//</span> <span class="n">rvalue</span><span class="p">,</span> <span class="n">ltype</span>
+                <span class="k">return</span> <span class="n">lvalue</span> <span class="o">//</span> <span class="n">rvalue</span><span class="p">,</span> <span class="n">rtype</span>
 </pre></div>
 
 
 <p>Now we have a pretty simple but working calculator! Enjoy the <code>cli.py</code>, as YOU did it this time! I rememberI was pretty excited the first time I run a command line calculator done by me. But hold tight, because you are going to learn and implement much more!</p>
 <h1>Level 9 - Mixing operators</h1>
 <p>Ouch! It looks like putting multiplications and sums in the same line is not really working. As you may recall we didn't link <code>parse_term()</code> with the other methods, and we use a generic function to treat literals. This works in principle, but doesn't consider operator precedence.</p>
-<p>The current output of the parser is</p>
+<p>When we try to evaluate <code>2 + 3 * 4</code> the output of the parser is</p>
 <div class="highlight"><pre><span></span><span class="p">{</span>
+  <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;binary&quot;</span><span class="p">,</span>
   <span class="s2">&quot;left&quot;</span><span class="p">:</span> <span class="p">{</span>
-    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;integer&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mi">2</span>
-  <span class="p">},</span>
-  <span class="s2">&quot;operator&quot;</span><span class="p">:</span> <span class="p">{</span>
-    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;literal&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;*&quot;</span>
-  <span class="p">},</span>
-  <span class="s2">&quot;right&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;binary&quot;</span><span class="p">,</span>
     <span class="s2">&quot;left&quot;</span><span class="p">:</span> <span class="p">{</span>
+      <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;integer&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mi">2</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;right&quot;</span><span class="p">:</span> <span class="p">{</span>
       <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;integer&quot;</span><span class="p">,</span>
       <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mi">3</span>
     <span class="p">},</span>
     <span class="s2">&quot;operator&quot;</span><span class="p">:</span> <span class="p">{</span>
       <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;literal&quot;</span><span class="p">,</span>
       <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;+&quot;</span>
-    <span class="p">},</span>
-    <span class="s2">&quot;right&quot;</span><span class="p">:</span> <span class="p">{</span>
-      <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;integer&quot;</span><span class="p">,</span>
-      <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mi">4</span>
-    <span class="p">},</span>
-    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;binary&quot;</span>
+    <span class="p">}</span>
   <span class="p">},</span>
-  <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;binary&quot;</span>
+  <span class="s2">&quot;right&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;integer&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mi">4</span>
+  <span class="p">},</span>
+  <span class="s2">&quot;operator&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;literal&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;*&quot;</span>
+  <span class="p">}</span>
 <span class="p">}</span>
 </pre></div>
 
 
-<p>As you can clearly see the parser recognised the multiplication operator, but then returns a nested sum (the oputput of a recursive call of <code>parse_term()</code>). This gives the sum a greater precedence that that of the sum, which is against the mathematical rules we want to follow here. <code>2 * 3 + 4</code> shall be considered <code>(2 * 3) + 4</code> and not <code>2 + (3 * 4)</code>.</p>
+<p>As you can clearly see the parser recognised the multiplication operator, but then returns a nested sum (the oputput of a recursive call of <code>parse_term()</code>). This gives the sum a greater precedence that that of the sum, which is against the mathematical rules we want to follow here. <code>2 + 3 * 4</code> shall be considered <code>2 + (3 + 4)</code> and not <code>(2 + 3) * 4</code>.</p>
 <p>To fix this we have to rework <code>parse_term()</code>. First of all it shall accept only the <code>*</code> and <code>/</code> operators, then it shall return the left part if it finds a different literal. Even <code>parse_expression()</code> shall change a bit: the first thing to do is to call <code>parse_term()</code> instead of <code>parse_integer()</code> and then to return the left part.</p>
 <p>The new code is then</p>
 <div class="highlight"><pre><span></span>    <span class="k">def</span> <span class="nf">parse_term</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -185,11 +189,14 @@
 
         <span class="n">next_token</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lexer</span><span class="o">.</span><span class="n">peek_token</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="n">next_token</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">clex</span><span class="o">.</span><span class="n">LITERAL</span> <span class="ow">and</span> <span class="n">next_token</span><span class="o">.</span><span class="n">value</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">]:</span>
+        <span class="k">while</span> <span class="n">next_token</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">clex</span><span class="o">.</span><span class="n">LITERAL</span>\
+                <span class="ow">and</span> <span class="n">next_token</span><span class="o">.</span><span class="n">value</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">]:</span>
             <span class="n">operator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_addsymbol</span><span class="p">()</span>
-            <span class="n">right</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_term</span><span class="p">()</span>
+            <span class="n">right</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_integer</span><span class="p">()</span>
 
-            <span class="k">return</span> <span class="n">BinaryNode</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">operator</span><span class="p">,</span> <span class="n">right</span><span class="p">)</span>
+            <span class="n">left</span> <span class="o">=</span> <span class="n">BinaryNode</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">operator</span><span class="p">,</span> <span class="n">right</span><span class="p">)</span>
+
+            <span class="n">next_token</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lexer</span><span class="o">.</span><span class="n">peek_token</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="n">left</span>
 
@@ -198,11 +205,13 @@
 
         <span class="n">next_token</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lexer</span><span class="o">.</span><span class="n">peek_token</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="n">next_token</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">clex</span><span class="o">.</span><span class="n">LITERAL</span><span class="p">:</span>
+        <span class="k">while</span> <span class="n">next_token</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">clex</span><span class="o">.</span><span class="n">LITERAL</span><span class="p">:</span>
             <span class="n">operator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_addsymbol</span><span class="p">()</span>
-            <span class="n">right</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_expression</span><span class="p">()</span>
+            <span class="n">right</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_term</span><span class="p">()</span>
 
-            <span class="k">return</span> <span class="n">BinaryNode</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">operator</span><span class="p">,</span> <span class="n">right</span><span class="p">)</span>
+            <span class="n">left</span> <span class="o">=</span> <span class="n">BinaryNode</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">operator</span><span class="p">,</span> <span class="n">right</span><span class="p">)</span>
+
+            <span class="n">next_token</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lexer</span><span class="o">.</span><span class="n">peek_token</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="n">left</span>
 </pre></div>
@@ -245,11 +254,14 @@
 
         <span class="n">next_token</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lexer</span><span class="o">.</span><span class="n">peek_token</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="n">next_token</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">clex</span><span class="o">.</span><span class="n">LITERAL</span> <span class="ow">and</span> <span class="n">next_token</span><span class="o">.</span><span class="n">value</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">]:</span>
+        <span class="k">while</span> <span class="n">next_token</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">clex</span><span class="o">.</span><span class="n">LITERAL</span>\
+                <span class="ow">and</span> <span class="n">next_token</span><span class="o">.</span><span class="n">value</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">]:</span>
             <span class="n">operator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_addsymbol</span><span class="p">()</span>
-            <span class="n">right</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_term</span><span class="p">()</span>
+            <span class="n">right</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_integer</span><span class="p">()</span>
 
-            <span class="k">return</span> <span class="n">BinaryNode</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">operator</span><span class="p">,</span> <span class="n">right</span><span class="p">)</span>
+            <span class="n">left</span> <span class="o">=</span> <span class="n">BinaryNode</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">operator</span><span class="p">,</span> <span class="n">right</span><span class="p">)</span>
+
+            <span class="n">next_token</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lexer</span><span class="o">.</span><span class="n">peek_token</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="n">left</span>
 </pre></div>
@@ -261,11 +273,14 @@
 
         <span class="n">next_token</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lexer</span><span class="o">.</span><span class="n">peek_token</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="n">next_token</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">clex</span><span class="o">.</span><span class="n">LITERAL</span> <span class="ow">and</span> <span class="n">next_token</span><span class="o">.</span><span class="n">value</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">]:</span>
+        <span class="k">while</span> <span class="n">next_token</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">clex</span><span class="o">.</span><span class="n">LITERAL</span>\
+                <span class="ow">and</span> <span class="n">next_token</span><span class="o">.</span><span class="n">value</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">]:</span>
             <span class="n">operator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_addsymbol</span><span class="p">()</span>
-            <span class="n">right</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_expression</span><span class="p">()</span>
+            <span class="n">right</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_term</span><span class="p">()</span>
 
-            <span class="k">return</span> <span class="n">BinaryNode</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">operator</span><span class="p">,</span> <span class="n">right</span><span class="p">)</span>
+            <span class="n">left</span> <span class="o">=</span> <span class="n">BinaryNode</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">operator</span><span class="p">,</span> <span class="n">right</span><span class="p">)</span>
+
+            <span class="n">next_token</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lexer</span><span class="o">.</span><span class="n">peek_token</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="n">left</span>
 </pre></div>
@@ -347,13 +362,13 @@
             <span class="n">operator</span> <span class="o">=</span> <span class="n">node</span><span class="p">[</span><span class="s1">&#39;operator&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span>
 
             <span class="k">if</span> <span class="n">operator</span> <span class="o">==</span> <span class="s1">&#39;+&#39;</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">lvalue</span> <span class="o">+</span> <span class="n">rvalue</span><span class="p">,</span> <span class="n">ltype</span>
+                <span class="k">return</span> <span class="n">lvalue</span> <span class="o">+</span> <span class="n">rvalue</span><span class="p">,</span> <span class="n">rtype</span>
             <span class="k">elif</span> <span class="n">operator</span> <span class="o">==</span> <span class="s1">&#39;-&#39;</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">lvalue</span> <span class="o">-</span> <span class="n">rvalue</span><span class="p">,</span> <span class="n">ltype</span>
+                <span class="k">return</span> <span class="n">lvalue</span> <span class="o">-</span> <span class="n">rvalue</span><span class="p">,</span> <span class="n">rtype</span>
             <span class="k">elif</span> <span class="n">operator</span> <span class="o">==</span> <span class="s1">&#39;*&#39;</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">lvalue</span> <span class="o">*</span> <span class="n">rvalue</span><span class="p">,</span> <span class="n">ltype</span>
+                <span class="k">return</span> <span class="n">lvalue</span> <span class="o">*</span> <span class="n">rvalue</span><span class="p">,</span> <span class="n">rtype</span>
             <span class="k">elif</span> <span class="n">operator</span> <span class="o">==</span> <span class="s1">&#39;/&#39;</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">lvalue</span> <span class="o">//</span> <span class="n">rvalue</span><span class="p">,</span> <span class="n">ltype</span>
+                <span class="k">return</span> <span class="n">lvalue</span> <span class="o">//</span> <span class="n">rvalue</span><span class="p">,</span> <span class="n">rtype</span>
 </pre></div>
 
 
@@ -388,9 +403,9 @@
 </pre></div>
 
 
-<h2>Final words</h2>
+<h1>Final words</h1>
 <p>Well, we have a pretty decent calculator now, don't we? Stay tuned, as in the next instalment we will explore variables and postfix operators. Get in touch if you want to discuss your solution or if you have questions about the code I posted here.</p>
-<h2>Feedback</h2>
+<h1>Feedback</h1>
 <p>Feel free to use <a href="https://plus.google.com/u/0/111444750762335924049">the blog Google+ page</a> to comment the post. Feel free to reach me on <a href="https://twitter.com/thedigicat">Twitter</a> if you have questions. The <a href="http://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues">GitHub issues</a> page is the best place to submit corrections.</p>
         </section>
 
@@ -398,9 +413,9 @@
     <h2>Related Posts</h2>
     <div class="box">
         <ul>
-            <li><a href="http://blog.thedigitalcatonline.com/blog/2017/05/09/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-1/">A game of tokens: write an interpreter in Python with TDD - Part 1</a></li>
             <li><a href="http://blog.thedigitalcatonline.com/blog/2017/07/12/a-game-of-tokens-solution-part-1/">A game of tokens: solution - Part 1</a></li>
             <li><a href="http://blog.thedigitalcatonline.com/blog/2017/10/31/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-3/">A game of tokens: write an interpreter in Python with TDD - Part 3</a></li>
+            <li><a href="http://blog.thedigitalcatonline.com/blog/2017/05/09/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-1/">A game of tokens: write an interpreter in Python with TDD - Part 1</a></li>
             <li><a href="http://blog.thedigitalcatonline.com/blog/2017/10/31/a-game-of-tokens-solution-part-3/">A game of tokens: solution - Part 3</a></li>
             <li><a href="http://blog.thedigitalcatonline.com/blog/2017/10/01/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-2/">A game of tokens: write an interpreter in Python with TDD - Part 2</a></li>
         </ul>
