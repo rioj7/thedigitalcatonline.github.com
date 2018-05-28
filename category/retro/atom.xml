@@ -1,0 +1,381 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>The Digital Cat - Retro</title><link href="http://blog.thedigitalcatonline.com/" rel="alternate"></link><link href="http://blog.thedigitalcatonline.com/category/retro/atom.xml" rel="self"></link><id>http://blog.thedigitalcatonline.com/</id><updated>2018-05-28T15:00:00+01:00</updated><entry><title>Exploring the Amiga - Part 2</title><link href="http://blog.thedigitalcatonline.com/blog/2018/05/28/exploring-the-amiga-2/" rel="alternate"></link><published>2018-05-28T15:00:00+01:00</published><updated>2018-05-28T15:00:00+01:00</updated><author><name>Leonardo Giordani</name></author><id>tag:blog.thedigitalcatonline.com,2018-05-28:/blog/2018/05/28/exploring-the-amiga-2/</id><summary type="html"></summary><content type="html">&lt;h1&gt;The library jump table&lt;/h1&gt;
+&lt;p&gt;As already mentioned when a library is loaded in memory a jump table is created just before the library base address. This table contains the addresses of the functions exposed by the library, and Exec itself has one.&lt;/p&gt;
+&lt;p&gt;The jump table functions order for the Exec library is specified in one of the include files provided by the NDK, namely &lt;code&gt;include_i/exec/exec_lib.i&lt;/code&gt;.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;    FUNCDEF Supervisor
+    FUNCDEF execPrivate1
+    FUNCDEF execPrivate2
+    FUNCDEF execPrivate3
+    ...
+    FUNCDEF OpenLibrary
+    ...
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;As you can see this file makes use of the &lt;code&gt;FUNCDEF&lt;/code&gt; macro, which is not provided and has to be implemented by the coder. The idea of the macro is very simple: as the order of the jump table does not change we can just replace the first &lt;code&gt;FUNCDEF&lt;/code&gt; with the offset of the first function in the library and then increment this offset with the default size of the jump address. The expected output of the macro is&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;    _LVOSupervisor     EQU     -30
+    _LVOexecPrivate1   EQU     -36
+    _LVOexecPrivate2   EQU     -42
+    _LVOexecPrivate3   EQU     -48
+    ...
+    _LVOOpenLibrary    EQU     -552
+    ...
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Please note that the name of the function has been replaced by another string prepending &lt;code&gt;_LVO&lt;/code&gt; to avoid clashes with the actual function definition (&lt;code&gt;LVO&lt;/code&gt; stands for Library Vector Offset).&lt;/p&gt;
+&lt;p&gt;The above figures come from the Special Constants contained in the &lt;code&gt;include_i/exec/libraries.i&lt;/code&gt; file&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;*------ Special Constants ---------------------------------------
+LIB_VECTSIZE    EQU 6       ;Each library entry takes 6 bytes
+LIB_RESERVED    EQU 4       ;Exec reserves the first 4 vectors
+LIB_BASE    EQU -LIB_VECTSIZE
+LIB_USERDEF EQU LIB_BASE-(LIB_RESERVED*LIB_VECTSIZE) ;First user func
+LIB_NONSTD  EQU LIB_USERDEF
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;AS you can see from the comments, Exec reserves the first 4 vectors, so the first function's address is &lt;code&gt;LIB_USERDEF&lt;/code&gt;. To understand why the addresses are negative and how the offset is computed let's get a snapshot of the library once it has been loaded in memory&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;                              HIGHER MEMORY ADDRESSES
+                            +-------------------------+
+Last byte of the            | End of the library      |
+library loaded in ---------&amp;gt;+-------------------------+
+memory                      | [...]                   |
+                            +-------------------------+
+                            | Content of the library  |
+                            +-------------------------+
+                            | Library structure       |
+Library base address ------&amp;gt;+-------------------------+
+                            | 1st reserved vector     |
+                            +-------------------------+&amp;lt;--- LIB_BASE
+                            | 2nd reserved vector     |
+                            +-------------------------+&amp;lt;--+
+                            | 3rd reserved vector     |   | LIB_VECTSIZE
+                            +-------------------------+&amp;lt;--+
+                            | 4th reserved vector     |
+                            +-------------------------+
+                            | 1st defined function    |
+                            +-------------------------+&amp;lt;--- LIB_USERDEF
+                            | 2nd defined function    |
+                            +-------------------------+
+                            | [...]                   |
+                            +-------------------------+
+First byte of the           | End of the jump table   |
+library loaded in ---------&amp;gt;+-------------------------+
+memory                        LOWER MEMORY ADDRESSES
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;You can find an official version of this in the &lt;a href="http://amigadev.elowar.com/read/ADCD_2.1/AmigaMail_Vol2_guide/node0189.html"&gt;documentation&lt;/a&gt;. Pay attention that the picture in the documentation represents memory upside down, with lower memory addresses towards the top of the page.&lt;/p&gt;
+&lt;p&gt;As you can see the library is loaded as expected from the base address towards the higher memory addresses, but at the same time the jump table is prefixed &lt;em&gt;in reverse order&lt;/em&gt;. This is done to allow you to find the address of a function with a simple (negative) indexing instead of a more complex algorithm. Function number 1 is at address &lt;code&gt;-1 * address_size&lt;/code&gt;, function number 2 at address &lt;code&gt;-2 * address_size&lt;/code&gt;, etc.&lt;/p&gt;
+&lt;p&gt;This is why we use negative offsets to call library functions but positive ones to access the library data and structures.&lt;/p&gt;
+&lt;p&gt;You can also see from the figure where the Special Constants &lt;code&gt;LIB_BASE&lt;/code&gt; and &lt;code&gt;LIB_USERDEF&lt;/code&gt; are located. The actual values are&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;LIB_BASE    EQU -6
+LIB_USERDEF EQU -30
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;A good definition of the &lt;code&gt;FUNCDEF&lt;/code&gt; macro, thus, is the following&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;    INCLUDE &amp;quot;exec/libraries.i&amp;quot;
+
+    MACRO   FUNCDEF
+_LVO\1      EQU      FUNC_CNT
+FUNC_CNT    SET      FUNC_CNT-LIB_VECTSIZE
+    ENDM
+
+FUNC_CNT    SET      LIB_USERDEF
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The last line initializes the &lt;code&gt;FUNC_CNT&lt;/code&gt; symbol with the &lt;code&gt;LIB_USERDEF&lt;/code&gt; value. Then each call of the &lt;code&gt;FUNCDEF &amp;lt;arg&amp;gt;&lt;/code&gt; macro does two things:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Creates the &lt;code&gt;_LVO&amp;lt;arg&amp;gt;&lt;/code&gt; symbol with value &lt;code&gt;FUNC_CNT&lt;/code&gt; (e.g. &lt;code&gt;_LVOSupervisor EQU -30&lt;/code&gt;)&lt;/li&gt;
+&lt;li&gt;Decrements the &lt;code&gt;FUNC_CNT&lt;/code&gt; symbol by &lt;code&gt;LIB_VECTSIZE&lt;/code&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Please note that the example &lt;code&gt;FUNCDEF&lt;/code&gt; that you can find (commented) in &lt;code&gt;libraries.i&lt;/code&gt; won't work out of the box as &lt;code&gt;FUNC_CNT&lt;/code&gt; is defined inside the macro itself, while it has to be already defined before the first use of the macro.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;*------ FUNCDEF is used to parse library offset tables.  Many applications
+*------ need a special version of FUNCDEF - you provide your own macro
+*------ to match your needs.  Here is an example:
+*
+*    FUNCDEF     MACRO
+*    _LVO\1      EQU    FUNC_CNT
+*    FUNC_CNT    SET    FUNC_CNT-6  * Standard offset-6 bytes each
+*    FUNC_CNT    EQU    LIB_USERDEF * Skip 4 standard vectors
+*                ENDM
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;You can put the &lt;code&gt;FUNCDEF&lt;/code&gt; macro code in a local include file like &lt;code&gt;funcdef.i&lt;/code&gt;. Including it your code allows you to use &lt;code&gt;_LVO&lt;/code&gt; prefixed labels for the functions that you want to load&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;    INCLUDE &amp;quot;funcdef.i&amp;quot;
+    INCLUDE &amp;quot;exec/exec_lib.i&amp;quot;
+
+    move.l  4.w,a6
+    clr.l   d0
+    move.l  #libname,a1
+    jsr     _LVOOpenLibrary(a6)
+
+libname:
+    dc.b &amp;quot;somename.library&amp;quot;,0
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Finally, if you want to be even more explicit you can use the &lt;code&gt;CALLLIB&lt;/code&gt; macro defined in &lt;code&gt;libraries.i&lt;/code&gt; and write&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;    INCLUDE &amp;quot;funcdef.i&amp;quot;
+    INCLUDE &amp;quot;exec/exec_lib.i&amp;quot;
+    INCLUDE &amp;quot;exec/libraries.i&amp;quot;
+
+    move.l  4.w,a6
+    clr.l   d0
+    move.l  #libname,a1
+    CALLLIB _LVOOpenLibrary
+
+libname:
+    dc.b &amp;quot;somename.library&amp;quot;,0
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h1&gt;The four reserved vectors&lt;/h1&gt;
+&lt;p&gt;As we saw, the Amiga system reserves 4 vectors at the beginning of the jump table of a library. These 4 spaces host 3 standard functions that shall be provided by any library, &lt;code&gt;Open()&lt;/code&gt;, &lt;code&gt;Close()&lt;/code&gt;, and &lt;code&gt;Expunge()&lt;/code&gt;. The fourth slot is kept for possible future expansions and must contain a function that returns 0.&lt;/p&gt;
+&lt;p&gt;The offsets of these functions are contained in the &lt;code&gt;exec/libraries.i&lt;/code&gt; file&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;*----------------------------------------------------------------
+*
+*   Standard Library Functions
+*
+*----------------------------------------------------------------
+
+    LIBINIT LIB_BASE
+
+    LIBDEF  LIB_OPEN
+    LIBDEF  LIB_CLOSE
+    LIBDEF  LIB_EXPUNGE ; must exist in all libraries
+    LIBDEF  LIB_EXTFUNC ; for future expansion - must return zero.
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;the effect of the above macros with the previous constants is&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;LIB_OPEN        EQU     -6
+LIB_CLOSE       EQU     -12
+LIB_EXPUNGE     EQU     -18
+LIB_EXTFUNC     EQU     -24
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;You can try to follow the definitions of the &lt;code&gt;LIBINIT&lt;/code&gt; and &lt;code&gt;LIBDEF&lt;/code&gt; macros to obtain the same result.&lt;/p&gt;
+&lt;h1&gt;Types and structures&lt;/h1&gt;
+&lt;p&gt;Let's see how the Exec library defines its types, which are the base components of the Amiga system. The main entry point for this investigation is the &lt;code&gt;include_i/exec/types.i&lt;/code&gt; file.&lt;/p&gt;
+&lt;p&gt;When working with data structures in Assembly, everything is expressed in terms of offsets. The main idea behind structures is to create something like this&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;STRUCT1         EQU     0
+OFFSET          SET     0
+FIELD1          EQU     OFFSET
+OFFSET          EQU     OFFSET+SIZE_OF_FIELD1
+FIELD2          EQU     OFFSET
+OFFSET          EQU     OFFSET+SIZE_OF_FIELD2
+[...]
+STRUCT1_SIZE    EQU     OFFSET
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;which, once run through the macro expansion, creates the following code&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;STRUCT1         EQU     0
+FIELD1          EQU     0
+FIELD2          EQU     SIZE_OF_FIELD1
+FIIELD3         EQU     SIZE_OF_FIELD1+SIZE_OF_FIELD2
+[...]
+STRUCT1_SIZE    EQU     SIZE_OF_FIELD1+...+SIZE_OF_FIELDn
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;So, the type macros are all defined with code like this&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;TYPENAME    MACRO
+\1          EQU     SOFFSET
+SOFFSET     SET     SOFFSET+SIZE_OF_TYPE
+            ENDM
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;For example the &lt;code&gt;BYTE&lt;/code&gt; macro is&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;BYTE        MACRO       ; byte (8 bits)
+\1          EQU     SOFFSET
+SOFFSET     SET     SOFFSET+1
+            ENDM
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Note that the field is defined with &lt;code&gt;EQU&lt;/code&gt; to avoid unwanted overwrites, while &lt;code&gt;SOFFSET&lt;/code&gt; uses &lt;code&gt;SET&lt;/code&gt; that allows to redefine the symbol.&lt;/p&gt;
+&lt;p&gt;Let's see now how a real structure is defined. A good example is &lt;code&gt;LN&lt;/code&gt; defined in &lt;code&gt;include_i/exec/nodes.i&lt;/code&gt; which represents a node of a linked list.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;   STRUCTURE    LN,0    ; List Node
+    APTR    LN_SUCC ; Pointer to next (successor)
+    APTR    LN_PRED ; Pointer to previous (predecessor)
+    UBYTE   LN_TYPE
+    BYTE    LN_PRI  ; Priority, for sorting
+    APTR    LN_NAME ; ID string, null terminated
+    LABEL   LN_SIZE ; Note: word aligned
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The &lt;code&gt;STRUCTURE&lt;/code&gt; macro is defined in &lt;code&gt;types.i&lt;/code&gt; as&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;STRUCTURE   MACRO       ; structure name, initial offset
+\1          EQU     0
+SOFFSET     SET     \2
+            ENDM
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;And the resulting declarations, once the macros have been expanded, are the following&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;LN          EQU     0
+LN_SUCC     EQU     0
+LN_PRED     EQU     4
+LN_TYPE     EQU     8
+LN_PRI      EQU     9
+LN_NAME     EQU     10
+LN_SIZE     EQU     14
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;As you can see the field names are just offsets inside the structure, and there is no specific padding at the end to align the structure. In this case there is no need, as the structure size is already a multiple of a word (14 bytes).&lt;/p&gt;
+&lt;h2&gt;How to align structures&lt;/h2&gt;
+&lt;p&gt;If we need to align the bytes however we can use a little binary trick. If you ignore the least significant bit of a binary number you convert it to the nearest even number (downwards). An example in Python is&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class="nb"&gt;bin&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;13&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="o"&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;0b1101&amp;#39;&lt;/span&gt;
+&lt;span class="o"&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class="nb"&gt;bin&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;12&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="o"&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;0b1100&amp;#39;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;and even numbers are separated exactly by two positions. So if we get the current offset, we increase it by one and round down to the nearest integer we are aligning the offset to multiples of a word (2 bytes). The &lt;code&gt;ALIGNWORD&lt;/code&gt; macro in the &lt;code&gt;include_i/exec/types.i&lt;/code&gt; file implements exactly this algorithm&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ALIGNWORD   MACRO       ; Align structure offset to nearest word
+SOFFSET     SET     (SOFFSET+1)&amp;amp;$fffffffe
+            ENDM
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;This can be seen in action in the &lt;code&gt;CardHandle&lt;/code&gt; structure defined in &lt;code&gt;include_i/resources/card.i&lt;/code&gt;.&lt;/p&gt;</content><category term="assembly"></category><category term="amiga"></category><category term="retroprogramming"></category></entry><entry><title>Exploring the Amiga - Part 1</title><link href="http://blog.thedigitalcatonline.com/blog/2018/05/28/exploring-the-amiga-1/" rel="alternate"></link><published>2018-05-28T14:00:00+01:00</published><updated>2018-05-28T14:00:00+01:00</updated><author><name>Leonardo Giordani</name></author><id>tag:blog.thedigitalcatonline.com,2018-05-28:/blog/2018/05/28/exploring-the-amiga-1/</id><summary type="html"></summary><content type="html">&lt;p&gt;Recently I decided to give some time to retroprogramming, and in particular to explore the architecture of some famous microcomputer and consoles of the 80s and 90s. Glorious 8-bit systems like the ZX Spectrum, the Commodore 64, or the Nintendo Entertainment System. 16-bits giants the likes of the Amiga, its (eventually winning) MS-DOS-based counterparts running on the early x86 architectures, the immortal Nintendo Super Famicom and SEGA Genesis.&lt;/p&gt;
+&lt;p&gt;I am deeply convinced that learning architectures is a perfect way to become a better programmer, even now that we have 64-bits processors, fifth generation languages, and Internet. Those old systems had many limitations and to get interesting results the programmer has to know the hardware and exploit every single bit of power it can deliver.&lt;/p&gt;
+&lt;p&gt;This is sometimes not true any more nowadays. On the one hand this is good, as it allows us to concentrate on business decisions and on higher layer of abstraction. On the other hand it was and it will always be useful for a programmer to face a limited system and to try to get the maximum out of it.&lt;/p&gt;
+&lt;p&gt;This series of posts is about the Commodore Amiga. Thousands of words have already been written on the Amiga, and I will not add anything but "milestone" to the adjectives used to describe it. This post and the following ones are not intended to be a complete and well-organised review of the architecture. Instead, they will be more a set of "lab notes" for myself that I write while I explore the platform. I put them on the blog in the hope that they will be useful for other programmers that try to crack the same problems.&lt;/p&gt;
+&lt;h1&gt;Assembly language and the Amiga&lt;/h1&gt;
+&lt;p&gt;If you want to write Assembly programs for the Amiga you can either work directly on a real system or use a cross-compiler. I prefer to work on my Linux system because, as much as I like retro architectures, I also like the power of a good Unix system and a modern editor.&lt;/p&gt;
+&lt;p&gt;Cross-compiling is a very simple concept: instead of compiling source code and creating binaries for the architecture you are running the compiler on, you create binaries for a different architecture. In this case the host architecture is Linux/amd64 and the target architecture is Amiga.&lt;/p&gt;
+&lt;p&gt;As this is not the only project I am following at the moment, I created a directory to host everything I need for the Amiga development: compiler, documentation, scripts.&lt;/p&gt;
+&lt;h2&gt;Install vasm&lt;/h2&gt;
+&lt;p&gt;On Linux you can both use the GCC compiler or install vasm. This latter uses the same syntax as the standard Amiga assemblers, especially for compiler directives like &lt;code&gt;macro&lt;/code&gt; and &lt;code&gt;include&lt;/code&gt;, thus making it easier to pick up and use code published in books and in magazines during the 80s.&lt;/p&gt;
+&lt;p&gt;To install the latest vasm you can run the following code&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;wget -q &lt;span class="s2"&gt;&amp;quot;http://sun.hasenbraten.de/vasm/release/vasm.tar.gz&amp;quot;&lt;/span&gt;
+tar xvf vasm.tar.gz &lt;span class="c1"&gt;# The file is not actually gzipped&lt;/span&gt;
+rm vasm.tar.gz
+&lt;span class="nb"&gt;cd&lt;/span&gt; vasm
+make &lt;span class="nv"&gt;CPU&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;m68k &lt;span class="nv"&gt;SYNTAX&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;mot
+&lt;span class="nb"&gt;cd&lt;/span&gt; ..
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h2&gt;Install a disassembler&lt;/h2&gt;
+&lt;p&gt;The vbcc suite written by Volker Barthelmann contains a disassembler for the M68k architecture that you can find &lt;a href="TODO"&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;A disassembler is a handy tool that can reveal a lot about how a program works. You can install it with the following code&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;wget -q &lt;span class="s2"&gt;&amp;quot;http://sun.hasenbraten.de/~frank/projects/download/vdam68k.tar.gz&amp;quot;&lt;/span&gt;
+tar xvzf vdam68k.tar.gz 
+&lt;span class="nb"&gt;cd&lt;/span&gt; vda/M68k/
+make
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;which will create the &lt;code&gt;vda/M68k/vda68k&lt;/code&gt; that you can use to disassemble Amiga programs or ROM dumps.&lt;/p&gt;
+&lt;h2&gt;Install the NDK&lt;/h2&gt;
+&lt;p&gt;The Native Development Kit (the Amiga SDK) contains include files that can be very helpful (though not strictly necessary) when developing. Unfortunately the NDK is still copyrighted by some of the guys that are trying to resurrect the Amiga. This latter idea is nice, but I really do not understand how preventing distribution of development documentation about a platform dead more than 20 years ago might help such a project.&lt;/p&gt;
+&lt;p&gt;Whatever, you can get an old version of the Amiga Developer CD &lt;a href="https://archive.org/details/amiga-developer-cd-v1_1"&gt;here&lt;/a&gt;. This contains the NDK version 3.1 which is enough for what we are going to learn in this series.&lt;/p&gt;
+&lt;p&gt;You may want to rename the &lt;code&gt;Includes&amp;amp;Libs&lt;/code&gt; directory to &lt;code&gt;Includes_Libs&lt;/code&gt; to simplify its access by the compiler command line (&lt;code&gt;&amp;amp;&lt;/code&gt; is a special character in bash).&lt;/p&gt;
+&lt;h2&gt;Helper script and test&lt;/h2&gt;
+&lt;p&gt;I created a &lt;code&gt;asm.sh&lt;/code&gt; helper script to simplify the development process&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="ch"&gt;#!/bin/bash&lt;/span&gt;
+
+&lt;span class="nv"&gt;BASE&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;/where/you/put/everything&amp;quot;&lt;/span&gt;
+
+&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;BASE&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;/vasm/vasmm68k_mot -kick1hunks -Fhunkexe -I&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;BASE&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;/NDK_3.1/Include_Libs/include_i -o &lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;1&lt;/span&gt;&lt;span class="p"&gt;/.asm/&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; -nosym &lt;span class="nv"&gt;$1&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Don't forget to run &lt;code&gt;chmod 775 asm.sh&lt;/code&gt; to make the script executable. Now run the following command&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nb"&gt;echo&lt;/span&gt; -e &lt;span class="s2"&gt;&amp;quot;loop:\n btst #6,\$bfe001\n bne loop\n rts\n&amp;quot;&lt;/span&gt; &amp;gt; test.asm &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; ./asm.sh test.asm
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;This compiles a very small program that loops until you press the right mouse button. If everything has been correctly installed you should get the following output&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;vasm &lt;span class="m"&gt;1&lt;/span&gt;.8c &lt;span class="o"&gt;(&lt;/span&gt;c&lt;span class="o"&gt;)&lt;/span&gt; in &lt;span class="m"&gt;2002&lt;/span&gt;-2018 Volker Barthelmann
+vasm M68k/CPU32/ColdFire cpu backend &lt;span class="m"&gt;2&lt;/span&gt;.3b &lt;span class="o"&gt;(&lt;/span&gt;c&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="m"&gt;2002&lt;/span&gt;-2017 Frank Wille
+vasm motorola syntax module &lt;span class="m"&gt;3&lt;/span&gt;.11c &lt;span class="o"&gt;(&lt;/span&gt;c&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="m"&gt;2002&lt;/span&gt;-2018 Frank Wille
+vasm hunk format output module &lt;span class="m"&gt;2&lt;/span&gt;.9b &lt;span class="o"&gt;(&lt;/span&gt;c&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="m"&gt;2002&lt;/span&gt;-2017 Frank Wille
+
+CODE&lt;span class="o"&gt;(&lt;/span&gt;acrx2&lt;span class="o"&gt;)&lt;/span&gt;:              &lt;span class="m"&gt;12&lt;/span&gt; bytes
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;And running the &lt;code&gt;file&lt;/code&gt; command should return the correct type&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ file &lt;span class="nb"&gt;test&lt;/span&gt;
+test: AmigaOS loadseg&lt;span class="o"&gt;()&lt;/span&gt;ble executable/binary
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h1&gt;LEA, the PC and the relative offset&lt;/h1&gt;
+&lt;p&gt;In Assembly you can manage memory cells using either their content or the address, as you can do with pointers in C or similar concepts in other high-level languages. You can also set labels that the assembler will convert in instruction addresses, but these are (almost) always relative to the beginning of the code itself, as the code may be loaded anywhere in memory.&lt;/p&gt;
+&lt;p&gt;This means that, generally speaking, all the addresses we use when we branch to other parts of the code should be relative to the current instruction.&lt;/p&gt;
+&lt;p&gt;The Motorola 68k calls this addressing mode &lt;em&gt;Program Counter Indirect with Displacement Mode&lt;/em&gt;. Its description contained in the Programmer's Reference Manual is&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;In this mode, the operand is in memory. The address of the operand is the sum of the address in the program counter (PC) and the sign-extended 16-bit displacement integer in the extension word. The value in the PC is the address of the extension word.&lt;/p&gt;
+&lt;p&gt;(2.2.11, page 13)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;The usual assembler syntax for this addressing mode is &lt;code&gt;(d16,PC)&lt;/code&gt; or &lt;code&gt;d16(PC)&lt;/code&gt;, where &lt;code&gt;d16&lt;/code&gt; is a 16-bits displacement. The &lt;code&gt;lea&lt;/code&gt; instruction, for example, supports this mode, so we can find code like&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="mi"&gt;0364&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;41&lt;/span&gt;&lt;span class="n"&gt;fa&lt;/span&gt; &lt;span class="n"&gt;ffa6&lt;/span&gt;         &lt;span class="n"&gt;lea&lt;/span&gt;     &lt;span class="mh"&gt;0x30c&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;pc&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt;&lt;span class="n"&gt;a0&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Here the instruction is stored at address &lt;code&gt;0x0364&lt;/code&gt; and it loads in the &lt;code&gt;a0&lt;/code&gt; register the &lt;em&gt;effective address&lt;/em&gt; of the instruction at &lt;code&gt;0x030c&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Pay attention: since your code starts always at address &lt;code&gt;0x0&lt;/code&gt;, you might be tempted to store the value &lt;code&gt;0x030c&lt;/code&gt; into &lt;code&gt;a0&lt;/code&gt; and go on. You want however to load the address that instruction has at runtime, which will be different from the current one. The displacement, however, will be the same, as the code doesn't change its form, and this is why this addressing mode is useful.&lt;/p&gt;
+&lt;h2&gt;Relative offset encoding&lt;/h2&gt;
+&lt;p&gt;A question may arise, then: why does the code show the address &lt;code&gt;0x30&lt;/code&gt; if the displacement is relative?&lt;/p&gt;
+&lt;p&gt;Let's dig into the binary representation of the instruction to see how the processor receives it. The value &lt;code&gt;0x41faffa6&lt;/code&gt; in binary form is &lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;01000001111110101111111110100110
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;If we split it according to the Motorola 68k opcodes scheme (Programmer's Reference Manual, Section 8) we get&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;0100 000 111 111010 1111111110100110
+^    ^       ^
+lea  a0      (d16,PC)
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;So we know this is a &lt;code&gt;lea&lt;/code&gt; to &lt;code&gt;a0&lt;/code&gt; using Program Counter with Displacement. The address argument is &lt;code&gt;1111111110100110&lt;/code&gt;, which has to be interpreted as a "sign-extended 16-bit displacement integer" as the Reference Manual stated.
+The value is the two's complement representation of the decimal &lt;code&gt;-90&lt;/code&gt;, and since the PC is pointing at the address itself (&lt;code&gt;0x0366&lt;/code&gt;) the resulting address is &lt;code&gt;0x0366 - 90&lt;/code&gt;, which gives &lt;code&gt;0x030c&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;The fact that the PC is pointing at the address might be overlooked. The manual says&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The value in the PC is the address of the extension word.
+2.2.11 (2-13)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;So, while the Assembly code uses the correct value for simplicity's sake, the actual opcode contains a true displacement from the current position.&lt;/p&gt;
+&lt;h1&gt;How to open a library&lt;/h1&gt;
+&lt;p&gt;When you code in a high level language like C you usually refer to functions of an external library in your code and then provide the library object files on the compiler command line. The code of the library is either included in the code of your program or loaded into memory at runtime (shared libraries), but in both cases the function call is, at the machine language level, just a jump to a different address in memory.&lt;/p&gt;
+&lt;p&gt;If you write a program directly in Assembly language things are not different, you can always rely on the linker to properly address external libraries. In a platform like Amiga, however, it's custom to access the system libraries in a direct way, manually jumping to the right address, which is why sometimes tutorials and books contain "magic numbers".&lt;/p&gt;
+&lt;p&gt;When the Amiga OS loads a library in memory the Exec master library analyses its structure and creates the so-called &lt;em&gt;jump table&lt;/em&gt;. This is nothing more than an array that lists the addresses of the functions exposed by the library. This is a very simple and effective way to let the OS free to load the library anywhere in memory (relocation).&lt;/p&gt;
+&lt;p&gt;The Exec master library is not different, but this library is loaded as part of the bootstrap process, and the base address is always stored in memory location &lt;code&gt;0x4&lt;/code&gt;. To use one of Exec's functions, then, we just need to issue a &lt;code&gt;jsr &amp;lt;address&amp;gt;&lt;/code&gt; (&lt;code&gt;j&lt;/code&gt;ump to &lt;code&gt;s&lt;/code&gt;ub&lt;code&gt;r&lt;/code&gt;outine), where &lt;code&gt;&amp;lt;address&amp;gt;&lt;/code&gt; is the current position in memory of the function we want to call. Since we don't know the absolute address, being the library dynamically loaded, we use the library's jump table to retrieve the base address and get the function address as a fixed offset from the former.&lt;/p&gt;
+&lt;p&gt;Many Amiga programmers knew (and know) the addresses by heart, which is fine since the Amiga OS promises not to change them among different versions. So, for example, the &lt;code&gt;OpenLibrary&lt;/code&gt; function can be found at address &lt;code&gt;-552&lt;/code&gt; relative to the library base, while &lt;code&gt;CloseLibrary&lt;/code&gt; is at &lt;code&gt;-414&lt;/code&gt;. To call the &lt;code&gt;OpenLibrary&lt;/code&gt; function, then, you need the following code&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;    move.l 4.w,a6   ; a6 = base address of Exec
+    jsr -552(a6)    ; OpenLibrary()
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The first instruction moves the value contained at address &lt;code&gt;0x4&lt;/code&gt; into the &lt;code&gt;a6&lt;/code&gt; register. This way the register will contain the base address of Exec. Then it jumps to the subroutine which address is 552 bytes before that base address. So, if &lt;code&gt;a6&lt;/code&gt; contains an address like &lt;code&gt;0x20000&lt;/code&gt; the code jumps to &lt;code&gt;0x1fdd8&lt;/code&gt; (&lt;code&gt;0x20000 - 552&lt;/code&gt;).&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;OpenLibrary&lt;/code&gt; function, however, expects some parameters, as you can see on the documentation page &lt;code&gt;exec.library/OpenLibrary&lt;/code&gt; (&lt;a href="http://amigadev.elowar.com/read/ADCD_2.1/Includes_and_Autodocs_3._guide/node0222.html"&gt;here&lt;/a&gt;). The pointer to the library name has to be in the register &lt;code&gt;a1&lt;/code&gt; and the minimum accepted version in &lt;code&gt;d0&lt;/code&gt;. The code becomes&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;    move.l 4.w,a6        ; a6 = base address of Exec
+    clr.l d0             ; 0 = accept all versions
+    move.l #libname,a1   ; a1 = address of the libname string
+    jsr -552(a6)         ; OpenLibrary()
+
+libname:
+    dc.b &amp;quot;somename.library&amp;quot;,0
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h1&gt;Resources&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;Motorola M68000 Family Programmer's Reference Manual &lt;a href="https://www.nxp.com/docs/en/reference-manual/M68000PRM.pdf"&gt;PDF here&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://amigadev.elowar.com"&gt;AmigaOS Developer Docs&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</content><category term="assembly"></category><category term="amiga"></category><category term="retroprogramming"></category></entry></feed>
