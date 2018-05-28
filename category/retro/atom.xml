@@ -2,35 +2,35 @@
 <feed xmlns="http://www.w3.org/2005/Atom"><title>The Digital Cat - Retro</title><link href="http://blog.thedigitalcatonline.com/" rel="alternate"></link><link href="http://blog.thedigitalcatonline.com/category/retro/atom.xml" rel="self"></link><id>http://blog.thedigitalcatonline.com/</id><updated>2018-05-28T15:00:00+01:00</updated><entry><title>Exploring the Amiga - Part 2</title><link href="http://blog.thedigitalcatonline.com/blog/2018/05/28/exploring-the-amiga-2/" rel="alternate"></link><published>2018-05-28T15:00:00+01:00</published><updated>2018-05-28T15:00:00+01:00</updated><author><name>Leonardo Giordani</name></author><id>tag:blog.thedigitalcatonline.com,2018-05-28:/blog/2018/05/28/exploring-the-amiga-2/</id><summary type="html"></summary><content type="html">&lt;h1&gt;The library jump table&lt;/h1&gt;
 &lt;p&gt;As already mentioned when a library is loaded in memory a jump table is created just before the library base address. This table contains the addresses of the functions exposed by the library, and Exec itself has one.&lt;/p&gt;
 &lt;p&gt;The jump table functions order for the Exec library is specified in one of the include files provided by the NDK, namely &lt;code&gt;include_i/exec/exec_lib.i&lt;/code&gt;.&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;    FUNCDEF Supervisor
-    FUNCDEF execPrivate1
-    FUNCDEF execPrivate2
-    FUNCDEF execPrivate3
-    ...
-    FUNCDEF OpenLibrary
-    ...
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;    &lt;span class="n"&gt;FUNCDEF&lt;/span&gt; &lt;span class="n"&gt;Supervisor&lt;/span&gt;
+    &lt;span class="n"&gt;FUNCDEF&lt;/span&gt; &lt;span class="n"&gt;execPrivate1&lt;/span&gt;
+    &lt;span class="n"&gt;FUNCDEF&lt;/span&gt; &lt;span class="n"&gt;execPrivate2&lt;/span&gt;
+    &lt;span class="n"&gt;FUNCDEF&lt;/span&gt; &lt;span class="n"&gt;execPrivate3&lt;/span&gt;
+    &lt;span class="n"&gt;...&lt;/span&gt;
+    &lt;span class="n"&gt;FUNCDEF&lt;/span&gt; &lt;span class="n"&gt;OpenLibrary&lt;/span&gt;
+    &lt;span class="n"&gt;...&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;As you can see this file makes use of the &lt;code&gt;FUNCDEF&lt;/code&gt; macro, which is not provided and has to be implemented by the coder. The idea of the macro is very simple: as the order of the jump table does not change we can just replace the first &lt;code&gt;FUNCDEF&lt;/code&gt; with the offset of the first function in the library and then increment this offset with the default size of the jump address. The expected output of the macro is&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;    _LVOSupervisor     EQU     -30
-    _LVOexecPrivate1   EQU     -36
-    _LVOexecPrivate2   EQU     -42
-    _LVOexecPrivate3   EQU     -48
-    ...
-    _LVOOpenLibrary    EQU     -552
-    ...
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;    &lt;span class="n"&gt;_LVOSupervisor&lt;/span&gt;     &lt;span class="o"&gt;EQU&lt;/span&gt;     &lt;span class="p"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;30&lt;/span&gt;
+    &lt;span class="n"&gt;_LVOexecPrivate1&lt;/span&gt;   &lt;span class="o"&gt;EQU&lt;/span&gt;     &lt;span class="p"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;36&lt;/span&gt;
+    &lt;span class="n"&gt;_LVOexecPrivate2&lt;/span&gt;   &lt;span class="o"&gt;EQU&lt;/span&gt;     &lt;span class="p"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;42&lt;/span&gt;
+    &lt;span class="n"&gt;_LVOexecPrivate3&lt;/span&gt;   &lt;span class="o"&gt;EQU&lt;/span&gt;     &lt;span class="p"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;48&lt;/span&gt;
+    &lt;span class="n"&gt;...&lt;/span&gt;
+    &lt;span class="n"&gt;_LVOOpenLibrary&lt;/span&gt;    &lt;span class="o"&gt;EQU&lt;/span&gt;     &lt;span class="p"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;552&lt;/span&gt;
+    &lt;span class="n"&gt;...&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;Please note that the name of the function has been replaced by another string prepending &lt;code&gt;_LVO&lt;/code&gt; to avoid clashes with the actual function definition (&lt;code&gt;LVO&lt;/code&gt; stands for Library Vector Offset).&lt;/p&gt;
 &lt;p&gt;The above figures come from the Special Constants contained in the &lt;code&gt;include_i/exec/libraries.i&lt;/code&gt; file&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;*------ Special Constants ---------------------------------------
-LIB_VECTSIZE    EQU 6       ;Each library entry takes 6 bytes
-LIB_RESERVED    EQU 4       ;Exec reserves the first 4 vectors
-LIB_BASE    EQU -LIB_VECTSIZE
-LIB_USERDEF EQU LIB_BASE-(LIB_RESERVED*LIB_VECTSIZE) ;First user func
-LIB_NONSTD  EQU LIB_USERDEF
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c1"&gt;*------ Special Constants ---------------------------------------&lt;/span&gt;
+&lt;span class="n"&gt;LIB_VECTSIZE&lt;/span&gt;    &lt;span class="o"&gt;EQU&lt;/span&gt; &lt;span class="mi"&gt;6&lt;/span&gt;       &lt;span class="c1"&gt;;Each library entry takes 6 bytes&lt;/span&gt;
+&lt;span class="n"&gt;LIB_RESERVED&lt;/span&gt;    &lt;span class="o"&gt;EQU&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;       &lt;span class="c1"&gt;;Exec reserves the first 4 vectors&lt;/span&gt;
+&lt;span class="n"&gt;LIB_BASE&lt;/span&gt;    &lt;span class="o"&gt;EQU&lt;/span&gt; &lt;span class="p"&gt;-&lt;/span&gt;&lt;span class="n"&gt;LIB_VECTSIZE&lt;/span&gt;
+&lt;span class="n"&gt;LIB_USERDEF&lt;/span&gt; &lt;span class="o"&gt;EQU&lt;/span&gt; &lt;span class="n"&gt;LIB_BASE&lt;/span&gt;&lt;span class="p"&gt;-(&lt;/span&gt;&lt;span class="n"&gt;LIB_RESERVED&lt;/span&gt;&lt;span class="p"&gt;*&lt;/span&gt;&lt;span class="n"&gt;LIB_VECTSIZE&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="c1"&gt;;First user func&lt;/span&gt;
+&lt;span class="n"&gt;LIB_NONSTD&lt;/span&gt;  &lt;span class="o"&gt;EQU&lt;/span&gt; &lt;span class="n"&gt;LIB_USERDEF&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
 
@@ -69,20 +69,20 @@ memory                        LOWER MEMORY ADDRESSES
 &lt;p&gt;As you can see the library is loaded as expected from the base address towards the higher memory addresses, but at the same time the jump table is prefixed &lt;em&gt;in reverse order&lt;/em&gt;. This is done to allow you to find the address of a function with a simple (negative) indexing instead of a more complex algorithm. Function number 1 is at address &lt;code&gt;-1 * address_size&lt;/code&gt;, function number 2 at address &lt;code&gt;-2 * address_size&lt;/code&gt;, etc.&lt;/p&gt;
 &lt;p&gt;This is why we use negative offsets to call library functions but positive ones to access the library data and structures.&lt;/p&gt;
 &lt;p&gt;You can also see from the figure where the Special Constants &lt;code&gt;LIB_BASE&lt;/code&gt; and &lt;code&gt;LIB_USERDEF&lt;/code&gt; are located. The actual values are&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;LIB_BASE    EQU -6
-LIB_USERDEF EQU -30
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;LIB_BASE&lt;/span&gt;    &lt;span class="o"&gt;EQU&lt;/span&gt; &lt;span class="p"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;6&lt;/span&gt;
+&lt;span class="n"&gt;LIB_USERDEF&lt;/span&gt; &lt;span class="o"&gt;EQU&lt;/span&gt; &lt;span class="p"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;30&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;A good definition of the &lt;code&gt;FUNCDEF&lt;/code&gt; macro, thus, is the following&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;    INCLUDE &amp;quot;exec/libraries.i&amp;quot;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;    &lt;span class="o"&gt;INCLUDE&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;exec/libraries.i&amp;quot;&lt;/span&gt;
 
-    MACRO   FUNCDEF
-_LVO\1      EQU      FUNC_CNT
-FUNC_CNT    SET      FUNC_CNT-LIB_VECTSIZE
-    ENDM
+    &lt;span class="o"&gt;MACRO&lt;/span&gt;   &lt;span class="n"&gt;FUNCDEF&lt;/span&gt;
+&lt;span class="n"&gt;_LVO&lt;/span&gt;&lt;span class="p"&gt;\&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;      &lt;span class="o"&gt;EQU&lt;/span&gt;      &lt;span class="n"&gt;FUNC_CNT&lt;/span&gt;
+&lt;span class="n"&gt;FUNC_CNT&lt;/span&gt;    &lt;span class="o"&gt;SET&lt;/span&gt;      &lt;span class="n"&gt;FUNC_CNT&lt;/span&gt;&lt;span class="p"&gt;-&lt;/span&gt;&lt;span class="n"&gt;LIB_VECTSIZE&lt;/span&gt;
+    &lt;span class="o"&gt;ENDM&lt;/span&gt;
 
-FUNC_CNT    SET      LIB_USERDEF
+&lt;span class="n"&gt;FUNC_CNT&lt;/span&gt;    &lt;span class="o"&gt;SET&lt;/span&gt;      &lt;span class="n"&gt;LIB_USERDEF&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
 
@@ -92,70 +92,70 @@ FUNC_CNT    SET      LIB_USERDEF
 &lt;li&gt;Decrements the &lt;code&gt;FUNC_CNT&lt;/code&gt; symbol by &lt;code&gt;LIB_VECTSIZE&lt;/code&gt;&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;Please note that the example &lt;code&gt;FUNCDEF&lt;/code&gt; that you can find (commented) in &lt;code&gt;libraries.i&lt;/code&gt; won't work out of the box as &lt;code&gt;FUNC_CNT&lt;/code&gt; is defined inside the macro itself, while it has to be already defined before the first use of the macro.&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;*------ FUNCDEF is used to parse library offset tables.  Many applications
-*------ need a special version of FUNCDEF - you provide your own macro
-*------ to match your needs.  Here is an example:
-*
-*    FUNCDEF     MACRO
-*    _LVO\1      EQU    FUNC_CNT
-*    FUNC_CNT    SET    FUNC_CNT-6  * Standard offset-6 bytes each
-*    FUNC_CNT    EQU    LIB_USERDEF * Skip 4 standard vectors
-*                ENDM
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c1"&gt;*------ FUNCDEF is used to parse library offset tables.  Many applications&lt;/span&gt;
+&lt;span class="c1"&gt;*------ need a special version of FUNCDEF - you provide your own macro&lt;/span&gt;
+&lt;span class="c1"&gt;*------ to match your needs.  Here is an example:&lt;/span&gt;
+&lt;span class="c1"&gt;*&lt;/span&gt;
+&lt;span class="c1"&gt;*    FUNCDEF     MACRO&lt;/span&gt;
+&lt;span class="c1"&gt;*    _LVO\1      EQU    FUNC_CNT&lt;/span&gt;
+&lt;span class="c1"&gt;*    FUNC_CNT    SET    FUNC_CNT-6  * Standard offset-6 bytes each&lt;/span&gt;
+&lt;span class="c1"&gt;*    FUNC_CNT    EQU    LIB_USERDEF * Skip 4 standard vectors&lt;/span&gt;
+&lt;span class="c1"&gt;*                ENDM&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;You can put the &lt;code&gt;FUNCDEF&lt;/code&gt; macro code in a local include file like &lt;code&gt;funcdef.i&lt;/code&gt;. Including it your code allows you to use &lt;code&gt;_LVO&lt;/code&gt; prefixed labels for the functions that you want to load&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;    INCLUDE &amp;quot;funcdef.i&amp;quot;
-    INCLUDE &amp;quot;exec/exec_lib.i&amp;quot;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;    &lt;span class="o"&gt;INCLUDE&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;funcdef.i&amp;quot;&lt;/span&gt;
+    &lt;span class="o"&gt;INCLUDE&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;exec/exec_lib.i&amp;quot;&lt;/span&gt;
 
-    move.l  4.w,a6
-    clr.l   d0
-    move.l  #libname,a1
-    jsr     _LVOOpenLibrary(a6)
+    &lt;span class="k"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt;  &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="o"&gt;.w&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;a6&lt;/span&gt;
+    &lt;span class="k"&gt;clr&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt;   &lt;span class="o"&gt;d0&lt;/span&gt;
+    &lt;span class="k"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt;  &lt;span class="nl"&gt;#libname&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;a1&lt;/span&gt;
+    &lt;span class="k"&gt;jsr&lt;/span&gt;     &lt;span class="n"&gt;_LVOOpenLibrary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;a6&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 
-libname:
-    dc.b &amp;quot;somename.library&amp;quot;,0
+&lt;span class="nl"&gt;libname:&lt;/span&gt;
+    &lt;span class="o"&gt;dc.b&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;somename.library&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;Finally, if you want to be even more explicit you can use the &lt;code&gt;CALLLIB&lt;/code&gt; macro defined in &lt;code&gt;libraries.i&lt;/code&gt; and write&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;    INCLUDE &amp;quot;funcdef.i&amp;quot;
-    INCLUDE &amp;quot;exec/exec_lib.i&amp;quot;
-    INCLUDE &amp;quot;exec/libraries.i&amp;quot;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;    &lt;span class="o"&gt;INCLUDE&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;funcdef.i&amp;quot;&lt;/span&gt;
+    &lt;span class="o"&gt;INCLUDE&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;exec/exec_lib.i&amp;quot;&lt;/span&gt;
+    &lt;span class="o"&gt;INCLUDE&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;exec/libraries.i&amp;quot;&lt;/span&gt;
 
-    move.l  4.w,a6
-    clr.l   d0
-    move.l  #libname,a1
-    CALLLIB _LVOOpenLibrary
+    &lt;span class="k"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt;  &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="o"&gt;.w&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;a6&lt;/span&gt;
+    &lt;span class="k"&gt;clr&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt;   &lt;span class="o"&gt;d0&lt;/span&gt;
+    &lt;span class="k"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt;  &lt;span class="nl"&gt;#libname&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;a1&lt;/span&gt;
+    &lt;span class="n"&gt;CALLLIB&lt;/span&gt; &lt;span class="n"&gt;_LVOOpenLibrary&lt;/span&gt;
 
-libname:
-    dc.b &amp;quot;somename.library&amp;quot;,0
+&lt;span class="nl"&gt;libname:&lt;/span&gt;
+    &lt;span class="o"&gt;dc.b&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;somename.library&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;h1&gt;The four reserved vectors&lt;/h1&gt;
 &lt;p&gt;As we saw, the Amiga system reserves 4 vectors at the beginning of the jump table of a library. These 4 spaces host 3 standard functions that shall be provided by any library, &lt;code&gt;Open()&lt;/code&gt;, &lt;code&gt;Close()&lt;/code&gt;, and &lt;code&gt;Expunge()&lt;/code&gt;. The fourth slot is kept for possible future expansions and must contain a function that returns 0.&lt;/p&gt;
 &lt;p&gt;The offsets of these functions are contained in the &lt;code&gt;exec/libraries.i&lt;/code&gt; file&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;*----------------------------------------------------------------
-*
-*   Standard Library Functions
-*
-*----------------------------------------------------------------
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c1"&gt;*----------------------------------------------------------------&lt;/span&gt;
+&lt;span class="c1"&gt;*&lt;/span&gt;
+&lt;span class="c1"&gt;*   Standard Library Functions&lt;/span&gt;
+&lt;span class="c1"&gt;*&lt;/span&gt;
+&lt;span class="c1"&gt;*----------------------------------------------------------------&lt;/span&gt;
 
-    LIBINIT LIB_BASE
+    &lt;span class="n"&gt;LIBINIT&lt;/span&gt; &lt;span class="n"&gt;LIB_BASE&lt;/span&gt;
 
-    LIBDEF  LIB_OPEN
-    LIBDEF  LIB_CLOSE
-    LIBDEF  LIB_EXPUNGE ; must exist in all libraries
-    LIBDEF  LIB_EXTFUNC ; for future expansion - must return zero.
+    &lt;span class="n"&gt;LIBDEF&lt;/span&gt;  &lt;span class="n"&gt;LIB_OPEN&lt;/span&gt;
+    &lt;span class="n"&gt;LIBDEF&lt;/span&gt;  &lt;span class="n"&gt;LIB_CLOSE&lt;/span&gt;
+    &lt;span class="n"&gt;LIBDEF&lt;/span&gt;  &lt;span class="n"&gt;LIB_EXPUNGE&lt;/span&gt; &lt;span class="c1"&gt;; must exist in all libraries&lt;/span&gt;
+    &lt;span class="n"&gt;LIBDEF&lt;/span&gt;  &lt;span class="n"&gt;LIB_EXTFUNC&lt;/span&gt; &lt;span class="c1"&gt;; for future expansion - must return zero.&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;the effect of the above macros with the previous constants is&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;LIB_OPEN        EQU     -6
-LIB_CLOSE       EQU     -12
-LIB_EXPUNGE     EQU     -18
-LIB_EXTFUNC     EQU     -24
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;LIB_OPEN&lt;/span&gt;        &lt;span class="o"&gt;EQU&lt;/span&gt;     &lt;span class="p"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;6&lt;/span&gt;
+&lt;span class="n"&gt;LIB_CLOSE&lt;/span&gt;       &lt;span class="o"&gt;EQU&lt;/span&gt;     &lt;span class="p"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;12&lt;/span&gt;
+&lt;span class="n"&gt;LIB_EXPUNGE&lt;/span&gt;     &lt;span class="o"&gt;EQU&lt;/span&gt;     &lt;span class="p"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;18&lt;/span&gt;
+&lt;span class="n"&gt;LIB_EXTFUNC&lt;/span&gt;     &lt;span class="o"&gt;EQU&lt;/span&gt;     &lt;span class="p"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;24&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
 
@@ -163,71 +163,71 @@ LIB_EXTFUNC     EQU     -24
 &lt;h1&gt;Types and structures&lt;/h1&gt;
 &lt;p&gt;Let's see how the Exec library defines its types, which are the base components of the Amiga system. The main entry point for this investigation is the &lt;code&gt;include_i/exec/types.i&lt;/code&gt; file.&lt;/p&gt;
 &lt;p&gt;When working with data structures in Assembly, everything is expressed in terms of offsets. The main idea behind structures is to create something like this&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;STRUCT1         EQU     0
-OFFSET          SET     0
-FIELD1          EQU     OFFSET
-OFFSET          EQU     OFFSET+SIZE_OF_FIELD1
-FIELD2          EQU     OFFSET
-OFFSET          EQU     OFFSET+SIZE_OF_FIELD2
-[...]
-STRUCT1_SIZE    EQU     OFFSET
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;STRUCT1&lt;/span&gt;         &lt;span class="o"&gt;EQU&lt;/span&gt;     &lt;span class="mi"&gt;0&lt;/span&gt;
+&lt;span class="o"&gt;OFFSET&lt;/span&gt;          &lt;span class="o"&gt;SET&lt;/span&gt;     &lt;span class="mi"&gt;0&lt;/span&gt;
+&lt;span class="n"&gt;FIELD1&lt;/span&gt;          &lt;span class="o"&gt;EQU&lt;/span&gt;     &lt;span class="o"&gt;OFFSET&lt;/span&gt;
+&lt;span class="o"&gt;OFFSET&lt;/span&gt;          &lt;span class="o"&gt;EQU&lt;/span&gt;     &lt;span class="o"&gt;OFFSET&lt;/span&gt;&lt;span class="p"&gt;+&lt;/span&gt;&lt;span class="n"&gt;SIZE_OF_FIELD1&lt;/span&gt;
+&lt;span class="n"&gt;FIELD2&lt;/span&gt;          &lt;span class="o"&gt;EQU&lt;/span&gt;     &lt;span class="o"&gt;OFFSET&lt;/span&gt;
+&lt;span class="o"&gt;OFFSET&lt;/span&gt;          &lt;span class="o"&gt;EQU&lt;/span&gt;     &lt;span class="o"&gt;OFFSET&lt;/span&gt;&lt;span class="p"&gt;+&lt;/span&gt;&lt;span class="n"&gt;SIZE_OF_FIELD2&lt;/span&gt;
+&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;...&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;span class="n"&gt;STRUCT1_SIZE&lt;/span&gt;    &lt;span class="o"&gt;EQU&lt;/span&gt;     &lt;span class="o"&gt;OFFSET&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;which, once run through the macro expansion, creates the following code&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;STRUCT1         EQU     0
-FIELD1          EQU     0
-FIELD2          EQU     SIZE_OF_FIELD1
-FIIELD3         EQU     SIZE_OF_FIELD1+SIZE_OF_FIELD2
-[...]
-STRUCT1_SIZE    EQU     SIZE_OF_FIELD1+...+SIZE_OF_FIELDn
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;STRUCT1&lt;/span&gt;         &lt;span class="o"&gt;EQU&lt;/span&gt;     &lt;span class="mi"&gt;0&lt;/span&gt;
+&lt;span class="n"&gt;FIELD1&lt;/span&gt;          &lt;span class="o"&gt;EQU&lt;/span&gt;     &lt;span class="mi"&gt;0&lt;/span&gt;
+&lt;span class="n"&gt;FIELD2&lt;/span&gt;          &lt;span class="o"&gt;EQU&lt;/span&gt;     &lt;span class="n"&gt;SIZE_OF_FIELD1&lt;/span&gt;
+&lt;span class="n"&gt;FIIELD3&lt;/span&gt;         &lt;span class="o"&gt;EQU&lt;/span&gt;     &lt;span class="n"&gt;SIZE_OF_FIELD1&lt;/span&gt;&lt;span class="p"&gt;+&lt;/span&gt;&lt;span class="n"&gt;SIZE_OF_FIELD2&lt;/span&gt;
+&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;...&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;span class="n"&gt;STRUCT1_SIZE&lt;/span&gt;    &lt;span class="o"&gt;EQU&lt;/span&gt;     &lt;span class="n"&gt;SIZE_OF_FIELD1&lt;/span&gt;&lt;span class="p"&gt;+&lt;/span&gt;&lt;span class="n"&gt;...&lt;/span&gt;&lt;span class="p"&gt;+&lt;/span&gt;&lt;span class="n"&gt;SIZE_OF_FIELDn&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;So, the type macros are all defined with code like this&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;TYPENAME    MACRO
-\1          EQU     SOFFSET
-SOFFSET     SET     SOFFSET+SIZE_OF_TYPE
-            ENDM
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;TYPENAME&lt;/span&gt;    &lt;span class="o"&gt;MACRO&lt;/span&gt;
+&lt;span class="p"&gt;\&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;          &lt;span class="o"&gt;EQU&lt;/span&gt;     &lt;span class="n"&gt;SOFFSET&lt;/span&gt;
+&lt;span class="n"&gt;SOFFSET&lt;/span&gt;     &lt;span class="o"&gt;SET&lt;/span&gt;     &lt;span class="n"&gt;SOFFSET&lt;/span&gt;&lt;span class="p"&gt;+&lt;/span&gt;&lt;span class="n"&gt;SIZE_OF_TYPE&lt;/span&gt;
+            &lt;span class="o"&gt;ENDM&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;For example the &lt;code&gt;BYTE&lt;/code&gt; macro is&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;BYTE        MACRO       ; byte (8 bits)
-\1          EQU     SOFFSET
-SOFFSET     SET     SOFFSET+1
-            ENDM
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;BYTE&lt;/span&gt;        &lt;span class="o"&gt;MACRO&lt;/span&gt;       &lt;span class="c1"&gt;; byte (8 bits)&lt;/span&gt;
+&lt;span class="p"&gt;\&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;          &lt;span class="o"&gt;EQU&lt;/span&gt;     &lt;span class="n"&gt;SOFFSET&lt;/span&gt;
+&lt;span class="n"&gt;SOFFSET&lt;/span&gt;     &lt;span class="o"&gt;SET&lt;/span&gt;     &lt;span class="n"&gt;SOFFSET&lt;/span&gt;&lt;span class="p"&gt;+&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;
+            &lt;span class="o"&gt;ENDM&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;Note that the field is defined with &lt;code&gt;EQU&lt;/code&gt; to avoid unwanted overwrites, while &lt;code&gt;SOFFSET&lt;/code&gt; uses &lt;code&gt;SET&lt;/code&gt; that allows to redefine the symbol.&lt;/p&gt;
 &lt;p&gt;Let's see now how a real structure is defined. A good example is &lt;code&gt;LN&lt;/code&gt; defined in &lt;code&gt;include_i/exec/nodes.i&lt;/code&gt; which represents a node of a linked list.&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;   STRUCTURE    LN,0    ; List Node
-    APTR    LN_SUCC ; Pointer to next (successor)
-    APTR    LN_PRED ; Pointer to previous (predecessor)
-    UBYTE   LN_TYPE
-    BYTE    LN_PRI  ; Priority, for sorting
-    APTR    LN_NAME ; ID string, null terminated
-    LABEL   LN_SIZE ; Note: word aligned
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;   &lt;span class="n"&gt;STRUCTURE&lt;/span&gt;    &lt;span class="n"&gt;LN&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;    &lt;span class="c1"&gt;; List Node&lt;/span&gt;
+    &lt;span class="n"&gt;APTR&lt;/span&gt;    &lt;span class="n"&gt;LN_SUCC&lt;/span&gt; &lt;span class="c1"&gt;; Pointer to next (successor)&lt;/span&gt;
+    &lt;span class="n"&gt;APTR&lt;/span&gt;    &lt;span class="n"&gt;LN_PRED&lt;/span&gt; &lt;span class="c1"&gt;; Pointer to previous (predecessor)&lt;/span&gt;
+    &lt;span class="n"&gt;UBYTE&lt;/span&gt;   &lt;span class="n"&gt;LN_TYPE&lt;/span&gt;
+    &lt;span class="n"&gt;BYTE&lt;/span&gt;    &lt;span class="n"&gt;LN_PRI&lt;/span&gt;  &lt;span class="c1"&gt;; Priority, for sorting&lt;/span&gt;
+    &lt;span class="n"&gt;APTR&lt;/span&gt;    &lt;span class="n"&gt;LN_NAME&lt;/span&gt; &lt;span class="c1"&gt;; ID string, null terminated&lt;/span&gt;
+    &lt;span class="n"&gt;LABEL&lt;/span&gt;   &lt;span class="n"&gt;LN_SIZE&lt;/span&gt; &lt;span class="c1"&gt;; Note: word aligned&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;The &lt;code&gt;STRUCTURE&lt;/code&gt; macro is defined in &lt;code&gt;types.i&lt;/code&gt; as&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;STRUCTURE   MACRO       ; structure name, initial offset
-\1          EQU     0
-SOFFSET     SET     \2
-            ENDM
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;STRUCTURE&lt;/span&gt;   &lt;span class="o"&gt;MACRO&lt;/span&gt;       &lt;span class="c1"&gt;; structure name, initial offset&lt;/span&gt;
+&lt;span class="p"&gt;\&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;          &lt;span class="o"&gt;EQU&lt;/span&gt;     &lt;span class="mi"&gt;0&lt;/span&gt;
+&lt;span class="n"&gt;SOFFSET&lt;/span&gt;     &lt;span class="o"&gt;SET&lt;/span&gt;     &lt;span class="p"&gt;\&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;
+            &lt;span class="o"&gt;ENDM&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;And the resulting declarations, once the macros have been expanded, are the following&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;LN          EQU     0
-LN_SUCC     EQU     0
-LN_PRED     EQU     4
-LN_TYPE     EQU     8
-LN_PRI      EQU     9
-LN_NAME     EQU     10
-LN_SIZE     EQU     14
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;LN&lt;/span&gt;          &lt;span class="o"&gt;EQU&lt;/span&gt;     &lt;span class="mi"&gt;0&lt;/span&gt;
+&lt;span class="n"&gt;LN_SUCC&lt;/span&gt;     &lt;span class="o"&gt;EQU&lt;/span&gt;     &lt;span class="mi"&gt;0&lt;/span&gt;
+&lt;span class="n"&gt;LN_PRED&lt;/span&gt;     &lt;span class="o"&gt;EQU&lt;/span&gt;     &lt;span class="mi"&gt;4&lt;/span&gt;
+&lt;span class="n"&gt;LN_TYPE&lt;/span&gt;     &lt;span class="o"&gt;EQU&lt;/span&gt;     &lt;span class="mi"&gt;8&lt;/span&gt;
+&lt;span class="n"&gt;LN_PRI&lt;/span&gt;      &lt;span class="o"&gt;EQU&lt;/span&gt;     &lt;span class="mi"&gt;9&lt;/span&gt;
+&lt;span class="n"&gt;LN_NAME&lt;/span&gt;     &lt;span class="o"&gt;EQU&lt;/span&gt;     &lt;span class="mi"&gt;10&lt;/span&gt;
+&lt;span class="n"&gt;LN_SIZE&lt;/span&gt;     &lt;span class="o"&gt;EQU&lt;/span&gt;     &lt;span class="mi"&gt;14&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
 
@@ -242,9 +242,9 @@ LN_SIZE     EQU     14
 
 
 &lt;p&gt;and even numbers are separated exactly by two positions. So if we get the current offset, we increase it by one and round down to the nearest integer we are aligning the offset to multiples of a word (2 bytes). The &lt;code&gt;ALIGNWORD&lt;/code&gt; macro in the &lt;code&gt;include_i/exec/types.i&lt;/code&gt; file implements exactly this algorithm&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ALIGNWORD   MACRO       ; Align structure offset to nearest word
-SOFFSET     SET     (SOFFSET+1)&amp;amp;$fffffffe
-            ENDM
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;ALIGNWORD&lt;/span&gt;   &lt;span class="o"&gt;MACRO&lt;/span&gt;       &lt;span class="c1"&gt;; Align structure offset to nearest word&lt;/span&gt;
+&lt;span class="n"&gt;SOFFSET&lt;/span&gt;     &lt;span class="o"&gt;SET&lt;/span&gt;     &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;SOFFSET&lt;/span&gt;&lt;span class="p"&gt;+&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&amp;amp;&lt;/span&gt;&lt;span class="mi"&gt;$fffffffe&lt;/span&gt;
+            &lt;span class="o"&gt;ENDM&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
 
@@ -323,7 +323,7 @@ test: AmigaOS loadseg&lt;span class="o"&gt;()&lt;/span&gt;ble executable/binary
 &lt;p&gt;(2.2.11, page 13)&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;The usual assembler syntax for this addressing mode is &lt;code&gt;(d16,PC)&lt;/code&gt; or &lt;code&gt;d16(PC)&lt;/code&gt;, where &lt;code&gt;d16&lt;/code&gt; is a 16-bits displacement. The &lt;code&gt;lea&lt;/code&gt; instruction, for example, supports this mode, so we can find code like&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="mi"&gt;0364&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;41&lt;/span&gt;&lt;span class="n"&gt;fa&lt;/span&gt; &lt;span class="n"&gt;ffa6&lt;/span&gt;         &lt;span class="n"&gt;lea&lt;/span&gt;     &lt;span class="mh"&gt;0x30c&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;pc&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt;&lt;span class="n"&gt;a0&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nl"&gt;0364:&lt;/span&gt; &lt;span class="mi"&gt;41fa&lt;/span&gt; &lt;span class="mi"&gt;ffa6&lt;/span&gt;         &lt;span class="k"&gt;lea&lt;/span&gt;     &lt;span class="mi"&gt;0x30c&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;pc&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;&lt;span class="o"&gt;a0&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
 
@@ -357,20 +357,20 @@ The value is the two's complement representation of the decimal &lt;code&gt;-90&
 &lt;p&gt;When the Amiga OS loads a library in memory the Exec master library analyses its structure and creates the so-called &lt;em&gt;jump table&lt;/em&gt;. This is nothing more than an array that lists the addresses of the functions exposed by the library. This is a very simple and effective way to let the OS free to load the library anywhere in memory (relocation).&lt;/p&gt;
 &lt;p&gt;The Exec master library is not different, but this library is loaded as part of the bootstrap process, and the base address is always stored in memory location &lt;code&gt;0x4&lt;/code&gt;. To use one of Exec's functions, then, we just need to issue a &lt;code&gt;jsr &amp;lt;address&amp;gt;&lt;/code&gt; (&lt;code&gt;j&lt;/code&gt;ump to &lt;code&gt;s&lt;/code&gt;ub&lt;code&gt;r&lt;/code&gt;outine), where &lt;code&gt;&amp;lt;address&amp;gt;&lt;/code&gt; is the current position in memory of the function we want to call. Since we don't know the absolute address, being the library dynamically loaded, we use the library's jump table to retrieve the base address and get the function address as a fixed offset from the former.&lt;/p&gt;
 &lt;p&gt;Many Amiga programmers knew (and know) the addresses by heart, which is fine since the Amiga OS promises not to change them among different versions. So, for example, the &lt;code&gt;OpenLibrary&lt;/code&gt; function can be found at address &lt;code&gt;-552&lt;/code&gt; relative to the library base, while &lt;code&gt;CloseLibrary&lt;/code&gt; is at &lt;code&gt;-414&lt;/code&gt;. To call the &lt;code&gt;OpenLibrary&lt;/code&gt; function, then, you need the following code&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;    move.l 4.w,a6   ; a6 = base address of Exec
-    jsr -552(a6)    ; OpenLibrary()
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;    &lt;span class="k"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="o"&gt;.w&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;a6&lt;/span&gt;   &lt;span class="c1"&gt;; a6 = base address of Exec&lt;/span&gt;
+    &lt;span class="k"&gt;jsr&lt;/span&gt; &lt;span class="p"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;552&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;a6&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;    &lt;span class="c1"&gt;; OpenLibrary()&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;The first instruction moves the value contained at address &lt;code&gt;0x4&lt;/code&gt; into the &lt;code&gt;a6&lt;/code&gt; register. This way the register will contain the base address of Exec. Then it jumps to the subroutine which address is 552 bytes before that base address. So, if &lt;code&gt;a6&lt;/code&gt; contains an address like &lt;code&gt;0x20000&lt;/code&gt; the code jumps to &lt;code&gt;0x1fdd8&lt;/code&gt; (&lt;code&gt;0x20000 - 552&lt;/code&gt;).&lt;/p&gt;
 &lt;p&gt;The &lt;code&gt;OpenLibrary&lt;/code&gt; function, however, expects some parameters, as you can see on the documentation page &lt;code&gt;exec.library/OpenLibrary&lt;/code&gt; (&lt;a href="http://amigadev.elowar.com/read/ADCD_2.1/Includes_and_Autodocs_3._guide/node0222.html"&gt;here&lt;/a&gt;). The pointer to the library name has to be in the register &lt;code&gt;a1&lt;/code&gt; and the minimum accepted version in &lt;code&gt;d0&lt;/code&gt;. The code becomes&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;    move.l 4.w,a6        ; a6 = base address of Exec
-    clr.l d0             ; 0 = accept all versions
-    move.l #libname,a1   ; a1 = address of the libname string
-    jsr -552(a6)         ; OpenLibrary()
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;    &lt;span class="k"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="o"&gt;.w&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;a6&lt;/span&gt;        &lt;span class="c1"&gt;; a6 = base address of Exec&lt;/span&gt;
+    &lt;span class="k"&gt;clr&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt; &lt;span class="o"&gt;d0&lt;/span&gt;             &lt;span class="c1"&gt;; 0 = accept all versions&lt;/span&gt;
+    &lt;span class="k"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt; &lt;span class="nl"&gt;#libname&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;a1&lt;/span&gt;   &lt;span class="c1"&gt;; a1 = address of the libname string&lt;/span&gt;
+    &lt;span class="k"&gt;jsr&lt;/span&gt; &lt;span class="p"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;552&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;a6&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;         &lt;span class="c1"&gt;; OpenLibrary()&lt;/span&gt;
 
-libname:
-    dc.b &amp;quot;somename.library&amp;quot;,0
+&lt;span class="nl"&gt;libname:&lt;/span&gt;
+    &lt;span class="o"&gt;dc.b&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;somename.library&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
 
