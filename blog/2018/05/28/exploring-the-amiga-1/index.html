@@ -44,7 +44,7 @@
     <header id="header">
         <a href="http://blog.thedigitalcatonline.com/category/retro/" title="Retro">Retro</a>
         <div class="align-right">        
-            <a href="#series">Exploring the Amiga</a> part 1/2
+            <a href="#series">Exploring the Amiga</a> part 1/3
         </div>
     </header>
     
@@ -143,7 +143,7 @@ test: AmigaOS loadseg<span class="o">()</span>ble executable/binary
 <p>(2.2.11, page 13)</p>
 </blockquote>
 <p>The usual assembler syntax for this addressing mode is <code>(d16,PC)</code> or <code>d16(PC)</code>, where <code>d16</code> is a 16-bits displacement. The <code>lea</code> instruction, for example, supports this mode, so we can find code like</p>
-<div class="highlight"><pre><span></span><span class="mi">0364</span><span class="o">:</span> <span class="mi">41</span><span class="n">fa</span> <span class="n">ffa6</span>         <span class="n">lea</span>     <span class="mh">0x30c</span><span class="o">(</span><span class="n">pc</span><span class="o">),</span><span class="n">a0</span>
+<div class="highlight"><pre><span></span><span class="nl">0364:</span> <span class="mi">41fa</span> <span class="mi">ffa6</span>         <span class="k">lea</span>     <span class="mi">0x30c</span><span class="p">(</span><span class="o">pc</span><span class="p">),</span><span class="o">a0</span>
 </pre></div>
 
 
@@ -177,20 +177,20 @@ The value is the two's complement representation of the decimal <code>-90</code>
 <p>When the Amiga OS loads a library in memory the Exec master library analyses its structure and creates the so-called <em>jump table</em>. This is nothing more than an array that lists the addresses of the functions exposed by the library. This is a very simple and effective way to let the OS free to load the library anywhere in memory (relocation).</p>
 <p>The Exec master library is not different, but this library is loaded as part of the bootstrap process, and the base address is always stored in memory location <code>0x4</code>. To use one of Exec's functions, then, we just need to issue a <code>jsr &lt;address&gt;</code> (<code>j</code>ump to <code>s</code>ub<code>r</code>outine), where <code>&lt;address&gt;</code> is the current position in memory of the function we want to call. Since we don't know the absolute address, being the library dynamically loaded, we use the library's jump table to retrieve the base address and get the function address as a fixed offset from the former.</p>
 <p>Many Amiga programmers knew (and know) the addresses by heart, which is fine since the Amiga OS promises not to change them among different versions. So, for example, the <code>OpenLibrary</code> function can be found at address <code>-552</code> relative to the library base, while <code>CloseLibrary</code> is at <code>-414</code>. To call the <code>OpenLibrary</code> function, then, you need the following code</p>
-<div class="highlight"><pre><span></span>    move.l 4.w,a6   ; a6 = base address of Exec
-    jsr -552(a6)    ; OpenLibrary()
+<div class="highlight"><pre><span></span>    <span class="k">move</span><span class="o">.l</span> <span class="mi">4</span><span class="o">.w</span><span class="p">,</span><span class="o">a6</span>   <span class="c1">; a6 = base address of Exec</span>
+    <span class="k">jsr</span> <span class="p">-</span><span class="mi">552</span><span class="p">(</span><span class="o">a6</span><span class="p">)</span>    <span class="c1">; OpenLibrary()</span>
 </pre></div>
 
 
 <p>The first instruction moves the value contained at address <code>0x4</code> into the <code>a6</code> register. This way the register will contain the base address of Exec. Then it jumps to the subroutine which address is 552 bytes before that base address. So, if <code>a6</code> contains an address like <code>0x20000</code> the code jumps to <code>0x1fdd8</code> (<code>0x20000 - 552</code>).</p>
 <p>The <code>OpenLibrary</code> function, however, expects some parameters, as you can see on the documentation page <code>exec.library/OpenLibrary</code> (<a href="http://amigadev.elowar.com/read/ADCD_2.1/Includes_and_Autodocs_3._guide/node0222.html">here</a>). The pointer to the library name has to be in the register <code>a1</code> and the minimum accepted version in <code>d0</code>. The code becomes</p>
-<div class="highlight"><pre><span></span>    move.l 4.w,a6        ; a6 = base address of Exec
-    clr.l d0             ; 0 = accept all versions
-    move.l #libname,a1   ; a1 = address of the libname string
-    jsr -552(a6)         ; OpenLibrary()
+<div class="highlight"><pre><span></span>    <span class="k">move</span><span class="o">.l</span> <span class="mi">4</span><span class="o">.w</span><span class="p">,</span><span class="o">a6</span>        <span class="c1">; a6 = base address of Exec</span>
+    <span class="k">clr</span><span class="o">.l</span> <span class="o">d0</span>             <span class="c1">; 0 = accept all versions</span>
+    <span class="k">move</span><span class="o">.l</span> <span class="nl">#libname</span><span class="p">,</span><span class="o">a1</span>   <span class="c1">; a1 = address of the libname string</span>
+    <span class="k">jsr</span> <span class="p">-</span><span class="mi">552</span><span class="p">(</span><span class="o">a6</span><span class="p">)</span>         <span class="c1">; OpenLibrary()</span>
 
-libname:
-    dc.b &quot;somename.library&quot;,0
+<span class="nl">libname:</span>
+    <span class="o">dc.b</span> <span class="s">&quot;somename.library&quot;</span><span class="p">,</span><span class="mi">0</span>
 </pre></div>
 
 
@@ -207,6 +207,7 @@ libname:
     <h2>Related Posts</h2>
     <div class="box">
         <ul>
+            <li><a href="http://blog.thedigitalcatonline.com/blog/2018/06/08/exploring-the-amiga-3/">Exploring the Amiga - Part 3</a></li>
             <li><a href="http://blog.thedigitalcatonline.com/blog/2018/05/28/exploring-the-amiga-2/">Exploring the Amiga - Part 2</a></li>
         </ul>
     </div>
@@ -218,6 +219,7 @@ libname:
         <h5>Next articles</h5>
         <ul>
             <li><a href="http://blog.thedigitalcatonline.com/blog/2018/05/28/exploring-the-amiga-2/">Exploring the Amiga - Part 2</a></li>
+            <li><a href="http://blog.thedigitalcatonline.com/blog/2018/06/08/exploring-the-amiga-3/">Exploring the Amiga - Part 3</a></li>
         </ul>
     </div>
 </section>
@@ -261,6 +263,10 @@ libname:
     </header>
     <div class="mini-posts">
         <article>
+            Exploring the Amiga - Part 3
+            <a href="http://blog.thedigitalcatonline.com/blog/2018/06/08/exploring-the-amiga-3/"> Read</a>
+        </article>
+        <article>
             A game of tokens: solution - Part 4
             <a href="http://blog.thedigitalcatonline.com/blog/2018/06/02/a-game-of-tokens-solution-part-4/"> Read</a>
         </article>
@@ -275,10 +281,6 @@ libname:
         <article>
             Exploring the Amiga - Part 1
             <a href="http://blog.thedigitalcatonline.com/blog/2018/05/28/exploring-the-amiga-1/"> Read</a>
-        </article>
-        <article>
-            Public key cryptography: RSA keys
-            <a href="http://blog.thedigitalcatonline.com/blog/2018/04/25/rsa-keys/"> Read</a>
         </article>
     </div>
 </section>
