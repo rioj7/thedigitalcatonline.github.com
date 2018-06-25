@@ -1,5 +1,622 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>The Digital Cat - Leonardo Giordani</title><link href="http://blog.thedigitalcatonline.com/" rel="alternate"></link><link href="http://blog.thedigitalcatonline.com/feeds/leonardo-giordani.atom.xml" rel="self"></link><id>http://blog.thedigitalcatonline.com/</id><updated>2018-06-14T14:30:00+01:00</updated><entry><title>Exploring the Amiga - Part 4</title><link href="http://blog.thedigitalcatonline.com/blog/2018/06/14/exploring-the-amiga-4/" rel="alternate"></link><published>2018-06-14T14:30:00+01:00</published><updated>2018-06-14T14:30:00+01:00</updated><author><name>Leonardo Giordani</name></author><id>tag:blog.thedigitalcatonline.com,2018-06-14:/blog/2018/06/14/exploring-the-amiga-4/</id><summary type="html"></summary><content type="html">&lt;h1&gt;The Exec base functions&lt;/h1&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>The Digital Cat - Leonardo Giordani</title><link href="http://blog.thedigitalcatonline.com/" rel="alternate"></link><link href="http://blog.thedigitalcatonline.com/feeds/leonardo-giordani.atom.xml" rel="self"></link><id>http://blog.thedigitalcatonline.com/</id><updated>2018-06-25T12:30:00+00:00</updated><entry><title>Exploring the Amiga - Part 6</title><link href="http://blog.thedigitalcatonline.com/blog/2018/06/25/exploring-the-amiga-6/" rel="alternate"></link><published>2018-06-25T13:00:00+01:00</published><updated>2018-06-25T13:00:00+01:00</updated><author><name>Leonardo Giordani</name></author><id>tag:blog.thedigitalcatonline.com,2018-06-25:/blog/2018/06/25/exploring-the-amiga-6/</id><summary type="html"></summary><content type="html">&lt;h1&gt;Memory initialisation&lt;/h1&gt;
+&lt;p&gt;The Amiga has two types of memory. The first one is found on-board and it is traditionally referred to as "Chip Memory". This name comes from the fact that both the CPU and the custom chips have access to it, which also means that all this components have to share the access. This slows down the CPU when the custom chips are using the memory. While they can use DMA to access it without blocking the CPU, the memory cannot be accessed by multiple components at the same time.&lt;/p&gt;
+&lt;p&gt;The second type of memory is called "Fast Memory" because the CPU has exclusive access to it, thus providing better performances. It is also referred to as "expansion memory" since it comes with expansion boards.&lt;/p&gt;
+&lt;p&gt;At a certain point during boot time Kickstart figures out the types of memory installed in the Amiga machine and puts the expansion memory size in &lt;code&gt;a4&lt;/code&gt;. If this register contains a non-zero value, Kickstart knows that an expansion board has been installed and configures the memory accordingly.&lt;/p&gt;
+&lt;p&gt;The memory initialisation code is the following&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nl"&gt;00000380:&lt;/span&gt; &lt;span class="mi"&gt;200c&lt;/span&gt;                      &lt;span class="k"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt;  &lt;span class="o"&gt;a4&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;d0&lt;/span&gt;
+&lt;span class="nl"&gt;00000382:&lt;/span&gt; &lt;span class="mi"&gt;6724&lt;/span&gt;                      &lt;span class="k"&gt;beq&lt;/span&gt;&lt;span class="o"&gt;.b&lt;/span&gt;   &lt;span class="mi"&gt;0x3a8&lt;/span&gt;
+&lt;span class="nl"&gt;00000384:&lt;/span&gt; &lt;span class="mi"&gt;41ee&lt;/span&gt; &lt;span class="mi"&gt;024c&lt;/span&gt;                 &lt;span class="k"&gt;lea&lt;/span&gt;     &lt;span class="mi"&gt;0x24c&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;a6&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;&lt;span class="o"&gt;a0&lt;/span&gt;
+&lt;span class="nl"&gt;00000388:&lt;/span&gt; &lt;span class="mi"&gt;43fa&lt;/span&gt; &lt;span class="mi"&gt;ffa8&lt;/span&gt;                 &lt;span class="k"&gt;lea&lt;/span&gt;     &lt;span class="mi"&gt;0x332&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;pc&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;&lt;span class="o"&gt;a1&lt;/span&gt;
+&lt;span class="nl"&gt;0000038c:&lt;/span&gt; &lt;span class="mi"&gt;7400&lt;/span&gt;                      &lt;span class="k"&gt;moveq&lt;/span&gt;   &lt;span class="nl"&gt;#0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;d2&lt;/span&gt;
+&lt;span class="nl"&gt;0000038e:&lt;/span&gt; &lt;span class="mi"&gt;323c&lt;/span&gt; &lt;span class="mi"&gt;0005&lt;/span&gt;                 &lt;span class="k"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.w&lt;/span&gt;  &lt;span class="nl"&gt;#0x5&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;d1&lt;/span&gt;
+&lt;span class="nl"&gt;00000392:&lt;/span&gt; &lt;span class="mi"&gt;200c&lt;/span&gt;                      &lt;span class="k"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt;  &lt;span class="o"&gt;a4&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;d0&lt;/span&gt;
+&lt;span class="nl"&gt;00000394:&lt;/span&gt; &lt;span class="mi"&gt;9088&lt;/span&gt;                      &lt;span class="k"&gt;sub&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt;   &lt;span class="o"&gt;a0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;d0&lt;/span&gt;
+&lt;span class="nl"&gt;00000396:&lt;/span&gt; &lt;span class="mi"&gt;0480&lt;/span&gt; &lt;span class="mi"&gt;0000&lt;/span&gt; &lt;span class="mi"&gt;1800&lt;/span&gt;            &lt;span class="k"&gt;subi&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt;  &lt;span class="nl"&gt;#0x1800&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;d0&lt;/span&gt;
+&lt;span class="nl"&gt;0000039c:&lt;/span&gt; &lt;span class="mi"&gt;6100&lt;/span&gt; &lt;span class="mi"&gt;1688&lt;/span&gt;                 &lt;span class="k"&gt;bsr&lt;/span&gt;&lt;span class="o"&gt;.w&lt;/span&gt;   &lt;span class="mi"&gt;0x1a26&lt;/span&gt;
+&lt;span class="nl"&gt;000003a0:&lt;/span&gt; &lt;span class="mi"&gt;41f8&lt;/span&gt; &lt;span class="mi"&gt;0400&lt;/span&gt;                 &lt;span class="k"&gt;lea&lt;/span&gt;     &lt;span class="mi"&gt;0x400&lt;/span&gt;&lt;span class="o"&gt;.w&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;a0&lt;/span&gt;
+&lt;span class="nl"&gt;000003a4:&lt;/span&gt; &lt;span class="mi"&gt;7000&lt;/span&gt;                      &lt;span class="k"&gt;moveq&lt;/span&gt;   &lt;span class="nl"&gt;#0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;d0&lt;/span&gt;
+&lt;span class="nl"&gt;000003a6:&lt;/span&gt; &lt;span class="mi"&gt;600a&lt;/span&gt;                      &lt;span class="k"&gt;bra&lt;/span&gt;&lt;span class="o"&gt;.b&lt;/span&gt;   &lt;span class="mi"&gt;0x3b2&lt;/span&gt;
+&lt;span class="nl"&gt;000003a8:&lt;/span&gt; &lt;span class="mi"&gt;41ee&lt;/span&gt; &lt;span class="mi"&gt;024c&lt;/span&gt;                 &lt;span class="k"&gt;lea&lt;/span&gt;     &lt;span class="mi"&gt;0x24c&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;a6&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;&lt;span class="o"&gt;a0&lt;/span&gt;
+&lt;span class="nl"&gt;000003ac:&lt;/span&gt; &lt;span class="mi"&gt;203c&lt;/span&gt; &lt;span class="mi"&gt;ffff&lt;/span&gt; &lt;span class="mi"&gt;e800&lt;/span&gt;            &lt;span class="k"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt;  &lt;span class="p"&gt;#-&lt;/span&gt;&lt;span class="mi"&gt;0x1800&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;d0&lt;/span&gt;
+&lt;span class="nl"&gt;000003b2:&lt;/span&gt; &lt;span class="mi"&gt;323c&lt;/span&gt; &lt;span class="mi"&gt;0003&lt;/span&gt;                 &lt;span class="k"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.w&lt;/span&gt;  &lt;span class="nl"&gt;#0x3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;d1&lt;/span&gt;
+&lt;span class="nl"&gt;000003b6:&lt;/span&gt; &lt;span class="mi"&gt;2448&lt;/span&gt;                      &lt;span class="k"&gt;movea&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt; &lt;span class="o"&gt;a0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;a2&lt;/span&gt;
+&lt;span class="nl"&gt;000003b8:&lt;/span&gt; &lt;span class="mi"&gt;43fa&lt;/span&gt; &lt;span class="mi"&gt;ff6c&lt;/span&gt;                 &lt;span class="k"&gt;lea&lt;/span&gt;     &lt;span class="mi"&gt;0x326&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;pc&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;&lt;span class="o"&gt;a1&lt;/span&gt;
+&lt;span class="nl"&gt;000003bc:&lt;/span&gt; &lt;span class="mi"&gt;74f6&lt;/span&gt;                      &lt;span class="k"&gt;moveq&lt;/span&gt;   &lt;span class="p"&gt;#-&lt;/span&gt;&lt;span class="mi"&gt;0xa&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;d2&lt;/span&gt;
+&lt;span class="nl"&gt;000003be:&lt;/span&gt; &lt;span class="o"&gt;d0&lt;/span&gt;&lt;span class="mi"&gt;8b&lt;/span&gt;                      &lt;span class="k"&gt;add&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt;   &lt;span class="o"&gt;a3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;d0&lt;/span&gt;
+&lt;span class="nl"&gt;000003c0:&lt;/span&gt; &lt;span class="mi"&gt;9088&lt;/span&gt;                      &lt;span class="k"&gt;sub&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt;   &lt;span class="o"&gt;a0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;d0&lt;/span&gt;
+&lt;span class="nl"&gt;000003c2:&lt;/span&gt; &lt;span class="mi"&gt;6100&lt;/span&gt; &lt;span class="mi"&gt;1662&lt;/span&gt;                 &lt;span class="k"&gt;bsr&lt;/span&gt;&lt;span class="o"&gt;.w&lt;/span&gt;   &lt;span class="mi"&gt;0x1a26&lt;/span&gt;
+&lt;span class="nl"&gt;000003c6:&lt;/span&gt; &lt;span class="mi"&gt;224e&lt;/span&gt;                      &lt;span class="k"&gt;movea&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt; &lt;span class="o"&gt;a6&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;a1&lt;/span&gt;
+&lt;span class="nl"&gt;000003c8:&lt;/span&gt; &lt;span class="mi"&gt;6100&lt;/span&gt; &lt;span class="mi"&gt;107e&lt;/span&gt;                 &lt;span class="k"&gt;bsr&lt;/span&gt;&lt;span class="o"&gt;.w&lt;/span&gt;   &lt;span class="mi"&gt;0x1448&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;As I did in the previous post I will split the code in parts and replace some addresses with labels to try and make the routine more understandable&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;Check_expansion&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="nl"&gt;00000380:&lt;/span&gt; &lt;span class="mi"&gt;200c&lt;/span&gt;                      &lt;span class="k"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt;  &lt;span class="o"&gt;a4&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;d0&lt;/span&gt;
+&lt;span class="nl"&gt;00000382:&lt;/span&gt; &lt;span class="mi"&gt;6724&lt;/span&gt;                      &lt;span class="k"&gt;beq&lt;/span&gt;&lt;span class="o"&gt;.b&lt;/span&gt;   &lt;span class="n"&gt;Only_chip&lt;/span&gt;
+
+&lt;span class="n"&gt;Add_expansion&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="nl"&gt;00000384:&lt;/span&gt; &lt;span class="mi"&gt;41ee&lt;/span&gt; &lt;span class="mi"&gt;024c&lt;/span&gt;                 &lt;span class="k"&gt;lea&lt;/span&gt;     &lt;span class="mi"&gt;0x24c&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;a6&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;&lt;span class="o"&gt;a0&lt;/span&gt;
+&lt;span class="nl"&gt;00000388:&lt;/span&gt; &lt;span class="mi"&gt;43fa&lt;/span&gt; &lt;span class="mi"&gt;ffa8&lt;/span&gt;                 &lt;span class="k"&gt;lea&lt;/span&gt;     &lt;span class="mi"&gt;0x332&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;pc&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;&lt;span class="o"&gt;a1&lt;/span&gt;
+&lt;span class="nl"&gt;0000038c:&lt;/span&gt; &lt;span class="mi"&gt;7400&lt;/span&gt;                      &lt;span class="k"&gt;moveq&lt;/span&gt;   &lt;span class="nl"&gt;#0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;d2&lt;/span&gt;
+&lt;span class="nl"&gt;0000038e:&lt;/span&gt; &lt;span class="mi"&gt;323c&lt;/span&gt; &lt;span class="mi"&gt;0005&lt;/span&gt;                 &lt;span class="k"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.w&lt;/span&gt;  &lt;span class="nl"&gt;#0x5&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;d1&lt;/span&gt;
+&lt;span class="nl"&gt;00000392:&lt;/span&gt; &lt;span class="mi"&gt;200c&lt;/span&gt;                      &lt;span class="k"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt;  &lt;span class="o"&gt;a4&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;d0&lt;/span&gt;
+&lt;span class="nl"&gt;00000394:&lt;/span&gt; &lt;span class="mi"&gt;9088&lt;/span&gt;                      &lt;span class="k"&gt;sub&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt;   &lt;span class="o"&gt;a0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;d0&lt;/span&gt;
+&lt;span class="nl"&gt;00000396:&lt;/span&gt; &lt;span class="mi"&gt;0480&lt;/span&gt; &lt;span class="mi"&gt;0000&lt;/span&gt; &lt;span class="mi"&gt;1800&lt;/span&gt;            &lt;span class="k"&gt;subi&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt;  &lt;span class="nl"&gt;#0x1800&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;d0&lt;/span&gt;
+&lt;span class="nl"&gt;0000039c:&lt;/span&gt; &lt;span class="mi"&gt;6100&lt;/span&gt; &lt;span class="mi"&gt;1688&lt;/span&gt;                 &lt;span class="k"&gt;bsr&lt;/span&gt;&lt;span class="o"&gt;.w&lt;/span&gt;   &lt;span class="mi"&gt;0x1a26&lt;/span&gt;
+&lt;span class="nl"&gt;000003a0:&lt;/span&gt; &lt;span class="mi"&gt;41f8&lt;/span&gt; &lt;span class="mi"&gt;0400&lt;/span&gt;                 &lt;span class="k"&gt;lea&lt;/span&gt;     &lt;span class="mi"&gt;0x400&lt;/span&gt;&lt;span class="o"&gt;.w&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;a0&lt;/span&gt;
+&lt;span class="nl"&gt;000003a4:&lt;/span&gt; &lt;span class="mi"&gt;7000&lt;/span&gt;                      &lt;span class="k"&gt;moveq&lt;/span&gt;   &lt;span class="nl"&gt;#0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;d0&lt;/span&gt;
+&lt;span class="nl"&gt;000003a6:&lt;/span&gt; &lt;span class="mi"&gt;600a&lt;/span&gt;                      &lt;span class="k"&gt;bra&lt;/span&gt;&lt;span class="o"&gt;.b&lt;/span&gt;   &lt;span class="n"&gt;Add_chip&lt;/span&gt;
+
+&lt;span class="n"&gt;Only_chip&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="nl"&gt;000003a8:&lt;/span&gt; &lt;span class="mi"&gt;41ee&lt;/span&gt; &lt;span class="mi"&gt;024c&lt;/span&gt;                 &lt;span class="k"&gt;lea&lt;/span&gt;     &lt;span class="mi"&gt;0x24c&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;a6&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;&lt;span class="o"&gt;a0&lt;/span&gt;
+&lt;span class="nl"&gt;000003ac:&lt;/span&gt; &lt;span class="mi"&gt;203c&lt;/span&gt; &lt;span class="mi"&gt;ffff&lt;/span&gt; &lt;span class="mi"&gt;e800&lt;/span&gt;            &lt;span class="k"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt;  &lt;span class="p"&gt;#-&lt;/span&gt;&lt;span class="mi"&gt;0x1800&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;d0&lt;/span&gt;
+
+&lt;span class="n"&gt;Add_chip&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="nl"&gt;000003b2:&lt;/span&gt; &lt;span class="mi"&gt;323c&lt;/span&gt; &lt;span class="mi"&gt;0003&lt;/span&gt;                 &lt;span class="k"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.w&lt;/span&gt;  &lt;span class="nl"&gt;#0x3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;d1&lt;/span&gt;
+&lt;span class="nl"&gt;000003b6:&lt;/span&gt; &lt;span class="mi"&gt;2448&lt;/span&gt;                      &lt;span class="k"&gt;movea&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt; &lt;span class="o"&gt;a0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;a2&lt;/span&gt;
+&lt;span class="nl"&gt;000003b8:&lt;/span&gt; &lt;span class="mi"&gt;43fa&lt;/span&gt; &lt;span class="mi"&gt;ff6c&lt;/span&gt;                 &lt;span class="k"&gt;lea&lt;/span&gt;     &lt;span class="mi"&gt;0x326&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;pc&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;&lt;span class="o"&gt;a1&lt;/span&gt;
+&lt;span class="nl"&gt;000003bc:&lt;/span&gt; &lt;span class="mi"&gt;74f6&lt;/span&gt;                      &lt;span class="k"&gt;moveq&lt;/span&gt;   &lt;span class="p"&gt;#-&lt;/span&gt;&lt;span class="mi"&gt;0xa&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;d2&lt;/span&gt;
+&lt;span class="nl"&gt;000003be:&lt;/span&gt; &lt;span class="o"&gt;d0&lt;/span&gt;&lt;span class="mi"&gt;8b&lt;/span&gt;                      &lt;span class="k"&gt;add&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt;   &lt;span class="o"&gt;a3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;d0&lt;/span&gt;
+&lt;span class="nl"&gt;000003c0:&lt;/span&gt; &lt;span class="mi"&gt;9088&lt;/span&gt;                      &lt;span class="k"&gt;sub&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt;   &lt;span class="o"&gt;a0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;d0&lt;/span&gt;
+&lt;span class="nl"&gt;000003c2:&lt;/span&gt; &lt;span class="mi"&gt;6100&lt;/span&gt; &lt;span class="mi"&gt;1662&lt;/span&gt;                 &lt;span class="k"&gt;bsr&lt;/span&gt;&lt;span class="o"&gt;.w&lt;/span&gt;   &lt;span class="mi"&gt;0x1a26&lt;/span&gt;
+&lt;span class="nl"&gt;000003c6:&lt;/span&gt; &lt;span class="mi"&gt;224e&lt;/span&gt;                      &lt;span class="k"&gt;movea&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt; &lt;span class="o"&gt;a6&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;a1&lt;/span&gt;
+&lt;span class="nl"&gt;000003c8:&lt;/span&gt; &lt;span class="mi"&gt;6100&lt;/span&gt; &lt;span class="mi"&gt;107e&lt;/span&gt;                 &lt;span class="k"&gt;bsr&lt;/span&gt;&lt;span class="o"&gt;.w&lt;/span&gt;   &lt;span class="mi"&gt;0x1448&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The two addresses &lt;code&gt;0x326&lt;/code&gt; and &lt;code&gt;0x332&lt;/code&gt; mentioned in the code contain the two zero-terminated strings &lt;code&gt;Chip Memory&lt;/code&gt; and &lt;code&gt;Fast Memory&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Chip Memory&amp;quot;&lt;/span&gt;
+
+&lt;span class="nt"&gt;00000326&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nt"&gt;4368&lt;/span&gt; &lt;span class="o"&gt;;&lt;/span&gt; &lt;span class="nt"&gt;Ch&lt;/span&gt;
+&lt;span class="nt"&gt;00000328&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nt"&gt;6970&lt;/span&gt; &lt;span class="o"&gt;;&lt;/span&gt; &lt;span class="nt"&gt;ip&lt;/span&gt;
+&lt;span class="nt"&gt;0000032a&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nt"&gt;204d&lt;/span&gt; &lt;span class="o"&gt;;&lt;/span&gt;  &lt;span class="nt"&gt;M&lt;/span&gt;
+&lt;span class="nt"&gt;0000032c&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nt"&gt;656d&lt;/span&gt; &lt;span class="o"&gt;;&lt;/span&gt; &lt;span class="nt"&gt;em&lt;/span&gt;
+&lt;span class="nt"&gt;0000032e&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nt"&gt;6f72&lt;/span&gt; &lt;span class="o"&gt;;&lt;/span&gt; &lt;span class="nt"&gt;or&lt;/span&gt;
+&lt;span class="nt"&gt;00000330&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nt"&gt;7900&lt;/span&gt; &lt;span class="o"&gt;;&lt;/span&gt; &lt;span class="nt"&gt;y&lt;/span&gt;&lt;span class="err"&gt;\&lt;/span&gt;&lt;span class="nt"&gt;0&lt;/span&gt;
+
+&lt;span class="o"&gt;;&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Fast Memory&amp;quot;&lt;/span&gt;
+
+&lt;span class="nt"&gt;00000332&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nt"&gt;4661&lt;/span&gt; &lt;span class="o"&gt;;&lt;/span&gt; &lt;span class="nt"&gt;Fa&lt;/span&gt;
+&lt;span class="nt"&gt;00000334&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nt"&gt;7374&lt;/span&gt; &lt;span class="o"&gt;;&lt;/span&gt; &lt;span class="nt"&gt;st&lt;/span&gt;
+&lt;span class="nt"&gt;00000336&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nt"&gt;204d&lt;/span&gt; &lt;span class="o"&gt;;&lt;/span&gt;  &lt;span class="nt"&gt;M&lt;/span&gt;
+&lt;span class="nt"&gt;00000338&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nt"&gt;656d&lt;/span&gt; &lt;span class="o"&gt;;&lt;/span&gt; &lt;span class="nt"&gt;em&lt;/span&gt;
+&lt;span class="nt"&gt;0000033a&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nt"&gt;6f72&lt;/span&gt; &lt;span class="o"&gt;;&lt;/span&gt; &lt;span class="nt"&gt;or&lt;/span&gt;
+&lt;span class="nt"&gt;0000033c&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nt"&gt;7900&lt;/span&gt; &lt;span class="o"&gt;;&lt;/span&gt; &lt;span class="nt"&gt;y&lt;/span&gt;&lt;span class="err"&gt;\&lt;/span&gt;&lt;span class="nt"&gt;0&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Let's analyse the code line by line.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;Check_expansion&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="nl"&gt;00000380:&lt;/span&gt; &lt;span class="mi"&gt;200c&lt;/span&gt;                      &lt;span class="k"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt;  &lt;span class="o"&gt;a4&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;d0&lt;/span&gt;
+&lt;span class="nl"&gt;00000382:&lt;/span&gt; &lt;span class="mi"&gt;6724&lt;/span&gt;                      &lt;span class="k"&gt;beq&lt;/span&gt;&lt;span class="o"&gt;.b&lt;/span&gt;   &lt;span class="n"&gt;Only_chip&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The first thing that Kickstart does is to check if &lt;code&gt;a4&lt;/code&gt; contains a non-zero value, which signals that we have a memory expansion board available. If &lt;code&gt;a4&lt;/code&gt; is zero the code jumps to the part that initialises chip memory only.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;Add_expansion&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="nl"&gt;00000384:&lt;/span&gt; &lt;span class="mi"&gt;41ee&lt;/span&gt; &lt;span class="mi"&gt;024c&lt;/span&gt;                 &lt;span class="k"&gt;lea&lt;/span&gt;     &lt;span class="mi"&gt;0x24c&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;a6&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;&lt;span class="o"&gt;a0&lt;/span&gt;
+&lt;span class="nl"&gt;00000388:&lt;/span&gt; &lt;span class="mi"&gt;43fa&lt;/span&gt; &lt;span class="mi"&gt;ffa8&lt;/span&gt;                 &lt;span class="k"&gt;lea&lt;/span&gt;     &lt;span class="mi"&gt;0x332&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;pc&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;&lt;span class="o"&gt;a1&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The code then loads two effective addresses. The first one is the first free location (&lt;code&gt;0x24c&lt;/code&gt;) and the second one is the string &lt;code&gt;Fast Memory&lt;/code&gt;. The reason behind the address &lt;code&gt;0x24c&lt;/code&gt; is explained in a later section in detail.&lt;/p&gt;
+&lt;p&gt;The purpose of the code is to call the &lt;code&gt;AddMemList&lt;/code&gt; routine, which adds the memory to the system free memory pool. It has the following prototype&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;   &lt;span class="n"&gt;error&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;AddMemList&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;size&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;attributes&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;pri&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;base&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;name&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;;&lt;/span&gt;   &lt;span class="n"&gt;D0&lt;/span&gt;                  &lt;span class="n"&gt;D0&lt;/span&gt;    &lt;span class="n"&gt;D1&lt;/span&gt;          &lt;span class="n"&gt;D2&lt;/span&gt;   &lt;span class="n"&gt;A0&lt;/span&gt;    &lt;span class="n"&gt;A1&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;where &lt;code&gt;size&lt;/code&gt; is the size of the memory (bytes), &lt;code&gt;attributes&lt;/code&gt; contains flags that identify memory attributes, &lt;code&gt;pri&lt;/code&gt; is the priority of the memory, &lt;code&gt;base&lt;/code&gt; is the base address of the new area and &lt;code&gt;name&lt;/code&gt; is a name for this list.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nl"&gt;0000038c:&lt;/span&gt; &lt;span class="mi"&gt;7400&lt;/span&gt;                      &lt;span class="k"&gt;moveq&lt;/span&gt;   &lt;span class="nl"&gt;#0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;d2&lt;/span&gt;
+&lt;span class="nl"&gt;0000038e:&lt;/span&gt; &lt;span class="mi"&gt;323c&lt;/span&gt; &lt;span class="mi"&gt;0005&lt;/span&gt;                 &lt;span class="k"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.w&lt;/span&gt;  &lt;span class="nl"&gt;#0x5&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;d1&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The code then prepares the registers for the &lt;code&gt;AddMemList&lt;/code&gt; call. It gives this memory priority &lt;code&gt;0&lt;/code&gt; and sets the &lt;code&gt;attributes&lt;/code&gt; flags to &lt;code&gt;0x5&lt;/code&gt;, which is &lt;code&gt;101&lt;/code&gt;, or &lt;code&gt;PUBLIC&lt;/code&gt; and &lt;code&gt;FAST&lt;/code&gt; (see &lt;code&gt;include_i/exec/memory.i&lt;/code&gt;).&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nl"&gt;00000392:&lt;/span&gt; &lt;span class="mi"&gt;200c&lt;/span&gt;                      &lt;span class="k"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt;  &lt;span class="o"&gt;a4&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;d0&lt;/span&gt;
+&lt;span class="nl"&gt;00000394:&lt;/span&gt; &lt;span class="mi"&gt;9088&lt;/span&gt;                      &lt;span class="k"&gt;sub&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt;   &lt;span class="o"&gt;a0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;d0&lt;/span&gt;
+&lt;span class="nl"&gt;00000396:&lt;/span&gt; &lt;span class="mi"&gt;0480&lt;/span&gt; &lt;span class="mi"&gt;0000&lt;/span&gt; &lt;span class="mi"&gt;1800&lt;/span&gt;            &lt;span class="k"&gt;subi&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt;  &lt;span class="nl"&gt;#0x1800&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;d0&lt;/span&gt;
+&lt;span class="nl"&gt;0000039c:&lt;/span&gt; &lt;span class="mi"&gt;6100&lt;/span&gt; &lt;span class="mi"&gt;1688&lt;/span&gt;                 &lt;span class="k"&gt;bsr&lt;/span&gt;&lt;span class="o"&gt;.w&lt;/span&gt;   &lt;span class="mi"&gt;0x1a26&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The expansion memory base address is copied in &lt;code&gt;d0&lt;/code&gt; (this is actually an unneeded repetition of what the code did 6 lines before, I think). It then subtracts the address of the first free location (because if this is not 0 it means that something is already stored in memory) and the size of the stack, that was initialised previously by Kickstart to 6 KBytes (hardcoded). After that the code jumps to &lt;code&gt;AddMemList&lt;/code&gt; (&lt;code&gt;0x1a26&lt;/code&gt;).&lt;/p&gt;
+&lt;p&gt;When the routine returns the code has to move on initialising the chip memory. The chip memory has to be initialised in two different ways depending on the presence of the expansion memory, as this latter is preferably used by the CPU.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="mi"&gt;000003&lt;/span&gt;&lt;span class="n"&gt;a0&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;41&lt;/span&gt;&lt;span class="n"&gt;f8&lt;/span&gt; &lt;span class="mi"&gt;0400&lt;/span&gt;                 &lt;span class="n"&gt;lea&lt;/span&gt;     &lt;span class="mh"&gt;0x400&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;w&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="n"&gt;a0&lt;/span&gt;
+&lt;span class="mi"&gt;000003&lt;/span&gt;&lt;span class="n"&gt;a4&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;7000&lt;/span&gt;                      &lt;span class="n"&gt;moveq&lt;/span&gt;   &lt;span class="err"&gt;#&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="n"&gt;d0&lt;/span&gt;
+&lt;span class="mi"&gt;000003&lt;/span&gt;&lt;span class="n"&gt;a6&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;600&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;                      &lt;span class="n"&gt;bra&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;b&lt;/span&gt;   &lt;span class="n"&gt;Add_chip&lt;/span&gt;
+
+&lt;span class="n"&gt;Only_chip&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
+&lt;span class="mi"&gt;000003&lt;/span&gt;&lt;span class="n"&gt;a8&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;41&lt;/span&gt;&lt;span class="n"&gt;ee&lt;/span&gt; &lt;span class="mi"&gt;024&lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt;                 &lt;span class="n"&gt;lea&lt;/span&gt;     &lt;span class="mh"&gt;0x24c&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a6&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt;&lt;span class="n"&gt;a0&lt;/span&gt;
+&lt;span class="mi"&gt;000003&lt;/span&gt;&lt;span class="n"&gt;ac&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;203&lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="n"&gt;ffff&lt;/span&gt; &lt;span class="n"&gt;e800&lt;/span&gt;            &lt;span class="n"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;l&lt;/span&gt;  &lt;span class="err"&gt;#&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mh"&gt;0x1800&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="n"&gt;d0&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;If the initial test on the presence of the expansion memory fails the code jumps directly to &lt;code&gt;0x03a8&lt;/code&gt;. If the expansion memory has already been initialised, instead, the CPU executes the code at &lt;code&gt;0x03a0&lt;/code&gt; and then jumps to &lt;code&gt;0x03b2&lt;/code&gt; (Renamed &lt;code&gt;Add_chip&lt;/code&gt; here).&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nl"&gt;000003a0:&lt;/span&gt; &lt;span class="mi"&gt;41f8&lt;/span&gt; &lt;span class="mi"&gt;0400&lt;/span&gt;                 &lt;span class="k"&gt;lea&lt;/span&gt;     &lt;span class="mi"&gt;0x400&lt;/span&gt;&lt;span class="o"&gt;.w&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;a0&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;So if there is expansion memory, Exec will be loaded there, which means that both it and the system stack are not in the chip memory. We can then add the whole space above &lt;code&gt;0x400&lt;/code&gt; (more on this number in a later section)&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nl"&gt;000003a4:&lt;/span&gt; &lt;span class="mi"&gt;7000&lt;/span&gt;                      &lt;span class="k"&gt;moveq&lt;/span&gt;   &lt;span class="nl"&gt;#0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;d0&lt;/span&gt;
+&lt;span class="nl"&gt;000003a6:&lt;/span&gt; &lt;span class="mi"&gt;600a&lt;/span&gt;                      &lt;span class="k"&gt;bra&lt;/span&gt;&lt;span class="o"&gt;.b&lt;/span&gt;   &lt;span class="n"&gt;Add_chip&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Since the stack has already been created in fast memory we can store a 0 in &lt;code&gt;d0&lt;/code&gt; and jump to the code that adds the memory to the system lists&lt;/p&gt;
+&lt;p&gt;If the expansion is not present, instead, Exec is installed in the chip memory, so we compute the base like we did for the fast memory.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;Only_chip&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="nl"&gt;000003a8:&lt;/span&gt; &lt;span class="mi"&gt;41ee&lt;/span&gt; &lt;span class="mi"&gt;024c&lt;/span&gt;                 &lt;span class="k"&gt;lea&lt;/span&gt;     &lt;span class="mi"&gt;0x24c&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;a6&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;&lt;span class="o"&gt;a0&lt;/span&gt;
+&lt;span class="nl"&gt;000003ac:&lt;/span&gt; &lt;span class="mi"&gt;203c&lt;/span&gt; &lt;span class="mi"&gt;ffff&lt;/span&gt; &lt;span class="mi"&gt;e800&lt;/span&gt;            &lt;span class="k"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt;  &lt;span class="p"&gt;#-&lt;/span&gt;&lt;span class="mi"&gt;0x1800&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;d0&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Here we load the effective address of the first free location, &lt;code&gt;0x24c&lt;/code&gt; bytes after the ExecBase address, and we specify the size of the memory as 6 Kbytes less than the maximum, to keep some space for the system stack. The size is negative as later the memory size will be added to the register.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;Add_chip&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="nl"&gt;000003b2:&lt;/span&gt; &lt;span class="mi"&gt;323c&lt;/span&gt; &lt;span class="mi"&gt;0003&lt;/span&gt;                 &lt;span class="k"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.w&lt;/span&gt;  &lt;span class="nl"&gt;#0x3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;d1&lt;/span&gt;
+&lt;span class="nl"&gt;000003b6:&lt;/span&gt; &lt;span class="mi"&gt;2448&lt;/span&gt;                      &lt;span class="k"&gt;movea&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt; &lt;span class="o"&gt;a0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;a2&lt;/span&gt;
+&lt;span class="nl"&gt;000003b8:&lt;/span&gt; &lt;span class="mi"&gt;43fa&lt;/span&gt; &lt;span class="mi"&gt;ff6c&lt;/span&gt;                 &lt;span class="k"&gt;lea&lt;/span&gt;     &lt;span class="mi"&gt;0x326&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;pc&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;&lt;span class="o"&gt;a1&lt;/span&gt;
+&lt;span class="nl"&gt;000003bc:&lt;/span&gt; &lt;span class="mi"&gt;74f6&lt;/span&gt;                      &lt;span class="k"&gt;moveq&lt;/span&gt;   &lt;span class="p"&gt;#-&lt;/span&gt;&lt;span class="mi"&gt;0xa&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;d2&lt;/span&gt;
+&lt;span class="nl"&gt;000003be:&lt;/span&gt; &lt;span class="o"&gt;d0&lt;/span&gt;&lt;span class="mi"&gt;8b&lt;/span&gt;                      &lt;span class="k"&gt;add&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt;   &lt;span class="o"&gt;a3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;d0&lt;/span&gt;
+&lt;span class="nl"&gt;000003c0:&lt;/span&gt; &lt;span class="mi"&gt;9088&lt;/span&gt;                      &lt;span class="k"&gt;sub&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt;   &lt;span class="o"&gt;a0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;d0&lt;/span&gt;
+&lt;span class="nl"&gt;000003c2:&lt;/span&gt; &lt;span class="mi"&gt;6100&lt;/span&gt; &lt;span class="mi"&gt;1662&lt;/span&gt;                 &lt;span class="k"&gt;bsr&lt;/span&gt;&lt;span class="o"&gt;.w&lt;/span&gt;   &lt;span class="mi"&gt;0x1a26&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;After this we repeat the same procedure that was described for the fast memory. The attributes are now &lt;code&gt;CHIP&lt;/code&gt; and &lt;code&gt;PUBLIC&lt;/code&gt; (&lt;code&gt;0x3&lt;/code&gt;), the string at &lt;code&gt;0x326&lt;/code&gt; is &lt;code&gt;Chip Memory&lt;/code&gt;, and the priority is -10 (&lt;code&gt;-0xa&lt;/code&gt;). The &lt;code&gt;a3&lt;/code&gt; register already contains the end address of the chip memory, so we add it to &lt;code&gt;d0&lt;/code&gt; and then subtract the first free location computed before to get the size of the memory. As happened before, the routine calls &lt;code&gt;AddMemList&lt;/code&gt; at &lt;code&gt;0x1a26&lt;/code&gt;.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nl"&gt;000003c6:&lt;/span&gt; &lt;span class="mi"&gt;224e&lt;/span&gt;                      &lt;span class="k"&gt;movea&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt; &lt;span class="o"&gt;a6&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;a1&lt;/span&gt;
+&lt;span class="nl"&gt;000003c8:&lt;/span&gt; &lt;span class="mi"&gt;6100&lt;/span&gt; &lt;span class="mi"&gt;107e&lt;/span&gt;                 &lt;span class="k"&gt;bsr&lt;/span&gt;&lt;span class="o"&gt;.w&lt;/span&gt;   &lt;span class="mi"&gt;0x1448&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The last action of this part of the code is to call &lt;code&gt;AddLibrary&lt;/code&gt; at &lt;code&gt;0x1448&lt;/code&gt;. The only parameter the routine requires is the base address of the library in &lt;code&gt;a1&lt;/code&gt;, which is why the code copies &lt;code&gt;a6&lt;/code&gt; there.&lt;/p&gt;
+&lt;h1&gt;The "magic number" &lt;code&gt;0x24c&lt;/code&gt;&lt;/h1&gt;
+&lt;p&gt;When we discussed the way the memory is initialised we discovered a "magic number" that Kickstart uses to find the first free location in memory&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nl"&gt;00000384:&lt;/span&gt; &lt;span class="mi"&gt;41ee&lt;/span&gt; &lt;span class="mi"&gt;024c&lt;/span&gt;                 &lt;span class="k"&gt;lea&lt;/span&gt;     &lt;span class="mi"&gt;0x24c&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;a6&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;&lt;span class="o"&gt;a0&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The first free location, according to this code is &lt;code&gt;0x24c&lt;/code&gt; (588) bytes after the Exec base address. The reason behind this number is simple. When the Exec library is installed its structures use exactly 588 bytes, thus that is the address of the first free space in memory.&lt;/p&gt;
+&lt;p&gt;It's easy to calculate this number. Here you find the annotated version of the &lt;code&gt;ExecBase&lt;/code&gt; structure that I already used in the previous instalment.&lt;/p&gt;
+&lt;p&gt;The structure is described in the &lt;code&gt;include_i/exec/execbase.i&lt;/code&gt; include file, and I added the displacement in bytes of each field. The first column is the displacement in the &lt;code&gt;ExecBase&lt;/code&gt; structure, while the second starts from &lt;code&gt;0x22&lt;/code&gt;. This latter comes from the fact that the structure follows an &lt;code&gt;LN&lt;/code&gt; structure and a &lt;code&gt;LIB&lt;/code&gt; structure, described in the fourth instalment of this series.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="mi"&gt;0000&lt;/span&gt; &lt;span class="mi"&gt;0022&lt;/span&gt;    &lt;span class="n"&gt;UWORD&lt;/span&gt;   &lt;span class="n"&gt;SoftVer&lt;/span&gt; &lt;span class="c1"&gt;; kickstart release number (obs.)&lt;/span&gt;
+&lt;span class="mi"&gt;0002&lt;/span&gt; &lt;span class="mi"&gt;0024&lt;/span&gt;    &lt;span class="n"&gt;WORD&lt;/span&gt;    &lt;span class="n"&gt;LowMemChkSum&lt;/span&gt;    &lt;span class="c1"&gt;; checksum of 68000 trap vectors&lt;/span&gt;
+&lt;span class="mi"&gt;0004&lt;/span&gt; &lt;span class="mi"&gt;0026&lt;/span&gt;    &lt;span class="n"&gt;ULONG&lt;/span&gt;   &lt;span class="n"&gt;ChkBase&lt;/span&gt; &lt;span class="c1"&gt;; system base pointer complement&lt;/span&gt;
+&lt;span class="mi"&gt;0008&lt;/span&gt; &lt;span class="mi"&gt;002a&lt;/span&gt;    &lt;span class="n"&gt;APTR&lt;/span&gt;    &lt;span class="n"&gt;ColdCapture&lt;/span&gt; &lt;span class="c1"&gt;; coldstart soft capture vector&lt;/span&gt;
+&lt;span class="mi"&gt;000c&lt;/span&gt; &lt;span class="mi"&gt;002e&lt;/span&gt;    &lt;span class="n"&gt;APTR&lt;/span&gt;    &lt;span class="n"&gt;CoolCapture&lt;/span&gt; &lt;span class="c1"&gt;; coolstart soft capture vector&lt;/span&gt;
+&lt;span class="mi"&gt;0010&lt;/span&gt; &lt;span class="mi"&gt;0032&lt;/span&gt;    &lt;span class="n"&gt;APTR&lt;/span&gt;    &lt;span class="n"&gt;WarmCapture&lt;/span&gt; &lt;span class="c1"&gt;; warmstart soft capture vector&lt;/span&gt;
+&lt;span class="mi"&gt;0014&lt;/span&gt; &lt;span class="mi"&gt;0036&lt;/span&gt;    &lt;span class="n"&gt;APTR&lt;/span&gt;    &lt;span class="n"&gt;SysStkUpper&lt;/span&gt; &lt;span class="c1"&gt;; system stack base   (upper bound)&lt;/span&gt;
+&lt;span class="mi"&gt;0018&lt;/span&gt; &lt;span class="mi"&gt;003a&lt;/span&gt;    &lt;span class="n"&gt;APTR&lt;/span&gt;    &lt;span class="n"&gt;SysStkLower&lt;/span&gt; &lt;span class="c1"&gt;; top of system stack (lower bound)&lt;/span&gt;
+&lt;span class="mi"&gt;001c&lt;/span&gt; &lt;span class="mi"&gt;003e&lt;/span&gt;    &lt;span class="n"&gt;ULONG&lt;/span&gt;   &lt;span class="n"&gt;MaxLocMem&lt;/span&gt;   &lt;span class="c1"&gt;; top of chip memory&lt;/span&gt;
+&lt;span class="mi"&gt;0020&lt;/span&gt; &lt;span class="mi"&gt;0042&lt;/span&gt;    &lt;span class="n"&gt;APTR&lt;/span&gt;    &lt;span class="n"&gt;DebugEntry&lt;/span&gt;  &lt;span class="c1"&gt;; global debugger entry point&lt;/span&gt;
+&lt;span class="mi"&gt;0024&lt;/span&gt; &lt;span class="mi"&gt;0046&lt;/span&gt;    &lt;span class="n"&gt;APTR&lt;/span&gt;    &lt;span class="n"&gt;DebugData&lt;/span&gt;   &lt;span class="c1"&gt;; global debugger data segment&lt;/span&gt;
+&lt;span class="mi"&gt;0028&lt;/span&gt; &lt;span class="mi"&gt;004a&lt;/span&gt;    &lt;span class="n"&gt;APTR&lt;/span&gt;    &lt;span class="n"&gt;AlertData&lt;/span&gt;   &lt;span class="c1"&gt;; alert data segment&lt;/span&gt;
+&lt;span class="mi"&gt;002c&lt;/span&gt; &lt;span class="mi"&gt;004e&lt;/span&gt;    &lt;span class="n"&gt;APTR&lt;/span&gt;    &lt;span class="n"&gt;MaxExtMem&lt;/span&gt;   &lt;span class="c1"&gt;; top of extended mem, or null if none&lt;/span&gt;
+
+&lt;span class="mi"&gt;0030&lt;/span&gt; &lt;span class="mi"&gt;0052&lt;/span&gt;    &lt;span class="n"&gt;WORD&lt;/span&gt;    &lt;span class="n"&gt;ChkSum&lt;/span&gt;      &lt;span class="c1"&gt;; for all of the above (minus 2)&lt;/span&gt;
+
+
+&lt;span class="c1"&gt;******* Interrupt Related ********************************************&lt;/span&gt;
+
+    &lt;span class="n"&gt;LABEL&lt;/span&gt;   &lt;span class="n"&gt;IntVects&lt;/span&gt;
+&lt;span class="mi"&gt;0032&lt;/span&gt; &lt;span class="mi"&gt;0054&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;IVTBE&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;IV_SIZE&lt;/span&gt;
+&lt;span class="mi"&gt;003e&lt;/span&gt; &lt;span class="mi"&gt;0060&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;IVDSKBLK&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;IV_SIZE&lt;/span&gt;
+&lt;span class="mi"&gt;004a&lt;/span&gt; &lt;span class="mi"&gt;006c&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;IVSOFTINT&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;IV_SIZE&lt;/span&gt;
+&lt;span class="mi"&gt;0056&lt;/span&gt; &lt;span class="mi"&gt;0078&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;IVPORTS&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;IV_SIZE&lt;/span&gt;
+&lt;span class="mi"&gt;0062&lt;/span&gt; &lt;span class="mi"&gt;0084&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;IVCOPER&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;IV_SIZE&lt;/span&gt;
+&lt;span class="mi"&gt;006e&lt;/span&gt; &lt;span class="mi"&gt;0090&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;IVVERTB&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;IV_SIZE&lt;/span&gt;
+&lt;span class="mi"&gt;007a&lt;/span&gt; &lt;span class="mi"&gt;009c&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;IVBLIT&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;IV_SIZE&lt;/span&gt;
+&lt;span class="mi"&gt;0086&lt;/span&gt; &lt;span class="mi"&gt;00a8&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;IVAUD0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;IV_SIZE&lt;/span&gt;
+&lt;span class="mi"&gt;0092&lt;/span&gt; &lt;span class="mi"&gt;00b4&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;IVAUD1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;IV_SIZE&lt;/span&gt;
+&lt;span class="mi"&gt;009e&lt;/span&gt; &lt;span class="mi"&gt;00c0&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;IVAUD2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;IV_SIZE&lt;/span&gt;
+&lt;span class="mi"&gt;00aa&lt;/span&gt; &lt;span class="mi"&gt;00cc&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;IVAUD3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;IV_SIZE&lt;/span&gt;
+&lt;span class="mi"&gt;00b6&lt;/span&gt; &lt;span class="mi"&gt;00d8&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;IVRBF&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;IV_SIZE&lt;/span&gt;
+&lt;span class="mi"&gt;00c2&lt;/span&gt; &lt;span class="mi"&gt;00e4&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;IVDSKSYNC&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;IV_SIZE&lt;/span&gt;
+&lt;span class="mi"&gt;00ce&lt;/span&gt; &lt;span class="mi"&gt;00f0&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;IVEXTER&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;IV_SIZE&lt;/span&gt;
+&lt;span class="mi"&gt;00da&lt;/span&gt; &lt;span class="mi"&gt;00fc&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;IVINTEN&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;IV_SIZE&lt;/span&gt;
+&lt;span class="mi"&gt;00e6&lt;/span&gt; &lt;span class="mi"&gt;0108&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;IVNMI&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;IV_SIZE&lt;/span&gt;
+
+
+&lt;span class="c1"&gt;******* Dynamic System Variables *************************************&lt;/span&gt;
+
+&lt;span class="mi"&gt;00f2&lt;/span&gt; &lt;span class="mi"&gt;0114&lt;/span&gt;    &lt;span class="n"&gt;APTR&lt;/span&gt;    &lt;span class="n"&gt;ThisTask&lt;/span&gt;    &lt;span class="c1"&gt;; pointer to current task (readable)&lt;/span&gt;
+
+&lt;span class="mi"&gt;00f6&lt;/span&gt; &lt;span class="mi"&gt;0118&lt;/span&gt;    &lt;span class="n"&gt;ULONG&lt;/span&gt;   &lt;span class="n"&gt;IdleCount&lt;/span&gt;   &lt;span class="c1"&gt;; idle counter&lt;/span&gt;
+&lt;span class="mi"&gt;00fa&lt;/span&gt; &lt;span class="mi"&gt;011c&lt;/span&gt;    &lt;span class="n"&gt;ULONG&lt;/span&gt;   &lt;span class="n"&gt;DispCount&lt;/span&gt;   &lt;span class="c1"&gt;; dispatch counter&lt;/span&gt;
+&lt;span class="mi"&gt;00fe&lt;/span&gt; &lt;span class="mi"&gt;0120&lt;/span&gt;    &lt;span class="n"&gt;UWORD&lt;/span&gt;   &lt;span class="n"&gt;Quantum&lt;/span&gt; &lt;span class="c1"&gt;; time slice quantum&lt;/span&gt;
+&lt;span class="mi"&gt;0100&lt;/span&gt; &lt;span class="mi"&gt;0122&lt;/span&gt;    &lt;span class="n"&gt;UWORD&lt;/span&gt;   &lt;span class="n"&gt;Elapsed&lt;/span&gt; &lt;span class="c1"&gt;; current quantum ticks&lt;/span&gt;
+&lt;span class="mi"&gt;0102&lt;/span&gt; &lt;span class="mi"&gt;0124&lt;/span&gt;    &lt;span class="n"&gt;UWORD&lt;/span&gt;   &lt;span class="n"&gt;SysFlags&lt;/span&gt;    &lt;span class="c1"&gt;; misc internal system flags&lt;/span&gt;
+&lt;span class="mi"&gt;0104&lt;/span&gt; &lt;span class="mi"&gt;0126&lt;/span&gt;    &lt;span class="n"&gt;BYTE&lt;/span&gt;    &lt;span class="n"&gt;IDNestCnt&lt;/span&gt;   &lt;span class="c1"&gt;; interrupt disable nesting count&lt;/span&gt;
+&lt;span class="mi"&gt;0105&lt;/span&gt; &lt;span class="mi"&gt;0127&lt;/span&gt;    &lt;span class="n"&gt;BYTE&lt;/span&gt;    &lt;span class="n"&gt;TDNestCnt&lt;/span&gt;   &lt;span class="c1"&gt;; task disable nesting count&lt;/span&gt;
+
+&lt;span class="mi"&gt;0106&lt;/span&gt; &lt;span class="mi"&gt;0128&lt;/span&gt;    &lt;span class="n"&gt;UWORD&lt;/span&gt;   &lt;span class="n"&gt;AttnFlags&lt;/span&gt;   &lt;span class="c1"&gt;; special attention flags (readable)&lt;/span&gt;
+
+&lt;span class="mi"&gt;0108&lt;/span&gt; &lt;span class="mi"&gt;012a&lt;/span&gt;    &lt;span class="n"&gt;UWORD&lt;/span&gt;   &lt;span class="n"&gt;AttnResched&lt;/span&gt; &lt;span class="c1"&gt;; rescheduling attention&lt;/span&gt;
+&lt;span class="mi"&gt;010a&lt;/span&gt; &lt;span class="mi"&gt;012c&lt;/span&gt;    &lt;span class="n"&gt;APTR&lt;/span&gt;    &lt;span class="n"&gt;ResModules&lt;/span&gt;  &lt;span class="c1"&gt;; pointer to resident module array&lt;/span&gt;
+&lt;span class="mi"&gt;010e&lt;/span&gt; &lt;span class="mi"&gt;0130&lt;/span&gt;    &lt;span class="n"&gt;APTR&lt;/span&gt;    &lt;span class="n"&gt;TaskTrapCode&lt;/span&gt;    &lt;span class="c1"&gt;; default task trap routine&lt;/span&gt;
+&lt;span class="mi"&gt;0112&lt;/span&gt; &lt;span class="mi"&gt;0134&lt;/span&gt;    &lt;span class="n"&gt;APTR&lt;/span&gt;    &lt;span class="n"&gt;TaskExceptCode&lt;/span&gt;  &lt;span class="c1"&gt;; default task exception code&lt;/span&gt;
+&lt;span class="mi"&gt;0116&lt;/span&gt; &lt;span class="mi"&gt;0138&lt;/span&gt;    &lt;span class="n"&gt;APTR&lt;/span&gt;    &lt;span class="n"&gt;TaskExitCode&lt;/span&gt;    &lt;span class="c1"&gt;; default task exit code&lt;/span&gt;
+&lt;span class="mi"&gt;011a&lt;/span&gt; &lt;span class="mi"&gt;013c&lt;/span&gt;    &lt;span class="n"&gt;ULONG&lt;/span&gt;   &lt;span class="n"&gt;TaskSigAlloc&lt;/span&gt;    &lt;span class="c1"&gt;; preallocated signal mask&lt;/span&gt;
+&lt;span class="mi"&gt;011e&lt;/span&gt; &lt;span class="mi"&gt;0140&lt;/span&gt;    &lt;span class="n"&gt;UWORD&lt;/span&gt;   &lt;span class="n"&gt;TaskTrapAlloc&lt;/span&gt;   &lt;span class="c1"&gt;; preallocated trap mask&lt;/span&gt;
+
+
+&lt;span class="c1"&gt;******* System List Headers (private!) ********************************&lt;/span&gt;
+
+&lt;span class="mi"&gt;0120&lt;/span&gt; &lt;span class="mi"&gt;0142&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;MemList&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;LH_SIZE&lt;/span&gt;
+&lt;span class="mi"&gt;012e&lt;/span&gt; &lt;span class="mi"&gt;0150&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;ResourceList&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;LH_SIZE&lt;/span&gt;
+&lt;span class="mi"&gt;013c&lt;/span&gt; &lt;span class="mi"&gt;015e&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;DeviceList&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;LH_SIZE&lt;/span&gt;
+&lt;span class="mi"&gt;014a&lt;/span&gt; &lt;span class="mi"&gt;016c&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;IntrList&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;LH_SIZE&lt;/span&gt;
+&lt;span class="mi"&gt;0158&lt;/span&gt; &lt;span class="mi"&gt;017a&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;LibList&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;LH_SIZE&lt;/span&gt;
+&lt;span class="mi"&gt;0166&lt;/span&gt; &lt;span class="mi"&gt;0188&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;PortList&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;LH_SIZE&lt;/span&gt;
+&lt;span class="mi"&gt;0174&lt;/span&gt; &lt;span class="mi"&gt;0196&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;TaskReady&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;LH_SIZE&lt;/span&gt;
+&lt;span class="mi"&gt;0182&lt;/span&gt; &lt;span class="mi"&gt;01a4&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;TaskWait&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;LH_SIZE&lt;/span&gt;
+&lt;span class="mi"&gt;0190&lt;/span&gt; &lt;span class="mi"&gt;01b2&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;SoftInts&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;SH_SIZE&lt;/span&gt;&lt;span class="c1"&gt;*5&lt;/span&gt;
+
+&lt;span class="mi"&gt;01e0&lt;/span&gt; &lt;span class="mi"&gt;0202&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;LastAlert&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="c1"&gt;*4&lt;/span&gt;
+
+&lt;span class="mi"&gt;01f0&lt;/span&gt; &lt;span class="mi"&gt;0212&lt;/span&gt;    &lt;span class="n"&gt;UBYTE&lt;/span&gt;   &lt;span class="n"&gt;VBlankFrequency&lt;/span&gt;     &lt;span class="c1"&gt;;(readable)&lt;/span&gt;
+&lt;span class="mi"&gt;01f1&lt;/span&gt; &lt;span class="mi"&gt;0213&lt;/span&gt;    &lt;span class="n"&gt;UBYTE&lt;/span&gt;   &lt;span class="n"&gt;PowerSupplyFrequency&lt;/span&gt;    &lt;span class="c1"&gt;;(readable)&lt;/span&gt;
+
+&lt;span class="mi"&gt;01f2&lt;/span&gt; &lt;span class="mi"&gt;0214&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;SemaphoreList&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;LH_SIZE&lt;/span&gt;
+
+&lt;span class="mi"&gt;0200&lt;/span&gt; &lt;span class="mi"&gt;0222&lt;/span&gt;    &lt;span class="n"&gt;APTR&lt;/span&gt;    &lt;span class="n"&gt;KickMemPtr&lt;/span&gt;  &lt;span class="c1"&gt;; ptr to queue of mem lists&lt;/span&gt;
+&lt;span class="mi"&gt;0204&lt;/span&gt; &lt;span class="mi"&gt;0226&lt;/span&gt;    &lt;span class="n"&gt;APTR&lt;/span&gt;    &lt;span class="n"&gt;KickTagPtr&lt;/span&gt;  &lt;span class="c1"&gt;; ptr to rom tag queue&lt;/span&gt;
+&lt;span class="mi"&gt;0208&lt;/span&gt; &lt;span class="mi"&gt;022a&lt;/span&gt;    &lt;span class="n"&gt;APTR&lt;/span&gt;    &lt;span class="n"&gt;KickCheckSum&lt;/span&gt;    &lt;span class="c1"&gt;; checksum for mem and tags&lt;/span&gt;
+
+&lt;span class="mi"&gt;020c&lt;/span&gt; &lt;span class="mi"&gt;022e&lt;/span&gt;    &lt;span class="n"&gt;UBYTE&lt;/span&gt; &lt;span class="n"&gt;ExecBaseReserved&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="c1"&gt;;&lt;/span&gt;
+&lt;span class="mi"&gt;0216&lt;/span&gt; &lt;span class="mi"&gt;0238&lt;/span&gt;    &lt;span class="n"&gt;UBYTE&lt;/span&gt; &lt;span class="n"&gt;ExecBaseNewReserved&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;20&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="c1"&gt;;&lt;/span&gt;
+&lt;span class="mi"&gt;022a&lt;/span&gt; &lt;span class="mi"&gt;024c&lt;/span&gt;    &lt;span class="n"&gt;LABEL&lt;/span&gt;   &lt;span class="n"&gt;SYSBASESIZE&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The include file that I found in the Amiga Developer CD has a slightly different version of this structure that contains fields from higher versions of Exec. This structure can be found in the Amiga System Programmer's Guide, page 308. You can easily find the definitions of values like &lt;code&gt;SH_SIZE&lt;/code&gt; in the include files contained in the &lt;code&gt;include_i/exec/&lt;/code&gt; directory.&lt;/p&gt;
+&lt;p&gt;As you can see the final address is &lt;code&gt;0x24c&lt;/code&gt;, which is exactly where the free memory begins (remember that &lt;code&gt;LABEL&lt;/code&gt; is a macro and not a field, so it doesn't use space).&lt;/p&gt;
+&lt;h1&gt;The "magic numbers" &lt;code&gt;0x676&lt;/code&gt; and &lt;code&gt;0x400&lt;/code&gt;&lt;/h1&gt;
+&lt;p&gt;The Motorola 68000 architecture forces to reserve the first 1024 bytes (&lt;code&gt;0x400&lt;/code&gt;) for the exception vectors. The table of these vectors can be found in the Programmer's Reference Manual, page B-2, and this is the source for the magic number used when adding the chip memory to the system lists in case an expansion memory is installed.&lt;/p&gt;
+&lt;p&gt;The Exec base address, however, is not &lt;code&gt;0x400&lt;/code&gt; but &lt;code&gt;0x676&lt;/code&gt;. As we already know the library is preceded by the jump table, and since Exec exports 105 functions we use &lt;code&gt;105*6 = 630&lt;/code&gt; bytes (&lt;code&gt;0x676&lt;/code&gt;) for the jump vectors.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;        &lt;span class="o"&gt;+---------------------------------------+&lt;/span&gt;
+        &lt;span class="o"&gt;|&lt;/span&gt; First free address                    &lt;span class="o"&gt;|&lt;/span&gt;
+   &lt;span class="m"&gt;2242&lt;/span&gt; &lt;span class="o"&gt;+---------------------------------------+&lt;/span&gt; &lt;span class="mh"&gt;0x8c2&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;-+&lt;/span&gt;
+        &lt;span class="o"&gt;|&lt;/span&gt; ExecBase structure                    &lt;span class="o"&gt;|&lt;/span&gt;         &lt;span class="o"&gt;|&lt;/span&gt;
+   &lt;span class="m"&gt;1688&lt;/span&gt; &lt;span class="o"&gt;+---------------------------------------+&lt;/span&gt; &lt;span class="mh"&gt;0x698&lt;/span&gt;   &lt;span class="o"&gt;|&lt;/span&gt;
+        &lt;span class="o"&gt;|&lt;/span&gt; LIB structure                         &lt;span class="o"&gt;|&lt;/span&gt;         &lt;span class="o"&gt;|&lt;/span&gt; Exec base
+   &lt;span class="m"&gt;1668&lt;/span&gt; &lt;span class="o"&gt;+---------------------------------------+&lt;/span&gt; &lt;span class="mh"&gt;0x684&lt;/span&gt;   &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="kp"&gt;structure&lt;/span&gt;
+        &lt;span class="o"&gt;|&lt;/span&gt; LN structure                          &lt;span class="o"&gt;|&lt;/span&gt;         &lt;span class="o"&gt;|&lt;/span&gt;
+   &lt;span class="m"&gt;1654&lt;/span&gt; &lt;span class="o"&gt;+---------------------------------------+&lt;/span&gt; &lt;span class="mh"&gt;0x676&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;-+&lt;/span&gt;
+        &lt;span class="o"&gt;|&lt;/span&gt; Jump &lt;span class="kt"&gt;vector&lt;/span&gt; &lt;span class="c1"&gt;#105                      |         |&lt;/span&gt;
+        &lt;span class="o"&gt;+---------------------------------------+&lt;/span&gt;         &lt;span class="o"&gt;|&lt;/span&gt;
+        &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="kc"&gt;...&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;                                 &lt;span class="o"&gt;|&lt;/span&gt;         &lt;span class="o"&gt;|&lt;/span&gt;
+        &lt;span class="o"&gt;+---------------------------------------+&lt;/span&gt;         &lt;span class="o"&gt;|&lt;/span&gt; Exec jump
+        &lt;span class="o"&gt;|&lt;/span&gt; Jump &lt;span class="kt"&gt;vector&lt;/span&gt; &lt;span class="c1"&gt;#2                        |         | vector table&lt;/span&gt;
+   &lt;span class="m"&gt;1030&lt;/span&gt; &lt;span class="o"&gt;+---------------------------------------+&lt;/span&gt; &lt;span class="mh"&gt;0x406&lt;/span&gt;   &lt;span class="o"&gt;|&lt;/span&gt;
+        &lt;span class="o"&gt;|&lt;/span&gt; Jump &lt;span class="kt"&gt;vector&lt;/span&gt; &lt;span class="c1"&gt;#1                        |         |&lt;/span&gt;
+   &lt;span class="m"&gt;1024&lt;/span&gt; &lt;span class="o"&gt;+---------------------------------------+&lt;/span&gt; &lt;span class="mh"&gt;0x400&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;-+&lt;/span&gt;
+        &lt;span class="o"&gt;|&lt;/span&gt; End of reserved space                 &lt;span class="o"&gt;|&lt;/span&gt;         &lt;span class="o"&gt;|&lt;/span&gt;
+        &lt;span class="o"&gt;+---------------------------------------+&lt;/span&gt;         &lt;span class="o"&gt;|&lt;/span&gt;
+        &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="kc"&gt;...&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;                                 &lt;span class="o"&gt;|&lt;/span&gt;         &lt;span class="o"&gt;|&lt;/span&gt;
+     &lt;span class="m"&gt;12&lt;/span&gt; &lt;span class="o"&gt;+---------------------------------------+&lt;/span&gt; &lt;span class="mh"&gt;0xc&lt;/span&gt;     &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="m"&gt;1&lt;/span&gt; Kilobyte
+        &lt;span class="o"&gt;|&lt;/span&gt; Vector &lt;span class="c1"&gt;#2                             |         | reserved by&lt;/span&gt;
+      &lt;span class="m"&gt;8&lt;/span&gt; &lt;span class="o"&gt;+---------------------------------------+&lt;/span&gt; &lt;span class="mh"&gt;0x8&lt;/span&gt;     &lt;span class="o"&gt;|&lt;/span&gt; the M68k
+        &lt;span class="o"&gt;|&lt;/span&gt; Reset Initial Program Counter         &lt;span class="o"&gt;|&lt;/span&gt;         &lt;span class="o"&gt;|&lt;/span&gt; architecture
+      &lt;span class="m"&gt;4&lt;/span&gt; &lt;span class="o"&gt;+---------------------------------------+&lt;/span&gt; &lt;span class="mh"&gt;0x4&lt;/span&gt;     &lt;span class="o"&gt;|&lt;/span&gt;
+        &lt;span class="o"&gt;|&lt;/span&gt; Reset Initial Interrupt Stack Pointer &lt;span class="o"&gt;|&lt;/span&gt;         &lt;span class="o"&gt;|&lt;/span&gt;
+      &lt;span class="m"&gt;0&lt;/span&gt; &lt;span class="o"&gt;+---------------------------------------+&lt;/span&gt; &lt;span class="mh"&gt;0x0&lt;/span&gt;   &lt;span class="o"&gt;&amp;lt;-+&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h1&gt;Resources&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;Microprocessor-based system design by Ricardo Gutierrez-Osuna (&lt;a href="http://courses.cs.tamu.edu/rgutier/ceg411_f01/"&gt;slides&lt;/a&gt;), in particular &lt;a href="http://courses.cs.tamu.edu/rgutier/ceg411_f01/l9.pdf"&gt;Lesson 9 - Exception processing&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Motorola M68000 Family Programmer's Reference Manual &lt;a href="https://www.nxp.com/docs/en/reference-manual/M68000PRM.pdf"&gt;PDF here&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Amiga System Programmers Guide, Abacus (&lt;a href="https://archive.org/details/Amiga_System_Programmers_Guide_1988_Abacus"&gt;pdf here&lt;/a&gt;)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1&gt;Feedback&lt;/h1&gt;
+&lt;p&gt;Feel free to reach me on &lt;a href="https://twitter.com/thedigicat"&gt;Twitter&lt;/a&gt; if you have questions. The &lt;a href="http://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues"&gt;GitHub issues&lt;/a&gt; page is the best place to submit corrections.&lt;/p&gt;</content><category term="assembly"></category><category term="amiga"></category><category term="retroprogramming"></category></entry><entry><title>Exploring the Amiga - Part 5</title><link href="http://blog.thedigitalcatonline.com/blog/2018/06/25/exploring-the-amiga-5/" rel="alternate"></link><published>2018-06-25T12:00:00+01:00</published><updated>2018-06-25T12:00:00+01:00</updated><author><name>Leonardo Giordani</name></author><id>tag:blog.thedigitalcatonline.com,2018-06-25:/blog/2018/06/25/exploring-the-amiga-5/</id><summary type="html"></summary><content type="html">&lt;p&gt;Memory management is always one of the most rich and complex parts of an architecture, mainly because the available amount of memory is always less than what you would like to have. &lt;a href="https://users.ece.cmu.edu/~koopman/titan/rules.html"&gt;Always&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;It is also an interesting topic because memory is generally managed by both the hardware and the software. The microprocessor may provide a memory management unit (MMU) that enforces a specific schema and the software has to implement its own algorithms on top of that.&lt;/p&gt;
+&lt;p&gt;The Amiga originally run on a Motorola 68k, which doesn't provide any memory management in hardware. This means that there is no way for the processor to block attempts to read memory by a process, a feature that wasn't present on the first Intel x86 processors as well. Intel "solved" the issue with the introduction of the protected mode in the 386 family (even though an initial version was already present on the 286 processors). Motorola provided external MMUs for the 68010 and 68020, while the 68030 and later processor feature an on-chip MMU. &lt;/p&gt;
+&lt;p&gt;The Motorola 68k is a 32-bit processor, thus registers and the address bus have that size. The memory, however, is connected to only 24 of the 32 lines of the bus, which means that the total memory space addressable by the processor is a 24-bit space, that gives 16 Megabytes instead of the possible 4 Gigabytes. That amount of memory was however enough for the period when the Amiga was designed. Consider that the most successful model of Amiga, the Amiga 500, had 500 KBytes of memory, sometimes increased to 1 Megabyte through a memory expansion.&lt;/p&gt;
+&lt;p&gt;The lack of a memory scheme enforced by the processor means that at boot time the memory is just a flat area that can be addressed directly. As we saw in the previous instalments Exec creates its own structure in memory, generating the library node and creating the library jump table. This happens in the bigger picture of the machine initialisation, and one of the tasks performed during this initialisation is the setup of the memory management structures.&lt;/p&gt;
+&lt;h1&gt;The Exec base address&lt;/h1&gt;
+&lt;p&gt;Every Amiga programmer knows that address &lt;code&gt;0x4&lt;/code&gt; contains the Exec base address, and I showed in past instalments how this is used in conjunction with the jump table to call the library functions.&lt;/p&gt;
+&lt;p&gt;The reason why the Exec base address is stored there is however seldom mentioned. As a matter of fact that address is not just a random choice.&lt;/p&gt;
+&lt;p&gt;The Motorola 68000 family reserves the first Kilobyte of memory for exception vectors, that is code that will be executed when something wrong happens. "Wrong" here means bad at hardware level, from a divide by zero to a bus error. This is enforced by the Motorola 68k architecture and thus is a feature shared by other computers and consoles based on it.&lt;/p&gt;
+&lt;p&gt;The first two of these vectors are actually used when the processor is powering-up (or in general when it resets). And the vector number 1 (the second) at offset &lt;code&gt;0x4&lt;/code&gt; is the Reset Initial Program Counter.&lt;/p&gt;
+&lt;p&gt;After a reset the processor initialises the Program Counter with the address stored at &lt;code&gt;0x4&lt;/code&gt; in the memory. When the CPU is switched on, however, the Kickstart ROM is copied in memory, thus the addresses 0 and 4 (first two exception vectors) are the addresses listed in the ROM itself.&lt;/p&gt;
+&lt;p&gt;The very first 8 bytes of the Kickstart ROM are&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nl"&gt;00000000:&lt;/span&gt; &lt;span class="mi"&gt;1111&lt;/span&gt;
+&lt;span class="nl"&gt;00000002:&lt;/span&gt; &lt;span class="mi"&gt;4ef9&lt;/span&gt; &lt;span class="mi"&gt;00fc&lt;/span&gt; &lt;span class="mi"&gt;00d2&lt;/span&gt;            &lt;span class="k"&gt;jmp&lt;/span&gt;     &lt;span class="mi"&gt;0xfc00d2&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;and you can clearly see that the long word at address &lt;code&gt;0x4&lt;/code&gt; is &lt;code&gt;00fc 00d2&lt;/code&gt;. This actually corresponds to the address where the initial code of the ROM is&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nl"&gt;000000d2:&lt;/span&gt; &lt;span class="mi"&gt;4ff9&lt;/span&gt; &lt;span class="mi"&gt;0004&lt;/span&gt; &lt;span class="mi"&gt;0000&lt;/span&gt;            &lt;span class="k"&gt;lea&lt;/span&gt;     &lt;span class="mi"&gt;0x40000&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;sp&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;which sets the stack pointer, but I'll keep this analysis for a future post.&lt;/p&gt;
+&lt;p&gt;The address &lt;code&gt;0x4&lt;/code&gt; is then free to be used during the normal execution, since it is used only during a reset, but in that case whatever we wrote there (the Exec base address) is overwritten by the ROM code.&lt;/p&gt;
+&lt;h1&gt;List headers&lt;/h1&gt;
+&lt;p&gt;Exec manages memory and resources using &lt;a href="https://en.wikipedia.org/wiki/Linked_list"&gt;linked lists&lt;/a&gt;. As you know, to manage a linked list we need the address (pointer) of the head, of the tail, and also of the second-to-last element (the tail predecessor), to allow the tail to be detached and replaced. Actually it is evident that, given the convention that the last node is connected to the address 0, the only value we need is the address of the list head. The two additional addresses, however, can greatly simplify the code that manages the list and can greatly increase the performances, avoiding the need of a complete scan of the list to find the last element every time we want to add something to the end of the list.&lt;/p&gt;
+&lt;p&gt;The Exec library provides a nice structure to manage lists, &lt;code&gt;LH&lt;/code&gt;. The structure is defined in &lt;code&gt;include_i/exec/lists.i&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c1"&gt;* Full featured list header&lt;/span&gt;
+&lt;span class="c1"&gt;*&lt;/span&gt;
+&lt;span class="c1"&gt;   STRUCTURE    LH,0&lt;/span&gt;
+    &lt;span class="n"&gt;APTR&lt;/span&gt;    &lt;span class="n"&gt;LH_HEAD&lt;/span&gt;
+    &lt;span class="n"&gt;APTR&lt;/span&gt;    &lt;span class="n"&gt;LH_TAIL&lt;/span&gt;
+    &lt;span class="n"&gt;APTR&lt;/span&gt;    &lt;span class="n"&gt;LH_TAILPRED&lt;/span&gt;
+    &lt;span class="n"&gt;UBYTE&lt;/span&gt;   &lt;span class="n"&gt;LH_TYPE&lt;/span&gt;
+    &lt;span class="n"&gt;UBYTE&lt;/span&gt;   &lt;span class="n"&gt;LH_pad&lt;/span&gt;
+    &lt;span class="n"&gt;LABEL&lt;/span&gt;   &lt;span class="n"&gt;LH_SIZE&lt;/span&gt; &lt;span class="c1"&gt;;word aligned&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The only two fields that this structure adds compared to the previous description are &lt;code&gt;LH_TYPE&lt;/code&gt;, that unsurprisingly contains the type of the data contained in the list, and &lt;code&gt;LH_pad&lt;/code&gt; which is nothing but what the name suggests, a padding that allows the structure to be word aligned.&lt;/p&gt;
+&lt;p&gt;We need now to discover where Exec keeps the header for the memory list. Analysing the &lt;code&gt;ExecBase&lt;/code&gt; structure contained in &lt;code&gt;include_i/exec/execbase.i&lt;/code&gt; we find the following definitions&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c1"&gt;******* System List Headers (private!) ********************************&lt;/span&gt;
+
+    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;MemList&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;LH_SIZE&lt;/span&gt;
+    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;ResourceList&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;LH_SIZE&lt;/span&gt;
+    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;DeviceList&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;LH_SIZE&lt;/span&gt;
+    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;IntrList&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;LH_SIZE&lt;/span&gt;
+    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;LibList&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;LH_SIZE&lt;/span&gt;
+    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;PortList&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;LH_SIZE&lt;/span&gt;
+    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;TaskReady&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;LH_SIZE&lt;/span&gt;
+    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;TaskWait&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;LH_SIZE&lt;/span&gt;
+    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;SoftInts&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;SH_SIZE&lt;/span&gt;&lt;span class="c1"&gt;*5&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;which is exactly what we wanted. When Exec installs itself in the first part of the memory it will also initialise these headers to keep track of the corresponding resources.&lt;/p&gt;
+&lt;p&gt;It is interesting to note, however, that the ExecBase structure described in the include files is not used directly, but is more a description of what the code is going to create. This is a bit different from what higher level languages like C use to do. In C you declare a structure, you reserve memory for it, and then access its fields. In Assembly, ultimately, there is no such a concept as a structure and a field. We have only a (flat) memory and addresses.&lt;/p&gt;
+&lt;p&gt;Since ExecBase is a description of the structure of Exec once it will be installed in memory it is interesting to run through its fields and annotate the relative address of each of them.&lt;/p&gt;
+&lt;p&gt;I took the code contained in &lt;code&gt;include_i/exec/execbase.i&lt;/code&gt; and I computed the address of each field. The first column contains the relative address inside the structure (thus starting from &lt;code&gt;0x0&lt;/code&gt;), while the second column contains the address relative to the Exec base address. As shown in the fourth post the &lt;code&gt;LN&lt;/code&gt; and &lt;code&gt;LIB&lt;/code&gt; structures fill the first 34 bytes, which is why the following starting address is &lt;code&gt;0x22&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="mi"&gt;0000&lt;/span&gt; &lt;span class="mi"&gt;0022&lt;/span&gt;    &lt;span class="n"&gt;UWORD&lt;/span&gt;   &lt;span class="n"&gt;SoftVer&lt;/span&gt; &lt;span class="c1"&gt;; kickstart release number (obs.)&lt;/span&gt;
+&lt;span class="mi"&gt;0002&lt;/span&gt; &lt;span class="mi"&gt;0024&lt;/span&gt;    &lt;span class="n"&gt;WORD&lt;/span&gt;    &lt;span class="n"&gt;LowMemChkSum&lt;/span&gt;    &lt;span class="c1"&gt;; checksum of 68000 trap vectors&lt;/span&gt;
+&lt;span class="mi"&gt;0004&lt;/span&gt; &lt;span class="mi"&gt;0026&lt;/span&gt;    &lt;span class="n"&gt;ULONG&lt;/span&gt;   &lt;span class="n"&gt;ChkBase&lt;/span&gt; &lt;span class="c1"&gt;; system base pointer complement&lt;/span&gt;
+&lt;span class="mi"&gt;0008&lt;/span&gt; &lt;span class="mi"&gt;002a&lt;/span&gt;    &lt;span class="n"&gt;APTR&lt;/span&gt;    &lt;span class="n"&gt;ColdCapture&lt;/span&gt; &lt;span class="c1"&gt;; coldstart soft capture vector&lt;/span&gt;
+&lt;span class="mi"&gt;000c&lt;/span&gt; &lt;span class="mi"&gt;002e&lt;/span&gt;    &lt;span class="n"&gt;APTR&lt;/span&gt;    &lt;span class="n"&gt;CoolCapture&lt;/span&gt; &lt;span class="c1"&gt;; coolstart soft capture vector&lt;/span&gt;
+&lt;span class="mi"&gt;0010&lt;/span&gt; &lt;span class="mi"&gt;0032&lt;/span&gt;    &lt;span class="n"&gt;APTR&lt;/span&gt;    &lt;span class="n"&gt;WarmCapture&lt;/span&gt; &lt;span class="c1"&gt;; warmstart soft capture vector&lt;/span&gt;
+&lt;span class="mi"&gt;0014&lt;/span&gt; &lt;span class="mi"&gt;0036&lt;/span&gt;    &lt;span class="n"&gt;APTR&lt;/span&gt;    &lt;span class="n"&gt;SysStkUpper&lt;/span&gt; &lt;span class="c1"&gt;; system stack base   (upper bound)&lt;/span&gt;
+&lt;span class="mi"&gt;0018&lt;/span&gt; &lt;span class="mi"&gt;003a&lt;/span&gt;    &lt;span class="n"&gt;APTR&lt;/span&gt;    &lt;span class="n"&gt;SysStkLower&lt;/span&gt; &lt;span class="c1"&gt;; top of system stack (lower bound)&lt;/span&gt;
+&lt;span class="mi"&gt;001c&lt;/span&gt; &lt;span class="mi"&gt;003e&lt;/span&gt;    &lt;span class="n"&gt;ULONG&lt;/span&gt;   &lt;span class="n"&gt;MaxLocMem&lt;/span&gt;   &lt;span class="c1"&gt;; top of chip memory&lt;/span&gt;
+&lt;span class="mi"&gt;0020&lt;/span&gt; &lt;span class="mi"&gt;0042&lt;/span&gt;    &lt;span class="n"&gt;APTR&lt;/span&gt;    &lt;span class="n"&gt;DebugEntry&lt;/span&gt;  &lt;span class="c1"&gt;; global debugger entry point&lt;/span&gt;
+&lt;span class="mi"&gt;0024&lt;/span&gt; &lt;span class="mi"&gt;0046&lt;/span&gt;    &lt;span class="n"&gt;APTR&lt;/span&gt;    &lt;span class="n"&gt;DebugData&lt;/span&gt;   &lt;span class="c1"&gt;; global debugger data segment&lt;/span&gt;
+&lt;span class="mi"&gt;0028&lt;/span&gt; &lt;span class="mi"&gt;004a&lt;/span&gt;    &lt;span class="n"&gt;APTR&lt;/span&gt;    &lt;span class="n"&gt;AlertData&lt;/span&gt;   &lt;span class="c1"&gt;; alert data segment&lt;/span&gt;
+&lt;span class="mi"&gt;002c&lt;/span&gt; &lt;span class="mi"&gt;004e&lt;/span&gt;    &lt;span class="n"&gt;APTR&lt;/span&gt;    &lt;span class="n"&gt;MaxExtMem&lt;/span&gt;   &lt;span class="c1"&gt;; top of extended mem, or null if none&lt;/span&gt;
+
+&lt;span class="mi"&gt;0030&lt;/span&gt; &lt;span class="mi"&gt;0052&lt;/span&gt;    &lt;span class="n"&gt;WORD&lt;/span&gt;    &lt;span class="n"&gt;ChkSum&lt;/span&gt;      &lt;span class="c1"&gt;; for all of the above (minus 2)&lt;/span&gt;
+
+
+&lt;span class="c1"&gt;******* Interrupt Related ********************************************&lt;/span&gt;
+
+    &lt;span class="n"&gt;LABEL&lt;/span&gt;   &lt;span class="n"&gt;IntVects&lt;/span&gt;
+&lt;span class="mi"&gt;0032&lt;/span&gt; &lt;span class="mi"&gt;0054&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;IVTBE&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;IV_SIZE&lt;/span&gt;
+&lt;span class="mi"&gt;003e&lt;/span&gt; &lt;span class="mi"&gt;0060&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;IVDSKBLK&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;IV_SIZE&lt;/span&gt;
+&lt;span class="mi"&gt;004a&lt;/span&gt; &lt;span class="mi"&gt;006c&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;IVSOFTINT&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;IV_SIZE&lt;/span&gt;
+&lt;span class="mi"&gt;0056&lt;/span&gt; &lt;span class="mi"&gt;0078&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;IVPORTS&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;IV_SIZE&lt;/span&gt;
+&lt;span class="mi"&gt;0062&lt;/span&gt; &lt;span class="mi"&gt;0084&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;IVCOPER&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;IV_SIZE&lt;/span&gt;
+&lt;span class="mi"&gt;006e&lt;/span&gt; &lt;span class="mi"&gt;0090&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;IVVERTB&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;IV_SIZE&lt;/span&gt;
+&lt;span class="mi"&gt;007a&lt;/span&gt; &lt;span class="mi"&gt;009c&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;IVBLIT&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;IV_SIZE&lt;/span&gt;
+&lt;span class="mi"&gt;0086&lt;/span&gt; &lt;span class="mi"&gt;00a8&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;IVAUD0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;IV_SIZE&lt;/span&gt;
+&lt;span class="mi"&gt;0092&lt;/span&gt; &lt;span class="mi"&gt;00b4&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;IVAUD1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;IV_SIZE&lt;/span&gt;
+&lt;span class="mi"&gt;009e&lt;/span&gt; &lt;span class="mi"&gt;00c0&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;IVAUD2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;IV_SIZE&lt;/span&gt;
+&lt;span class="mi"&gt;00aa&lt;/span&gt; &lt;span class="mi"&gt;00cc&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;IVAUD3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;IV_SIZE&lt;/span&gt;
+&lt;span class="mi"&gt;00b6&lt;/span&gt; &lt;span class="mi"&gt;00d8&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;IVRBF&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;IV_SIZE&lt;/span&gt;
+&lt;span class="mi"&gt;00c2&lt;/span&gt; &lt;span class="mi"&gt;00e4&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;IVDSKSYNC&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;IV_SIZE&lt;/span&gt;
+&lt;span class="mi"&gt;00ce&lt;/span&gt; &lt;span class="mi"&gt;00f0&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;IVEXTER&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;IV_SIZE&lt;/span&gt;
+&lt;span class="mi"&gt;00da&lt;/span&gt; &lt;span class="mi"&gt;00fc&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;IVINTEN&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;IV_SIZE&lt;/span&gt;
+&lt;span class="mi"&gt;00e6&lt;/span&gt; &lt;span class="mi"&gt;0108&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;IVNMI&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;IV_SIZE&lt;/span&gt;
+
+
+&lt;span class="c1"&gt;******* Dynamic System Variables *************************************&lt;/span&gt;
+
+&lt;span class="mi"&gt;00f2&lt;/span&gt; &lt;span class="mi"&gt;0114&lt;/span&gt;    &lt;span class="n"&gt;APTR&lt;/span&gt;    &lt;span class="n"&gt;ThisTask&lt;/span&gt;    &lt;span class="c1"&gt;; pointer to current task (readable)&lt;/span&gt;
+
+&lt;span class="mi"&gt;00f6&lt;/span&gt; &lt;span class="mi"&gt;0118&lt;/span&gt;    &lt;span class="n"&gt;ULONG&lt;/span&gt;   &lt;span class="n"&gt;IdleCount&lt;/span&gt;   &lt;span class="c1"&gt;; idle counter&lt;/span&gt;
+&lt;span class="mi"&gt;00fa&lt;/span&gt; &lt;span class="mi"&gt;011c&lt;/span&gt;    &lt;span class="n"&gt;ULONG&lt;/span&gt;   &lt;span class="n"&gt;DispCount&lt;/span&gt;   &lt;span class="c1"&gt;; dispatch counter&lt;/span&gt;
+&lt;span class="mi"&gt;00fe&lt;/span&gt; &lt;span class="mi"&gt;0120&lt;/span&gt;    &lt;span class="n"&gt;UWORD&lt;/span&gt;   &lt;span class="n"&gt;Quantum&lt;/span&gt; &lt;span class="c1"&gt;; time slice quantum&lt;/span&gt;
+&lt;span class="mi"&gt;0100&lt;/span&gt; &lt;span class="mi"&gt;0122&lt;/span&gt;    &lt;span class="n"&gt;UWORD&lt;/span&gt;   &lt;span class="n"&gt;Elapsed&lt;/span&gt; &lt;span class="c1"&gt;; current quantum ticks&lt;/span&gt;
+&lt;span class="mi"&gt;0102&lt;/span&gt; &lt;span class="mi"&gt;0124&lt;/span&gt;    &lt;span class="n"&gt;UWORD&lt;/span&gt;   &lt;span class="n"&gt;SysFlags&lt;/span&gt;    &lt;span class="c1"&gt;; misc internal system flags&lt;/span&gt;
+&lt;span class="mi"&gt;0104&lt;/span&gt; &lt;span class="mi"&gt;0126&lt;/span&gt;    &lt;span class="n"&gt;BYTE&lt;/span&gt;    &lt;span class="n"&gt;IDNestCnt&lt;/span&gt;   &lt;span class="c1"&gt;; interrupt disable nesting count&lt;/span&gt;
+&lt;span class="mi"&gt;0105&lt;/span&gt; &lt;span class="mi"&gt;0127&lt;/span&gt;    &lt;span class="n"&gt;BYTE&lt;/span&gt;    &lt;span class="n"&gt;TDNestCnt&lt;/span&gt;   &lt;span class="c1"&gt;; task disable nesting count&lt;/span&gt;
+
+&lt;span class="mi"&gt;0106&lt;/span&gt; &lt;span class="mi"&gt;0128&lt;/span&gt;    &lt;span class="n"&gt;UWORD&lt;/span&gt;   &lt;span class="n"&gt;AttnFlags&lt;/span&gt;   &lt;span class="c1"&gt;; special attention flags (readable)&lt;/span&gt;
+
+&lt;span class="mi"&gt;0108&lt;/span&gt; &lt;span class="mi"&gt;012a&lt;/span&gt;    &lt;span class="n"&gt;UWORD&lt;/span&gt;   &lt;span class="n"&gt;AttnResched&lt;/span&gt; &lt;span class="c1"&gt;; rescheduling attention&lt;/span&gt;
+&lt;span class="mi"&gt;010a&lt;/span&gt; &lt;span class="mi"&gt;012c&lt;/span&gt;    &lt;span class="n"&gt;APTR&lt;/span&gt;    &lt;span class="n"&gt;ResModules&lt;/span&gt;  &lt;span class="c1"&gt;; pointer to resident module array&lt;/span&gt;
+&lt;span class="mi"&gt;010e&lt;/span&gt; &lt;span class="mi"&gt;0130&lt;/span&gt;    &lt;span class="n"&gt;APTR&lt;/span&gt;    &lt;span class="n"&gt;TaskTrapCode&lt;/span&gt;    &lt;span class="c1"&gt;; default task trap routine&lt;/span&gt;
+&lt;span class="mi"&gt;0112&lt;/span&gt; &lt;span class="mi"&gt;0134&lt;/span&gt;    &lt;span class="n"&gt;APTR&lt;/span&gt;    &lt;span class="n"&gt;TaskExceptCode&lt;/span&gt;  &lt;span class="c1"&gt;; default task exception code&lt;/span&gt;
+&lt;span class="mi"&gt;0116&lt;/span&gt; &lt;span class="mi"&gt;0138&lt;/span&gt;    &lt;span class="n"&gt;APTR&lt;/span&gt;    &lt;span class="n"&gt;TaskExitCode&lt;/span&gt;    &lt;span class="c1"&gt;; default task exit code&lt;/span&gt;
+&lt;span class="mi"&gt;011a&lt;/span&gt; &lt;span class="mi"&gt;013c&lt;/span&gt;    &lt;span class="n"&gt;ULONG&lt;/span&gt;   &lt;span class="n"&gt;TaskSigAlloc&lt;/span&gt;    &lt;span class="c1"&gt;; preallocated signal mask&lt;/span&gt;
+&lt;span class="mi"&gt;011e&lt;/span&gt; &lt;span class="mi"&gt;0140&lt;/span&gt;    &lt;span class="n"&gt;UWORD&lt;/span&gt;   &lt;span class="n"&gt;TaskTrapAlloc&lt;/span&gt;   &lt;span class="c1"&gt;; preallocated trap mask&lt;/span&gt;
+
+
+&lt;span class="c1"&gt;******* System List Headers (private!) ********************************&lt;/span&gt;
+
+&lt;span class="mi"&gt;0120&lt;/span&gt; &lt;span class="mi"&gt;0142&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;MemList&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;LH_SIZE&lt;/span&gt;
+&lt;span class="mi"&gt;012e&lt;/span&gt; &lt;span class="mi"&gt;0150&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;ResourceList&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;LH_SIZE&lt;/span&gt;
+&lt;span class="mi"&gt;013c&lt;/span&gt; &lt;span class="mi"&gt;015e&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;DeviceList&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;LH_SIZE&lt;/span&gt;
+&lt;span class="mi"&gt;014a&lt;/span&gt; &lt;span class="mi"&gt;016c&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;IntrList&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;LH_SIZE&lt;/span&gt;
+&lt;span class="mi"&gt;0158&lt;/span&gt; &lt;span class="mi"&gt;017a&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;LibList&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;LH_SIZE&lt;/span&gt;
+&lt;span class="mi"&gt;0166&lt;/span&gt; &lt;span class="mi"&gt;0188&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;PortList&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;LH_SIZE&lt;/span&gt;
+&lt;span class="mi"&gt;0174&lt;/span&gt; &lt;span class="mi"&gt;0196&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;TaskReady&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;LH_SIZE&lt;/span&gt;
+&lt;span class="mi"&gt;0182&lt;/span&gt; &lt;span class="mi"&gt;01a4&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;TaskWait&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;LH_SIZE&lt;/span&gt;
+&lt;span class="mi"&gt;0190&lt;/span&gt; &lt;span class="mi"&gt;01b2&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;SoftInts&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;SH_SIZE&lt;/span&gt;&lt;span class="c1"&gt;*5&lt;/span&gt;
+
+&lt;span class="mi"&gt;01e0&lt;/span&gt; &lt;span class="mi"&gt;0202&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;LastAlert&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="c1"&gt;*4&lt;/span&gt;
+
+&lt;span class="mi"&gt;01f0&lt;/span&gt; &lt;span class="mi"&gt;0212&lt;/span&gt;    &lt;span class="n"&gt;UBYTE&lt;/span&gt;   &lt;span class="n"&gt;VBlankFrequency&lt;/span&gt;     &lt;span class="c1"&gt;;(readable)&lt;/span&gt;
+&lt;span class="mi"&gt;01f1&lt;/span&gt; &lt;span class="mi"&gt;0213&lt;/span&gt;    &lt;span class="n"&gt;UBYTE&lt;/span&gt;   &lt;span class="n"&gt;PowerSupplyFrequency&lt;/span&gt;    &lt;span class="c1"&gt;;(readable)&lt;/span&gt;
+
+&lt;span class="mi"&gt;01f2&lt;/span&gt; &lt;span class="mi"&gt;0214&lt;/span&gt;    &lt;span class="n"&gt;STRUCT&lt;/span&gt;  &lt;span class="n"&gt;SemaphoreList&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;LH_SIZE&lt;/span&gt;
+
+&lt;span class="mi"&gt;0200&lt;/span&gt; &lt;span class="mi"&gt;0222&lt;/span&gt;    &lt;span class="n"&gt;APTR&lt;/span&gt;    &lt;span class="n"&gt;KickMemPtr&lt;/span&gt;  &lt;span class="c1"&gt;; ptr to queue of mem lists&lt;/span&gt;
+&lt;span class="mi"&gt;0204&lt;/span&gt; &lt;span class="mi"&gt;0226&lt;/span&gt;    &lt;span class="n"&gt;APTR&lt;/span&gt;    &lt;span class="n"&gt;KickTagPtr&lt;/span&gt;  &lt;span class="c1"&gt;; ptr to rom tag queue&lt;/span&gt;
+&lt;span class="mi"&gt;0208&lt;/span&gt; &lt;span class="mi"&gt;022a&lt;/span&gt;    &lt;span class="n"&gt;APTR&lt;/span&gt;    &lt;span class="n"&gt;KickCheckSum&lt;/span&gt;    &lt;span class="c1"&gt;; checksum for mem and tags&lt;/span&gt;
+
+&lt;span class="mi"&gt;020c&lt;/span&gt; &lt;span class="mi"&gt;022e&lt;/span&gt;    &lt;span class="n"&gt;UBYTE&lt;/span&gt; &lt;span class="n"&gt;ExecBaseReserved&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="c1"&gt;;&lt;/span&gt;
+&lt;span class="mi"&gt;0216&lt;/span&gt; &lt;span class="mi"&gt;0238&lt;/span&gt;    &lt;span class="n"&gt;UBYTE&lt;/span&gt; &lt;span class="n"&gt;ExecBaseNewReserved&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;20&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="c1"&gt;;&lt;/span&gt;
+&lt;span class="mi"&gt;022a&lt;/span&gt; &lt;span class="mi"&gt;024c&lt;/span&gt;    &lt;span class="n"&gt;LABEL&lt;/span&gt;   &lt;span class="n"&gt;SYSBASESIZE&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;According to this structure we expect to find the memory list header 322 bytes (&lt;code&gt;0x142&lt;/code&gt;) after the base address, which means that this number should be mentioned somewhere in the Kickstart code.&lt;/p&gt;
+&lt;p&gt;It is not surprise indeed that the function &lt;code&gt;AllocMem&lt;/code&gt; mentions it. This function is part of the Exec API that we explored in the third and fourth instalments. Following the same method described there I found the function at the address &lt;code&gt;0x17d0&lt;/code&gt; in the Kickstart code&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c1"&gt;; memoryBlock = AllocMem(byteSize, attributes)&lt;/span&gt;
+&lt;span class="c1"&gt;; d0                     d0        d1&lt;/span&gt;
+
+&lt;span class="nl"&gt;000017d0:&lt;/span&gt; &lt;span class="mi"&gt;522e&lt;/span&gt; &lt;span class="mi"&gt;0127&lt;/span&gt;                 &lt;span class="k"&gt;addq&lt;/span&gt;&lt;span class="o"&gt;.b&lt;/span&gt;  &lt;span class="nl"&gt;#0x1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;0x127&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;a6&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="nl"&gt;000017d4:&lt;/span&gt; &lt;span class="mi"&gt;48e7&lt;/span&gt; &lt;span class="mi"&gt;3020&lt;/span&gt;                 &lt;span class="k"&gt;movem&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt; &lt;span class="o"&gt;d2&lt;/span&gt;&lt;span class="p"&gt;-&lt;/span&gt;&lt;span class="o"&gt;d3&lt;/span&gt;&lt;span class="p"&gt;/&lt;/span&gt;&lt;span class="o"&gt;a2&lt;/span&gt;&lt;span class="p"&gt;,-(&lt;/span&gt;&lt;span class="n"&gt;sp&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="nl"&gt;000017d8:&lt;/span&gt; &lt;span class="mi"&gt;2600&lt;/span&gt;                      &lt;span class="k"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt;  &lt;span class="o"&gt;d0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;d3&lt;/span&gt;
+&lt;span class="nl"&gt;000017da:&lt;/span&gt; &lt;span class="mi"&gt;2401&lt;/span&gt;                      &lt;span class="k"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt;  &lt;span class="o"&gt;d1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;d2&lt;/span&gt;
+&lt;span class="nl"&gt;000017dc:&lt;/span&gt; &lt;span class="mi"&gt;45ee&lt;/span&gt; &lt;span class="mi"&gt;0142&lt;/span&gt;                 &lt;span class="k"&gt;lea&lt;/span&gt;     &lt;span class="mi"&gt;0x142&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;a6&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;&lt;span class="o"&gt;a2&lt;/span&gt;
+&lt;span class="nl"&gt;000017e0:&lt;/span&gt; &lt;span class="mi"&gt;2452&lt;/span&gt;                      &lt;span class="k"&gt;movea&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;a2&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;&lt;span class="o"&gt;a2&lt;/span&gt;
+&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;...&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;and in this initial part of the function we can clearly see the code that loads the effective address of &lt;code&gt;0x142(a6)&lt;/code&gt;. Remember that &lt;code&gt;a6&lt;/code&gt; is always supposed to contain the Exec base address.&lt;/p&gt;
+&lt;p&gt;The displacement &lt;code&gt;0x142&lt;/code&gt; is also mentioned in a table towards the beginning of the code, and this is the part we are really interested in at the moment&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c1"&gt;; Initialise list headers&lt;/span&gt;
+
+&lt;span class="nl"&gt;000002b0:&lt;/span&gt; &lt;span class="mi"&gt;43fa&lt;/span&gt; &lt;span class="mi"&gt;0020&lt;/span&gt;                 &lt;span class="k"&gt;lea&lt;/span&gt;     &lt;span class="mi"&gt;0x2d2&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;pc&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;&lt;span class="o"&gt;a1&lt;/span&gt;
+&lt;span class="nl"&gt;000002b4:&lt;/span&gt; &lt;span class="mi"&gt;3019&lt;/span&gt;                      &lt;span class="k"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.w&lt;/span&gt;  &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;a1&lt;/span&gt;&lt;span class="p"&gt;)+,&lt;/span&gt;&lt;span class="o"&gt;d0&lt;/span&gt;
+&lt;span class="nl"&gt;000002b6:&lt;/span&gt; &lt;span class="mi"&gt;6700&lt;/span&gt; &lt;span class="mi"&gt;0086&lt;/span&gt;                 &lt;span class="k"&gt;beq&lt;/span&gt;&lt;span class="o"&gt;.w&lt;/span&gt;   &lt;span class="mi"&gt;0x33e&lt;/span&gt;
+&lt;span class="nl"&gt;000002ba:&lt;/span&gt; &lt;span class="mi"&gt;41f6&lt;/span&gt; &lt;span class="mi"&gt;0000&lt;/span&gt;                 &lt;span class="k"&gt;lea&lt;/span&gt;     &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;a6&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;d0.w&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;&lt;span class="o"&gt;a0&lt;/span&gt;
+&lt;span class="nl"&gt;000002be:&lt;/span&gt; &lt;span class="mi"&gt;2088&lt;/span&gt;                      &lt;span class="k"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt;  &lt;span class="o"&gt;a0&lt;/span&gt;&lt;span class="p"&gt;,(&lt;/span&gt;&lt;span class="o"&gt;a0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="nl"&gt;000002c0:&lt;/span&gt; &lt;span class="mi"&gt;5890&lt;/span&gt;                      &lt;span class="k"&gt;addq&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt;  &lt;span class="nl"&gt;#0x4&lt;/span&gt;&lt;span class="p"&gt;,(&lt;/span&gt;&lt;span class="o"&gt;a0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="nl"&gt;000002c2:&lt;/span&gt; &lt;span class="mi"&gt;42a8&lt;/span&gt; &lt;span class="mi"&gt;0004&lt;/span&gt;                 &lt;span class="k"&gt;clr&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt;   &lt;span class="mi"&gt;0x4&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;a0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="nl"&gt;000002c6:&lt;/span&gt; &lt;span class="mi"&gt;2148&lt;/span&gt; &lt;span class="mi"&gt;0008&lt;/span&gt;                 &lt;span class="k"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt;  &lt;span class="o"&gt;a0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;0x8&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;a0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="nl"&gt;000002ca:&lt;/span&gt; &lt;span class="mi"&gt;3019&lt;/span&gt;                      &lt;span class="k"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.w&lt;/span&gt;  &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;a1&lt;/span&gt;&lt;span class="p"&gt;)+,&lt;/span&gt;&lt;span class="o"&gt;d0&lt;/span&gt;
+&lt;span class="nl"&gt;000002cc:&lt;/span&gt; &lt;span class="mi"&gt;1140&lt;/span&gt; &lt;span class="mi"&gt;000c&lt;/span&gt;                 &lt;span class="k"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.b&lt;/span&gt;  &lt;span class="o"&gt;d0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;0xc&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;a0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="nl"&gt;000002d0:&lt;/span&gt; &lt;span class="mi"&gt;60e2&lt;/span&gt;                      &lt;span class="k"&gt;bra&lt;/span&gt;&lt;span class="o"&gt;.b&lt;/span&gt;   &lt;span class="mi"&gt;0x2b4&lt;/span&gt;
+
+&lt;span class="c1"&gt;; List headers&lt;/span&gt;
+
+&lt;span class="nl"&gt;000002d2:&lt;/span&gt; &lt;span class="mi"&gt;0142&lt;/span&gt; &lt;span class="mi"&gt;000a&lt;/span&gt;
+&lt;span class="nl"&gt;000002d6:&lt;/span&gt; &lt;span class="mi"&gt;0150&lt;/span&gt; &lt;span class="mi"&gt;0008&lt;/span&gt;
+&lt;span class="nl"&gt;000002da:&lt;/span&gt; &lt;span class="mi"&gt;015e&lt;/span&gt; &lt;span class="mi"&gt;0003&lt;/span&gt;
+&lt;span class="nl"&gt;000002de:&lt;/span&gt; &lt;span class="mi"&gt;017a&lt;/span&gt; &lt;span class="mi"&gt;0009&lt;/span&gt;
+&lt;span class="nl"&gt;000002e2:&lt;/span&gt; &lt;span class="mi"&gt;0188&lt;/span&gt; &lt;span class="mi"&gt;0004&lt;/span&gt;
+&lt;span class="nl"&gt;000002e6:&lt;/span&gt; &lt;span class="mi"&gt;0196&lt;/span&gt; &lt;span class="mi"&gt;0001&lt;/span&gt;
+&lt;span class="nl"&gt;000002ea:&lt;/span&gt; &lt;span class="mi"&gt;01a4&lt;/span&gt; &lt;span class="mi"&gt;0001&lt;/span&gt;
+&lt;span class="nl"&gt;000002ee:&lt;/span&gt; &lt;span class="mi"&gt;016c&lt;/span&gt; &lt;span class="mi"&gt;0002&lt;/span&gt;
+&lt;span class="nl"&gt;000002f2:&lt;/span&gt; &lt;span class="mi"&gt;01b2&lt;/span&gt; &lt;span class="mi"&gt;000b&lt;/span&gt;
+&lt;span class="nl"&gt;000002f6:&lt;/span&gt; &lt;span class="mi"&gt;01c2&lt;/span&gt; &lt;span class="mi"&gt;000b&lt;/span&gt;
+&lt;span class="nl"&gt;000002fa:&lt;/span&gt; &lt;span class="mi"&gt;01d2&lt;/span&gt; &lt;span class="mi"&gt;000b&lt;/span&gt;
+&lt;span class="nl"&gt;000002fe:&lt;/span&gt; &lt;span class="mi"&gt;01e2&lt;/span&gt; &lt;span class="mi"&gt;000b&lt;/span&gt;
+&lt;span class="nl"&gt;00000302:&lt;/span&gt; &lt;span class="mi"&gt;01f2&lt;/span&gt; &lt;span class="mi"&gt;000b&lt;/span&gt;
+&lt;span class="nl"&gt;00000306:&lt;/span&gt; &lt;span class="mi"&gt;0214&lt;/span&gt; &lt;span class="mi"&gt;000f&lt;/span&gt;
+&lt;span class="nl"&gt;0000030a:&lt;/span&gt; &lt;span class="mi"&gt;0000&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;As you can see I formatted the code to show that the values after &lt;code&gt;02d2&lt;/code&gt; are data and not code. The disassembler will obviously show you some instructions but they are just misinterpretations of the binary data.&lt;/p&gt;
+&lt;p&gt;This table is immediately followed by the table we found in the third post, when we were looking at the values of the &lt;code&gt;LIB&lt;/code&gt; structure.&lt;/p&gt;
+&lt;p&gt;Let's comment line by line the code at &lt;code&gt;02b0&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c1"&gt;; Initialise list headers&lt;/span&gt;
+
+&lt;span class="nl"&gt;000002b0:&lt;/span&gt; &lt;span class="mi"&gt;43fa&lt;/span&gt; &lt;span class="mi"&gt;0020&lt;/span&gt;                 &lt;span class="k"&gt;lea&lt;/span&gt;     &lt;span class="mi"&gt;0x2d2&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;pc&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;&lt;span class="o"&gt;a1&lt;/span&gt;
+&lt;span class="nl"&gt;000002b4:&lt;/span&gt; &lt;span class="mi"&gt;3019&lt;/span&gt;                      &lt;span class="k"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.w&lt;/span&gt;  &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;a1&lt;/span&gt;&lt;span class="p"&gt;)+,&lt;/span&gt;&lt;span class="o"&gt;d0&lt;/span&gt;
+&lt;span class="nl"&gt;000002b6:&lt;/span&gt; &lt;span class="mi"&gt;6700&lt;/span&gt; &lt;span class="mi"&gt;0086&lt;/span&gt;                 &lt;span class="k"&gt;beq&lt;/span&gt;&lt;span class="o"&gt;.w&lt;/span&gt;   &lt;span class="mi"&gt;0x33e&lt;/span&gt;
+&lt;span class="nl"&gt;000002ba:&lt;/span&gt; &lt;span class="mi"&gt;41f6&lt;/span&gt; &lt;span class="mi"&gt;0000&lt;/span&gt;                 &lt;span class="k"&gt;lea&lt;/span&gt;     &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;a6&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;d0.w&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;&lt;span class="o"&gt;a0&lt;/span&gt;
+&lt;span class="nl"&gt;000002be:&lt;/span&gt; &lt;span class="mi"&gt;2088&lt;/span&gt;                      &lt;span class="k"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt;  &lt;span class="o"&gt;a0&lt;/span&gt;&lt;span class="p"&gt;,(&lt;/span&gt;&lt;span class="o"&gt;a0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="nl"&gt;000002c0:&lt;/span&gt; &lt;span class="mi"&gt;5890&lt;/span&gt;                      &lt;span class="k"&gt;addq&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt;  &lt;span class="nl"&gt;#0x4&lt;/span&gt;&lt;span class="p"&gt;,(&lt;/span&gt;&lt;span class="o"&gt;a0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="nl"&gt;000002c2:&lt;/span&gt; &lt;span class="mi"&gt;42a8&lt;/span&gt; &lt;span class="mi"&gt;0004&lt;/span&gt;                 &lt;span class="k"&gt;clr&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt;   &lt;span class="mi"&gt;0x4&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;a0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="nl"&gt;000002c6:&lt;/span&gt; &lt;span class="mi"&gt;2148&lt;/span&gt; &lt;span class="mi"&gt;0008&lt;/span&gt;                 &lt;span class="k"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt;  &lt;span class="o"&gt;a0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;0x8&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;a0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="nl"&gt;000002ca:&lt;/span&gt; &lt;span class="mi"&gt;3019&lt;/span&gt;                      &lt;span class="k"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.w&lt;/span&gt;  &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;a1&lt;/span&gt;&lt;span class="p"&gt;)+,&lt;/span&gt;&lt;span class="o"&gt;d0&lt;/span&gt;
+&lt;span class="nl"&gt;000002cc:&lt;/span&gt; &lt;span class="mi"&gt;1140&lt;/span&gt; &lt;span class="mi"&gt;000c&lt;/span&gt;                 &lt;span class="k"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.b&lt;/span&gt;  &lt;span class="o"&gt;d0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;0xc&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;a0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="nl"&gt;000002d0:&lt;/span&gt; &lt;span class="mi"&gt;60e2&lt;/span&gt;                      &lt;span class="k"&gt;bra&lt;/span&gt;&lt;span class="o"&gt;.b&lt;/span&gt;   &lt;span class="mi"&gt;0x2b4&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nl"&gt;000002b0:&lt;/span&gt; &lt;span class="mi"&gt;43fa&lt;/span&gt; &lt;span class="mi"&gt;0020&lt;/span&gt;                 &lt;span class="k"&gt;lea&lt;/span&gt;     &lt;span class="mi"&gt;0x2d2&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;pc&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;&lt;span class="o"&gt;a1&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;First of all the code loads the absolute address of &lt;code&gt;0x2d2(pc)&lt;/code&gt; in the &lt;code&gt;a1&lt;/code&gt; register. This is exactly the beginning of the table, as shown above.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nl"&gt;000002b4:&lt;/span&gt; &lt;span class="mi"&gt;3019&lt;/span&gt;                      &lt;span class="k"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.w&lt;/span&gt;  &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;a1&lt;/span&gt;&lt;span class="p"&gt;)+,&lt;/span&gt;&lt;span class="o"&gt;d0&lt;/span&gt;
+&lt;span class="nl"&gt;000002b6:&lt;/span&gt; &lt;span class="mi"&gt;6700&lt;/span&gt; &lt;span class="mi"&gt;0086&lt;/span&gt;                 &lt;span class="k"&gt;beq&lt;/span&gt;&lt;span class="o"&gt;.w&lt;/span&gt;   &lt;span class="mi"&gt;0x33e&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The code then loads the first value of the table (&lt;code&gt;0142&lt;/code&gt;) in &lt;code&gt;d0&lt;/code&gt; and increments &lt;code&gt;a1&lt;/code&gt;. This suggests that we are looking at a loop. The following instruction is indeed a comparison that jumps to &lt;code&gt;0x33e&lt;/code&gt; is the value is &lt;code&gt;0&lt;/code&gt;. You can easily see above that the table is terminated by a &lt;code&gt;0000&lt;/code&gt;.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nl"&gt;000002ba:&lt;/span&gt; &lt;span class="mi"&gt;41f6&lt;/span&gt; &lt;span class="mi"&gt;0000&lt;/span&gt;                 &lt;span class="k"&gt;lea&lt;/span&gt;     &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;a6&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;d0.w&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;&lt;span class="o"&gt;a0&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The register &lt;code&gt;a0&lt;/code&gt; is then loaded with the effective address of Exec + &lt;code&gt;d0&lt;/code&gt;. This means that we use the value we just read from the table as a pointer. For the first value, then, we are looking at &lt;code&gt;0x142&lt;/code&gt; bytes after the beginning of the Exec library, exactly where we expected to find the Memory List header.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nl"&gt;000002be:&lt;/span&gt; &lt;span class="mi"&gt;2088&lt;/span&gt;                      &lt;span class="k"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt;  &lt;span class="o"&gt;a0&lt;/span&gt;&lt;span class="p"&gt;,(&lt;/span&gt;&lt;span class="o"&gt;a0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="nl"&gt;000002c0:&lt;/span&gt; &lt;span class="mi"&gt;5890&lt;/span&gt;                      &lt;span class="k"&gt;addq&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt;  &lt;span class="nl"&gt;#0x4&lt;/span&gt;&lt;span class="p"&gt;,(&lt;/span&gt;&lt;span class="o"&gt;a0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;An empty linked list has the head pointing to the tail and the tail pointing to zero. To do this we set the content of that address &lt;code&gt;(a0)&lt;/code&gt; to the address itself (&lt;code&gt;a0&lt;/code&gt;), then we increment it by 4 making it point to the tail.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nl"&gt;000002c2:&lt;/span&gt; &lt;span class="mi"&gt;42a8&lt;/span&gt; &lt;span class="mi"&gt;0004&lt;/span&gt;                 &lt;span class="k"&gt;clr&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt;   &lt;span class="mi"&gt;0x4&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;a0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="nl"&gt;000002c6:&lt;/span&gt; &lt;span class="mi"&gt;2148&lt;/span&gt; &lt;span class="mi"&gt;0008&lt;/span&gt;                 &lt;span class="k"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.l&lt;/span&gt;  &lt;span class="o"&gt;a0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;0x8&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;a0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The tail itself is then cleared and the tail predecessor is set to be the head.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nl"&gt;000002ca:&lt;/span&gt; &lt;span class="mi"&gt;3019&lt;/span&gt;                      &lt;span class="k"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.w&lt;/span&gt;  &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;a1&lt;/span&gt;&lt;span class="p"&gt;)+,&lt;/span&gt;&lt;span class="o"&gt;d0&lt;/span&gt;
+&lt;span class="nl"&gt;000002cc:&lt;/span&gt; &lt;span class="mi"&gt;1140&lt;/span&gt; &lt;span class="mi"&gt;000c&lt;/span&gt;                 &lt;span class="k"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.b&lt;/span&gt;  &lt;span class="o"&gt;d0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;0xc&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;a0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The code then fetches the next word from the table (&lt;code&gt;000a&lt;/code&gt;) and puts it into a field 12 bytes (&lt;code&gt;0xc&lt;/code&gt;) from the beginning of the structure, that is &lt;code&gt;LH_TYPE&lt;/code&gt;. The possible values of this byte can be found in &lt;code&gt;include_i/exec/nodes.i&lt;/code&gt;, where we find that the value &lt;code&gt;0xa&lt;/code&gt; corresponds to &lt;code&gt;NT_MEMORY&lt;/code&gt;.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c1"&gt;;------ Node Types for LN_TYPE&lt;/span&gt;
+
+&lt;span class="n"&gt;NT_UNKNOWN&lt;/span&gt;  &lt;span class="o"&gt;EQU&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+&lt;span class="n"&gt;NT_TASK&lt;/span&gt; &lt;span class="o"&gt;EQU&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;   &lt;span class="c1"&gt;; Exec task&lt;/span&gt;
+&lt;span class="n"&gt;NT_INTERRUPT&lt;/span&gt;    &lt;span class="o"&gt;EQU&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;
+&lt;span class="n"&gt;NT_DEVICE&lt;/span&gt;   &lt;span class="o"&gt;EQU&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;
+&lt;span class="n"&gt;NT_MSGPORT&lt;/span&gt;  &lt;span class="o"&gt;EQU&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;
+&lt;span class="n"&gt;NT_MESSAGE&lt;/span&gt;  &lt;span class="o"&gt;EQU&lt;/span&gt; &lt;span class="mi"&gt;5&lt;/span&gt;   &lt;span class="c1"&gt;; Indicates message currently pending&lt;/span&gt;
+&lt;span class="n"&gt;NT_FREEMSG&lt;/span&gt;  &lt;span class="o"&gt;EQU&lt;/span&gt; &lt;span class="mi"&gt;6&lt;/span&gt;
+&lt;span class="n"&gt;NT_REPLYMSG&lt;/span&gt; &lt;span class="o"&gt;EQU&lt;/span&gt; &lt;span class="mi"&gt;7&lt;/span&gt;   &lt;span class="c1"&gt;; Message has been replied&lt;/span&gt;
+&lt;span class="n"&gt;NT_RESOURCE&lt;/span&gt; &lt;span class="o"&gt;EQU&lt;/span&gt; &lt;span class="mi"&gt;8&lt;/span&gt;
+&lt;span class="n"&gt;NT_LIBRARY&lt;/span&gt;  &lt;span class="o"&gt;EQU&lt;/span&gt; &lt;span class="mi"&gt;9&lt;/span&gt;
+&lt;span class="n"&gt;NT_MEMORY&lt;/span&gt;   &lt;span class="o"&gt;EQU&lt;/span&gt; &lt;span class="mi"&gt;10&lt;/span&gt;
+&lt;span class="n"&gt;NT_SOFTINT&lt;/span&gt;  &lt;span class="o"&gt;EQU&lt;/span&gt; &lt;span class="mi"&gt;11&lt;/span&gt;  &lt;span class="c1"&gt;; Internal flag used by SoftInts&lt;/span&gt;
+&lt;span class="n"&gt;NT_FONT&lt;/span&gt; &lt;span class="o"&gt;EQU&lt;/span&gt; &lt;span class="mi"&gt;12&lt;/span&gt;
+&lt;span class="n"&gt;NT_PROCESS&lt;/span&gt;  &lt;span class="o"&gt;EQU&lt;/span&gt; &lt;span class="mi"&gt;13&lt;/span&gt;  &lt;span class="c1"&gt;; AmigaDOS Process&lt;/span&gt;
+&lt;span class="n"&gt;NT_SEMAPHORE&lt;/span&gt;    &lt;span class="o"&gt;EQU&lt;/span&gt; &lt;span class="mi"&gt;14&lt;/span&gt;
+&lt;span class="n"&gt;NT_SIGNALSEM&lt;/span&gt;    &lt;span class="o"&gt;EQU&lt;/span&gt; &lt;span class="mi"&gt;15&lt;/span&gt;  &lt;span class="c1"&gt;; signal semaphores&lt;/span&gt;
+&lt;span class="n"&gt;NT_BOOTNODE&lt;/span&gt; &lt;span class="o"&gt;EQU&lt;/span&gt; &lt;span class="mi"&gt;16&lt;/span&gt;
+&lt;span class="n"&gt;NT_KICKMEM&lt;/span&gt;  &lt;span class="o"&gt;EQU&lt;/span&gt; &lt;span class="mi"&gt;17&lt;/span&gt;
+&lt;span class="n"&gt;NT_GRAPHICS&lt;/span&gt; &lt;span class="o"&gt;EQU&lt;/span&gt; &lt;span class="mi"&gt;18&lt;/span&gt;
+&lt;span class="n"&gt;NT_DEATHMESSAGE&lt;/span&gt; &lt;span class="o"&gt;EQU&lt;/span&gt; &lt;span class="mi"&gt;19&lt;/span&gt;
+
+&lt;span class="n"&gt;NT_USER&lt;/span&gt;     &lt;span class="o"&gt;EQU&lt;/span&gt; &lt;span class="mi"&gt;254&lt;/span&gt; &lt;span class="c1"&gt;; User node types work down from here&lt;/span&gt;
+&lt;span class="n"&gt;NT_EXTENDED&lt;/span&gt; &lt;span class="o"&gt;EQU&lt;/span&gt; &lt;span class="mi"&gt;255&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;There is only one instruction left&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nl"&gt;000002d0:&lt;/span&gt; &lt;span class="mi"&gt;60e2&lt;/span&gt;                      &lt;span class="k"&gt;bra&lt;/span&gt;&lt;span class="o"&gt;.b&lt;/span&gt;   &lt;span class="mi"&gt;0x2b4&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;which jumps back to the beginning of this short piece of code. The procedure then keeps looping on the whole table until it reaches the list terminator &lt;code&gt;0000&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;The final content of the memory at &lt;code&gt;0142&lt;/code&gt; will be&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nl"&gt;00000142:&lt;/span&gt; &lt;span class="mi"&gt;0000&lt;/span&gt; &lt;span class="mi"&gt;0146&lt;/span&gt; &lt;span class="c1"&gt;; LH_HEAD&lt;/span&gt;
+&lt;span class="nl"&gt;00000146:&lt;/span&gt; &lt;span class="mi"&gt;0000&lt;/span&gt; &lt;span class="mi"&gt;0000&lt;/span&gt; &lt;span class="c1"&gt;; LH_TAIL&lt;/span&gt;
+&lt;span class="nl"&gt;0000014a:&lt;/span&gt; &lt;span class="mi"&gt;0000&lt;/span&gt; &lt;span class="mi"&gt;0146&lt;/span&gt; &lt;span class="c1"&gt;; LH_TAILPRED&lt;/span&gt;
+&lt;span class="nl"&gt;0000014d:&lt;/span&gt; &lt;span class="mi"&gt;0a&lt;/span&gt;        &lt;span class="c1"&gt;; LH_TYPE&lt;/span&gt;
+&lt;span class="nl"&gt;0000014e:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;...&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;And the same happens for the remaining 7 lists from &lt;code&gt;ResourceList&lt;/code&gt; to &lt;code&gt;TaskWait&lt;/code&gt;. After this the Exec lists are initialised.&lt;/p&gt;
+&lt;h1&gt;Resources&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;Microprocessor-based system design by Ricardo Gutierrez-Osuna (&lt;a href="http://courses.cs.tamu.edu/rgutier/ceg411_f01/"&gt;slides&lt;/a&gt;), in particular &lt;a href="http://courses.cs.tamu.edu/rgutier/ceg411_f01/l9.pdf"&gt;Lesson 9 - Exception processing&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Motorola M68000 Family Programmer's Reference Manual &lt;a href="https://www.nxp.com/docs/en/reference-manual/M68000PRM.pdf"&gt;PDF here&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1&gt;Feedback&lt;/h1&gt;
+&lt;p&gt;Feel free to reach me on &lt;a href="https://twitter.com/thedigicat"&gt;Twitter&lt;/a&gt; if you have questions. The &lt;a href="http://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues"&gt;GitHub issues&lt;/a&gt; page is the best place to submit corrections.&lt;/p&gt;</content><category term="assembly"></category><category term="amiga"></category><category term="retroprogramming"></category></entry><entry><title>Exploring the Amiga - Part 4</title><link href="http://blog.thedigitalcatonline.com/blog/2018/06/14/exploring-the-amiga-4/" rel="alternate"></link><published>2018-06-14T14:30:00+01:00</published><updated>2018-06-14T14:30:00+01:00</updated><author><name>Leonardo Giordani</name></author><id>tag:blog.thedigitalcatonline.com,2018-06-14:/blog/2018/06/14/exploring-the-amiga-4/</id><summary type="html"></summary><content type="html">&lt;h1&gt;The Exec base functions&lt;/h1&gt;
 &lt;p&gt;We found the Kickstart 1.3 (&lt;code&gt;exec&lt;/code&gt; 34.2) vector table at address &lt;code&gt;0x1a7c&lt;/code&gt;, and the first 4 entries read&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nl"&gt;00001a7c:&lt;/span&gt; &lt;span class="mi"&gt;08a0&lt;/span&gt;
 &lt;span class="nl"&gt;00001a7e:&lt;/span&gt; &lt;span class="mi"&gt;08a8&lt;/span&gt;
@@ -248,7 +865,7 @@
 &lt;li&gt;&lt;a href="http://amigadev.elowar.com"&gt;AmigaOS Developer Docs&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h1&gt;Feedback&lt;/h1&gt;
-&lt;p&gt;Feel free to reach me on &lt;a href="https://twitter.com/thedigicat"&gt;Twitter&lt;/a&gt; if you have questions. The &lt;a href="http://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues"&gt;GitHub issues&lt;/a&gt; page is the best place to submit corrections.&lt;/p&gt;</content><category term="assembly"></category><category term="amiga"></category><category term="retroprogramming"></category></entry><entry><title>Exploring the Amiga - Part 3</title><link href="http://blog.thedigitalcatonline.com/blog/2018/06/08/exploring-the-amiga-3/" rel="alternate"></link><published>2018-06-08T12:30:00+01:00</published><updated>2018-06-08T12:30:00+01:00</updated><author><name>Leonardo Giordani</name></author><id>tag:blog.thedigitalcatonline.com,2018-06-08:/blog/2018/06/08/exploring-the-amiga-3/</id><summary type="html"></summary><content type="html">&lt;h1&gt;Exec and the vector table&lt;/h1&gt;
+&lt;p&gt;Feel free to reach me on &lt;a href="https://twitter.com/thedigicat"&gt;Twitter&lt;/a&gt; if you have questions. The &lt;a href="http://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues"&gt;GitHub issues&lt;/a&gt; page is the best place to submit corrections.&lt;/p&gt;</content><category term="assembly"></category><category term="amiga"></category><category term="retroprogramming"></category></entry><entry><title>Exploring the Amiga - Part 3</title><link href="http://blog.thedigitalcatonline.com/blog/2018/06/08/exploring-the-amiga-3/" rel="alternate"></link><published>2018-06-08T12:30:00+01:00</published><updated>2018-06-24T22:30:00+00:00</updated><author><name>Leonardo Giordani</name></author><id>tag:blog.thedigitalcatonline.com,2018-06-08:/blog/2018/06/08/exploring-the-amiga-3/</id><summary type="html"></summary><content type="html">&lt;h1&gt;Exec and the vector table&lt;/h1&gt;
 &lt;p&gt;The Exec library is the base library of the Amiga system. This library is loaded in memory at boot time, and it is always open and available. Once loaded, it has the same structure of any other library, that is a prefix containing the jump table in reverse order, then the actual code.&lt;/p&gt;
 &lt;p&gt;The trick here is that Exec is the library used to load in memory other libraries, so the function that creates the structure in memory of a given library is contained here. To install Exec in memory, thus, we need to use a function which is part of the library itself.&lt;/p&gt;
 &lt;p&gt;This is one of the powers of the Assembly language. The property of treating the code as if it was pure data is called homoiconicity, and is something that can be rarely found in other languages. Lisp is a good example of a higher level homoiconic language.&lt;/p&gt;
@@ -331,7 +948,7 @@
 
 
 &lt;p&gt;Inside this code we can see a practical implementation of the mechanism described above.&lt;/p&gt;
-&lt;p&gt;The mandatory disclaimer: &lt;strong&gt;to legally use the Amiga Kickstart ROM images you must own the specific Amiga model.&lt;/strong&gt; This website is against piracy of dead and discontinued systems.&lt;/p&gt;
+&lt;p&gt;The mandatory disclaimer: &lt;strong&gt;to use the Amiga Kickstart ROM images you must own a license.&lt;/strong&gt; (see the Resources section). This website is against piracy of dead and discontinued systems ;)&lt;/p&gt;
 &lt;p&gt;When you disassemble some binary code, however, you don't get some nice source code written in a high level language. Well, not with a simple disassembler like vdasm, anyway. What you get is the one to one interpretation of the binary values according to the processor's conventions, and this includes parts of the binary file that are pure data. The disassembler has no way to know if some binary number represents an instruction or a pure number. Moreover, there is no trace of the original labels used by the author(s) of the code, as they are lost in the translation to machine language, when they are converted to pure addresses.&lt;/p&gt;
 &lt;p&gt;The practice of understanding how a system works starting from the pure implementation is called "reversing", and personally I consider it one of the most fascinating tasks a programmer can face.&lt;/p&gt;
 &lt;p&gt;The purpose of the present investigation is to find the Kickstart 1.3 vector table, and with that to find the position and implementation of the Exec functions. Well, let's start.&lt;/p&gt;
@@ -354,7 +971,7 @@
 &lt;h2&gt;Step 2&lt;/h2&gt;
 &lt;p&gt;In the Amiga system all libraries have a specific structure when loaded in memory. Apart from the prefixed jump table, the library code itself has a fixed structure that allows us to read and use it.&lt;/p&gt;
 &lt;p&gt;First of all all libraries in memory are nodes of a linked list, so we expect to find the structure of the node itself. Then, inside the node, we expect to find the actual library structure.&lt;/p&gt;
-&lt;p&gt;The include file &lt;code&gt;exec/nodes.i&lt;/code&gt; tells us that a standard linked list node has the following structure&lt;/p&gt;
+&lt;p&gt;The include file &lt;code&gt;include_i/exec/nodes.i&lt;/code&gt; tells us that a standard linked list node has the following structure&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;   &lt;span class="n"&gt;STRUCTURE&lt;/span&gt;    &lt;span class="n"&gt;LN&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;    &lt;span class="c1"&gt;; List Node&lt;/span&gt;
     &lt;span class="n"&gt;APTR&lt;/span&gt;    &lt;span class="n"&gt;LN_SUCC&lt;/span&gt; &lt;span class="c1"&gt;; Pointer to next (successor)&lt;/span&gt;
     &lt;span class="n"&gt;APTR&lt;/span&gt;    &lt;span class="n"&gt;LN_PRED&lt;/span&gt; &lt;span class="c1"&gt;; Pointer to previous (predecessor)&lt;/span&gt;
@@ -365,7 +982,7 @@
 &lt;/pre&gt;&lt;/div&gt;
 
 
-&lt;p&gt;The two 32-bit pointers &lt;code&gt;LN_SUCC&lt;/code&gt; and &lt;code&gt;LN_PRED&lt;/code&gt; are created when the node is loaded in memory, so we need to look for the rest of the structure, namely 1 byte with &lt;code&gt;LN_TYPE&lt;/code&gt;, 1 byte with &lt;code&gt;LN_PRI&lt;/code&gt; and 4 bytes with &lt;code&gt;LN_NAME&lt;/code&gt;. From the same file &lt;code&gt;exec/nodes.i&lt;/code&gt; we know that the note type for a library is &lt;code&gt;09&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;The two 32-bit pointers &lt;code&gt;LN_SUCC&lt;/code&gt; and &lt;code&gt;LN_PRED&lt;/code&gt; are created when the node is loaded in memory, so we need to look for the rest of the structure, namely 1 byte with &lt;code&gt;LN_TYPE&lt;/code&gt;, 1 byte with &lt;code&gt;LN_PRI&lt;/code&gt; and 4 bytes with &lt;code&gt;LN_NAME&lt;/code&gt;. From the same file &lt;code&gt;include_i/exec/nodes.i&lt;/code&gt; we know that the note type for a library is &lt;code&gt;09&lt;/code&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;NT_LIBRARY&lt;/span&gt;  &lt;span class="o"&gt;EQU&lt;/span&gt; &lt;span class="mi"&gt;9&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
@@ -373,7 +990,7 @@
 &lt;p&gt;So the pattern we are looking for is &lt;code&gt;09XX 00fc 00a8&lt;/code&gt;, respectively the node type (&lt;code&gt;09&lt;/code&gt;), an unknown priority (&lt;code&gt;XX&lt;/code&gt;), and the library name pointer &lt;code&gt;00fc 00a8&lt;/code&gt;. We also know that the pattern is likely to be stored towards the beginning of the whole ROM, as one of the first things the library will do is to create its own structure in memory. This last assumption is not to be taken for granted, but it's a reasonable one.&lt;/p&gt;
 &lt;p&gt;In the Kickstart 1.3 code this pattern can be found at offset &lt;code&gt;0x030c&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;&lt;img alt="Search library pattern" src="/images/exploring-the-amiga-3/search-library-pattern.png"&gt;&lt;/p&gt;
-&lt;p&gt;If this is the correct position of the node structure, we expect to find just after it the structure of the library as described in the include file &lt;code&gt;exec/libraries.i&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;If this is the correct position of the node structure, we expect to find just after it the structure of the library as described in the include file &lt;code&gt;include_i/exec/libraries.i&lt;/code&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt; &lt;span class="n"&gt;STRUCTURE&lt;/span&gt; &lt;span class="n"&gt;LIB&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;LN_SIZE&lt;/span&gt;     
     &lt;span class="n"&gt;UBYTE&lt;/span&gt;   &lt;span class="n"&gt;LIB_FLAGS&lt;/span&gt;           &lt;span class="c1"&gt;; see below&lt;/span&gt;
     &lt;span class="n"&gt;UBYTE&lt;/span&gt;   &lt;span class="n"&gt;LIB_pad&lt;/span&gt;         &lt;span class="c1"&gt;; must be zero&lt;/span&gt;
@@ -442,7 +1059,7 @@
 &lt;h2&gt;Step 4&lt;/h2&gt;
 &lt;p&gt;We extracted two useful information from this code. First, the vector table is at address &lt;code&gt;0x1a7c&lt;/code&gt;, and second the &lt;code&gt;MakeFunctions&lt;/code&gt; subroutine is at address &lt;code&gt;0x15b2&lt;/code&gt;. This latter will be useful to double check the content of the vector table.&lt;/p&gt;
 &lt;p&gt;After &lt;code&gt;MakeFunctions&lt;/code&gt; has been executed the code returns and the next instruction stores the final size of the jump table 16 bytes after the address contained in &lt;code&gt;a6&lt;/code&gt;. With the help of the structures shown above we know that at that offset we can find the &lt;code&gt;LIB_NEGSIZE&lt;/code&gt; field, that contains the size of the jump table (number of bytes before the library).&lt;/p&gt;
-&lt;p&gt;It's time to check if what we found is correct. There should be a table at address &lt;code&gt;0x1a7c&lt;/code&gt; that contains function addresses in the order listed by the include file &lt;code&gt;exec/exec_lib.i&lt;/code&gt;. As &lt;code&gt;MakeFunctions&lt;/code&gt; in that file is listed at the 11th place we can check if the table is consistent. That address should point a function at &lt;code&gt;0x15b2&lt;/code&gt;, according to the previous code.&lt;/p&gt;
+&lt;p&gt;It's time to check if what we found is correct. There should be a table at address &lt;code&gt;0x1a7c&lt;/code&gt; that contains function addresses in the order listed by the include file &lt;code&gt;include_i/exec/exec_lib.i&lt;/code&gt;. As &lt;code&gt;MakeFunctions&lt;/code&gt; in that file is listed at the 11th place we can check if the table is consistent. That address should point a function at &lt;code&gt;0x15b2&lt;/code&gt;, according to the previous code.&lt;/p&gt;
 &lt;p&gt;The values at &lt;code&gt;0x1a7c&lt;/code&gt; are the following &lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nl"&gt;00001a7c:&lt;/span&gt; &lt;span class="mi"&gt;08a0&lt;/span&gt;
 &lt;span class="nl"&gt;00001a7e:&lt;/span&gt; &lt;span class="mi"&gt;08a8&lt;/span&gt;
@@ -464,13 +1081,16 @@
 &lt;/pre&gt;&lt;/div&gt;
 
 
-&lt;p&gt;The file &lt;code&gt;exec/exec_lib.i&lt;/code&gt; doesn't contain the first 4 reserved vectors (the functions &lt;code&gt;Open&lt;/code&gt;, &lt;code&gt;Close&lt;/code&gt;, &lt;code&gt;Expunge&lt;/code&gt;, and the reserved space), so considering that those are in the vector table we should check the 15th, were we find &lt;code&gt;0xfb36&lt;/code&gt;. This is an offset relative to the beginning of the table, so the function is at &lt;code&gt;0x1a7c + 0xfb36 = 0x15b2&lt;/code&gt; (addresses are 16 bits numbers), as we already discovered.&lt;/p&gt;
+&lt;p&gt;The file &lt;code&gt;include_i/exec/exec_lib.i&lt;/code&gt; doesn't contain the first 4 reserved vectors (the functions &lt;code&gt;Open&lt;/code&gt;, &lt;code&gt;Close&lt;/code&gt;, &lt;code&gt;Expunge&lt;/code&gt;, and the reserved space), so considering that those are in the vector table we should check the 15th, were we find &lt;code&gt;0xfb36&lt;/code&gt;. This is an offset relative to the beginning of the table, so the function is at &lt;code&gt;0x1a7c + 0xfb36 = 0x15b2&lt;/code&gt; (addresses are 16 bits numbers), as we already discovered.&lt;/p&gt;
 &lt;p&gt;This shows that our investigation is correct. The Kickstart 1.3 vector table is at address &lt;code&gt;0x1a7c&lt;/code&gt; and from there we can reach and analyse all the functions contained in the base Amiga library.&lt;/p&gt;
 &lt;h1&gt;Resources&lt;/h1&gt;
 &lt;ul&gt;
 &lt;li&gt;Amiga System Programmers Guide, Abacus (&lt;a href="https://archive.org/details/Amiga_System_Programmers_Guide_1988_Abacus"&gt;pdf here&lt;/a&gt;)&lt;/li&gt;
 &lt;li&gt;&lt;a href="http://amigadev.elowar.com"&gt;AmigaOS Developer Docs&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Amiga Forever package sold by Cloanto &lt;a href="www.amigaforever.com"&gt;here&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
+&lt;h1&gt;Updates&lt;/h1&gt;
+&lt;p&gt;2018-06-23: As &lt;a href="https://new.reddit.com/user/Malor"&gt;Malor&lt;/a&gt; pointed out on Reddit (&lt;a href="https://new.reddit.com/r/programming/comments/8pkgk0/exploring_the_amiga_part_1/e0cifax"&gt;here&lt;/a&gt;) there is no need to own the original hardware, as licenses are still sold by Cloanto. Thanks Malor!&lt;/p&gt;
 &lt;h1&gt;Feedback&lt;/h1&gt;
 &lt;p&gt;Feel free to reach me on &lt;a href="https://twitter.com/thedigicat"&gt;Twitter&lt;/a&gt; if you have questions. The &lt;a href="http://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues"&gt;GitHub issues&lt;/a&gt; page is the best place to submit corrections.&lt;/p&gt;</content><category term="assembly"></category><category term="amiga"></category><category term="retroprogramming"></category></entry><entry><title>A game of tokens: solution - Part 4</title><link href="http://blog.thedigitalcatonline.com/blog/2018/06/02/a-game-of-tokens-solution-part-4/" rel="alternate"></link><published>2018-06-02T13:30:00+00:00</published><updated>2018-06-02T13:30:00+00:00</updated><author><name>Leonardo Giordani</name></author><id>tag:blog.thedigitalcatonline.com,2018-06-02:/blog/2018/06/02/a-game-of-tokens-solution-part-4/</id><summary type="html"></summary><content type="html">&lt;p&gt;This is my solution to the fourth part of "A Game of Tokens", which can be found &lt;a href="/blog/2018/06/02/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-4/"&gt;here&lt;/a&gt;.&lt;/p&gt;
 &lt;p&gt;You can find the tests and the code presented here in &lt;a href="https://github.com/lgiordani/smallcalc"&gt;this repository&lt;/a&gt; in the branch called &lt;code&gt;part4&lt;/code&gt;.&lt;/p&gt;
@@ -1597,7 +2217,7 @@ memory                        LOWER MEMORY ADDRESSES
 
 &lt;h1&gt;The four reserved vectors&lt;/h1&gt;
 &lt;p&gt;As we saw, the Amiga system reserves 4 vectors at the beginning of the jump table of a library. These 4 spaces host 3 standard functions that shall be provided by any library, &lt;code&gt;Open()&lt;/code&gt;, &lt;code&gt;Close()&lt;/code&gt;, and &lt;code&gt;Expunge()&lt;/code&gt;. The fourth slot is kept for possible future expansions and must contain a function that returns 0.&lt;/p&gt;
-&lt;p&gt;The offsets of these functions are contained in the &lt;code&gt;exec/libraries.i&lt;/code&gt; file&lt;/p&gt;
+&lt;p&gt;The offsets of these functions are contained in the &lt;code&gt;include_i/exec/libraries.i&lt;/code&gt; file&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c1"&gt;*----------------------------------------------------------------&lt;/span&gt;
 &lt;span class="c1"&gt;*&lt;/span&gt;
 &lt;span class="c1"&gt;*   Standard Library Functions&lt;/span&gt;
@@ -7957,7 +8577,7 @@ Rule                     Endpoint
 &lt;h2&gt;Sources&lt;/h2&gt;
 &lt;p&gt;The official documentation of the &lt;code&gt;abc&lt;/code&gt; module is very well written. &lt;a href="https://docs.python.org/3.5/library/abc.html"&gt;Here&lt;/a&gt; you find the version for Python 3.5. I also suggest to read the original &lt;a href="https://www.python.org/dev/peps/pep-3119"&gt;PEP 3119&lt;/a&gt; and the related &lt;a href="https://www.python.org/dev/peps/pep-3141"&gt;PEP 3141&lt;/a&gt; for a deeper understanding of the topic.&lt;/p&gt;
 &lt;h2&gt;Feedback&lt;/h2&gt;
-&lt;p&gt;Feel free to use &lt;a href="https://plus.google.com/u/0/111444750762335924049"&gt;the blog Google+ page&lt;/a&gt; to comment the post. The &lt;a href="http://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues"&gt;GitHub issues&lt;/a&gt; page is the best place to submit corrections.&lt;/p&gt;</content><category term="decorators"></category><category term="metaclasses"></category><category term="metaprogramming"></category><category term="Notebook"></category><category term="OOP"></category><category term="Python"></category><category term="Python2"></category><category term="Python3"></category></entry><entry><title>Python Mocks: a gentle introduction - Part 1</title><link href="http://blog.thedigitalcatonline.com/blog/2016/03/06/python-mocks-a-gentle-introduction-part-1/" rel="alternate"></link><published>2016-03-06T18:00:00+01:00</published><updated>2016-03-06T18:00:00+01:00</updated><author><name>Leonardo Giordani</name></author><id>tag:blog.thedigitalcatonline.com,2016-03-06:/blog/2016/03/06/python-mocks-a-gentle-introduction-part-1/</id><summary type="html"></summary><content type="html">&lt;p&gt;As already stressed in the two introductory posts on TDD (you can find them &lt;a href="/categories/tdd/"&gt;here&lt;/a&gt;) testing requires to write some code that uses the functions and objects you are going to develop. This means that you need to isolate a given (external) function that is part of your public API and demonstrate that it works with standard inputs and in edge cases.&lt;/p&gt;
+&lt;p&gt;Feel free to use &lt;a href="https://plus.google.com/u/0/111444750762335924049"&gt;the blog Google+ page&lt;/a&gt; to comment the post. The &lt;a href="http://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues"&gt;GitHub issues&lt;/a&gt; page is the best place to submit corrections.&lt;/p&gt;</content><category term="decorators"></category><category term="metaclasses"></category><category term="metaprogramming"></category><category term="Notebook"></category><category term="OOP"></category><category term="Python"></category><category term="Python2"></category><category term="Python3"></category></entry><entry><title>Python Mocks: a gentle introduction - Part 1</title><link href="http://blog.thedigitalcatonline.com/blog/2016/03/06/python-mocks-a-gentle-introduction-part-1/" rel="alternate"></link><published>2016-03-06T18:00:00+01:00</published><updated>2018-06-25T12:30:00+00:00</updated><author><name>Leonardo Giordani</name></author><id>tag:blog.thedigitalcatonline.com,2016-03-06:/blog/2016/03/06/python-mocks-a-gentle-introduction-part-1/</id><summary type="html"></summary><content type="html">&lt;p&gt;As already stressed in the two introductory posts on TDD (you can find them &lt;a href="/categories/tdd/"&gt;here&lt;/a&gt;) testing requires to write some code that uses the functions and objects you are going to develop. This means that you need to isolate a given (external) function that is part of your public API and demonstrate that it works with standard inputs and in edge cases.&lt;/p&gt;
 &lt;p&gt;For example, if you are going to develop an object that stores percentages (such as for example poll results), you should test the following conditions: the class can store a standard percentage such as 42%, the class shall give an error if you try to store a negative percentage, the class shall give an error if you store a percentage greater than 100%.&lt;/p&gt;
 &lt;p&gt;Tests shall be &lt;em&gt;idempotent&lt;/em&gt; and &lt;em&gt;isolated&lt;/em&gt;. Idempotent in mathematics and computer science identifies a process that can be run multiple times without changing the status of the system. Isolated means that a test shall not change its behaviour depending on previous executions of itself, nor depend on the previous execution (or missing execution) of other tests.&lt;/p&gt;
 &lt;p&gt;Such restrictions, which guarantee that your tests are not passing due to a temporary configuration of the system or the order in which they are run, can raise big issues when dealing with external libraries and systems, or with intrinsically mutable concepts such as time. In the testing discipline, such issues are mostly faced using mocks, that is objects that pretend to be other objects.&lt;/p&gt;
@@ -12233,7 +12853,7 @@ By convention, the first element in the list is element 0.&lt;/p&gt;
 &lt;h2&gt;Sources&lt;/h2&gt;
 &lt;p&gt;You will find a lot of documentation in &lt;a href="http://www.reddit.com/r/Python/comments/226ahl/some_links_about_python_oop/"&gt;this Reddit post&lt;/a&gt;. Most of the information contained in this series come from those sources.&lt;/p&gt;
 &lt;h2&gt;Feedback&lt;/h2&gt;
-&lt;p&gt;Feel free to use &lt;a href="https://plus.google.com/u/0/111444750762335924049"&gt;the blog Google+ page&lt;/a&gt; to comment the post. The &lt;a href="http://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues"&gt;GitHub issues&lt;/a&gt; page is the best place to submit corrections.&lt;/p&gt;</content><category term="Python"></category><category term="Python3"></category><category term="OOP"></category></entry><entry><title>Python 3 OOP Part 1 - Objects and types</title><link href="http://blog.thedigitalcatonline.com/blog/2014/08/20/python-3-oop-part-1-objects-and-types/" rel="alternate"></link><published>2014-08-20T13:00:00+02:00</published><updated>2014-08-20T13:00:00+02:00</updated><author><name>Leonardo Giordani</name></author><id>tag:blog.thedigitalcatonline.com,2014-08-20:/blog/2014/08/20/python-3-oop-part-1-objects-and-types/</id><summary type="html"></summary><content type="html">&lt;p&gt;This post is available as an &lt;strong&gt;IPython Notebook&lt;/strong&gt; &lt;a href="/notebooks/Python_3_OOP_Part_1__Objects_and_types.ipynb"&gt;here&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Feel free to use &lt;a href="https://plus.google.com/u/0/111444750762335924049"&gt;the blog Google+ page&lt;/a&gt; to comment the post. The &lt;a href="http://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues"&gt;GitHub issues&lt;/a&gt; page is the best place to submit corrections.&lt;/p&gt;</content><category term="Python"></category><category term="Python3"></category><category term="OOP"></category></entry><entry><title>Python 3 OOP Part 1 - Objects and types</title><link href="http://blog.thedigitalcatonline.com/blog/2014/08/20/python-3-oop-part-1-objects-and-types/" rel="alternate"></link><published>2014-08-20T13:00:00+02:00</published><updated>2018-06-25T12:30:00+00:00</updated><author><name>Leonardo Giordani</name></author><id>tag:blog.thedigitalcatonline.com,2014-08-20:/blog/2014/08/20/python-3-oop-part-1-objects-and-types/</id><summary type="html"></summary><content type="html">&lt;p&gt;This post is available as an &lt;strong&gt;IPython Notebook&lt;/strong&gt; &lt;a href="/notebooks/Python_3_OOP_Part_1__Objects_and_types.ipynb"&gt;here&lt;/a&gt;&lt;/p&gt;
 &lt;h2&gt;About this series&lt;/h2&gt;
 &lt;p&gt;Object-oriented programming (OOP) has been the leading programming paradigm for several decades now, starting from the initial attempts back in the 60s to some of the most important languages used nowadays. Being a set of programming concepts and design methodologies, OOP can never be said to be "correctly" or "fully" implemented by a language: indeed there are as many implementations as languages.&lt;/p&gt;
 &lt;p&gt;So one of the most interesting aspects of OOP languages is to understand how they implement those concepts. In this post I am going to try and start analyzing the OOP implementation of the Python language. Due to the richness of the topic, however, I consider this attempt just like a set of thoughts for Python beginners trying to find their way into this beautiful (and sometimes peculiar) language.&lt;/p&gt;

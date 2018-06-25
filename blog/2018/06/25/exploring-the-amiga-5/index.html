@@ -1,0 +1,623 @@
+<!DOCTYPE HTML>
+<!--
+    Editorial by HTML5 UP
+    html5up.net | @ajlkn
+    Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+    <head>
+        <title>Exploring the Amiga - Part 5 - The Digital Cat</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+        <!--[if lte IE 8]><script src="http://blog.thedigitalcatonline.com/theme/js/ie/html5shiv.js"></script><![endif]-->
+        <link rel="stylesheet" href="http://blog.thedigitalcatonline.com/theme/css/main.css" />
+
+        <!-- Pygments CSS START -->
+        <link rel="stylesheet" href="http://blog.thedigitalcatonline.com/theme/css/pygments/monokai.css">
+        <!-- Pygments CSS END -->
+
+        <link href="http://blog.thedigitalcatonline.com/images/TheDigitalCat_favicon_32.png" rel="icon">
+
+        <!--[if lte IE 9]><link rel="stylesheet" href="http://blog.thedigitalcatonline.com/theme/css/ie9.css" /><![endif]-->
+        <!--[if lte IE 8]><link rel="stylesheet" href="http://blog.thedigitalcatonline.com/theme/css/ie8.css" /><![endif]-->
+
+        <!-- Google Analytics Universal -->
+            <script type="text/javascript">
+                (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+                    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+                    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+                })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+                ga('create', 'UA-74364524-1', 'auto');
+                ga('send', 'pageview');
+            </script>
+        <!-- End Google Analytics Universal Code -->
+    </head>
+    <body>
+
+        <!-- Wrapper -->
+            <div id="wrapper">
+
+                <!-- Main -->
+                    <div id="main">
+                        <div class="inner narrow">
+
+    <header id="header">
+        <a href="http://blog.thedigitalcatonline.com/category/retro/" title="Retro">Retro</a>
+        <div class="align-right">        
+            <a href="#series">Exploring the Amiga</a> part 5/6
+        </div>
+    </header>
+    
+
+    <article class="post">
+        <header class="page-header">
+            <h1>Exploring the Amiga - Part 5</h1>
+        </header>
+
+        <section id="tags" class="align-center">
+            <a class="button special small" href="http://blog.thedigitalcatonline.com/categories/assembly/">assembly</a>            <a class="button special small" href="http://blog.thedigitalcatonline.com/categories/amiga/">amiga</a>            <a class="button special small" href="http://blog.thedigitalcatonline.com/categories/retroprogramming/">retroprogramming</a>        </section>
+
+        <section id="author" class="align-center">
+                By
+                <a href="http://blog.thedigitalcatonline.com/authors/leonardo-giordani/">Leonardo Giordani</a>
+                <span class="separator">•</span>
+
+            Published on
+            <time datetime="2018-06-25T12:00:00+01:00"> 25/06/2018</time>
+
+        </section>
+
+        <section id="content">
+            <p>Memory management is always one of the most rich and complex parts of an architecture, mainly because the available amount of memory is always less than what you would like to have. <a href="https://users.ece.cmu.edu/~koopman/titan/rules.html">Always</a>.</p>
+<p>It is also an interesting topic because memory is generally managed by both the hardware and the software. The microprocessor may provide a memory management unit (MMU) that enforces a specific schema and the software has to implement its own algorithms on top of that.</p>
+<p>The Amiga originally run on a Motorola 68k, which doesn't provide any memory management in hardware. This means that there is no way for the processor to block attempts to read memory by a process, a feature that wasn't present on the first Intel x86 processors as well. Intel "solved" the issue with the introduction of the protected mode in the 386 family (even though an initial version was already present on the 286 processors). Motorola provided external MMUs for the 68010 and 68020, while the 68030 and later processor feature an on-chip MMU. </p>
+<p>The Motorola 68k is a 32-bit processor, thus registers and the address bus have that size. The memory, however, is connected to only 24 of the 32 lines of the bus, which means that the total memory space addressable by the processor is a 24-bit space, that gives 16 Megabytes instead of the possible 4 Gigabytes. That amount of memory was however enough for the period when the Amiga was designed. Consider that the most successful model of Amiga, the Amiga 500, had 500 KBytes of memory, sometimes increased to 1 Megabyte through a memory expansion.</p>
+<p>The lack of a memory scheme enforced by the processor means that at boot time the memory is just a flat area that can be addressed directly. As we saw in the previous instalments Exec creates its own structure in memory, generating the library node and creating the library jump table. This happens in the bigger picture of the machine initialisation, and one of the tasks performed during this initialisation is the setup of the memory management structures.</p>
+<h1>The Exec base address</h1>
+<p>Every Amiga programmer knows that address <code>0x4</code> contains the Exec base address, and I showed in past instalments how this is used in conjunction with the jump table to call the library functions.</p>
+<p>The reason why the Exec base address is stored there is however seldom mentioned. As a matter of fact that address is not just a random choice.</p>
+<p>The Motorola 68000 family reserves the first Kilobyte of memory for exception vectors, that is code that will be executed when something wrong happens. "Wrong" here means bad at hardware level, from a divide by zero to a bus error. This is enforced by the Motorola 68k architecture and thus is a feature shared by other computers and consoles based on it.</p>
+<p>The first two of these vectors are actually used when the processor is powering-up (or in general when it resets). And the vector number 1 (the second) at offset <code>0x4</code> is the Reset Initial Program Counter.</p>
+<p>After a reset the processor initialises the Program Counter with the address stored at <code>0x4</code> in the memory. When the CPU is switched on, however, the Kickstart ROM is copied in memory, thus the addresses 0 and 4 (first two exception vectors) are the addresses listed in the ROM itself.</p>
+<p>The very first 8 bytes of the Kickstart ROM are</p>
+<div class="highlight"><pre><span></span><span class="nl">00000000:</span> <span class="mi">1111</span>
+<span class="nl">00000002:</span> <span class="mi">4ef9</span> <span class="mi">00fc</span> <span class="mi">00d2</span>            <span class="k">jmp</span>     <span class="mi">0xfc00d2</span><span class="o">.l</span>
+</pre></div>
+
+
+<p>and you can clearly see that the long word at address <code>0x4</code> is <code>00fc 00d2</code>. This actually corresponds to the address where the initial code of the ROM is</p>
+<div class="highlight"><pre><span></span><span class="nl">000000d2:</span> <span class="mi">4ff9</span> <span class="mi">0004</span> <span class="mi">0000</span>            <span class="k">lea</span>     <span class="mi">0x40000</span><span class="o">.l</span><span class="p">,</span><span class="n">sp</span>
+</pre></div>
+
+
+<p>which sets the stack pointer, but I'll keep this analysis for a future post.</p>
+<p>The address <code>0x4</code> is then free to be used during the normal execution, since it is used only during a reset, but in that case whatever we wrote there (the Exec base address) is overwritten by the ROM code.</p>
+<h1>List headers</h1>
+<p>Exec manages memory and resources using <a href="https://en.wikipedia.org/wiki/Linked_list">linked lists</a>. As you know, to manage a linked list we need the address (pointer) of the head, of the tail, and also of the second-to-last element (the tail predecessor), to allow the tail to be detached and replaced. Actually it is evident that, given the convention that the last node is connected to the address 0, the only value we need is the address of the list head. The two additional addresses, however, can greatly simplify the code that manages the list and can greatly increase the performances, avoiding the need of a complete scan of the list to find the last element every time we want to add something to the end of the list.</p>
+<p>The Exec library provides a nice structure to manage lists, <code>LH</code>. The structure is defined in <code>include_i/exec/lists.i</code></p>
+<div class="highlight"><pre><span></span><span class="c1">* Full featured list header</span>
+<span class="c1">*</span>
+<span class="c1">   STRUCTURE    LH,0</span>
+    <span class="n">APTR</span>    <span class="n">LH_HEAD</span>
+    <span class="n">APTR</span>    <span class="n">LH_TAIL</span>
+    <span class="n">APTR</span>    <span class="n">LH_TAILPRED</span>
+    <span class="n">UBYTE</span>   <span class="n">LH_TYPE</span>
+    <span class="n">UBYTE</span>   <span class="n">LH_pad</span>
+    <span class="n">LABEL</span>   <span class="n">LH_SIZE</span> <span class="c1">;word aligned</span>
+</pre></div>
+
+
+<p>The only two fields that this structure adds compared to the previous description are <code>LH_TYPE</code>, that unsurprisingly contains the type of the data contained in the list, and <code>LH_pad</code> which is nothing but what the name suggests, a padding that allows the structure to be word aligned.</p>
+<p>We need now to discover where Exec keeps the header for the memory list. Analysing the <code>ExecBase</code> structure contained in <code>include_i/exec/execbase.i</code> we find the following definitions</p>
+<div class="highlight"><pre><span></span><span class="c1">******* System List Headers (private!) ********************************</span>
+
+    <span class="n">STRUCT</span>  <span class="n">MemList</span><span class="p">,</span><span class="n">LH_SIZE</span>
+    <span class="n">STRUCT</span>  <span class="n">ResourceList</span><span class="p">,</span><span class="n">LH_SIZE</span>
+    <span class="n">STRUCT</span>  <span class="n">DeviceList</span><span class="p">,</span><span class="n">LH_SIZE</span>
+    <span class="n">STRUCT</span>  <span class="n">IntrList</span><span class="p">,</span><span class="n">LH_SIZE</span>
+    <span class="n">STRUCT</span>  <span class="n">LibList</span><span class="p">,</span><span class="n">LH_SIZE</span>
+    <span class="n">STRUCT</span>  <span class="n">PortList</span><span class="p">,</span><span class="n">LH_SIZE</span>
+    <span class="n">STRUCT</span>  <span class="n">TaskReady</span><span class="p">,</span><span class="n">LH_SIZE</span>
+    <span class="n">STRUCT</span>  <span class="n">TaskWait</span><span class="p">,</span><span class="n">LH_SIZE</span>
+    <span class="n">STRUCT</span>  <span class="n">SoftInts</span><span class="p">,</span><span class="n">SH_SIZE</span><span class="c1">*5</span>
+</pre></div>
+
+
+<p>which is exactly what we wanted. When Exec installs itself in the first part of the memory it will also initialise these headers to keep track of the corresponding resources.</p>
+<p>It is interesting to note, however, that the ExecBase structure described in the include files is not used directly, but is more a description of what the code is going to create. This is a bit different from what higher level languages like C use to do. In C you declare a structure, you reserve memory for it, and then access its fields. In Assembly, ultimately, there is no such a concept as a structure and a field. We have only a (flat) memory and addresses.</p>
+<p>Since ExecBase is a description of the structure of Exec once it will be installed in memory it is interesting to run through its fields and annotate the relative address of each of them.</p>
+<p>I took the code contained in <code>include_i/exec/execbase.i</code> and I computed the address of each field. The first column contains the relative address inside the structure (thus starting from <code>0x0</code>), while the second column contains the address relative to the Exec base address. As shown in the fourth post the <code>LN</code> and <code>LIB</code> structures fill the first 34 bytes, which is why the following starting address is <code>0x22</code></p>
+<div class="highlight"><pre><span></span><span class="mi">0000</span> <span class="mi">0022</span>    <span class="n">UWORD</span>   <span class="n">SoftVer</span> <span class="c1">; kickstart release number (obs.)</span>
+<span class="mi">0002</span> <span class="mi">0024</span>    <span class="n">WORD</span>    <span class="n">LowMemChkSum</span>    <span class="c1">; checksum of 68000 trap vectors</span>
+<span class="mi">0004</span> <span class="mi">0026</span>    <span class="n">ULONG</span>   <span class="n">ChkBase</span> <span class="c1">; system base pointer complement</span>
+<span class="mi">0008</span> <span class="mi">002a</span>    <span class="n">APTR</span>    <span class="n">ColdCapture</span> <span class="c1">; coldstart soft capture vector</span>
+<span class="mi">000c</span> <span class="mi">002e</span>    <span class="n">APTR</span>    <span class="n">CoolCapture</span> <span class="c1">; coolstart soft capture vector</span>
+<span class="mi">0010</span> <span class="mi">0032</span>    <span class="n">APTR</span>    <span class="n">WarmCapture</span> <span class="c1">; warmstart soft capture vector</span>
+<span class="mi">0014</span> <span class="mi">0036</span>    <span class="n">APTR</span>    <span class="n">SysStkUpper</span> <span class="c1">; system stack base   (upper bound)</span>
+<span class="mi">0018</span> <span class="mi">003a</span>    <span class="n">APTR</span>    <span class="n">SysStkLower</span> <span class="c1">; top of system stack (lower bound)</span>
+<span class="mi">001c</span> <span class="mi">003e</span>    <span class="n">ULONG</span>   <span class="n">MaxLocMem</span>   <span class="c1">; top of chip memory</span>
+<span class="mi">0020</span> <span class="mi">0042</span>    <span class="n">APTR</span>    <span class="n">DebugEntry</span>  <span class="c1">; global debugger entry point</span>
+<span class="mi">0024</span> <span class="mi">0046</span>    <span class="n">APTR</span>    <span class="n">DebugData</span>   <span class="c1">; global debugger data segment</span>
+<span class="mi">0028</span> <span class="mi">004a</span>    <span class="n">APTR</span>    <span class="n">AlertData</span>   <span class="c1">; alert data segment</span>
+<span class="mi">002c</span> <span class="mi">004e</span>    <span class="n">APTR</span>    <span class="n">MaxExtMem</span>   <span class="c1">; top of extended mem, or null if none</span>
+
+<span class="mi">0030</span> <span class="mi">0052</span>    <span class="n">WORD</span>    <span class="n">ChkSum</span>      <span class="c1">; for all of the above (minus 2)</span>
+
+
+<span class="c1">******* Interrupt Related ********************************************</span>
+
+    <span class="n">LABEL</span>   <span class="n">IntVects</span>
+<span class="mi">0032</span> <span class="mi">0054</span>    <span class="n">STRUCT</span>  <span class="n">IVTBE</span><span class="p">,</span><span class="n">IV_SIZE</span>
+<span class="mi">003e</span> <span class="mi">0060</span>    <span class="n">STRUCT</span>  <span class="n">IVDSKBLK</span><span class="p">,</span><span class="n">IV_SIZE</span>
+<span class="mi">004a</span> <span class="mi">006c</span>    <span class="n">STRUCT</span>  <span class="n">IVSOFTINT</span><span class="p">,</span><span class="n">IV_SIZE</span>
+<span class="mi">0056</span> <span class="mi">0078</span>    <span class="n">STRUCT</span>  <span class="n">IVPORTS</span><span class="p">,</span><span class="n">IV_SIZE</span>
+<span class="mi">0062</span> <span class="mi">0084</span>    <span class="n">STRUCT</span>  <span class="n">IVCOPER</span><span class="p">,</span><span class="n">IV_SIZE</span>
+<span class="mi">006e</span> <span class="mi">0090</span>    <span class="n">STRUCT</span>  <span class="n">IVVERTB</span><span class="p">,</span><span class="n">IV_SIZE</span>
+<span class="mi">007a</span> <span class="mi">009c</span>    <span class="n">STRUCT</span>  <span class="n">IVBLIT</span><span class="p">,</span><span class="n">IV_SIZE</span>
+<span class="mi">0086</span> <span class="mi">00a8</span>    <span class="n">STRUCT</span>  <span class="n">IVAUD0</span><span class="p">,</span><span class="n">IV_SIZE</span>
+<span class="mi">0092</span> <span class="mi">00b4</span>    <span class="n">STRUCT</span>  <span class="n">IVAUD1</span><span class="p">,</span><span class="n">IV_SIZE</span>
+<span class="mi">009e</span> <span class="mi">00c0</span>    <span class="n">STRUCT</span>  <span class="n">IVAUD2</span><span class="p">,</span><span class="n">IV_SIZE</span>
+<span class="mi">00aa</span> <span class="mi">00cc</span>    <span class="n">STRUCT</span>  <span class="n">IVAUD3</span><span class="p">,</span><span class="n">IV_SIZE</span>
+<span class="mi">00b6</span> <span class="mi">00d8</span>    <span class="n">STRUCT</span>  <span class="n">IVRBF</span><span class="p">,</span><span class="n">IV_SIZE</span>
+<span class="mi">00c2</span> <span class="mi">00e4</span>    <span class="n">STRUCT</span>  <span class="n">IVDSKSYNC</span><span class="p">,</span><span class="n">IV_SIZE</span>
+<span class="mi">00ce</span> <span class="mi">00f0</span>    <span class="n">STRUCT</span>  <span class="n">IVEXTER</span><span class="p">,</span><span class="n">IV_SIZE</span>
+<span class="mi">00da</span> <span class="mi">00fc</span>    <span class="n">STRUCT</span>  <span class="n">IVINTEN</span><span class="p">,</span><span class="n">IV_SIZE</span>
+<span class="mi">00e6</span> <span class="mi">0108</span>    <span class="n">STRUCT</span>  <span class="n">IVNMI</span><span class="p">,</span><span class="n">IV_SIZE</span>
+
+
+<span class="c1">******* Dynamic System Variables *************************************</span>
+
+<span class="mi">00f2</span> <span class="mi">0114</span>    <span class="n">APTR</span>    <span class="n">ThisTask</span>    <span class="c1">; pointer to current task (readable)</span>
+
+<span class="mi">00f6</span> <span class="mi">0118</span>    <span class="n">ULONG</span>   <span class="n">IdleCount</span>   <span class="c1">; idle counter</span>
+<span class="mi">00fa</span> <span class="mi">011c</span>    <span class="n">ULONG</span>   <span class="n">DispCount</span>   <span class="c1">; dispatch counter</span>
+<span class="mi">00fe</span> <span class="mi">0120</span>    <span class="n">UWORD</span>   <span class="n">Quantum</span> <span class="c1">; time slice quantum</span>
+<span class="mi">0100</span> <span class="mi">0122</span>    <span class="n">UWORD</span>   <span class="n">Elapsed</span> <span class="c1">; current quantum ticks</span>
+<span class="mi">0102</span> <span class="mi">0124</span>    <span class="n">UWORD</span>   <span class="n">SysFlags</span>    <span class="c1">; misc internal system flags</span>
+<span class="mi">0104</span> <span class="mi">0126</span>    <span class="n">BYTE</span>    <span class="n">IDNestCnt</span>   <span class="c1">; interrupt disable nesting count</span>
+<span class="mi">0105</span> <span class="mi">0127</span>    <span class="n">BYTE</span>    <span class="n">TDNestCnt</span>   <span class="c1">; task disable nesting count</span>
+
+<span class="mi">0106</span> <span class="mi">0128</span>    <span class="n">UWORD</span>   <span class="n">AttnFlags</span>   <span class="c1">; special attention flags (readable)</span>
+
+<span class="mi">0108</span> <span class="mi">012a</span>    <span class="n">UWORD</span>   <span class="n">AttnResched</span> <span class="c1">; rescheduling attention</span>
+<span class="mi">010a</span> <span class="mi">012c</span>    <span class="n">APTR</span>    <span class="n">ResModules</span>  <span class="c1">; pointer to resident module array</span>
+<span class="mi">010e</span> <span class="mi">0130</span>    <span class="n">APTR</span>    <span class="n">TaskTrapCode</span>    <span class="c1">; default task trap routine</span>
+<span class="mi">0112</span> <span class="mi">0134</span>    <span class="n">APTR</span>    <span class="n">TaskExceptCode</span>  <span class="c1">; default task exception code</span>
+<span class="mi">0116</span> <span class="mi">0138</span>    <span class="n">APTR</span>    <span class="n">TaskExitCode</span>    <span class="c1">; default task exit code</span>
+<span class="mi">011a</span> <span class="mi">013c</span>    <span class="n">ULONG</span>   <span class="n">TaskSigAlloc</span>    <span class="c1">; preallocated signal mask</span>
+<span class="mi">011e</span> <span class="mi">0140</span>    <span class="n">UWORD</span>   <span class="n">TaskTrapAlloc</span>   <span class="c1">; preallocated trap mask</span>
+
+
+<span class="c1">******* System List Headers (private!) ********************************</span>
+
+<span class="mi">0120</span> <span class="mi">0142</span>    <span class="n">STRUCT</span>  <span class="n">MemList</span><span class="p">,</span><span class="n">LH_SIZE</span>
+<span class="mi">012e</span> <span class="mi">0150</span>    <span class="n">STRUCT</span>  <span class="n">ResourceList</span><span class="p">,</span><span class="n">LH_SIZE</span>
+<span class="mi">013c</span> <span class="mi">015e</span>    <span class="n">STRUCT</span>  <span class="n">DeviceList</span><span class="p">,</span><span class="n">LH_SIZE</span>
+<span class="mi">014a</span> <span class="mi">016c</span>    <span class="n">STRUCT</span>  <span class="n">IntrList</span><span class="p">,</span><span class="n">LH_SIZE</span>
+<span class="mi">0158</span> <span class="mi">017a</span>    <span class="n">STRUCT</span>  <span class="n">LibList</span><span class="p">,</span><span class="n">LH_SIZE</span>
+<span class="mi">0166</span> <span class="mi">0188</span>    <span class="n">STRUCT</span>  <span class="n">PortList</span><span class="p">,</span><span class="n">LH_SIZE</span>
+<span class="mi">0174</span> <span class="mi">0196</span>    <span class="n">STRUCT</span>  <span class="n">TaskReady</span><span class="p">,</span><span class="n">LH_SIZE</span>
+<span class="mi">0182</span> <span class="mi">01a4</span>    <span class="n">STRUCT</span>  <span class="n">TaskWait</span><span class="p">,</span><span class="n">LH_SIZE</span>
+<span class="mi">0190</span> <span class="mi">01b2</span>    <span class="n">STRUCT</span>  <span class="n">SoftInts</span><span class="p">,</span><span class="n">SH_SIZE</span><span class="c1">*5</span>
+
+<span class="mi">01e0</span> <span class="mi">0202</span>    <span class="n">STRUCT</span>  <span class="n">LastAlert</span><span class="p">,</span><span class="mi">4</span><span class="c1">*4</span>
+
+<span class="mi">01f0</span> <span class="mi">0212</span>    <span class="n">UBYTE</span>   <span class="n">VBlankFrequency</span>     <span class="c1">;(readable)</span>
+<span class="mi">01f1</span> <span class="mi">0213</span>    <span class="n">UBYTE</span>   <span class="n">PowerSupplyFrequency</span>    <span class="c1">;(readable)</span>
+
+<span class="mi">01f2</span> <span class="mi">0214</span>    <span class="n">STRUCT</span>  <span class="n">SemaphoreList</span><span class="p">,</span><span class="n">LH_SIZE</span>
+
+<span class="mi">0200</span> <span class="mi">0222</span>    <span class="n">APTR</span>    <span class="n">KickMemPtr</span>  <span class="c1">; ptr to queue of mem lists</span>
+<span class="mi">0204</span> <span class="mi">0226</span>    <span class="n">APTR</span>    <span class="n">KickTagPtr</span>  <span class="c1">; ptr to rom tag queue</span>
+<span class="mi">0208</span> <span class="mi">022a</span>    <span class="n">APTR</span>    <span class="n">KickCheckSum</span>    <span class="c1">; checksum for mem and tags</span>
+
+<span class="mi">020c</span> <span class="mi">022e</span>    <span class="n">UBYTE</span> <span class="n">ExecBaseReserved</span><span class="p">[</span><span class="mi">10</span><span class="p">]</span><span class="c1">;</span>
+<span class="mi">0216</span> <span class="mi">0238</span>    <span class="n">UBYTE</span> <span class="n">ExecBaseNewReserved</span><span class="p">[</span><span class="mi">20</span><span class="p">]</span><span class="c1">;</span>
+<span class="mi">022a</span> <span class="mi">024c</span>    <span class="n">LABEL</span>   <span class="n">SYSBASESIZE</span>
+</pre></div>
+
+
+<p>According to this structure we expect to find the memory list header 322 bytes (<code>0x142</code>) after the base address, which means that this number should be mentioned somewhere in the Kickstart code.</p>
+<p>It is not surprise indeed that the function <code>AllocMem</code> mentions it. This function is part of the Exec API that we explored in the third and fourth instalments. Following the same method described there I found the function at the address <code>0x17d0</code> in the Kickstart code</p>
+<div class="highlight"><pre><span></span><span class="c1">; memoryBlock = AllocMem(byteSize, attributes)</span>
+<span class="c1">; d0                     d0        d1</span>
+
+<span class="nl">000017d0:</span> <span class="mi">522e</span> <span class="mi">0127</span>                 <span class="k">addq</span><span class="o">.b</span>  <span class="nl">#0x1</span><span class="p">,</span><span class="mi">0x127</span><span class="p">(</span><span class="o">a6</span><span class="p">)</span>
+<span class="nl">000017d4:</span> <span class="mi">48e7</span> <span class="mi">3020</span>                 <span class="k">movem</span><span class="o">.l</span> <span class="o">d2</span><span class="p">-</span><span class="o">d3</span><span class="p">/</span><span class="o">a2</span><span class="p">,-(</span><span class="n">sp</span><span class="p">)</span>
+<span class="nl">000017d8:</span> <span class="mi">2600</span>                      <span class="k">move</span><span class="o">.l</span>  <span class="o">d0</span><span class="p">,</span><span class="o">d3</span>
+<span class="nl">000017da:</span> <span class="mi">2401</span>                      <span class="k">move</span><span class="o">.l</span>  <span class="o">d1</span><span class="p">,</span><span class="o">d2</span>
+<span class="nl">000017dc:</span> <span class="mi">45ee</span> <span class="mi">0142</span>                 <span class="k">lea</span>     <span class="mi">0x142</span><span class="p">(</span><span class="o">a6</span><span class="p">),</span><span class="o">a2</span>
+<span class="nl">000017e0:</span> <span class="mi">2452</span>                      <span class="k">movea</span><span class="o">.l</span> <span class="p">(</span><span class="o">a2</span><span class="p">),</span><span class="o">a2</span>
+<span class="p">[</span><span class="n">...</span><span class="p">]</span>
+</pre></div>
+
+
+<p>and in this initial part of the function we can clearly see the code that loads the effective address of <code>0x142(a6)</code>. Remember that <code>a6</code> is always supposed to contain the Exec base address.</p>
+<p>The displacement <code>0x142</code> is also mentioned in a table towards the beginning of the code, and this is the part we are really interested in at the moment</p>
+<div class="highlight"><pre><span></span><span class="c1">; Initialise list headers</span>
+
+<span class="nl">000002b0:</span> <span class="mi">43fa</span> <span class="mi">0020</span>                 <span class="k">lea</span>     <span class="mi">0x2d2</span><span class="p">(</span><span class="o">pc</span><span class="p">),</span><span class="o">a1</span>
+<span class="nl">000002b4:</span> <span class="mi">3019</span>                      <span class="k">move</span><span class="o">.w</span>  <span class="p">(</span><span class="o">a1</span><span class="p">)+,</span><span class="o">d0</span>
+<span class="nl">000002b6:</span> <span class="mi">6700</span> <span class="mi">0086</span>                 <span class="k">beq</span><span class="o">.w</span>   <span class="mi">0x33e</span>
+<span class="nl">000002ba:</span> <span class="mi">41f6</span> <span class="mi">0000</span>                 <span class="k">lea</span>     <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="o">a6</span><span class="p">,</span><span class="o">d0.w</span><span class="p">),</span><span class="o">a0</span>
+<span class="nl">000002be:</span> <span class="mi">2088</span>                      <span class="k">move</span><span class="o">.l</span>  <span class="o">a0</span><span class="p">,(</span><span class="o">a0</span><span class="p">)</span>
+<span class="nl">000002c0:</span> <span class="mi">5890</span>                      <span class="k">addq</span><span class="o">.l</span>  <span class="nl">#0x4</span><span class="p">,(</span><span class="o">a0</span><span class="p">)</span>
+<span class="nl">000002c2:</span> <span class="mi">42a8</span> <span class="mi">0004</span>                 <span class="k">clr</span><span class="o">.l</span>   <span class="mi">0x4</span><span class="p">(</span><span class="o">a0</span><span class="p">)</span>
+<span class="nl">000002c6:</span> <span class="mi">2148</span> <span class="mi">0008</span>                 <span class="k">move</span><span class="o">.l</span>  <span class="o">a0</span><span class="p">,</span><span class="mi">0x8</span><span class="p">(</span><span class="o">a0</span><span class="p">)</span>
+<span class="nl">000002ca:</span> <span class="mi">3019</span>                      <span class="k">move</span><span class="o">.w</span>  <span class="p">(</span><span class="o">a1</span><span class="p">)+,</span><span class="o">d0</span>
+<span class="nl">000002cc:</span> <span class="mi">1140</span> <span class="mi">000c</span>                 <span class="k">move</span><span class="o">.b</span>  <span class="o">d0</span><span class="p">,</span><span class="mi">0xc</span><span class="p">(</span><span class="o">a0</span><span class="p">)</span>
+<span class="nl">000002d0:</span> <span class="mi">60e2</span>                      <span class="k">bra</span><span class="o">.b</span>   <span class="mi">0x2b4</span>
+
+<span class="c1">; List headers</span>
+
+<span class="nl">000002d2:</span> <span class="mi">0142</span> <span class="mi">000a</span>
+<span class="nl">000002d6:</span> <span class="mi">0150</span> <span class="mi">0008</span>
+<span class="nl">000002da:</span> <span class="mi">015e</span> <span class="mi">0003</span>
+<span class="nl">000002de:</span> <span class="mi">017a</span> <span class="mi">0009</span>
+<span class="nl">000002e2:</span> <span class="mi">0188</span> <span class="mi">0004</span>
+<span class="nl">000002e6:</span> <span class="mi">0196</span> <span class="mi">0001</span>
+<span class="nl">000002ea:</span> <span class="mi">01a4</span> <span class="mi">0001</span>
+<span class="nl">000002ee:</span> <span class="mi">016c</span> <span class="mi">0002</span>
+<span class="nl">000002f2:</span> <span class="mi">01b2</span> <span class="mi">000b</span>
+<span class="nl">000002f6:</span> <span class="mi">01c2</span> <span class="mi">000b</span>
+<span class="nl">000002fa:</span> <span class="mi">01d2</span> <span class="mi">000b</span>
+<span class="nl">000002fe:</span> <span class="mi">01e2</span> <span class="mi">000b</span>
+<span class="nl">00000302:</span> <span class="mi">01f2</span> <span class="mi">000b</span>
+<span class="nl">00000306:</span> <span class="mi">0214</span> <span class="mi">000f</span>
+<span class="nl">0000030a:</span> <span class="mi">0000</span>
+</pre></div>
+
+
+<p>As you can see I formatted the code to show that the values after <code>02d2</code> are data and not code. The disassembler will obviously show you some instructions but they are just misinterpretations of the binary data.</p>
+<p>This table is immediately followed by the table we found in the third post, when we were looking at the values of the <code>LIB</code> structure.</p>
+<p>Let's comment line by line the code at <code>02b0</code></p>
+<div class="highlight"><pre><span></span><span class="c1">; Initialise list headers</span>
+
+<span class="nl">000002b0:</span> <span class="mi">43fa</span> <span class="mi">0020</span>                 <span class="k">lea</span>     <span class="mi">0x2d2</span><span class="p">(</span><span class="o">pc</span><span class="p">),</span><span class="o">a1</span>
+<span class="nl">000002b4:</span> <span class="mi">3019</span>                      <span class="k">move</span><span class="o">.w</span>  <span class="p">(</span><span class="o">a1</span><span class="p">)+,</span><span class="o">d0</span>
+<span class="nl">000002b6:</span> <span class="mi">6700</span> <span class="mi">0086</span>                 <span class="k">beq</span><span class="o">.w</span>   <span class="mi">0x33e</span>
+<span class="nl">000002ba:</span> <span class="mi">41f6</span> <span class="mi">0000</span>                 <span class="k">lea</span>     <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="o">a6</span><span class="p">,</span><span class="o">d0.w</span><span class="p">),</span><span class="o">a0</span>
+<span class="nl">000002be:</span> <span class="mi">2088</span>                      <span class="k">move</span><span class="o">.l</span>  <span class="o">a0</span><span class="p">,(</span><span class="o">a0</span><span class="p">)</span>
+<span class="nl">000002c0:</span> <span class="mi">5890</span>                      <span class="k">addq</span><span class="o">.l</span>  <span class="nl">#0x4</span><span class="p">,(</span><span class="o">a0</span><span class="p">)</span>
+<span class="nl">000002c2:</span> <span class="mi">42a8</span> <span class="mi">0004</span>                 <span class="k">clr</span><span class="o">.l</span>   <span class="mi">0x4</span><span class="p">(</span><span class="o">a0</span><span class="p">)</span>
+<span class="nl">000002c6:</span> <span class="mi">2148</span> <span class="mi">0008</span>                 <span class="k">move</span><span class="o">.l</span>  <span class="o">a0</span><span class="p">,</span><span class="mi">0x8</span><span class="p">(</span><span class="o">a0</span><span class="p">)</span>
+<span class="nl">000002ca:</span> <span class="mi">3019</span>                      <span class="k">move</span><span class="o">.w</span>  <span class="p">(</span><span class="o">a1</span><span class="p">)+,</span><span class="o">d0</span>
+<span class="nl">000002cc:</span> <span class="mi">1140</span> <span class="mi">000c</span>                 <span class="k">move</span><span class="o">.b</span>  <span class="o">d0</span><span class="p">,</span><span class="mi">0xc</span><span class="p">(</span><span class="o">a0</span><span class="p">)</span>
+<span class="nl">000002d0:</span> <span class="mi">60e2</span>                      <span class="k">bra</span><span class="o">.b</span>   <span class="mi">0x2b4</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="nl">000002b0:</span> <span class="mi">43fa</span> <span class="mi">0020</span>                 <span class="k">lea</span>     <span class="mi">0x2d2</span><span class="p">(</span><span class="o">pc</span><span class="p">),</span><span class="o">a1</span>
+</pre></div>
+
+
+<p>First of all the code loads the absolute address of <code>0x2d2(pc)</code> in the <code>a1</code> register. This is exactly the beginning of the table, as shown above.</p>
+<div class="highlight"><pre><span></span><span class="nl">000002b4:</span> <span class="mi">3019</span>                      <span class="k">move</span><span class="o">.w</span>  <span class="p">(</span><span class="o">a1</span><span class="p">)+,</span><span class="o">d0</span>
+<span class="nl">000002b6:</span> <span class="mi">6700</span> <span class="mi">0086</span>                 <span class="k">beq</span><span class="o">.w</span>   <span class="mi">0x33e</span>
+</pre></div>
+
+
+<p>The code then loads the first value of the table (<code>0142</code>) in <code>d0</code> and increments <code>a1</code>. This suggests that we are looking at a loop. The following instruction is indeed a comparison that jumps to <code>0x33e</code> is the value is <code>0</code>. You can easily see above that the table is terminated by a <code>0000</code>.</p>
+<div class="highlight"><pre><span></span><span class="nl">000002ba:</span> <span class="mi">41f6</span> <span class="mi">0000</span>                 <span class="k">lea</span>     <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="o">a6</span><span class="p">,</span><span class="o">d0.w</span><span class="p">),</span><span class="o">a0</span>
+</pre></div>
+
+
+<p>The register <code>a0</code> is then loaded with the effective address of Exec + <code>d0</code>. This means that we use the value we just read from the table as a pointer. For the first value, then, we are looking at <code>0x142</code> bytes after the beginning of the Exec library, exactly where we expected to find the Memory List header.</p>
+<div class="highlight"><pre><span></span><span class="nl">000002be:</span> <span class="mi">2088</span>                      <span class="k">move</span><span class="o">.l</span>  <span class="o">a0</span><span class="p">,(</span><span class="o">a0</span><span class="p">)</span>
+<span class="nl">000002c0:</span> <span class="mi">5890</span>                      <span class="k">addq</span><span class="o">.l</span>  <span class="nl">#0x4</span><span class="p">,(</span><span class="o">a0</span><span class="p">)</span>
+</pre></div>
+
+
+<p>An empty linked list has the head pointing to the tail and the tail pointing to zero. To do this we set the content of that address <code>(a0)</code> to the address itself (<code>a0</code>), then we increment it by 4 making it point to the tail.</p>
+<div class="highlight"><pre><span></span><span class="nl">000002c2:</span> <span class="mi">42a8</span> <span class="mi">0004</span>                 <span class="k">clr</span><span class="o">.l</span>   <span class="mi">0x4</span><span class="p">(</span><span class="o">a0</span><span class="p">)</span>
+<span class="nl">000002c6:</span> <span class="mi">2148</span> <span class="mi">0008</span>                 <span class="k">move</span><span class="o">.l</span>  <span class="o">a0</span><span class="p">,</span><span class="mi">0x8</span><span class="p">(</span><span class="o">a0</span><span class="p">)</span>
+</pre></div>
+
+
+<p>The tail itself is then cleared and the tail predecessor is set to be the head.</p>
+<div class="highlight"><pre><span></span><span class="nl">000002ca:</span> <span class="mi">3019</span>                      <span class="k">move</span><span class="o">.w</span>  <span class="p">(</span><span class="o">a1</span><span class="p">)+,</span><span class="o">d0</span>
+<span class="nl">000002cc:</span> <span class="mi">1140</span> <span class="mi">000c</span>                 <span class="k">move</span><span class="o">.b</span>  <span class="o">d0</span><span class="p">,</span><span class="mi">0xc</span><span class="p">(</span><span class="o">a0</span><span class="p">)</span>
+</pre></div>
+
+
+<p>The code then fetches the next word from the table (<code>000a</code>) and puts it into a field 12 bytes (<code>0xc</code>) from the beginning of the structure, that is <code>LH_TYPE</code>. The possible values of this byte can be found in <code>include_i/exec/nodes.i</code>, where we find that the value <code>0xa</code> corresponds to <code>NT_MEMORY</code>.</p>
+<div class="highlight"><pre><span></span><span class="c1">;------ Node Types for LN_TYPE</span>
+
+<span class="n">NT_UNKNOWN</span>  <span class="o">EQU</span> <span class="mi">0</span>
+<span class="n">NT_TASK</span> <span class="o">EQU</span> <span class="mi">1</span>   <span class="c1">; Exec task</span>
+<span class="n">NT_INTERRUPT</span>    <span class="o">EQU</span> <span class="mi">2</span>
+<span class="n">NT_DEVICE</span>   <span class="o">EQU</span> <span class="mi">3</span>
+<span class="n">NT_MSGPORT</span>  <span class="o">EQU</span> <span class="mi">4</span>
+<span class="n">NT_MESSAGE</span>  <span class="o">EQU</span> <span class="mi">5</span>   <span class="c1">; Indicates message currently pending</span>
+<span class="n">NT_FREEMSG</span>  <span class="o">EQU</span> <span class="mi">6</span>
+<span class="n">NT_REPLYMSG</span> <span class="o">EQU</span> <span class="mi">7</span>   <span class="c1">; Message has been replied</span>
+<span class="n">NT_RESOURCE</span> <span class="o">EQU</span> <span class="mi">8</span>
+<span class="n">NT_LIBRARY</span>  <span class="o">EQU</span> <span class="mi">9</span>
+<span class="n">NT_MEMORY</span>   <span class="o">EQU</span> <span class="mi">10</span>
+<span class="n">NT_SOFTINT</span>  <span class="o">EQU</span> <span class="mi">11</span>  <span class="c1">; Internal flag used by SoftInts</span>
+<span class="n">NT_FONT</span> <span class="o">EQU</span> <span class="mi">12</span>
+<span class="n">NT_PROCESS</span>  <span class="o">EQU</span> <span class="mi">13</span>  <span class="c1">; AmigaDOS Process</span>
+<span class="n">NT_SEMAPHORE</span>    <span class="o">EQU</span> <span class="mi">14</span>
+<span class="n">NT_SIGNALSEM</span>    <span class="o">EQU</span> <span class="mi">15</span>  <span class="c1">; signal semaphores</span>
+<span class="n">NT_BOOTNODE</span> <span class="o">EQU</span> <span class="mi">16</span>
+<span class="n">NT_KICKMEM</span>  <span class="o">EQU</span> <span class="mi">17</span>
+<span class="n">NT_GRAPHICS</span> <span class="o">EQU</span> <span class="mi">18</span>
+<span class="n">NT_DEATHMESSAGE</span> <span class="o">EQU</span> <span class="mi">19</span>
+
+<span class="n">NT_USER</span>     <span class="o">EQU</span> <span class="mi">254</span> <span class="c1">; User node types work down from here</span>
+<span class="n">NT_EXTENDED</span> <span class="o">EQU</span> <span class="mi">255</span>
+</pre></div>
+
+
+<p>There is only one instruction left</p>
+<div class="highlight"><pre><span></span><span class="nl">000002d0:</span> <span class="mi">60e2</span>                      <span class="k">bra</span><span class="o">.b</span>   <span class="mi">0x2b4</span>
+</pre></div>
+
+
+<p>which jumps back to the beginning of this short piece of code. The procedure then keeps looping on the whole table until it reaches the list terminator <code>0000</code>.</p>
+<p>The final content of the memory at <code>0142</code> will be</p>
+<div class="highlight"><pre><span></span><span class="nl">00000142:</span> <span class="mi">0000</span> <span class="mi">0146</span> <span class="c1">; LH_HEAD</span>
+<span class="nl">00000146:</span> <span class="mi">0000</span> <span class="mi">0000</span> <span class="c1">; LH_TAIL</span>
+<span class="nl">0000014a:</span> <span class="mi">0000</span> <span class="mi">0146</span> <span class="c1">; LH_TAILPRED</span>
+<span class="nl">0000014d:</span> <span class="mi">0a</span>        <span class="c1">; LH_TYPE</span>
+<span class="nl">0000014e:</span> <span class="p">[</span><span class="n">...</span><span class="p">]</span>
+</pre></div>
+
+
+<p>And the same happens for the remaining 7 lists from <code>ResourceList</code> to <code>TaskWait</code>. After this the Exec lists are initialised.</p>
+<h1>Resources</h1>
+<ul>
+<li>Microprocessor-based system design by Ricardo Gutierrez-Osuna (<a href="http://courses.cs.tamu.edu/rgutier/ceg411_f01/">slides</a>), in particular <a href="http://courses.cs.tamu.edu/rgutier/ceg411_f01/l9.pdf">Lesson 9 - Exception processing</a></li>
+<li>Motorola M68000 Family Programmer's Reference Manual <a href="https://www.nxp.com/docs/en/reference-manual/M68000PRM.pdf">PDF here</a></li>
+</ul>
+<h1>Feedback</h1>
+<p>Feel free to reach me on <a href="https://twitter.com/thedigicat">Twitter</a> if you have questions. The <a href="http://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues">GitHub issues</a> page is the best place to submit corrections.</p>
+        </section>
+
+<section id="related-posts">
+    <h2>Related Posts</h2>
+    <div class="box">
+        <ul>
+            <li><a href="http://blog.thedigitalcatonline.com/blog/2018/06/25/exploring-the-amiga-6/">Exploring the Amiga - Part 6</a></li>
+            <li><a href="http://blog.thedigitalcatonline.com/blog/2018/06/14/exploring-the-amiga-4/">Exploring the Amiga - Part 4</a></li>
+            <li><a href="http://blog.thedigitalcatonline.com/blog/2018/06/08/exploring-the-amiga-3/">Exploring the Amiga - Part 3</a></li>
+            <li><a href="http://blog.thedigitalcatonline.com/blog/2018/05/28/exploring-the-amiga-2/">Exploring the Amiga - Part 2</a></li>
+            <li><a href="http://blog.thedigitalcatonline.com/blog/2018/05/28/exploring-the-amiga-1/">Exploring the Amiga - Part 1</a></li>
+        </ul>
+    </div>
+</section>
+<section id="series">
+    <h2>Part 5 of the Exploring the Amiga series</h2>
+    <div class="box">
+        <h5>Previous articles</h5>
+        <ul>
+            <li><a href="http://blog.thedigitalcatonline.com/blog/2018/05/28/exploring-the-amiga-1/">Exploring the Amiga - Part 1</a></li>
+            <li><a href="http://blog.thedigitalcatonline.com/blog/2018/05/28/exploring-the-amiga-2/">Exploring the Amiga - Part 2</a></li>
+            <li><a href="http://blog.thedigitalcatonline.com/blog/2018/06/08/exploring-the-amiga-3/">Exploring the Amiga - Part 3</a></li>
+            <li><a href="http://blog.thedigitalcatonline.com/blog/2018/06/14/exploring-the-amiga-4/">Exploring the Amiga - Part 4</a></li>
+        </ul>
+    
+        <h5>Next articles</h5>
+        <ul>
+            <li><a href="http://blog.thedigitalcatonline.com/blog/2018/06/25/exploring-the-amiga-6/">Exploring the Amiga - Part 6</a></li>
+        </ul>
+    </div>
+</section>
+    </article>
+
+
+                        </div>
+                    </div>
+
+                <!-- Sidebar -->
+                    <div id="sidebar">
+<div class="inner">
+    <!-- Menu -->
+    <nav id="menu">
+        <header class="major">
+            <h2>Menu</h2>
+        </header>
+        <ul>
+            <li><a href="http://blog.thedigitalcatonline.com/">Homepage</a></li>
+            <li><a href="http://blog.thedigitalcatonline.com/pages/about.html">About</a></li>
+            <li><a href="http://blog.thedigitalcatonline.com/archives/">Archives</a></li>
+        </ul>
+    </nav>
+
+    <!-- Feeds -->
+<section>
+    <header class="major">
+        <h2>Feeds</h2>
+    </header>
+    <ul class="list-clean">
+        <li><a href="http://blog.thedigitalcatonline.com/atom.xml"><i class="fa fa-rss"></i> All posts</a></li>
+
+
+        <li><a href="http://blog.thedigitalcatonline.com/category/retro/atom.xml"><i class="fa fa-rss"></i> All posts in category: Retro</a></li>
+    </ul>
+</section>
+    <!-- Recent posts -->
+<section>
+    <header class="major">
+        <h2>Recent posts</h2>
+    </header>
+    <div class="mini-posts">
+        <article>
+            Exploring the Amiga - Part 6
+            <a href="http://blog.thedigitalcatonline.com/blog/2018/06/25/exploring-the-amiga-6/"> Read</a>
+        </article>
+        <article>
+            Exploring the Amiga - Part 5
+            <a href="http://blog.thedigitalcatonline.com/blog/2018/06/25/exploring-the-amiga-5/"> Read</a>
+        </article>
+        <article>
+            Exploring the Amiga - Part 4
+            <a href="http://blog.thedigitalcatonline.com/blog/2018/06/14/exploring-the-amiga-4/"> Read</a>
+        </article>
+        <article>
+            Exploring the Amiga - Part 3
+            <a href="http://blog.thedigitalcatonline.com/blog/2018/06/08/exploring-the-amiga-3/"> Read</a>
+        </article>
+        <article>
+            A game of tokens: solution - Part 4
+            <a href="http://blog.thedigitalcatonline.com/blog/2018/06/02/a-game-of-tokens-solution-part-4/"> Read</a>
+        </article>
+    </div>
+</section>
+    <!-- Tags -->
+<section>
+    <header class="major">
+        <h2>Tags</h2>
+    </header>
+    <ul class="list-inline list-clean" id="tags-side">
+        <li class="tag-3">
+            <a href="http://blog.thedigitalcatonline.com/categories/algorithms/">algorithms</a>
+        </li>
+        <li class="tag-2">
+            <a href="http://blog.thedigitalcatonline.com/categories/amiga/">amiga</a>
+        </li>
+        <li class="tag-4">
+            <a href="http://blog.thedigitalcatonline.com/categories/amqp/">AMQP</a>
+        </li>
+        <li class="tag-4">
+            <a href="http://blog.thedigitalcatonline.com/categories/architectures/">architectures</a>
+        </li>
+        <li class="tag-2">
+            <a href="http://blog.thedigitalcatonline.com/categories/assembly/">assembly</a>
+        </li>
+        <li class="tag-2">
+            <a href="http://blog.thedigitalcatonline.com/categories/c/">C</a>
+        </li>
+        <li class="tag-4">
+            <a href="http://blog.thedigitalcatonline.com/categories/clojure/">Clojure</a>
+        </li>
+        <li class="tag-2">
+            <a href="http://blog.thedigitalcatonline.com/categories/compilers/">compilers</a>
+        </li>
+        <li class="tag-2">
+            <a href="http://blog.thedigitalcatonline.com/categories/concurrent-programming/">concurrent programming</a>
+        </li>
+        <li class="tag-4">
+            <a href="http://blog.thedigitalcatonline.com/categories/cryptography/">cryptography</a>
+        </li>
+        <li class="tag-2">
+            <a href="http://blog.thedigitalcatonline.com/categories/decorators/">decorators</a>
+        </li>
+        <li class="tag-3">
+            <a href="http://blog.thedigitalcatonline.com/categories/django/">Django</a>
+        </li>
+        <li class="tag-3">
+            <a href="http://blog.thedigitalcatonline.com/categories/erlang/">Erlang</a>
+        </li>
+        <li class="tag-1">
+            <a href="http://blog.thedigitalcatonline.com/categories/functional-programming/">functional programming</a>
+        </li>
+        <li class="tag-3">
+            <a href="http://blog.thedigitalcatonline.com/categories/generators/">generators</a>
+        </li>
+        <li class="tag-3">
+            <a href="http://blog.thedigitalcatonline.com/categories/git/">Git</a>
+        </li>
+        <li class="tag-2">
+            <a href="http://blog.thedigitalcatonline.com/categories/metaclasses/">metaclasses</a>
+        </li>
+        <li class="tag-2">
+            <a href="http://blog.thedigitalcatonline.com/categories/metaprogramming/">metaprogramming</a>
+        </li>
+        <li class="tag-3">
+            <a href="http://blog.thedigitalcatonline.com/categories/notebook/">Notebook</a>
+        </li>
+        <li class="tag-1">
+            <a href="http://blog.thedigitalcatonline.com/categories/oop/">OOP</a>
+        </li>
+        <li class="tag-2">
+            <a href="http://blog.thedigitalcatonline.com/categories/operating-systems/">operating systems</a>
+        </li>
+        <li class="tag-4">
+            <a href="http://blog.thedigitalcatonline.com/categories/pika/">Pika</a>
+        </li>
+        <li class="tag-4">
+            <a href="http://blog.thedigitalcatonline.com/categories/postage/">Postage</a>
+        </li>
+        <li class="tag-1">
+            <a href="http://blog.thedigitalcatonline.com/categories/python/">Python</a>
+        </li>
+        <li class="tag-2">
+            <a href="http://blog.thedigitalcatonline.com/categories/python2/">Python2</a>
+        </li>
+        <li class="tag-1">
+            <a href="http://blog.thedigitalcatonline.com/categories/python3/">Python3</a>
+        </li>
+        <li class="tag-3">
+            <a href="http://blog.thedigitalcatonline.com/categories/rabbitmq/">RabbitMQ</a>
+        </li>
+        <li class="tag-4">
+            <a href="http://blog.thedigitalcatonline.com/categories/refactoring/">refactoring</a>
+        </li>
+        <li class="tag-2">
+            <a href="http://blog.thedigitalcatonline.com/categories/retroprogramming/">retroprogramming</a>
+        </li>
+        <li class="tag-4">
+            <a href="http://blog.thedigitalcatonline.com/categories/rsa/">RSA</a>
+        </li>
+        <li class="tag-1">
+            <a href="http://blog.thedigitalcatonline.com/categories/scala/">Scala</a>
+        </li>
+        <li class="tag-4">
+            <a href="http://blog.thedigitalcatonline.com/categories/ssh/">SSH</a>
+        </li>
+        <li class="tag-4">
+            <a href="http://blog.thedigitalcatonline.com/categories/ssl/">SSL</a>
+        </li>
+        <li class="tag-1">
+            <a href="http://blog.thedigitalcatonline.com/categories/tdd/">TDD</a>
+        </li>
+        <li class="tag-1">
+            <a href="http://blog.thedigitalcatonline.com/categories/testing/">testing</a>
+        </li>
+        <li class="tag-3">
+            <a href="http://blog.thedigitalcatonline.com/categories/versioning/">versioning</a>
+        </li>
+    </ul>
+</section>
+    <!-- Section -->
+<section>
+    <header class="major">
+        <h2>Get in touch</h2>
+    </header>
+    <ul class="list-clean" id="social">
+        
+        
+        
+        <li class="list-item-spaced"><a href="https://twitter.com/thedigicat"><i class="fa fa-twitter-square fa-lg"></i> Twitter</a></li>
+        
+        
+        
+        
+        <li class="list-item-spaced"><a href="https://plus.google.com/u/0/111444750762335924049"><i class="fa fa-google-plus-square fa-lg"></i> Google+</a></li>
+        
+        
+        
+        
+        <li class="list-item-spaced"><a href="https://github.com/TheDigitalCatOnline"><i class="fa fa-github-square fa-lg"></i> GitHub</a></li>
+        
+    </ul>
+</section>
+    <!-- Footer -->
+    <footer id="footer">
+        <p class="copyright">Editorial theme by: <a href="https://html5up.net">HTML5 UP</a>.</p>
+    </footer>
+
+</div>                    </div>
+
+            </div>
+
+        <!-- Scripts -->
+            <script src="http://blog.thedigitalcatonline.com/theme/js/jquery.min.js"></script>
+            <script src="http://blog.thedigitalcatonline.com/theme/js/skel.min.js"></script>
+            <script src="http://blog.thedigitalcatonline.com/theme/js/util.js"></script>
+            <!--[if lte IE 8]><script src="http://blog.thedigitalcatonline.com/theme/js/ie/respond.min.js"></script><![endif]-->
+            <script src="http://blog.thedigitalcatonline.com/theme/js/main.js"></script>
+
+    </body>
+</html>
