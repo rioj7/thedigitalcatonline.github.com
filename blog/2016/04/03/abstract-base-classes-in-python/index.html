@@ -69,8 +69,8 @@
         <section id="content">
             <p>With the introduction of Abstract Base Classes, Python once again shows its nature of a very innovative and flexible language. It is interesting to see how such a remarkable feature has been introduced into the language by a pure Python module. This demonstrates that Python is built in a way that is very open to changes, thanks to its foundations in pure polymorphism based on delegation.</p>
 <p>Many Python programmers overlooked Abstract Base Classes and the classes in the <code>collections</code> module, which are one of the simplest and useful applications of the concept. Sure enough, this is not a feature that you will use every day or that will change the way you are programming in Python. But neither is it something you shall discard before understanding what it brings into the language, and what sort of problems it can solve for you.</p>
-<h1>Level 1</h1>
-<h2>EAFP</h2>
+<h1 id="level-1">Level 1<a class="headerlink" href="#level-1" title="Permanent link">&para;</a></h1>
+<h2 id="eafp">EAFP<a class="headerlink" href="#eafp" title="Permanent link">&para;</a></h2>
 <p>Python is a dynamically-typed object-oriented language strongly based on delegation, so its approach to problems is intrinsically polymorphic. This means that Python deals mostly with the behaviour of objects and not with their structure. The well-known EAFP protocol (it's Easier to Ask Forgiveness than Permission) comes from this approach. This code</p>
 <div class="highlight"><pre><span></span><span class="k">try</span><span class="p">:</span>
     <span class="n">someobj</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
@@ -82,7 +82,7 @@
 
 <p>does not check if the object is a <code>list</code> or a <code>dictionary</code> (both would allow the <code>[1]</code> notation), but if the object can be accessed by key (or index). When you accept a parameter in a function Python does not specify the type (leaving aside type hints) because you are not interested in accepting a given type or one of its derived types. You are interested in accepting something that provides the methods you will use.</p>
 <p>The behaviour, in an object-oriented environment, is the run-time interface of the object. This is different from the static interface, which is the collection of the methods provided by the object. The run-time interface is the actual interface the object shows when it is used, and this encompasses the methods provided by its class, but also methods provided by parent classes, the metaclass and other entry points provided by <code>__getattr__</code>.</p>
-<h2>Complex checks</h2>
+<h2 id="complex-checks">Complex checks<a class="headerlink" href="#complex-checks" title="Permanent link">&para;</a></h2>
 <p>Sometimes, however, you need to perform complex checks, such as "it behaves like a list". How can you test this condition? You could test if the incoming object has some standard methods, but this is not only incomplete but also wrong. For example, I could write the following test</p>
 <div class="highlight"><pre><span></span><span class="k">try</span><span class="p">:</span>
     <span class="n">obj</span><span class="o">.</span><span class="n">append</span>
@@ -114,7 +114,7 @@
 
 
 <p>If possible this approach is worse than before, since it tests the exact type. Even if <code>isinstance()</code> and <code>issubclass()</code> are smart enough to walk through the hierarchy of parent classes, this excludes evary class that behaves like a list does not inherit from it.</p>
-<h2>Back to delegation</h2>
+<h2 id="back-to-delegation">Back to delegation<a class="headerlink" href="#back-to-delegation" title="Permanent link">&para;</a></h2>
 <p>The idea proposed in <a href="http://legacy.python.org/dev/peps/pep-3119/">PEP 3119</a> to face this problem is very elegant, and leverages the very nature of Python: that of being strongly based on delegation. The solution, implemented in Python 3 and backported to Python 2.7, changes the nature of the two <code>isinstance()</code> and <code>issubclass()</code> builtins. Now the first thing that <code>isinstance()</code> does is to call the <code>__instancecheck__()</code> method of the queried class, basically giving it the chance to answer the call with a different algorithm than the standard one. The same happens for <code>issubclass()</code>, which becomes <code>__subclasscheck__()</code>. So the following code</p>
 <div class="highlight"><pre><span></span><span class="nb">issubclass</span><span class="p">(</span><span class="n">myclass</span><span class="p">,</span> <span class="n">someclass</span><span class="p">)</span>
 </pre></div>
@@ -126,7 +126,7 @@
 
 
 <p>This is very natural because, after all, <code>someclass</code> is the best source of judgement about being a subclass of itself.</p>
-<h2>A new type of subclass</h2>
+<h2 id="a-new-type-of-subclass">A new type of subclass<a class="headerlink" href="#a-new-type-of-subclass" title="Permanent link">&para;</a></h2>
 <p>With the introduction of delegation-based instance and subclass checks, Python provides a new type of subclass, and thus a new way to relate classes together. Now a subclass may be a real subclass, obtained using inheritance</p>
 <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">ChildClass</span><span class="p">(</span><span class="n">ParentClass</span><span class="p">):</span>
     <span class="k">pass</span>
@@ -139,7 +139,7 @@
 
 
 <p>The difference between a real and a virtual subclass is very simple: a real subclass knows its relationship with the parent class through its <code>__bases__</code> attribute, and can thus implicitly delegate the resolution of missing methods. A virtual subclass knows nothing about the class that registered it, and nowhere in the subclass will you find something that links it to the parent class. Thus, a virtual parent class is useful only as a categorization.</p>
-<h2>Abstract Base Classes</h2>
+<h2 id="abstract-base-classes">Abstract Base Classes<a class="headerlink" href="#abstract-base-classes" title="Permanent link">&para;</a></h2>
 <p>Classes that can register other classes, thus becoming virtual parents of those, are called in Python Abstract Base Classes, or ABCs.</p>
 <p>The name of this new language element is important. ABCs are first of all classes, just like any other class you can create in Python, and they can be subclassed in the usual way to create taxonomies. They are also meant to be base classes, that is classes that represent fundamental behaviours or categories. Last, they are abstract. This has a very precise meaning in Python and will be the subject of the last part of this post.</p>
 <p>The classes provided by the <code>collections</code> module are Abstract Base Classes, and they set themselves as virtual parents of some base types in the same module. If you check the <code>_collections_abc.py</code> file in your Python 3 installation (for example in <code>/usr/lib/python3.4/_collections_abc.py</code>) you will find code like this</p>
@@ -175,7 +175,7 @@
 
 
 <p>As you can see, the <code>MyClass</code> class is initially not recognized as a subclass of <code>collections.Sequence</code>, but after the registration <code>issubclass()</code> returns <code>True</code>, even if the class is still empty.</p>
-<h2>How to create ABCs</h2>
+<h2 id="how-to-create-abcs">How to create ABCs<a class="headerlink" href="#how-to-create-abcs" title="Permanent link">&para;</a></h2>
 <p>The example given by the official documentation is very simple and clear</p>
 <div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABCMeta</span>
 
@@ -202,7 +202,7 @@
 </pre></div>
 
 
-<h2>Are you scared of metaclasses?</h2>
+<h2 id="are-you-scared-of-metaclasses">Are you scared of metaclasses?<a class="headerlink" href="#are-you-scared-of-metaclasses" title="Permanent link">&para;</a></h2>
 <p>Metaclasses are a strange topic in Python. Most of the times the advice given to the novice is "Don't use them", like they were an error of the language and something that shall be avoided.</p>
 <p>I don't think so. As a matter of facts I definitely disagree with such position, for many reasons.</p>
 <p>First of all, if you are programming in Python its better for you to understand everything Python provides you, both the good and the bad parts. Programming languages are tools, and you shall know their strengths and their limitations. Most of the times what we call "limitations" are just features that become a restraint just because we are not aware of them. The C language, for example, is not object-oriented. Is this a strength or a limitation? Python provides you a very powerful inspection mechanism. Is this a strength or a limitations? I could give countless other examples.</p>
@@ -210,7 +210,7 @@
 <p>Third, if a feature of a language is a design error, and it can be, you need to understand why it is an error, and how you can avoid using it. Before ES6, JavaScript had some issues with scopes, given by the behaviour of the <code>var</code> keyword. You cannot afford being ignorant about those limitations, otherwise your software will be buggy. So, while studying the <code>for</code> loop in JavaScript took me a couple of minutes (it is a C-like for loop, after all), I spent a lot of time in dealing with <code>var</code>, which is the dangerous button of the whole device.</p>
 <p>Back to Python. Metaclasses are not a last-minute feature put into the language just for fun. They are the foundation of Python itself, and the relationship between <code>object</code> and <code>type</code> is something so beautiful that it is a pity that basically no one talks about it. So, plase stop complaining against metaclasses and telling people that they are dangerous or complex.</p>
 <p>Metaclasses are part of the language. And they are not complex to understand.</p>
-<h2>Why metaclasses for ABCs?</h2>
+<h2 id="why-metaclasses-for-abcs">Why metaclasses for ABCs?<a class="headerlink" href="#why-metaclasses-for-abcs" title="Permanent link">&para;</a></h2>
 <p>If you program in Python you should be somehow familiar with classes and instances. You know that when you build an instance you use a class (like a blueprint) and that the class can put things into the instance. For example</p>
 <div class="highlight"><pre><span></span><span class="c1"># Class definition</span>
 <span class="k">class</span> <span class="nc">Child</span><span class="p">():</span>
@@ -249,7 +249,7 @@
 </pre></div>
 
 
-<h2>Metaclasses and MRO</h2>
+<h2 id="metaclasses-and-mro">Metaclasses and MRO<a class="headerlink" href="#metaclasses-and-mro" title="Permanent link">&para;</a></h2>
 <p>A slightly advanced annotation: when I say that the metaclass <em>puts</em> the methods into the class I'm simplifying the whole thing. As a matter of fact, like a class provides methods to the instance at runtime through the <code>__class__</code> attribute and the MRO protocol, the metaclass provides methods for the class. Attributes, instead, are put inside the class by the <code>__new__</code> or <code>__init__</code> methods of the metaclass.</p>
 <p>Let us review the MRO mechanism for instances and classes first. When you call a method on an instance Python automatically looks for that method in the instance first, then in the parent class and in every class in its hierarchy.</p>
 <p>So in this example</p>
@@ -284,7 +284,7 @@
 </pre></div>
 
 
-<h2>Abstract methods</h2>
+<h2 id="abstract-methods">Abstract methods<a class="headerlink" href="#abstract-methods" title="Permanent link">&para;</a></h2>
 <p>Why are ABC called <code>abstract</code>? ABCs can be instantiated, so they are after all not pure interfaces (like Java ones, for example)</p>
 <div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">abc</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">MyABC</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span><span class="p">):</span>
@@ -325,16 +325,16 @@
 
 
 <p>Check the official documentation of Abstract Base Classes for a complete description of <code>@abstractmethod</code> and <code>@abstractproperty</code>.</p>
-<h2>What about the behaviour?</h2>
+<h2 id="what-about-the-behaviour">What about the behaviour?<a class="headerlink" href="#what-about-the-behaviour" title="Permanent link">&para;</a></h2>
 <p>So, what happened to the Python tenet "Check the behaviour and not the structure"? With collections, after all, we dropped the EAFP protocol, going back to a Look Before You Leap approach. Are we going against the philosophy at the very base of the language?</p>
 <p>It is very interesting to see what Guido van Rossum, creator of the Python language, says about this in <a href="http://legacy.python.org/dev/peps/pep-3119/">PEP 3119</a>: <em>Invocation means interacting with an object by invoking its methods. Usually this is combined with polymorphism, so that invoking a given method may run different code depending on the type of an object. Inspection means the ability for external code (outside of the object's methods) to examine the type or properties of that object, and make decisions on how to treat that object based on that information. [...] In classical OOP theory, invocation is the preferred usage pattern, and inspection is actively discouraged, being considered a relic of an earlier, procedural programming style. However, in practice this view is simply too dogmatic and inflexible, and leads to a kind of design rigidity that is very much at odds with the dynamic nature of a language like Python.</em></p>
 <p>So the point is that forcing the use of a pure polymorphic approach sometimes can lead to solutions that are too complex or even incorrect. The key words here, in my opinion, are "dogmatic", "inflexible", and "rigidity", opposed to "dynamic nature". I really like this flexibility in a language and in its author.</p>
 <p>Writing <code>if isinstance(obj, collections.Sequence)</code> is not EAFP, neither is any conditional test you may write. Nevertheless, no one would replace conditional tests with a pure EAFP approach, simply because sometimes those tests are more readable. This is the exact purpose of collections in Python and ABCs in general: to allow parts of the code to be simpler.</p>
-<h2>Final words</h2>
+<h2 id="final-words">Final words<a class="headerlink" href="#final-words" title="Permanent link">&para;</a></h2>
 <p>I hope this post helped you understand that Abstract Base Classes, and in particular the standard collections, are useful and easy to understand. Metaclasses are also not that scary and dangerous, even if using them obviously requires some skill.</p>
-<h2>Sources</h2>
+<h2 id="sources">Sources<a class="headerlink" href="#sources" title="Permanent link">&para;</a></h2>
 <p>The official documentation of the <code>abc</code> module is very well written. <a href="https://docs.python.org/3.5/library/abc.html">Here</a> you find the version for Python 3.5. I also suggest to read the original <a href="https://www.python.org/dev/peps/pep-3119">PEP 3119</a> and the related <a href="https://www.python.org/dev/peps/pep-3141">PEP 3141</a> for a deeper understanding of the topic.</p>
-<h2>Feedback</h2>
+<h2 id="feedback">Feedback<a class="headerlink" href="#feedback" title="Permanent link">&para;</a></h2>
 <p>Feel free to use <a href="https://plus.google.com/u/0/111444750762335924049">the blog Google+ page</a> to comment the post. The <a href="http://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues">GitHub issues</a> page is the best place to submit corrections.</p>
         </section>
 

@@ -3,13 +3,13 @@
 &lt;p&gt;But do you know what you actually did?&lt;/p&gt;
 &lt;p&gt;Do you know what the &lt;code&gt;~/.ssh/id_rsa&lt;/code&gt; file really contains, or why that strange file that begins with &lt;code&gt;ssh-rsa&lt;/code&gt; pairs with another that begins with &lt;code&gt;-----BEGIN RSA PRIVATE KEY-----&lt;/code&gt;. Or why does sometimes that same header miss the &lt;code&gt;RSA&lt;/code&gt; part and just say &lt;code&gt;BEGIN PRIVATE KEY&lt;/code&gt;?&lt;/p&gt;
 &lt;p&gt;I think a minimum knowledge of the various formats of RSA keys is mandatory for every developer nowadays, not to mention the importance of understanding them deeply if you want to pursue a career in the infrastructure management world.&lt;/p&gt;
-&lt;h1&gt;RSA algorithm and key pairs&lt;/h1&gt;
+&lt;h1 id="rsa-algorithm-and-key-pairs"&gt;RSA algorithm and key pairs&lt;a class="headerlink" href="#rsa-algorithm-and-key-pairs" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;Since the invention of public-key cryptography various systems have been devised to create the key pair. One of the first ones is RSA, the creation of three brilliant cryptographers, that dates back to 1977. The story of RSA is quite interesting, as it was first invented by an English mathematician, Clifford Cocks, who was however forced to keep it secret by the British intelligence office he was working for.&lt;/p&gt;
 &lt;p&gt;Keeping in mind that RSA is not a synonym for public-key cryptography, the former being only one of the possible implementations, I wanted to write a post on it because it is still, more than 40 years after its publication, one of the most widespread algorithms. In particular it is the standard algorithm used to generate SSH key pairs, and since nowadays every developer has their public key on GitHub, BitBucket, or similar systems, we may arguably say that RSA is pretty ubiquitous.&lt;/p&gt;
 &lt;p&gt;I will not cover the internals of the RSA algorithm in this article, however. If you are interested in the gory details of the mathematical framework you may find plenty of resources both on Internet and in the textbooks. The theory behind it is not trivial, but it is definitely worth the time if you want to be serious about the mathematical part of cryptography.&lt;/p&gt;
 &lt;p&gt;In this article I will instead explore two ways to create RSA key pairs and the formats used to store them. Applied cryptography is, like many other topics in computer science, a moving target, and the tools change often. Sometimes it is pretty easy to find out &lt;em&gt;how&lt;/em&gt; to do something (StackOverflow helps), but less easy to get a clear picture of what is going on.&lt;/p&gt;
 &lt;p&gt;All the examples show in this post use a 2048-bits RSA key created for this purpose, so all the numbers you see come from a real example. The key has been obviously trashed after I wrote the article.&lt;/p&gt;
-&lt;h1&gt;The PEM format&lt;/h1&gt;
+&lt;h1 id="the-pem-format"&gt;The PEM format&lt;a class="headerlink" href="#the-pem-format" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;Let's start the discussion about key pairs with the format used to store them. Nowadays the most widely accepted storage format is called PEM (Privacy-enhanced Electronic Mail). As the name suggests, this format was initially created for e-mail encryption but later became a general format to store cryptographic data like keys and certificates. It is described in &lt;a href="https://tools.ietf.org/html/rfc7468"&gt;RFC 7468&lt;/a&gt; ("Textual Encodings of PKIX, PKCS, and CMS Structures").&lt;/p&gt;
 &lt;p&gt;An example private key in PEM format is the following&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;-----BEGIN PRIVATE KEY-----
@@ -82,7 +82,7 @@ wBLKVfMiwcWAbl121M2DCLj9/g==
 &lt;p&gt;When the PEM format is used to store cryptographic keys the body of the content is in a format called PKCS #8. Initially a standard created by a private company (RSA Laboratories), it became a de facto standard so has been described in various RFCs, most notably &lt;a href="https://tools.ietf.org/html/rfc5208"&gt;RFC 5208&lt;/a&gt; ("Public-Key Cryptography Standards (PKCS) #8: Private-Key Information Syntax Specification Version 1.2").&lt;/p&gt;
 &lt;p&gt;The PKCS #8 format describes the content using the &lt;a href="https://en.wikipedia.org/wiki/Abstract_Syntax_Notation_One"&gt;ASN.1&lt;/a&gt; (Abstract Syntax Notation One) description language and the relative DER (Distinguished Encoding Rules) to serialize the resulting structure. This means that Base64-decoding the content will return some binary content that can be processed only by an ASN.1 parser.&lt;/p&gt;
 &lt;p&gt;Please not that, due to the structure of the underlying ASN.1 structure, every PEM body starts with the &lt;code&gt;MII&lt;/code&gt; characters.&lt;/p&gt;
-&lt;h2&gt;OpenSSL and ASN.1&lt;/h2&gt;
+&lt;h2 id="openssl-and-asn1"&gt;OpenSSL and ASN.1&lt;a class="headerlink" href="#openssl-and-asn1" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;OpenSSL can directly decode a key in PEM format and show the underlying ASN.1 structure with the &lt;code&gt;asn1parse&lt;/code&gt; module&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ openssl asn1parse -inform pem -in private.pem
     &lt;span class="m"&gt;0&lt;/span&gt;:d&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;  &lt;span class="nv"&gt;hl&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;4&lt;/span&gt; &lt;span class="nv"&gt;l&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;1214&lt;/span&gt; cons: SEQUENCE          
@@ -204,7 +204,7 @@ wBLKVfMiwcWAbl121M2DCLj9/g==
 &lt;/pre&gt;&lt;/div&gt;
 
 
-&lt;h2&gt;OpenSSL and RSA keys&lt;/h2&gt;
+&lt;h2 id="openssl-and-rsa-keys"&gt;OpenSSL and RSA keys&lt;a class="headerlink" href="#openssl-and-rsa-keys" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;Another way to look into a private key with OpenSSL is to use the &lt;code&gt;rsa&lt;/code&gt; module. While the &lt;code&gt;asn1parse&lt;/code&gt; module is a generic ASN.1 parser, the &lt;code&gt;rsa&lt;/code&gt; module knows the structure of an RSA key and can properly output the field names&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ openssl rsa -in private.pem -noout -text
 Private-Key: &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="m"&gt;2048&lt;/span&gt; bit&lt;span class="o"&gt;)&lt;/span&gt;
@@ -301,7 +301,7 @@ coefficient:
 
 
 &lt;p&gt;The fields are the same we found in the ASN.1 structure, this being only a different representation of the same data. You can compare the two and see that the value of the fields are the same.&lt;/p&gt;
-&lt;h2&gt;PKCS #8 vs PKCS #1&lt;/h2&gt;
+&lt;h2 id="pkcs-8-vs-pkcs-1"&gt;PKCS #8 vs PKCS #1&lt;a class="headerlink" href="#pkcs-8-vs-pkcs-1" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;The first version of the PKCS standard (PKCS #1) was specifically tailored to contain an RSA key. Its ASN.1 definition can be found in &lt;a href="https://tools.ietf.org/html/rfc8017"&gt;RFC 8017&lt;/a&gt; ("PKCS #1: RSA Cryptography Specifications Version 2.2")&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;   RSAPublicKey ::= SEQUENCE {
        modulus           INTEGER,  -- n
@@ -356,7 +356,7 @@ PrivateKey ::= OCTET STRING
 
 
 &lt;p&gt;The structure of PKCS #8 is the reason why previously we had to parse the field at offset 22 (&lt;code&gt;openssl asn1parse -inform pem -in private.pem -strparse 22&lt;/code&gt;) to access the RSA parameters. If you are parsing a PKCS #1 key in PEM format you don't need this second step.&lt;/p&gt;
-&lt;h1&gt;Private and public key&lt;/h1&gt;
+&lt;h1 id="private-and-public-key"&gt;Private and public key&lt;a class="headerlink" href="#private-and-public-key" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;In the RSA algorithm the public key is made by the modulus and the public exponent, which means that we can derive the public key from the private key. OpenSSL can easily do this with the &lt;code&gt;rsa&lt;/code&gt; module, producing the public key in PEM format&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ openssl rsa -in private.pem -pubout
 writing RSA key
@@ -398,7 +398,7 @@ Exponent: &lt;span class="m"&gt;65537&lt;/span&gt; &lt;span class="o"&gt;(&lt;/s
 &lt;/pre&gt;&lt;/div&gt;
 
 
-&lt;h1&gt;Generating key pairs with OpenSSL&lt;/h1&gt;
+&lt;h1 id="generating-key-pairs-with-openssl"&gt;Generating key pairs with OpenSSL&lt;a class="headerlink" href="#generating-key-pairs-with-openssl" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;If you want to generate an RSA private key you can do it with OpenSSL&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ openssl genpkey -algorithm RSA -out key.pem -pkeyopt rsa_keygen_bits:2048
 ......................................................................+++
@@ -416,7 +416,7 @@ Verifying - Enter PEM pass phrase:
 
 
 &lt;p&gt;You can see the list of supported ciphers with &lt;code&gt;openssl list-cipher-algorithms&lt;/code&gt;. In both cases you can then extract the public key with the method shown previously.&lt;/p&gt;
-&lt;h1&gt;Generating key pairs with OpenSSH&lt;/h1&gt;
+&lt;h1 id="generating-key-pairs-with-openssh"&gt;Generating key pairs with OpenSSH&lt;a class="headerlink" href="#generating-key-pairs-with-openssh" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;Another tool that you can use to generate key pairs is ssh-keygen, which is a tool included in the SSH suite that is specifically used to create and manage SSH keys. As SSH keys are standard asymmetrical keys we can use the tool to create keys for other purposes.&lt;/p&gt;
 &lt;p&gt;To create a key pair just run&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ssh-keygen -t rsa -b &lt;span class="m"&gt;2048&lt;/span&gt; -f private
@@ -433,7 +433,7 @@ Verifying - Enter PEM pass phrase:
 &lt;/pre&gt;&lt;/div&gt;
 
 
-&lt;h2&gt;The OpenSSH public key format&lt;/h2&gt;
+&lt;h2 id="the-openssh-public-key-format"&gt;The OpenSSH public key format&lt;a class="headerlink" href="#the-openssh-public-key-format" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;The public key saved by ssh-keygen is written in the so-called SSH-format, which is not a standard in the cryptography world. It's structure is &lt;code&gt;&amp;lt;algorithm&amp;gt; &amp;lt;key&amp;gt; &amp;lt;comment&amp;gt;&lt;/code&gt;, where the &lt;code&gt;&amp;lt;key&amp;gt;&lt;/code&gt; part of the format is encoded with Base64.&lt;/p&gt;
 &lt;p&gt;For example&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCy9f0/nwkXESzkL4v4ftZ24VJYvkQ/Nt6vsLab3iSWtJXqrRsBythCcbAU6W9
@@ -506,29 +506,29 @@ mpint
 
 &lt;p&gt;Please note that since we created a key of 2048 bits we should have a modulus of 256 bytes. Instead this key uses 257 bytes prefixing the number with a &lt;code&gt;00&lt;/code&gt; byte to avoid it being interpreted as negative (two's complement format).&lt;/p&gt;
 &lt;p&gt;The structure shown above is the reason why all the RSA public SSH keys start with the same 12 characters &lt;code&gt;AAAAB3NzaC1y&lt;/code&gt;. This string, converted in Base64 gives the initial 9 bytes &lt;code&gt;00 00 00 07 73 73 68 2d 72&lt;/code&gt; (Base64 strings are not a one-to-one mapping of the source bytes). If the exponent is the standard 65537 the key starts with &lt;code&gt;AAAAB3NzaC1yc2EAAAADAQAB&lt;/code&gt;, which encoded gives the fist 18 bytes &lt;code&gt;00 00 00 07 73 73 68 2d 72 73 61 00 00 00 03 01 00 01&lt;/code&gt;. &lt;/p&gt;
-&lt;h1&gt;Converting between PEM and OpenSSH format&lt;/h1&gt;
+&lt;h1 id="converting-between-pem-and-openssh-format"&gt;Converting between PEM and OpenSSH format&lt;a class="headerlink" href="#converting-between-pem-and-openssh-format" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;Often you need to convert files created with one tool to a different format, so this is a list of the most common conversions you might need. I prefer to consider the key format instead of the source tool, but I give a short description of the reason why you should want to perform the conversion.&lt;/p&gt;
-&lt;h2&gt;PEM/PKCS#1 to PEM/PKCS#8&lt;/h2&gt;
+&lt;h2 id="pempkcs1-to-pempkcs8"&gt;PEM/PKCS#1 to PEM/PKCS#8&lt;a class="headerlink" href="#pempkcs1-to-pempkcs8" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;This is useful to convert OpenSSh private keys to a newer format.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;openssl pkcs8 -topk8 -inform PEM -outform PEM -in pkcs1.pem -out pkcs8.pem
 &lt;/pre&gt;&lt;/div&gt;
 
 
-&lt;h2&gt;OpenSSH public to PEM/PKCS#8&lt;/h2&gt;
+&lt;h2 id="openssh-public-to-pempkcs8"&gt;OpenSSH public to PEM/PKCS#8&lt;a class="headerlink" href="#openssh-public-to-pempkcs8" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;To convert public OpenSSH keys in a proper PEM format.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ssh-keygen -e -f public.pub -mPKCS8
 &lt;/pre&gt;&lt;/div&gt;
 
 
-&lt;h2&gt;PEM/PKCS#8 to OpenSSH public&lt;/h2&gt;
+&lt;h2 id="pempkcs8-to-openssh-public"&gt;PEM/PKCS#8 to OpenSSH public&lt;a class="headerlink" href="#pempkcs8-to-openssh-public" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;if you need to use in SSH a key pair created with another system.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ssh-keygen -i -f public.pem
 &lt;/pre&gt;&lt;/div&gt;
 
 
-&lt;h1&gt;Final words&lt;/h1&gt;
+&lt;h1 id="final-words"&gt;Final words&lt;a class="headerlink" href="#final-words" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;I hope this post helped you to get a better understanding of RSA public and private keys. I keep finding on StackOverflow and on other boards messages of users that are confused by the output of the various tools and by the subtle but important differences between the formats.&lt;/p&gt;
-&lt;h1&gt;Resources&lt;/h1&gt;
+&lt;h1 id="resources"&gt;Resources&lt;a class="headerlink" href="#resources" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;ul&gt;
 &lt;li&gt;The Wikipedia article on &lt;a href="https://en.wikipedia.org/wiki/RSA_(cryptosystem)"&gt;RSA&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;OpenSSL documentation: &lt;a href="https://www.openssl.org/docs/man1.1.0/apps/asn1parse.html"&gt;asn1parse&lt;/a&gt;, &lt;a href="https://www.openssl.org/docs/man1.1.0/apps/rsa.html"&gt;rsa&lt;/a&gt;, &lt;a href="https://www.openssl.org/docs/man1.1.0/apps/genpkey.html"&gt;genpkey&lt;/a&gt;&lt;/li&gt;
@@ -541,12 +541,12 @@ mpint
 &lt;li&gt;&lt;a href="https://tools.ietf.org/html/rfc7468"&gt;RFC 7468 - Textual Encodings of PKIX, PKCS, and CMS Structures&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://tools.ietf.org/html/rfc8017"&gt;RFC 8017 - PKCS #1: RSA Cryptography Specifications Version 2.2&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h1&gt;Feedback&lt;/h1&gt;
+&lt;h1 id="feedback"&gt;Feedback&lt;a class="headerlink" href="#feedback" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;Feel free to use &lt;a href="https://plus.google.com/u/0/111444750762335924049"&gt;the blog Google+ page&lt;/a&gt; to comment the post or reach me on &lt;a href="https://twitter.com/thedigicat"&gt;Twitter&lt;/a&gt; if you have questions. The &lt;a href="http://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues"&gt;GitHub issues&lt;/a&gt; page is the best place to submit corrections.&lt;/p&gt;</content><category term="algorithms"></category><category term="cryptography"></category><category term="SSL"></category><category term="SSH"></category><category term="RSA"></category></entry><entry><title>Introduction to hashing</title><link href="http://blog.thedigitalcatonline.com/blog/2018/04/06/introduction-to-hashing/" rel="alternate"></link><published>2018-04-06T11:30:00+01:00</published><updated>2018-04-06T11:30:00+01:00</updated><author><name>Leonardo Giordani</name></author><id>tag:blog.thedigitalcatonline.com,2018-04-06:/blog/2018/04/06/introduction-to-hashing/</id><summary type="html"></summary><content type="html">&lt;p&gt;Have you ever used dictionaries or maps in your language of choice, or have you ever met a mysterious MD5 code while downloading a file from a server? Maybe you are a programmer, and using Git to manage your code you ended up dealing with strange numbers called SHA1, and surely you heard at least a couple of times the term &lt;em&gt;cache&lt;/em&gt;, which probably needed to be emptied in your browser.&lt;/p&gt;
 &lt;p&gt;What do all these concept have in common?&lt;/p&gt;
 &lt;p&gt;In this post I want to introduce you to the concept of &lt;em&gt;hashing&lt;/em&gt;, which is one of the basic topics a good programmer shall know. Hashes are such an important topic in computer science that lacking knowledge in this field means being confused about a wide range of other subjects, like cryptography and security. Just to name some of the players you could be interested in your future career as a programmer: data structures, Bitcoin and blockchains, HTTPS. All these topics have hashing as one of their building blocks. As you can see, it is worth mastering the concept.&lt;/p&gt;
 &lt;p&gt;This will obviously be only a humble introduction to the subject matter, as the whole concept is too broad for a single post. You can start a serious study of this important part of computer science reading the Wikipedia articles liked at the bottom of the page and reading a good book (or taking a course) in either cryptography or data structures.&lt;/p&gt;
-&lt;h1&gt;A practical example&lt;/h1&gt;
+&lt;h1 id="a-practical-example"&gt;A practical example&lt;a class="headerlink" href="#a-practical-example" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;Let me give you a concrete example of hashing before we analyse the matter in depth.&lt;/p&gt;
 &lt;p&gt;I want to download a big file from Internet, like a Linux distribution. I already downloaded it in the past, but I'm not sure if the version I have is the same available for download now. The file has been renamed, so the original name has been lost. I might obviously just download it again, install it and manually check the version.&lt;/p&gt;
 &lt;p&gt;I wonder if there is a simpler solution, one that can possibly be automated. Downloading an ISO file from Internet is nowadays very cheap, but manually checking for the version isn't, at least in terms of time. I might also download it and compare all the files contained in both the new and the old ISO images, but then again, this process is not very fast.&lt;/p&gt;
@@ -560,14 +560,14 @@ mpint
 &lt;p&gt;and the result will be &lt;code&gt;8a7cc3b47880b5ef880ac6ef30785a1a&lt;/code&gt;, independently of your operating system.&lt;/p&gt;
 &lt;p&gt;MD5 is one of many &lt;em&gt;hash functions&lt;/em&gt; that have been invented to deal with problems like the one I exemplified. Recently I had the need to synchronise daily two AWS S3 buckets containing more than 60 gigabytes of files. Without hash functions it would be impossible to quickly identify the files that need to be copied.&lt;/p&gt;
 &lt;p&gt;The rest of the post is dedicated to the exploration of such an important and intriguing part of contemporary technology.&lt;/p&gt;
-&lt;h1&gt;Hash functions&lt;/h1&gt;
+&lt;h1 id="hash-functions"&gt;Hash functions&lt;a class="headerlink" href="#hash-functions" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;Let's start from the formal definition of hash function:&lt;/p&gt;
 &lt;p&gt;&lt;em&gt;A hash function is any function that can be used to map data of arbitrary size to data of fixed size&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;This description may sound intimidating at first, but it is actually pretty simple. Let's consider a dictionary where you want to look up a word that you don't know, like for example "quagmire". What you do is to jump directly to a section labelled "Q" in the dictionary, then quickly identify the part of the section where words that start with "QU" are, and promptly find the word. Congratulations, you just used a hash function! &lt;/p&gt;
 &lt;p&gt;&lt;img alt="Image 01" src="/images/introduction_to_hashing/hash1.jpg"&gt;&lt;/p&gt;
 &lt;p&gt;Getting the first letter of the word is, as a matter of fact, &lt;em&gt;a function&lt;/em&gt; (an operation) &lt;em&gt;that maps&lt;/em&gt; (connects) &lt;em&gt;data of arbitrary size&lt;/em&gt; (words) &lt;em&gt;to data of fixed size&lt;/em&gt; (a single letter of the alphabet). Using this method we can connect any word (also invented ones!) to a letter of the alphabet.&lt;/p&gt;
 &lt;p&gt;Before we move on, I want to stress one aspect that is clear from the previous example. Through a hash function we can connect a set of potentially infinite values (all the words that we can create) with a finite set (the letters of an alphabet). This is the most important concept we have to keep in mind when dealing with hashing.&lt;/p&gt;
-&lt;h1&gt;Uniqueness&lt;/h1&gt;
+&lt;h1 id="uniqueness"&gt;Uniqueness&lt;a class="headerlink" href="#uniqueness" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;The result of a hash function is not unique, which means that two different inputs may give the same output. This is pretty easy to understand in the dictionary example, where multiple words can give as a result the same letter, as multiple words begin with that letter.&lt;/p&gt;
 &lt;p&gt;It is also evident both from the dictionary example and from the definition that hash functions cannot produce unique results by design. The goal of a hash function is to map an infinite set with a finite set, so it is obvious that multiple elements of the infinite set will map to the same element in the finite one.&lt;/p&gt;
 &lt;p&gt;Let me give you a very simple example. Let's create a hash function that returns the first 32 bits (4 bytes) of the input, padding them with zeros if the input is shorter that 32 bits. I will use the ASCII standard to convert strings of characters into hexadecimal numbers, so every letter is represented by 1 byte.&lt;/p&gt;
@@ -583,20 +583,20 @@ mpint
 &lt;p&gt;Collisions are not intrinsically bad, but we have to be aware they can happen when we develop algorithms that use hash functions. If we are writing a dictionary for a human language where 80% of the words starts with "A" it is pointless to use the first letter to partition the book because the first section would be almost as big as the whole tome. This may seem too imaginative an example, but when we manage data structures problems such this arise at every corner.&lt;/p&gt;
 &lt;p&gt;&lt;img alt="Image 02" src="/images/introduction_to_hashing/hash2.jpg"&gt;&lt;/p&gt;
 &lt;p&gt;In this last example avoiding collisions is easy. We just need to increase the number of characters that we consider until the size of the book sections becomes reasonable. When the the hash function becomes more complex, especially when it has the diffusion property (explained later), avoiding the clustering in the output data might not be so simple.&lt;/p&gt;
-&lt;h1&gt;Digital hash functions&lt;/h1&gt;
+&lt;h1 id="digital-hash-functions"&gt;Digital hash functions&lt;a class="headerlink" href="#digital-hash-functions" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;As we saw the definition of hash functions involves functions, which are mappings. In other words we just need to describe a process that couples objects from the source infinite set to the destination finite set. Taking the fist letter of a word is such a process, but other examples may be grouping people according to the colour of the eyes or cataloguing films by production year. Among the various processes that we can use a big role is played by digital processes, that is functions that involve some operation on binary numbers.&lt;/p&gt;
 &lt;p&gt;When we &lt;em&gt;digitalise&lt;/em&gt; something we represent it with a sequence of bits, and once this is done there is no real difference between strings, images, videos, sounds, programs. Everything in a computer is ultimately a sequence of bits, and those sequences can be sliced and changed with pure numerical functions such as additions and multiplications.&lt;/p&gt;
-&lt;h1&gt;Cryptographic hash functions&lt;/h1&gt;
+&lt;h1 id="cryptographic-hash-functions"&gt;Cryptographic hash functions&lt;a class="headerlink" href="#cryptographic-hash-functions" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;Hash functions play a decisive role in security and in cryptography, and they can mostly be found in algorithms that provide authentication, i.e. secure ways to demonstrate the authenticity of some data. While the actual cryptographic techniques are not in the scope of this article, it is important to know that hash functions used for cryptographic purposes are not different from hash functions used for other tasks that do not require any degree of security. Cryptographic hash functions, however, must have some specific properties that give the function a certain degree of "robustness". Being able to find the input of a hash function given the output, for example, would be catastrophic for some security algorithms that rely on the infeasibility of such an operation.&lt;/p&gt;
-&lt;h1&gt;"Good" hash functions&lt;/h1&gt;
+&lt;h1 id="good-hash-functions"&gt;"Good" hash functions&lt;a class="headerlink" href="#good-hash-functions" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;While the definition of hash function is pretty inclusive, stating that the only required property is that of returning a fixed-length output, hash functions used in practice may have other properties. Such properties may be desirable or mandatory depending on the application, so functions that are extremely good for cryptography may be a poor choice as a base for data structures like dictionaries. &lt;/p&gt;
 &lt;p&gt;Let me briefly describe some of the most important ones that you should be aware of.&lt;/p&gt;
-&lt;h2&gt;Determinism&lt;/h2&gt;
+&lt;h2 id="determinism"&gt;Determinism&lt;a class="headerlink" href="#determinism" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;Given the algorithm (with its parameters), the hash number of some data &lt;strong&gt;must always be the same&lt;/strong&gt;. The result of the hashing function depends only on the data itself, and not on other external factors like for example time or computer system.&lt;/p&gt;
 &lt;p&gt;Pay attention to the fact that this definition considers the algorithm and its parameters. This means that we can include external factors in the computation, but they have to be fixed for the whole life of the result itself.&lt;/p&gt;
 &lt;p&gt;&lt;img alt="Image 03" src="/images/introduction_to_hashing/hash3.jpg"&gt;&lt;/p&gt;
 &lt;p&gt;Let's consider a system that uses a hash to speed up searches in some arrays. For several reasons the hashing algorithm employs an initial random seed that is derived from the boot time. As long as the system is running (i.e. it is not rebooted), the algorithm is consistent, and we may consider the random seed as a constant parameter. We may also persist the hashes on a storage, because when we load them they are still perfectly valid. As soon as the system is rebooted, however, the whole set of hashes created during the previous execution becomes invalid and meaningless. This is not the case, though, if the hashing function bases its computation on the actual data only.&lt;/p&gt;
-&lt;h2&gt;Diffusion&lt;/h2&gt;
+&lt;h2 id="diffusion"&gt;Diffusion&lt;a class="headerlink" href="#diffusion" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;Changing one single bit of the source data shall results in a &lt;strong&gt;complete change&lt;/strong&gt; of the hash number. Compare for example the MD5 hash values of two similar strings&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;The quick brown fox jumps over the lazy dog =&amp;gt; 37c4b87edffc5d198ff5a185cee7ee09
 The quick brown fox jumps over the lazy cog =&amp;gt; 15546a0bcace46fd5e12ec29adca5e70
@@ -605,21 +605,21 @@ The quick brown fox jumps over the lazy cog =&amp;gt; 15546a0bcace46fd5e12ec29ad
 
 &lt;p&gt;As you can see when a single input byte is different (the letter &lt;code&gt;d&lt;/code&gt; becomes a &lt;code&gt;c&lt;/code&gt;), the whole result changes.&lt;/p&gt;
 &lt;p&gt;This implies that every part of the hash function's output is computed considering all the bits of the input. A function that returns the first &lt;code&gt;n&lt;/code&gt; bits of the input does not have a good diffusion, as two different strings may return exactly the same hash if they have the same first &lt;code&gt;n&lt;/code&gt; bits (see the example given above when I spoke about uniqueness). This property is important for cryptographic hash function.&lt;/p&gt;
-&lt;h2&gt;Minimal change (continuity)&lt;/h2&gt;
+&lt;h2 id="minimal-change-continuity"&gt;Minimal change (continuity)&lt;a class="headerlink" href="#minimal-change-continuity" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;An interesting property of some hash functions is that &lt;strong&gt;similar input values map to similar hash values&lt;/strong&gt;. The exact definition of "similar" may vary, but in general we might associate it with the number of changes from the first output to the second. This behaviour is handy in some searching algorithms, where it is important that similar objects are stored near each other.&lt;/p&gt;
 &lt;p&gt;Note that this property is somehow the opposite of diffusion, thus demonstrating that not all these properties might be found in a single hash function.&lt;/p&gt;
-&lt;h2&gt;Uniformity&lt;/h2&gt;
+&lt;h2 id="uniformity"&gt;Uniformity&lt;a class="headerlink" href="#uniformity" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;A hash function has a given finite number of possible outputs, because the output has a finite length. When a hash function is uniform, producing the output for each possible input produces a &lt;strong&gt;uniform distribution of outputs&lt;/strong&gt;, that is there is no output value that is used more often than others. When designing data structures this is often the desirable behaviour, since it leads to an uniform use of resources, for example memory, leading to an uniform behaviour of other algorithms that work on the same structure, like search. &lt;/p&gt;
 &lt;p&gt;&lt;img alt="Image 04" src="/images/introduction_to_hashing/hash4.jpg"&gt;&lt;/p&gt;
 &lt;p&gt;Uniformity is obviously linked to the number of collisions produced by a hash function, and a perfectly uniform hash function will have the same number of collisions for each output value. Increasing the number of possible output values, thus, results in a uniform reduction of collisions.&lt;/p&gt;
-&lt;h2&gt;Non-invertible&lt;/h2&gt;
+&lt;h2 id="non-invertible"&gt;Non-invertible&lt;a class="headerlink" href="#non-invertible" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;Inverting a function means to create a function that returns the original input given the output. For example multiplication by 2 is an invertible function, as given the result we may easily divide by 2 and retrieve the original input.&lt;/p&gt;
 &lt;p&gt;With non-injective functions the only caveat is that there are multiple inputs that return the same output, but this doesn't prevent the creation of an inverse function. For example, 3 squared gives 9 and since the inverse of the square function is the square root, we can apply it to the result and retrieve the possible inputs, that is +3 and -3.&lt;/p&gt;
 &lt;p&gt;With non-invertible functions &lt;strong&gt;there is no simple way to find the input given the output&lt;/strong&gt;. Mathematically we speak of &lt;em&gt;one-way functions&lt;/em&gt;, as computing the inverse is either impossible of infeasible. Mind that "infeasible" has a well-defined meaning in mathematics, but I will not go deeper into it in this article. It will be sufficient to consider it as "too hard to compute in a reasonable time with the current state of technology". Cryptographic hash functions must be non-invertible.&lt;/p&gt;
 &lt;p&gt;&lt;img alt="Image 05" src="/images/introduction_to_hashing/hash5.jpg"&gt;&lt;/p&gt;
-&lt;h2&gt;Collisions-resistant&lt;/h2&gt;
+&lt;h2 id="collisions-resistant"&gt;Collisions-resistant&lt;a class="headerlink" href="#collisions-resistant" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;A hash function is said to be collision-resistant when &lt;strong&gt;it is hard to find two different inputs that produce the same hash value&lt;/strong&gt;. Mind that the definition of "hard" here is the same as that of "infeasible" in the previous section. This property is very important in cryptography, where collisions can be exploited to crack a cipher.&lt;/p&gt;
-&lt;h1&gt;Theoretical and practical inputs&lt;/h1&gt;
+&lt;h1 id="theoretical-and-practical-inputs"&gt;Theoretical and practical inputs&lt;a class="headerlink" href="#theoretical-and-practical-inputs" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;It is important to understand that the analysis of a hash function can be made considering either theoretical or practical inputs. Theoretical inputs are all the possible inputs, like "all the possible strings", while a set of practical inputs might be "the names of a group of people". This latter might be very large but it is not infinite. &lt;/p&gt;
 &lt;p&gt;Obviously, a hash function that provides interesting properties when dealing with theoretical inputs will show the same properties when applied to practical inputs, but often such functions are complex and slow. Not to mention that it is very difficult to create them.&lt;/p&gt;
 &lt;p&gt;Let me show you an example. As we saw above, a hash function that returns the first letter of a string is not a very good one. It lacks the diffusion property, for instance, an its uniformity is questionable, as all the strings that begin with the same letter will produce the same hash, leading to a large number of collisions. This is bad for data structures, so such a function is in theory not optimal.&lt;/p&gt;
@@ -635,9 +635,9 @@ You can&amp;#39;t teach an old dog new tricks
 
 &lt;p&gt;where it is known (or evident) that each string begins with a different letter, suddenly our hash function becomes a perfect choice to build a searchable data structure, because &lt;strong&gt;given this input set&lt;/strong&gt; there are no collisions. So, an analysis of the practical inputs is always paramount when we consider hash functions, as theoretically poor functions may perform very well on specific sets of inputs.&lt;/p&gt;
 &lt;p&gt;A very good example of such an analysis can be found in the source code of the Python language. The implementation of dictionaries contains an in-depth discussion of the choices made when implementing the hashing mechanism behind those structures. You can find it &lt;a href="https://github.com/python/cpython/blob/v3.6.5/Objects/dictobject.c#L132"&gt;here&lt;/a&gt;. If you never approached data structures I recommend starting from a simpler explanation, however, as you might be intimidated by that discussion. You will find a good basic tutorial on hash tables in any data structures course or textbook.&lt;/p&gt;
-&lt;h1&gt;Final words&lt;/h1&gt;
+&lt;h1 id="final-words"&gt;Final words&lt;a class="headerlink" href="#final-words" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;As I said this is just a very quick and humble introduction to hashing. I think you cannot call yourself a programmer nowadays without knowing something about hashing, and what I summarized in this post is enough to understand hash uses like Bitcoin or SSL. If you want to study the topic in depth, however, I recommend taking a course or reading a book on data structures.&lt;/p&gt;
-&lt;h1&gt;Resources&lt;/h1&gt;
+&lt;h1 id="resources"&gt;Resources&lt;a class="headerlink" href="#resources" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://en.wikipedia.org/wiki/Hash_function"&gt;Hash function&lt;/a&gt;  on Wikipedia&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://en.wikipedia.org/wiki/Cryptographic_hash_function"&gt;Cryptographic hash function&lt;/a&gt; on Wikipedia&lt;/li&gt;
@@ -646,7 +646,7 @@ You can&amp;#39;t teach an old dog new tricks
 &lt;li&gt;Wiley &amp;amp; Sons publishes a book on &lt;a href="https://www.amazon.co.uk/Structures-Algorithms-Python-Michael-Goodrich/dp/1118290275"&gt;Data Structures and Algorithms in Python&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;O'Reilly publishes a book on &lt;a href="https://www.amazon.com/Mastering-Algorithms-Techniques-Sorting-Encryption/dp/1565924533/ref=sr_1_1?s=books&amp;amp;ie=UTF8&amp;amp;qid=1523009383&amp;amp;sr=1-1&amp;amp;keywords=Mastering+Algorithms+with+C"&gt;Mastering Algorithms with C: Useful Techniques from Sorting to Encryption&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h2&gt;Updates&lt;/h2&gt;
+&lt;h2 id="updates"&gt;Updates&lt;a class="headerlink" href="#updates" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;2018-04-28 &lt;a href="https://www.reddit.com/user/gixslayer"&gt;gixslayer&lt;/a&gt; and &lt;a href="https://www.reddit.com/user/SevenGlass"&gt;SevenGlass&lt;/a&gt; discussed on reddit the right command line for the &lt;code&gt;md5sum&lt;/code&gt; example on Windows. See https://www.reddit.com/r/programming/comments/8fbepo/introduction_to_hashing/dy316go&lt;/p&gt;
-&lt;h1&gt;Feedback&lt;/h1&gt;
+&lt;h1 id="feedback"&gt;Feedback&lt;a class="headerlink" href="#feedback" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;Feel free to use &lt;a href="https://plus.google.com/u/0/111444750762335924049"&gt;the blog Google+ page&lt;/a&gt; to comment the post or reach me on &lt;a href="https://twitter.com/thedigicat"&gt;Twitter&lt;/a&gt; if you have questions. The &lt;a href="http://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues"&gt;GitHub issues&lt;/a&gt; page is the best place to submit corrections.&lt;/p&gt;</content><category term="algorithms"></category></entry></feed>

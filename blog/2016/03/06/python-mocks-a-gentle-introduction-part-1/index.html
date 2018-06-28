@@ -76,11 +76,11 @@
 <p>Tests shall be <em>idempotent</em> and <em>isolated</em>. Idempotent in mathematics and computer science identifies a process that can be run multiple times without changing the status of the system. Isolated means that a test shall not change its behaviour depending on previous executions of itself, nor depend on the previous execution (or missing execution) of other tests.</p>
 <p>Such restrictions, which guarantee that your tests are not passing due to a temporary configuration of the system or the order in which they are run, can raise big issues when dealing with external libraries and systems, or with intrinsically mutable concepts such as time. In the testing discipline, such issues are mostly faced using mocks, that is objects that pretend to be other objects.</p>
 <p>In this series of posts I am going to review the Python <code>mock</code> library and exemplify its use. I will not cover everything you may do with mock, obviously, but hopefully I'll give you the information you need to start using this powerful library.</p>
-<h2>Installation</h2>
+<h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
 <p>First of all, <code>mock</code> is a Python library which development started around 2008. It was selected to be included in the standard library as of Python 3.3, which however does not prevent you to use other libraries if you prefer.</p>
 <p>Python 3 users, thus, are not required to take any step, while for Python 2 projects you are still required to issue a <code>pip install mock</code> to install it into the system or the current virtualenv.</p>
 <p>You may find the official documentation <a href="https://docs.python.org/dev/library/unittest.mock.html">here</a>. It is very detailed, and as always I strongly recommend taking your time to run through it.</p>
-<h2>Basic concepts</h2>
+<h2 id="basic-concepts">Basic concepts<a class="headerlink" href="#basic-concepts" title="Permanent link">&para;</a></h2>
 <p>A mock, in the testing lingo, is an object that simulates the behaviour of another (more complex) object. When you (unit)test an object of your library you need sometimes to access other systems your object want to connect to, but you do not really want to be forced to run them, for several reasons.</p>
 <p>The first one is that connecting with external systems means having a complex testing environment, that is you are dropping the isolation requirement of you tests. If your object wants to connect with a website, for example, you are forced to have a running Internet connection, and if the remote website is down you cannot test your library.</p>
 <p>The second reason is that the setup of an external system is usually slow in comparison with the speed of unit tests. We expect to run hundred of tests in seconds, and if we have to fetch information from a remote server for each of them the time easily increases by several orders of magnitude. Remember: having slow tests means that you cannot run them while you develop, which in turn means that you will not really use them for TDD.</p>
@@ -127,7 +127,7 @@
 
 
 <p>As you can understand, such objects are the perfect tool to mimic other objects or systems, since they may expose any API without raising exceptions. To use them in tests, however, we need them to behave just like the original, which implies returning sensible values or performing operations.</p>
-<h2>Return value</h2>
+<h2 id="return-value">Return value<a class="headerlink" href="#return-value" title="Permanent link">&para;</a></h2>
 <p>The simplest thing a mock can do for you is to return a given value every time you call it. This is configured setting the <code>return_value</code> attribute of a mock object</p>
 <div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">some</span> <span class="n">attribute</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="mi">42</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">some</span> <span class="n">attribute</span><span class="p">()</span>
@@ -147,7 +147,7 @@
 
 
 <p>As you can see calling <code>some_attribute()</code> just returns the value stored in <code>return_value</code>, that is the function itself. To return values that come from a function we have to use a slightly more complex attribute of mock objects called <code>side_effect</code>.</p>
-<h2>Side effect</h2>
+<h2 id="side-effect">Side effect<a class="headerlink" href="#side-effect" title="Permanent link">&para;</a></h2>
 <p>The <code>side_effect</code> parameter of mock objects is a very powerful tool. It accepts three different flavours of objects, callables, iterables, and exceptions, and changes its behaviour accordingly.</p>
 <p>If you pass an exception the mock will raise it</p>
 <div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">some_attribute</span><span class="o">.</span><span class="n">side_effect</span> <span class="o">=</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;A custom value error&#39;</span><span class="p">)</span>
@@ -217,9 +217,9 @@
 </pre></div>
 
 
-<h2>Testing with mocks</h2>
+<h2 id="testing-with-mocks">Testing with mocks<a class="headerlink" href="#testing-with-mocks" title="Permanent link">&para;</a></h2>
 <p>Now we know how to build a mock and how to give it a static return value or make it call a callable object. It is time to see how to use a mock in a test and what facilities do mocks provide. I'm going to use <a href="http://pytest.org">pytest</a> as a testing framework. You can find a quick introduction to pytest and TDD <a href="/categories/tdd/">here</a>).</p>
-<h3>Setup</h3>
+<h3 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h3>
 <p>If you want to quickly setup a pytest playground you may execute this code in a terminal (you need to have Python 3 and virtualenv installed in your system) </p>
 <div class="highlight"><pre><span></span>mkdir mockplayground
 <span class="nb">cd</span> mockplayground
@@ -237,7 +237,7 @@ touch tests/test_mock.py
 
 
 <p>The <code>PYTHONPATH</code> environment variable is an easy way to avoid having to setup a whole Python project to just test some simple code.</p>
-<h3>The three test types</h3>
+<h3 id="the-three-test-types">The three test types<a class="headerlink" href="#the-three-test-types" title="Permanent link">&para;</a></h3>
 <p>According to Sandy Metz we need to test only three types of messages (calls) between objects:</p>
 <ul>
 <li>Incoming queries (assertion on result)</li>
@@ -247,7 +247,7 @@ touch tests/test_mock.py
 <p>You can see the original talk <a href="https://www.youtube.com/watch?v=URSWYvyc42M">here</a> or read the slides <a href="https://speakerdeck.com/skmetz/magic-tricks-of-testing-railsconf">here</a>. The final table is shown in slide number 176.</p>
 <p>As you can see when dealing with external objects we are only interested in knowing IF a method was called and WHAT PARAMETERS the caller passed to the object. We are not testing if the remote object returns the correct result, this is faked by the mock, which indeed returns exactly the result we need.</p>
 <p>So the purpose of the methods provided by mock objects is to allow us to check what methods we called on the mock itself and what parameters we used in the call.</p>
-<h3>Asserting calls</h3>
+<h3 id="asserting-calls">Asserting calls<a class="headerlink" href="#asserting-calls" title="Permanent link">&para;</a></h3>
 <p>To show how to use Python mocks in testing I will follow the TDD methodology, writing tests first and then writing the code that makes the tests pass. In this post I want to give you a simple overview of the mock objects, so I will not implement a real world use case, and the code will be very trivial. In the second part of this series I will test and implement a real class, in order to show some more interesting use cases.</p>
 <p>The first thing we are usually interested in when dealing with an external object is to know that a given method has been called on it. Python mocks provide the <code>assert_called_with()</code> method to check this condition.</p>
 <p>The use case we are going to test is the following. <em>We instantiate the <code>myobj.MyObj</code> class, which requires an external object. The class shall call the <code>connect()</code> method of the external object without any parameter.</em></p>
@@ -347,10 +347,10 @@ E           Actual call: setup<span class="o">(</span><span class="nv">cache</sp
 
 <p>and you see that the error message is very clear about what we expected and what happened in our code.</p>
 <p>As you can read in the official documentation, the <code>Mock</code> object also provides the following methods and attributes: <code>assert_called_once_with</code>, <code>assert_any_call</code>, <code>assert_has_calls</code>, <code>assert_not_called</code>, <code>called</code>, <code>call_count</code>. Each of them explores a different aspect of the mock behaviour concerning calls, make sure to check their description and the examples provided along.</p>
-<h2>Final words</h2>
+<h2 id="final-words">Final words<a class="headerlink" href="#final-words" title="Permanent link">&para;</a></h2>
 <p>In this first part of the series I described the behaviour of mock objects and the methods they provide to simulate return values and to test calls. They are a very powerful tool that allows you to avoid creating complex and slow tests that depend on external facilities to run, thus missing the main purpose of tests, which is that of <em>continuously</em> helping you to check your code.</p>
 <p>In the next issue of the series I will explore the automatic creation of mock methods from a given object and the very important patching mechanism provided by the <code>patch</code> decorator and context manager.</p>
-<h2>Feedback</h2>
+<h2 id="feedback">Feedback<a class="headerlink" href="#feedback" title="Permanent link">&para;</a></h2>
 <p>Feel free to use <a href="https://plus.google.com/u/0/111444750762335924049">the blog Google+ page</a> to comment the post. The <a href="http://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues">GitHub issues</a> page is the best place to submit corrections.</p>
         </section>
 

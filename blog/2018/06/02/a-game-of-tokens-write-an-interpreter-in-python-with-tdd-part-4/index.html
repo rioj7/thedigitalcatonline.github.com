@@ -71,7 +71,7 @@
             <p>In the first three parts of this series of posts we developed together a calculator using a pure TDD methodology. In the <a href="/blog/2017/10/31/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-3/">previous post</a> we added support for variables.</p>
 <p>In this new post we will first add the exponentiation operation. The operator will be challenging because it has a high priority, so we will need to spice up the peek functions to look at multiple tokens.</p>
 <p>Then I will show you how I performed a refactoring of the code introducing a new version of the lexer that greatly simplifies the code of the parser.</p>
-<h1>Level 15 - Exponentiation</h1>
+<h1 id="level-15-exponentiation">Level 15 - Exponentiation<a class="headerlink" href="#level-15-exponentiation" title="Permanent link">&para;</a></h1>
 <p><em>That is power.</em></p>
 <p>The exponentiation operation is simple, and Python uses the double star operator to represent it</p>
 <div class="highlight"><pre><span></span>&gt;&gt;&gt; 2**3
@@ -87,7 +87,7 @@
 
 <p>Python correctly computes <code>1 + (2 ** 3)</code> and not <code>(1 + 2) ** 3</code>. As we did with multiplication and division, then, we will need to create a specific step to parse this operation.</p>
 <p>NOTE: I realised too late that the class called <code>PowerNode</code> should have been called <code>ExponentiationNode</code>, the former being a leftover of a previous incorrect nomenclature. I will eventually fix it in one of the refactoring steps, trying to convert a mistake into a good example of TDD.</p>
-<h2>Lexer</h2>
+<h2 id="lexer">Lexer<a class="headerlink" href="#lexer" title="Permanent link">&para;</a></h2>
 <p>The lexer has a simple task, that of recognising the symbol <code>'^'</code> as a <code>LITERAL</code> token. The test goes into <code>tests/test_calc_lexer.py</code></p>
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">test_get_tokens_understands_exponentiation</span><span class="p">():</span>
     <span class="n">l</span> <span class="o">=</span> <span class="n">clex</span><span class="o">.</span><span class="n">CalcLexer</span><span class="p">()</span>
@@ -105,7 +105,7 @@
 
 
 <p>Does your code already pass the test? If yes, why?</p>
-<h2>Parser</h2>
+<h2 id="parser">Parser<a class="headerlink" href="#parser" title="Permanent link">&para;</a></h2>
 <p>It's time to test the proper parsing of the exponentiation operation. Add this test to <code>tests/test_calc_parser.py</code></p>
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">test_parse_exponentiation</span><span class="p">():</span>
     <span class="n">p</span> <span class="o">=</span> <span class="n">cpar</span><span class="o">.</span><span class="n">CalcParser</span><span class="p">()</span>
@@ -237,7 +237,7 @@
 
 
 <p>My advice is to add the first test and to try and pass that one changing the code. If your change doesn't touch too much of the existing parse methods, chances are that the following two tests will pass as well.</p>
-<h2>Visitor</h2>
+<h2 id="visitor">Visitor<a class="headerlink" href="#visitor" title="Permanent link">&para;</a></h2>
 <p>Last, we need to properly expose the exponentiation operation in the CLI, which means to change the Visitor in order to support nodes of type <code>'exponentiation</code>. The test that we need to add to <code>tests/test_calc_visitor.py</code> is</p>
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">test_visitor_exponentiation</span><span class="p">():</span>
     <span class="n">ast</span> <span class="o">=</span> <span class="p">{</span>
@@ -262,14 +262,14 @@
 
 
 <p>And the change to the <code>CalcVisitor</code> class should be very easy as we need to simply process a new type of node.</p>
-<h1>Intermezzo - Refactoring with tests</h1>
+<h1 id="intermezzo-refactoring-with-tests">Intermezzo - Refactoring with tests<a class="headerlink" href="#intermezzo-refactoring-with-tests" title="Permanent link">&para;</a></h1>
 <p><em>See? You just had to see it in context.</em></p>
 <p>So our little project is growing, and the TDD methodology we are following gives us plenty of confidence in what we did. There as for sure bugs we are not aware of, we we are sure that the cases that we tested are correctly handled by our code.</p>
 <p>As happens in many projects at a certain point it's time for refactoring. We implemented solutions to the problems that we found along the way, but are we sure we avoided duplicating code, that we chose the best solution for some algorithms, or more trivially that the names we chose for the variables are clear?</p>
 <p>Refactoring means basically to change the internal structure of something without changing its external behaviour, and tests are a priceless help in this phase. The tests we wrote are there to ensure that the previous behaviour does not change. Or, if it changes, that we are perfectly aware of it.</p>
 <p>In this section, thus, I want to guide you through a refactoring guided by tests. If you are following this series and writing your own code this section will not add anything to the project, but I recommend that you read it anyway, as it shows why tests are so important in a software project.</p>
 <p>If you want to follow the refactoring on the repository you can create a branch on the tag <code>context-manager-refactoring</code> and work there. From that commit I implemented the steps you will find in the next sections.</p>
-<h2>Context managers</h2>
+<h2 id="context-managers">Context managers<a class="headerlink" href="#context-managers" title="Permanent link">&para;</a></h2>
 <p>The main issue the current code has is that the lexer cannot automatically recover a past status, that is we cannot easily try to parse something and, when we discover that the initial guess is wrong, go back in time and start over.</p>
 <p>Let's consider the <code>parse_line()</code> method</p>
 <div class="highlight"><pre><span></span>    <span class="k">def</span> <span class="nf">parse_line</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -324,7 +324,7 @@
 </pre></div>
 
 
-<h2>Lexer</h2>
+<h2 id="lexer_1">Lexer<a class="headerlink" href="#lexer_1" title="Permanent link">&para;</a></h2>
 <p>The first move is to transform the lexer into a context manager that does nothing. The test in <code>tests/test_calc_lexer.py</code> is</p>
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">test_lexer_as_context_manager</span><span class="p">():</span>
     <span class="n">l</span> <span class="o">=</span> <span class="n">clex</span><span class="o">.</span><span class="n">CalcLexer</span><span class="p">()</span>
@@ -362,7 +362,7 @@
 
 
 <p>When these three tests pass, we have a fully working context manager lexer, that reacts to <code>TokenError</code> exceptions going back to the previously stored status.</p>
-<h2>Parser</h2>
+<h2 id="parser_1">Parser<a class="headerlink" href="#parser_1" title="Permanent link">&para;</a></h2>
 <p>If the context manager lexer works as intended we should be able to replace the code of the parser without changing any test. The new code for <code>parse_line()</code> is the one I showed before</p>
 <div class="highlight"><pre><span></span>    <span class="k">def</span> <span class="nf">parse_line</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">lexer</span><span class="p">:</span>
@@ -374,7 +374,7 @@
 
 <p>and it works flawlessly.</p>
 <p>The context manager part of the lexer, however, works if the code inside the <code>with</code> statement raises a <code>TokenError</code> exception when it fails. That exception is a signal to the context manager that the parsing path is not leading anywhere and it shall go back to the previous state.</p>
-<h3>Manage literals</h3>
+<h3 id="manage-literals">Manage literals<a class="headerlink" href="#manage-literals" title="Permanent link">&para;</a></h3>
 <p>The <code>_parse_symbol()</code> method is often used after some checks like</p>
 <div class="highlight"><pre><span></span>        <span class="k">if</span> <span class="n">next_token</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">clex</span><span class="o">.</span><span class="n">LITERAL</span> <span class="ow">and</span> <span class="n">next_token</span><span class="o">.</span><span class="n">value</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39;+&#39;</span><span class="p">]:</span>
             <span class="n">operator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_symbol</span><span class="p">()</span>
@@ -403,7 +403,7 @@
 
 
 <p>Note that using the default value for the <code>values</code> parameter I didn't change the current behaviour. The whole battery of tests still passes without errors.</p>
-<h3>Parsing factors</h3>
+<h3 id="parsing-factors">Parsing factors<a class="headerlink" href="#parsing-factors" title="Permanent link">&para;</a></h3>
 <p>The next method that we can start changing is <code>parse_factor()</code>. The first pattern this function tries to parse is an unary node</p>
 <div class="highlight"><pre><span></span>        <span class="k">if</span> <span class="n">next_token</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">clex</span><span class="o">.</span><span class="n">LITERAL</span> <span class="ow">and</span> <span class="n">next_token</span><span class="o">.</span><span class="n">value</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39;+&#39;</span><span class="p">]:</span>
             <span class="n">operator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_literal</span><span class="p">()</span>
@@ -439,7 +439,7 @@
 </pre></div>
 
 
-<h3>Parsing exponentiation operations</h3>
+<h3 id="parsing-exponentiation-operations">Parsing exponentiation operations<a class="headerlink" href="#parsing-exponentiation-operations" title="Permanent link">&para;</a></h3>
 <p>To change the <code>parse_exponentiation()</code> method we need first to make the <code>_parse_variable()</code> return a <code>TokenError</code> in case of wrong token</p>
 <div class="highlight"><pre><span></span>    <span class="k">def</span> <span class="nf">_parse_variable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lexer</span><span class="o">.</span><span class="n">get_token</span><span class="p">()</span>
@@ -466,7 +466,7 @@
 
 
 <p>Doing this last substitution I also notice that there is some duplicated code in <code>parse_factor()</code>, and I replace it with a call to <code>_parse_variable()</code>. The test suite keeps passing, giving me the certainty that what I did does not change the behaviour of the code (at least the behaviour that is covered by tests).</p>
-<h3>Parsing terms</h3>
+<h3 id="parsing-terms">Parsing terms<a class="headerlink" href="#parsing-terms" title="Permanent link">&para;</a></h3>
 <p>Now, the <code>parse_term()</code> method will be problematic. To implement this function I used a <code>while</code> loop that keeps using the <code>parse_exponentiation()</code> method until the separation token is a <code>LITERAL</code> with value <code>*</code> or <code>/</code></p>
 <div class="highlight"><pre><span></span>    <span class="k">def</span> <span class="nf">parse_term</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">left</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_exponentiation</span><span class="p">()</span>
@@ -584,7 +584,7 @@
 <p>This means that we may change the test and make it pass. Let me stress it once more: we have to understand why the test doesn't pass, and once we understood the reason, and decided it is acceptable, we can change the test.</p>
 <p>Tests are not immutable, they are mere safeguards that raise alarms when you change the behaviour. It's up to you to deal with the alarm and to decide how what to do.</p>
 <p>Once the test has been modified and the test suite passes, it's time to uncomment the first of the two remaining tests, <code>test_parse_exponentiation_with_other_operators()</code>. This test uses <code>parse_term()</code> to parse a string that contains an exponentiation, but the new code of the <code>parse_term()</code> method doesn't call the <code>parse_exponentiation()</code> function. So the test fails.</p>
-<h3>Parsing exponentiation</h3>
+<h3 id="parsing-exponentiation">Parsing exponentiation<a class="headerlink" href="#parsing-exponentiation" title="Permanent link">&para;</a></h3>
 <p>That tests tries to parse a string that contains a multiplication and an exponentiation, so the method that we should use to process it is <code>parse_term()</code>. The current version of <code>parse_term()</code>, however, doesn't consider exponentiation, so the new code is</p>
 <div class="highlight"><pre><span></span>    <span class="k">def</span> <span class="nf">parse_term</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">left</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_exponentiation</span><span class="p">()</span>
@@ -601,7 +601,7 @@
 
 <p>which makes all the active tests pass.</p>
 <p>There is still one commented test, <code>test_parse_exponentiation_with_parenthesis</code>, that now passes with the new code.</p>
-<h3>Parsing expressions</h3>
+<h3 id="parsing-expressions">Parsing expressions<a class="headerlink" href="#parsing-expressions" title="Permanent link">&para;</a></h3>
 <p>The new version of <code>parse_expression()</code> has the same issue we found with <code>parse_term()</code>, that is the recursive approach changes the output.</p>
 <div class="highlight"><pre><span></span>    <span class="k">def</span> <span class="nf">parse_expression</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">left</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_term</span><span class="p">()</span>
@@ -617,9 +617,9 @@
 
 
 <p>As before, we have to decide if the change is acceptable or if it is a real error. As happened for <code>parse_term()</code> the test can be safely changes to match the new code output.</p>
-<h1>Level 16 - Float numbers</h1>
+<h1 id="level-16-float-numbers">Level 16 - Float numbers<a class="headerlink" href="#level-16-float-numbers" title="Permanent link">&para;</a></h1>
 <p>So far, our calculator can handle only integer values, so it's time to add support for float numbers. This change shouldn't be complex: floating point numbers are easy to parse as they are basically two integer numbers separated by a dot.</p>
-<h2>Lexer</h2>
+<h2 id="lexer_2">Lexer<a class="headerlink" href="#lexer_2" title="Permanent link">&para;</a></h2>
 <p>To test if the lexer understands floating point numbers it's enough to add this to <code>tests/test_calc_lexer.py</code></p>
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">test_get_tokens_understands_floats</span><span class="p">():</span>
     <span class="n">l</span> <span class="o">=</span> <span class="n">clex</span><span class="o">.</span><span class="n">CalcLexer</span><span class="p">()</span>
@@ -634,7 +634,7 @@
 </pre></div>
 
 
-<h2>Parser</h2>
+<h2 id="parser_2">Parser<a class="headerlink" href="#parser_2" title="Permanent link">&para;</a></h2>
 <p>To support float numbers it's enough to add that feature the method that we use to parse integers. We can rename <code>parse_integer()</code> to <code>parse_number()</code>, fix the test <code>test_parse_integer()</code>, and add <code>test_parse_float()</code></p>
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">test_parse_integer</span><span class="p">():</span>
     <span class="n">p</span> <span class="o">=</span> <span class="n">cpar</span><span class="o">.</span><span class="n">CalcParser</span><span class="p">()</span>
@@ -661,7 +661,7 @@
 </pre></div>
 
 
-<h2>Visitor</h2>
+<h2 id="visitor_1">Visitor<a class="headerlink" href="#visitor_1" title="Permanent link">&para;</a></h2>
 <p>The same thing that we did for the parser is valid for the visitor. We just need to copy the test for the integer numbers and adapt it</p>
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">test_visitor_float</span><span class="p">():</span>
     <span class="n">ast</span> <span class="o">=</span> <span class="p">{</span>
@@ -698,11 +698,11 @@
 </pre></div>
 
 
-<h1>Conclusion</h1>
+<h1 id="conclusion">Conclusion<a class="headerlink" href="#conclusion" title="Permanent link">&para;</a></h1>
 <p>This post showed you how powerful the TDD methodology is when it comes to refactoring, or in general when the code has to be changed. Remember that tests can be changed if there are good reasons, and that the main point is to understand what's happening in your code and in the cases that you already tested.</p>
-<h1>Titles</h1>
+<h1 id="titles">Titles<a class="headerlink" href="#titles" title="Permanent link">&para;</a></h1>
 <p>The section quotes come from some good films: "Conan the Barbarian" (1982) and "Scrooged" (1988).</p>
-<h1>Feedback</h1>
+<h1 id="feedback">Feedback<a class="headerlink" href="#feedback" title="Permanent link">&para;</a></h1>
 <p>Feel free to reach me on <a href="https://twitter.com/thedigicat">Twitter</a> if you have questions. The <a href="http://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues">GitHub issues</a> page is the best place to submit corrections.</p>
         </section>
 

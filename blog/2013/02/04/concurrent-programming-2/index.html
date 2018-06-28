@@ -68,13 +68,13 @@
         </section>
 
         <section id="content">
-            <h2>Abstract</h2>
+            <h2 id="abstract">Abstract<a class="headerlink" href="#abstract" title="Permanent link">&para;</a></h2>
 <p>In the past article I introduced the concept of process and how important it is for our operating system: in this new issue of the Concurrent Programming series we will go on and begin to write multitasking code; we will start from one of the basic concepts of the whole picture, the forking operation. Afterwards, we will start to introduce the problem of process synchronization and communication, which we will deeply face in a later instalment.</p>
-<h2>The C standard library</h2>
+<h2 id="the-c-standard-library">The C standard library<a class="headerlink" href="#the-c-standard-library" title="Permanent link">&para;</a></h2>
 <p>The C standard library, nicknamed libc, is a collection of functions for the C language which has been standardized by ANSI and later by ISO. An implementation of it can be found in any major compiler or operating system, especially Unix-like ones.</p>
 <p>In the GNU ecosystem, which Linux distributions are grounded on, the library is implemented by glibc (GNU libc). The library reached version 2.17 in December 2012 and is free software released under LGPL, a less restrictive version of the GPL which most notably allows the use of the library by non-GPL software, even proprietary one.</p>
 <p>You can find and navigate glibc sources <a href="http://sourceware.org/git/?p=glibc.git;a=summary">here</a></p>
-<h2>C language and PIDs</h2>
+<h2 id="c-language-and-pids">C language and PIDs<a class="headerlink" href="#c-language-and-pids" title="Permanent link">&para;</a></h2>
 <p>Processes, like every resource in a computer, are managed by the kernel. This is a part of the operating system that runs continuously in background, exposing functions to other programs that allow them to obtain, manage and release resources such as memory, disk space and CPU time. One of the things the kernel exposes to the hosted programs is the process management, which stands for structures that represent the current status of processes in the system. Using the libc the programmer can easily access those structures in a read-only way.</p>
 <p>Let us start with the simple concept of PID, the Process IDentifier we described in the past issue of this series. In the libc, the <code>pid_t</code> type is defined as an integer capable of containing a pid. To show this we will now take a little tour of the glibc source code: we will cover the whole path this time only, just to highlight both the chances given us by the source code and the complexity of a project like glibc.</p>
 <p>We can find the initial definition of <code>pid_t</code> <a href="http://sourceware.org/git/?p=glibc.git;a=blob;f=posix/sys/types.h;h=33c2176d0f0b38f1a81bf8c76d38f08d2ab38675;hb=HEAD">here</a></p>
@@ -99,7 +99,7 @@
 
 
 <p>The heavy use of defines and compiler features made by glibc code allows the library to be compiled on very different architectures.</p>
-<h2>Telling the PID</h2>
+<h2 id="telling-the-pid">Telling the PID<a class="headerlink" href="#telling-the-pid" title="Permanent link">&para;</a></h2>
 <p>Let us now discover the function which give us the knowledge of the pid of the process containing our program</p>
 <div class="highlight"><pre><span></span><span class="kt">pid_t</span> <span class="nf">getpid</span> <span class="p">(</span><span class="kt">void</span><span class="p">);</span>
 </pre></div>
@@ -136,7 +136,7 @@
 
 <p>If this operation returns errors make sure you installed gcc and libc headers; refer to your distribution knowledge base to solve this task.</p>
 <p>The compiler will build an executable named <code>print_pid</code> (since the current directory is probably not in the system path you can run it with <code>./print_pid</code>). Executing the program we will have no great surprises: it prints out a positive number and if you executes it more than once this number will likely increase progressively; this is not mandatory, however, because another process could be created between two executions of <code>print_pid</code>. Try for example to execute <code>print_pid</code>, then <code>ps</code> and then <code>print_pid</code> again.</p>
-<h2>Forking</h2>
+<h2 id="forking">Forking<a class="headerlink" href="#forking" title="Permanent link">&para;</a></h2>
 <p>Now it is time to meet one of the most important concepts in the field of operating systems, that is the concept of forking.</p>
 <p>Forking in general means that one thing splits in two and each part acts like an independent being. At the very moment of the split the two entities are the same, exactly the same, except for the fact that they live in two different spaces. This computer science concept can be retrieved in nature when a simple organism generates a clone of itself. After the cloning the two organisms are the exact copy, but they can be told apart since they are two things (the right one and the left one for example). Back to the operating system world we find the very same problem when a process forks; after the fork operation we have two processes with two different PIDs, but the two contain the same program at the same execution point.</p>
 <p>So, when a program (running as process A) creates another process (B) the two are identical, that is they have the same code, the memory full of the same data (not the same memory, since the memory regions are different) and the same processor status. From this point on the two can continue in two different ways, just like our cloning organisms, for example depending on the user's input or some other data. The process A is called the <strong>parent</strong> process while B is the <strong>child</strong> process; now you can begin to understand better the name <em>parent of all the processes</em> given to init. The function which creates a new process is</p>
@@ -147,7 +147,7 @@
 <p>The number returned is a pid, but it deserves a particular attention. We said that the first process duplicates itself splitting in a parent and a child, which will then execute interlacing themselves with the other running processes, doing different works; but immediately after the duplication which process will be executed, the parent or the child?</p>
 <p>Well, the answer is as simple as unuseful: one of the two. The decision about which process has to be executed is taken by a part of the operating system called scheduler, and it pays no attention if a process is the parent or the child, following an algorithm based on other parameters.</p>
 <p>If we are writing processes that implement a service (such as serving network connections) we need nothing more: the two processes are the same and they behave the same way, so by cloning the process we just incremented the number of service providers. This is usually done by Web servers such as Apache, which spawns a copy of itself to serve incoming connections.</p>
-<h2>Parent and child</h2>
+<h2 id="parent-and-child">Parent and child<a class="headerlink" href="#parent-and-child" title="Permanent link">&para;</a></h2>
 <p>Sometimes, anyway, it is fundamental to know what process is in execution: after the fork both processes are at the same execution point (that is just after the <code>fork()</code> call) so how can them tell if they are the parent or the child one?</p>
 <p>In order to clarify this question let us look at the following algorithm:</p>
 <ol>
@@ -240,12 +240,12 @@
 
 
 <p>As always when dealing with multitasking code, your output is probably different from mine and will also be different between consecutive executions. Try also to change the parameters of the program, such as the sleep time or the number of loops.</p>
-<h2>Why forking</h2>
+<h2 id="why-forking">Why forking<a class="headerlink" href="#why-forking" title="Permanent link">&para;</a></h2>
 <p>Thinking carefully about the parent and child example a question arises: why should I write code that forks, with all the intricacies it entails, when I could simply write two different programs and run them, letting the operating system to deal with their simultaneous execution?</p>
 <p>This is a very interesting question, and the answer is very simple, though the underlying concept is rather complex. When you run a program the shell or the GUI follows a pattern called <strong>fork-and-exec</strong>: first it forks, then the child process executes the desired program. The reason of this behaviour is that the <code>exec</code> family of system calls replace the running program with a new program but do not change the PID. So the tasks are divided between system calls: <code>fork</code> creates a new process while <code>exec</code> loads the given program into the newly created process.</p>
-<h2>DOS and Windows</h2>
+<h2 id="dos-and-windows">DOS and Windows<a class="headerlink" href="#dos-and-windows" title="Permanent link">&para;</a></h2>
 <p>Operating systems of the DOS and Windows family do not provide a <code>fork</code> mechanism but a <code>spawn</code> family of system calls, which directly implement the fork-and-exec technique; this is a good example of the different implementation OSs make of common computer science concepts: while both implement multitasking and let many processes run concurrently, the way this target is reached can vary significantly.</p>
-<h2>Conclusion</h2>
+<h2 id="conclusion">Conclusion<a class="headerlink" href="#conclusion" title="Permanent link">&para;</a></h2>
 <p>Starting from the knowledge of processes you stepped into the fundamental Unix concept of forking, learning to tell apart parent and child processes and running your first multitasking-based program. You also started to understand how complex can some operating system issues be, and that real world OSs can provide very different solutions to them.</p>
 <p>In the next article we will start to look after processes synchronization and data sharing between processes.</p>
         </section>

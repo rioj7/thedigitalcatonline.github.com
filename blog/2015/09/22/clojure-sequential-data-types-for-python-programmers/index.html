@@ -73,7 +73,7 @@
 <p>One of the languages I fell in love (but never used in production) is LISP. I strongly believe that everyone calls themselves a programmer shall be somehow familiar with LISP, as well as with Assembly language. The reasons are many and probably do not fit well with the title of this article so I will save them for another, more theoretical post, and move on.</p>
 <p>Clojure is a LISP implementation that runs on the JVM, thus being available on a wide number of platforms. As any other LISP its syntax is a step lower in the abstraction tree: while other languages provide their syntax and then a conversion to an AST (Abstract Syntax Tree), LISPs provide only their AST syntax. This has the great advantage of homoiconicity, something that they share with Assembly and other languages like Prolog, but comes at the cost of a slightly more difficult syntax, at least for the novice.</p>
 <p>In this post I want to review the sequential data types provided by Clojure, trying to introduce them to programmers accustomed to Python data types. Anyway, while the nomenclature and the examples will be specific to Python, I think the discussion can be easily extended to other dynamic languages such as Ruby.</p>
-<h2>Three collection types for the programming-kings</h2>
+<h2 id="three-collection-types-for-the-programming-kings">Three collection types for the programming-kings<a class="headerlink" href="#three-collection-types-for-the-programming-kings" title="Permanent link">&para;</a></h2>
 <p>In Clojure, just like in Python, you find three types of basic collection types, that is types of data that hold together other types of data, also called compound data types. These are sequences, sets and maps.</p>
 <p>Python provides two types of basic sequences, <strong>tuples</strong> and <strong>lists</strong>, while maps are called <strong>dictionaries</strong>. Those are present in Python since its first versions. <strong>Sets</strong> have been introduced with Python 2.3 in 2003, at first with a dedicated <code>set</code> module, which was then deprecated with Python 2.6 in favour of the built-in type with the same name. From Python 2.7 sets get also a dedicated short syntax similar to that of dictionaries (e.g. <code>{'just', 'a', 'set'</code>).</p>
 <p>The two basic Python sequences differ mainly for a small but very important detail: mutability. In Python tuples are immutable, while lists can be modified. Python lists behave mostly like C arrays: elements can be appended to and extracted from the right end. Apart from the mutability, Python lists and tuples expose a common API which we may address as the <strong>Python sequence API</strong> or <strong>protocol</strong>.</p>
@@ -84,7 +84,7 @@
 </ul>
 <p>A derived feature which is provided by sequences is that they can be sliced, i.e. part of them can be extracted as a collection of the same type.</p>
 <p>These features are paramount because they allow Python to define a common interface for loops. This is obviously shared with mostly every programming language, but Clojure implements it in a slightly different way. A Python class shall implement some "magic" methods to expose the sequence API. To get a starting picture of the steps involved read <a href="/blog/2015/05/13/python-oop-tdd-example-part1/">this post</a>, where I discuss the implementation of a binary number type in Python.</p>
-<h2>A matter of definitions</h2>
+<h2 id="a-matter-of-definitions">A matter of definitions<a class="headerlink" href="#a-matter-of-definitions" title="Permanent link">&para;</a></h2>
 <p>The Clojure counterpart of the Python sequence protocol is the <strong>seq API</strong> and it consists of two simple functions: <code>first</code> and <code>rest</code>. Their behaviour is the following</p>
 <ul>
 <li>If the collection is not empty <code>(first collection)</code> returns the first element, otherwise returns <code>nil</code>.</li>
@@ -96,14 +96,14 @@
 <p>The concept of being an ordered set of values in Clojure is represented by the word <strong>sequential</strong>, which corresponds to the Java interface <code>Sequential</code> (<a href="https://github.com/clojure/clojure/blob/master/src/jvm/clojure/lang/Sequential.java">source code</a>). Last, the concept of being a <strong>collection</strong> is represented in Clojure by means of the Java interface <code>IPersistenCollection</code> (<a href="https://github.com/clojure/clojure/blob/master/src/jvm/clojure/lang/IPersistentCollection.java">source code</a>).</p>
 <p>Given these definitions it is immediately clear what difference is there between the <code>seq?</code>, <code>sequential?</code> and <code>coll?</code> functions. They tell you if the given parameter implements the relative Java interface.</p>
 <p>The function <code>seq</code>, instead, performs a conversion of its input into a sequence, that is something that implements the <code>ISeq</code> interface. This function always returns <code>nil</code> if the input is an empty collection, which allows Clojure to adhere to the standard LISP technique called <em>nil-punning</em>, or in simpler words <strong>loop termination condition check</strong>. Every collection in Clojure provides a meaningful output for the <code>seq</code> function, but some of them provide more than one function to return a sequence. For example maps provide a way to get the sequence of both keys and values through the aptly named <code>keys</code> and <code>vals</code> functions.</p>
-<h2>Vectors and lists</h2>
+<h2 id="vectors-and-lists">Vectors and lists<a class="headerlink" href="#vectors-and-lists" title="Permanent link">&para;</a></h2>
 <p>Clojure provides two sequential data types just like Python, but they do not differ for the mutability property, because in Clojure every collection is immutable. Instead, they differ for their behaviour as queues (where a new element goes and where a popped element comes from).</p>
 <p>These two data types are vectors and lists, and as happens in other LISPs lists are very important for the language syntax itself. Their main difference between the two types, which is immediately clear when using them, is that while vectors grow on the right end, lists grow on the left one. This will be important when discussing append functions like <code>conj</code>.</p>
 <p>Let me first start with some details on mutability and persistence.</p>
-<h2>Mutability and persistence</h2>
+<h2 id="mutability-and-persistence">Mutability and persistence<a class="headerlink" href="#mutability-and-persistence" title="Permanent link">&para;</a></h2>
 <p>Clojure's collections are <strong>immutable</strong>, which means that you cannot change the content of one of their instances. This is a feature provided in Python by means of the tuple data type only. As happens in other languages like Erlang, Clojure's immutability of collections is a trampoline to concurrency safety, something the language provides as a feature rather than a limitation.</p>
 <p>Clojure collections are also <strong>persistent</strong>. The original meaning of this word refers to the possibility of accessing the old version of a given structure after having changed it. Since structures in Clojure are immutable you are forced to create a new variable every time you want to change something, which implies that the "old version" is still available. That is, immutability implies persistence. In Clojure, moreover, structures share values as long as this is consistent, which is exactly what Python does with the references concept (see <a href="/blog/2014/08/21/python-3-oop-part-4-polymorphism">this post</a>).</p>
-<h2>Vectors in Clojure</h2>
+<h2 id="vectors-in-clojure">Vectors in Clojure<a class="headerlink" href="#vectors-in-clojure" title="Permanent link">&para;</a></h2>
 <p>Clojure's vectors are very similar to Python lists. The first thing that makes them similar (apart from the square brackets syntax) is that they grow on the right end.</p>
 <div class="highlight"><pre><span></span><span class="nv">user=&gt;</span> <span class="p">(</span><span class="nb">conj </span><span class="p">[</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">]</span> <span class="mi">5</span><span class="p">)</span>
 <span class="p">[</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span> <span class="mi">5</span><span class="p">]</span>
@@ -134,7 +134,7 @@
 
 
 <p>So Clojure vectors and Python lists are LIFO queues (Last In First Out), otherwise known as <em>stacks</em>. In Clojure <code>peek</code> takes the role of the classic <code>pop</code> operation, but remember that being collections immutable, what you get is a new value. That is, while in Python <code>pop()</code> modifies the list, in Clojure <code>peek</code> doesn't alter the vector.</p>
-<h3>Subvectors</h3>
+<h3 id="subvectors">Subvectors<a class="headerlink" href="#subvectors" title="Permanent link">&para;</a></h3>
 <p>Just like Python lists, vectors can be sliced with the <code>subvec</code> function</p>
 <div class="highlight"><pre><span></span><span class="nv">user=&gt;</span> <span class="p">(</span><span class="nb">subvec </span><span class="p">[</span><span class="ss">:a</span> <span class="ss">:b</span> <span class="ss">:c</span> <span class="ss">:d</span> <span class="ss">:e</span><span class="p">]</span> <span class="mi">2</span> <span class="mi">5</span><span class="p">)</span>
 <span class="p">[</span><span class="ss">:c</span> <span class="ss">:d</span> <span class="ss">:e</span><span class="p">]</span>
@@ -174,7 +174,7 @@
 
 
 <p>In Clojure a subvector is a complete reference to the source vector, with a special annotation of the slice boundaries. This gives you a very fast way to create subvectors, which is independent from the size of the vector itself (aka O(1) or constant time). On the other hand this gives you a structure which is a bit slower when accessed, due to the math involved in computing the actual offset. This handicap however does not propagate to subvectors of subvectors, so it can be considered a (little) constant slowdown of every subvector.</p>
-<h3>Appending values (push)</h3>
+<h3 id="appending-values-push">Appending values (push)<a class="headerlink" href="#appending-values-push" title="Permanent link">&para;</a></h3>
 <p>You find two different functions that can append values to a Clojure vector, <code>into</code> and <code>conj</code>, implementing the <code>push</code> operation of classic stacks. Clojure is not an object-oriented language, so these functions are not methods of the vector type. Those methods however behave in a different way according to the destination type.</p>
 <p>The <code>into</code> function, according to the <a href="https://clojuredocs.org/clojure.core/into">official documentation</a> <em>conjoins every item</em> of the second argument (the <em>from</em> collection) into the first argument (the <em>to</em> collection). This means that every item of the incoming collection is appended to the destination, according to the way that collection manages the append operation. For example, vectors grow on the right, so performing an <code>into</code> will append elements on the right end of the vector itself. This means also that <code>into</code> may be used to convert one type of collection into another.</p>
 <p>Conversely, the <code>conj</code> function <em>conjoins the whole second argument</em> (<code>conj</code> accepts more than two arguments but let's deal with the simpler case now)</p>
@@ -202,7 +202,7 @@
 </pre></div>
 
 
-<h3>Getting values (pop)</h3>
+<h3 id="getting-values-pop">Getting values (pop)<a class="headerlink" href="#getting-values-pop" title="Permanent link">&para;</a></h3>
 <p>The <code>pop</code> operation of classic stacks is also implemented by two different functions, <code>peek</code> and <code>pop</code>. The first one returns the last element of the vector, being thus the Clojure's equivalent of Python's <code>pop()</code> as shown in a previous example. Clojure's <code>pop</code>, instead, removes the last element and returns the resulting vector.</p>
 <div class="highlight"><pre><span></span><span class="nv">user=&gt;</span> <span class="p">(</span><span class="nb">pop </span><span class="p">[</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span> <span class="mi">5</span><span class="p">])</span>
 <span class="p">[</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">]</span>
@@ -217,7 +217,7 @@
 
 <p>The <code>last</code> function will return the same value as <code>peek</code>, but is very inefficient for vectors. The <a href="https://clojuredocs.org/clojure.core/peek">official documentation</a> gives an example for a vector of ten thousand elements where <code>last</code> is around 25 times slower than <code>peek</code>. This is mainly due to the fact that <code>last</code> scans the whole sequence to find the last element, that is works in linear time O(n) (see the <a href="https://github.com/clojure/clojure/blob/clojure-1.7.0/src/clj/clojure/core.clj#L249">source code</a>).</p>
 <p>A final note about looking for values. The Python <code>in</code> operator has no direct equivalent for Clojure vectors. Beware that the <code>contains?</code> function does check the collection keys (indices of the vector) and not the values. The <a href="https://clojuredocs.org/clojure.core/contains_q">official documentation</a> of <code>contains?</code> gives some hints about this problem. I strongly suggest you to check them.</p>
-<h3>Random access</h3>
+<h3 id="random-access">Random access<a class="headerlink" href="#random-access" title="Permanent link">&para;</a></h3>
 <p>Clojure vectors and Python lists are both arrays of indexed values, which means that they are optimized for random access. In Python you may just index the list</p>
 <div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">l</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;list&quot;</span><span class="p">,</span> <span class="s2">&quot;of&quot;</span><span class="p">,</span> <span class="s2">&quot;strings&quot;</span><span class="p">]</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">l</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
@@ -237,7 +237,7 @@
 </pre></div>
 
 
-<h2>Lists in Clojure</h2>
+<h2 id="lists-in-clojure">Lists in Clojure<a class="headerlink" href="#lists-in-clojure" title="Permanent link">&para;</a></h2>
 <p>Being Clojure a LISP, lists are of paramount importance and a complete discussion about them will surely span more than a small post on a blog. So in this section I will try to stay focused on the differences with Python lists (and Clojure vectors), rather than give you a complete overview of this incredibly powerful tool. The most important thing I will not review here is that lists in Clojure are part of the syntax itself and in the following section I will only consider lists as data containers. The fact that LISPs consider code as data is outside the scope of this work.</p>
 <p>Being vectors the Clojure collection that implement classic stacks (LIFO queues), and being stacks one of the most used data structures in computer science, it is no surprise that a lot of sequential data processing in Clojure is done through vectors.</p>
 <p>As already stated the big difference between vectors and lists in Clojure is the fact that lists grow on the left end. Let us review the behaviour of <code>peek</code> and <code>conj</code> on lists compared to that of the same functions on vectors</p>
@@ -260,10 +260,10 @@
 <p>As happened for vectors there are some performance considerations to do for lists. Even for lists the <code>last</code> function performs in linear time, but while vectors can use <code>peek</code> to perform the same service, lists cannot. This is a big asymmetry and one of the reasons you could prefer vectors over lists for your data. While accessing the first element is blazing fast both for lists and vectors, accessing the last can be very fast for vectors through the <code>peek</code> function but is performed in linear time on lists.</p>
 <p>One of the biggest drawbacks of Clojure lists used like arrays is that they are not optimized for random access, while vectors are. That is, the <code>nth</code> function performs in linear time on lists since, just like <code>last</code>, it scans the whole list one element at a time. Vectors, on the other hand, are indexed, which means that random access is performed in constant time.</p>
 <p>As you can see there is not much to say about Clojure lists as data containers (here <em>data</em> is used more in a Python sense): there are simply very few reasons to prefer lists over vectors as data containers.</p>
-<h2>Final words</h2>
+<h2 id="final-words">Final words<a class="headerlink" href="#final-words" title="Permanent link">&para;</a></h2>
 <p>Python and Clojure are very different languages, so this was not an attempt to find "migration rules" from Python code to Clojure. I just wanted to review what Python programmers shall expect from Clojure sequential data types, expressing it in a familiar way.</p>
 <p>I wish you a happy Clojure time!</p>
-<h2>Feedback</h2>
+<h2 id="feedback">Feedback<a class="headerlink" href="#feedback" title="Permanent link">&para;</a></h2>
 <p>Feel free to use <a href="https://plus.google.com/u/0/111444750762335924049">the blog Google+ page</a> to comment the post. The <a href="http://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues">GitHub issues</a> page is the best place to submit corrections.</p>
         </section>
 

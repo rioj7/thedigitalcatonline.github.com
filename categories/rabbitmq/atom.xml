@@ -2,13 +2,13 @@
 <feed xmlns="http://www.w3.org/2005/Atom"><title>The Digital Cat - RabbitMQ</title><link href="http://blog.thedigitalcatonline.com/" rel="alternate"></link><link href="http://blog.thedigitalcatonline.com/categories/rabbitmq/atom.xml" rel="self"></link><id>http://blog.thedigitalcatonline.com/</id><updated>2013-08-21T18:10:00+01:00</updated><entry><title>Some tips about AMQP direct exchanges</title><link href="http://blog.thedigitalcatonline.com/blog/2013/08/21/some-tips-about-amqp-direct-exchanges/" rel="alternate"></link><published>2013-08-21T18:10:00+01:00</published><updated>2013-08-21T18:10:00+01:00</updated><author><name>Leonardo Giordani</name></author><id>tag:blog.thedigitalcatonline.com,2013-08-21:/blog/2013/08/21/some-tips-about-amqp-direct-exchanges/</id><summary type="html"></summary><content type="html">&lt;p&gt;&lt;em&gt;EDIT: thanks to Alvaro Videla that pointed out that a queue can be connected to more than one exchange; sorry for the wrong information.&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;Everyone who started using AMQP learned from the very beginning that there are three different types of exchanges, namely direct, fanout and topic. In this post, I am going to highlight some interesting properties of direct exchanges, which were not clear to me when I started using RabbitMQ.&lt;/p&gt;
 &lt;p&gt;Now some time has passed since I started, and reading the &lt;a href="http://www.rabbitmq.com/getstarted.html"&gt;RabbitMQ tutorials&lt;/a&gt; again I can see that these properties are no mystery. However, in this short post I want to clearly point out three different uses of direct exchanges, in the hope that other novices will be helped to better understand those powerful components of an AMQP system.&lt;/p&gt;
-&lt;h2&gt;Movie cast&lt;/h2&gt;
+&lt;h2 id="movie-cast"&gt;Movie cast&lt;a class="headerlink" href="#movie-cast" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;The cast of an AMQP message delivery is made of three different type of components: the exchange, the queues, and the consumers.&lt;/p&gt;
 &lt;p&gt;The exchange is the container of all the messages other components sent; each message has been tagged with a routing key and they can be extracted from the exchange by means of those keys.&lt;/p&gt;
 &lt;p&gt;The consumers are those which are interested in getting messages from the exchange, so their main activity is to connect to the exchange, pick messages from it and act according to its content. A consumer can connect to more than one exchange and receive messages concurrently.&lt;/p&gt;
 &lt;p&gt;The queues are the real core of the system. They actually extract messages from the exchange according to their configuration, and you are not wrong if you think that they are the real routing component of AMQP; indeed exchanges do not exist as separate components, so the routing game is played by the channel and the queues. &lt;/p&gt;
 &lt;p&gt;Let us consider queues at a deeper level. They are two sided components, messages enter from one side and exit from the other one. Thus each queue can establish connections on both sides: on the input side a queue fetches messages from &lt;strong&gt;one or more exchanges&lt;/strong&gt; while on the output side the queue can be connected to &lt;strong&gt;one or more consumers&lt;/strong&gt;. From the single queue point of view being connected to more than one exchange with the same routing key is transparent, since the only thing that concerns the queue itself are the incoming messages; being connected to more than one exchange with different routing keys leads to complex scenarios, so in this article I will consider a single direct exchange delivering messages to queues.&lt;/p&gt;
-&lt;h2&gt;Three configurations&lt;/h2&gt;
+&lt;h2 id="three-configurations"&gt;Three configurations&lt;a class="headerlink" href="#three-configurations" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;As you can easily see, the most general case with direct exchanges is that of multiple queues connected to the same exchange, with multiple consumers connected to each queue.&lt;/p&gt;
 &lt;p&gt;&lt;img alt="Image 01" src="/images/amqp_direct_exchanges/image01.jpg"&gt;&lt;/p&gt;
 &lt;p&gt;The edge cases of this configuration can be obtained decreasing the number of queues, the number of consumers, or both, to a single unit. This leads to three different configurations:&lt;/p&gt;
@@ -25,7 +25,7 @@
 &lt;/ul&gt;
 &lt;p&gt;&lt;img alt="Image 04" src="/images/amqp_direct_exchanges/image04.jpg"&gt;&lt;/p&gt;
 &lt;p&gt;The last consideration about the fanout case is important. A pure fanout exchange is somehow limited since it can only blindly dispatch messages to everyone connects. A direct exchange can behave like a fanout only for certain keys while acting as a direct or round robin dispatcher with other keys, at the same time.&lt;/p&gt;
-&lt;h2&gt;A real use case&lt;/h2&gt;
+&lt;h2 id="a-real-use-case"&gt;A real use case&lt;a class="headerlink" href="#a-real-use-case" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;Let us look at a concrete example to better understand why direct exchanges can be used to solve the most part of routing issues we face. Remember that in AMQP queues are named objects and that names are primary keys, i.e. there cannot be two queues with the same name under the same virtual host.&lt;/p&gt;
 &lt;p&gt;This example is a simplified version of a real RabbitMQ system running Python programs based on &lt;a href="https://github.com/lgiordani/postage"&gt;Postage&lt;/a&gt;.&lt;/p&gt;
 &lt;p&gt;In a cluster, a single program can be uniquely identified by the compound value &lt;code&gt;(pid,host)&lt;/code&gt;, since given a host only one program can have the given PID. To simplify the notation say that any program in the cluster is identified by a string of the form &lt;code&gt;pid@host&lt;/code&gt; (for example &lt;code&gt;8669@yoda&lt;/code&gt;, which is the editor I'm using in this very moment). To further simplify the management of our cluster say that each program has a name, such as the name of its executable file.&lt;/p&gt;
@@ -48,7 +48,7 @@
 &lt;p&gt;&lt;img alt="Image 08" src="/images/amqp_direct_exchanges/image08.jpg"&gt;&lt;/p&gt;
 &lt;p&gt;If the routing key changes to "program1" the connections become the following&lt;/p&gt;
 &lt;p&gt;&lt;img alt="Image 09" src="/images/amqp_direct_exchanges/image09.jpg"&gt;&lt;/p&gt;
-&lt;h2&gt;Direct exchanges and load balance&lt;/h2&gt;
+&lt;h2 id="direct-exchanges-and-load-balance"&gt;Direct exchanges and load balance&lt;a class="headerlink" href="#direct-exchanges-and-load-balance" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;In the previous section we looked at a smart use of the third of the three configurations explained at the beginning of the post. We can profitably leverage the second one (the "round robin" case) to selectively reach cluster programs while balancing the load. Remember that the main use of a round robin message delivery is indeed to avoid overloading a single component or machine.&lt;/p&gt;
 &lt;p&gt;To balance the load among a set of programs we need each of them to declare a queue and share it with others: in other words we need to declare a queue with a shared name. This is very easy: for each of the properties of our programs a shared queue can be declared simply by naming it with the value of the property itself.&lt;/p&gt;
 &lt;p&gt;For example, declaring a queue named "@host1" creates a queue shared by each program running on host1, while a queue named "program1" is shared among all the programs running the same executable. Even PIDs can be used in this way, but since it is usually not interesting to get the set of all programs on the cluster running with the same pid, there is also no point in defining queues based on them.&lt;/p&gt;
@@ -56,17 +56,17 @@
 &lt;p&gt;The resulting setup is portrayed in the following picture&lt;/p&gt;
 &lt;p&gt;&lt;img alt="Image 10" src="/images/amqp_direct_exchanges/image10.jpg"&gt;&lt;/p&gt;
 &lt;p&gt;Here you can see, for example, that sending a message with the routing key "@host1/rr" makes the message flow into the queue called "@host1", which is shared by all the processes running on that host. Since the queue is shared, messages are not duplicated but delivered in a balanced way. The "/rr" suffix stands for Round Robin and usefully tells apart fanout routing keys from load balance ones.&lt;/p&gt;
-&lt;h2&gt;Conclusions&lt;/h2&gt;
+&lt;h2 id="conclusions"&gt;Conclusions&lt;a class="headerlink" href="#conclusions" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;Well, after all I just explained again and more verbosely the basic RabbitMQ examples, didn't I?&lt;/p&gt;
 &lt;p&gt;Yes. However, I think such considerations can be useful for novices and from time to time it is a good thing for experts to refresh the plain old basic stuff. So this post can be used as a quick memo of the different configurations you can create with an AMQP direct exchange.&lt;/p&gt;
 &lt;p&gt;Stay tuned for other &lt;a href="/categories/rabbitmq/"&gt;RabbitMQ&lt;/a&gt; and &lt;a href="/categories/amqp/"&gt;AMQP&lt;/a&gt; posts!&lt;/p&gt;</content><category term="RabbitMQ"></category><category term="AMQP"></category></entry><entry><title>Postage - a RabbitMQ-based component Python library</title><link href="http://blog.thedigitalcatonline.com/blog/2013/07/25/postage-a-rabbitmq-based-component-python-library/" rel="alternate"></link><published>2013-07-25T15:50:00+01:00</published><updated>2013-07-25T15:50:00+01:00</updated><author><name>Leonardo Giordani</name></author><id>tag:blog.thedigitalcatonline.com,2013-07-25:/blog/2013/07/25/postage-a-rabbitmq-based-component-python-library/</id><summary type="html"></summary><content type="html">&lt;p&gt;&lt;a href="https://github.com/pika/pika"&gt;Pika&lt;/a&gt; is a wonderful pure Python implementation of the AMQP protocol. Using it you can exploit the full power of your RabbitMQ installation from your Python code.&lt;/p&gt;
 &lt;p&gt;When using pika to develop a component-based system I tried to write some code to simplify its use: the result is &lt;a href="https://github.com/lgiordani/postage"&gt;Postage&lt;/a&gt;, a Python library that provides higher level structures such as a message format, components fingerprint, rich producer and consumers.&lt;/p&gt;
 &lt;p&gt;Most notably it provides a handler mechanism for consumers that makes message processing a breeze.&lt;/p&gt;
 &lt;p&gt;Postage is freely available under the GPL2. It is based on the pika BlockingConnection since I had no experience with other adapters. If you want to hack it, feel free to &lt;a href="https://github.com/lgiordani/postage"&gt;fork it on Github&lt;/a&gt; and submit a pull request.&lt;/p&gt;
-&lt;h2&gt;A simple ping example&lt;/h2&gt;
+&lt;h2 id="a-simple-ping-example"&gt;A simple ping example&lt;a class="headerlink" href="#a-simple-ping-example" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;I'll describe here a very simple example of a producer/consumer system using Postage; I'll write a server that answers ping messages and a program that sends them. First I will implement a simple server that receives ping messages without answering, to introduce the reader to the base structures, then I will evolve it.&lt;/p&gt;
 &lt;p&gt;To execute the program you need a working RabbitMQ system, check the RabbitMQ documentation to install and run it. Postage assumes that your system is configured with the standard values (a "/" virtualhost, "guest" user and password). If not check &lt;a href="https://github.com/lgiordani/postage#environment-variables"&gt;this paragraph&lt;/a&gt; of the documentation.&lt;/p&gt;
-&lt;h4&gt;Setting up the exchange&lt;/h4&gt;
+&lt;h4 id="setting-up-the-exchange"&gt;Setting up the exchange&lt;a class="headerlink" href="#setting-up-the-exchange" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
 &lt;p&gt;Put the following code in a &lt;code&gt;facilities.py&lt;/code&gt; file:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;postage&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;messaging&lt;/span&gt;
 
@@ -81,7 +81,7 @@
 
 
 &lt;p&gt;This imports the messaging part of Postage and declares a &lt;code&gt;PingExchange&lt;/code&gt;, which is a simple direct RabbitMQ exchange, which name is &lt;code&gt;ping-exchange&lt;/code&gt;. Remember that in a AMQP system exchanges are unique by name and virtualhost, i.e. given a virtualhost the name of the exchange uniquely identifies it.&lt;/p&gt;
-&lt;h4&gt;Setting up the producer&lt;/h4&gt;
+&lt;h4 id="setting-up-the-producer"&gt;Setting up the producer&lt;a class="headerlink" href="#setting-up-the-producer" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
 &lt;p&gt;Just below the exchange object we declare a producer, a class that can send a given set of messages:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;PingProducer&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;messaging&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;GenericProducer&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
     &lt;span class="n"&gt;eks&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[(&lt;/span&gt;&lt;span class="n"&gt;PingExchange&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;ping_rk&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)]&lt;/span&gt;
@@ -94,7 +94,7 @@
 &lt;p&gt;First of all our producer inherits from &lt;code&gt;GenericProducer&lt;/code&gt;, a rich object that manages low-level stuff such as connection to the AMQP broker (RabbitMQ), exchange declaration and message creation.&lt;/p&gt;
 &lt;p&gt;The &lt;code&gt;eks&lt;/code&gt; class attribute is a list of exchange/routing key couples (tuples); we list here all the exchanges that will receive our messages when the object will send them and for each exchange we give a routing key. Recall that routing keys are used to label messages so that the exchange can route them to the subscribing queues (according to the rules of the exchange type). Here, we declare that the messages of our producer are going to be sent to the &lt;code&gt;PingExchange&lt;/code&gt; exchange with the &lt;code&gt;ping_rk&lt;/code&gt; routing key.&lt;/p&gt;
 &lt;p&gt;Then we declare a &lt;code&gt;build_message_ping()&lt;/code&gt; method, which simply builds a new message and returns it. This latter is a command message that in Postage lingo means a message that contains an action the receiver shall execute (a fire-and-forget call).&lt;/p&gt;
-&lt;h4&gt;The producer&lt;/h4&gt;
+&lt;h4 id="the-producer"&gt;The producer&lt;a class="headerlink" href="#the-producer" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
 &lt;p&gt;The program that sends ping messages is very straightforward; it shall declare a message producer and use it to send the message. Create the &lt;code&gt;send_ping.py&lt;/code&gt; file and write the following code&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;postage&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;messaging&lt;/span&gt;
 &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;facilities&lt;/span&gt;
@@ -111,7 +111,7 @@
 
 &lt;p&gt;The &lt;code&gt;PingProducer&lt;/code&gt; we declared in &lt;code&gt;facilities.py&lt;/code&gt; is instanced, and its &lt;code&gt;message_ping()&lt;/code&gt; method is invoked.
 If you review the above paragraph you will notice that you never defined a &lt;code&gt;message_ping()&lt;/code&gt; method; this is automatically implemented by the &lt;code&gt;GenericProducer&lt;/code&gt; class from the &lt;code&gt;build_message_ping()&lt;/code&gt; method. The class performs many actions under the hood: it executes some code to set up the correct RabbitMQ structures, calls your method to get the actual message data, attaches the fingerprint to the message, and serializes the message data. Eventually, the producer sends the message to the exchange defined in the class (&lt;code&gt;PingExchange&lt;/code&gt;) with the linked routing key (&lt;code&gt;ping_rk&lt;/code&gt;).&lt;/p&gt;
-&lt;h4&gt;The server program&lt;/h4&gt;
+&lt;h4 id="the-server-program"&gt;The server program&lt;a class="headerlink" href="#the-server-program" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
 &lt;p&gt;Now we will write a component that receives ping command messages and performs some action accordingly. Open a &lt;code&gt;receive_ping.py&lt;/code&gt; file and write the following code&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;postage&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;messaging&lt;/span&gt;
 &lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;postage&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;microthreads&lt;/span&gt;
@@ -149,7 +149,7 @@ If you review the above paragraph you will notice that you never defined a &lt;c
 
 
 &lt;p&gt;This code creates a scheduler and adds the receiver, which is a &lt;code&gt;microthreads.Microthread&lt;/code&gt;, then starts the execution loop.&lt;/p&gt;
-&lt;h4&gt;Execution&lt;/h4&gt;
+&lt;h4 id="execution"&gt;Execution&lt;a class="headerlink" href="#execution" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
 &lt;p&gt;Open two different shells on your system and execute the receiver in the first&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ python receive_ping.py 
 postage.messaging: global_vhost set to /
@@ -171,7 +171,7 @@ Got a ping!
 
 
 &lt;p&gt;which is what we expected. You can stop the receiver with &lt;code&gt;Ctrl-C&lt;/code&gt;, this kills the Pika connection somehow abruptly, but I am not going to implement in this article a good signal management.&lt;/p&gt;
-&lt;h4&gt;Adding message parameters&lt;/h4&gt;
+&lt;h4 id="adding-message-parameters"&gt;Adding message parameters&lt;a class="headerlink" href="#adding-message-parameters" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
 &lt;p&gt;Now we want to add a parameter to the message we send, namely the time at which the message was sent. To do this we make some changes to &lt;code&gt;facilities.py&lt;/code&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;time&lt;/span&gt;
 
@@ -218,7 +218,7 @@ Got a timed ping! Time is 1374826309.06
 &lt;/pre&gt;&lt;/div&gt;
 
 
-&lt;h4&gt;Adding call parameters&lt;/h4&gt;
+&lt;h4 id="adding-call-parameters"&gt;Adding call parameters&lt;a class="headerlink" href="#adding-call-parameters" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
 &lt;p&gt;If you want to allow the user to pass a parameter when sending the message, you just need to accept and use it in your &lt;code&gt;build_message_NAME()&lt;/code&gt; method. In &lt;code&gt;facilities.py&lt;/code&gt; add:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;PingProducer&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;messaging&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;GenericProducer&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
     &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="o"&gt;...&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
@@ -253,7 +253,7 @@ Got a custom ping! The custom value is [u&amp;#39;Just ping me&amp;#39;, 1]
 
 
 &lt;p&gt;Pay attention to JSON, which does not tell apart tuples from lists.&lt;/p&gt;
-&lt;h4&gt;RPC calls to the rescue&lt;/h4&gt;
+&lt;h4 id="rpc-calls-to-the-rescue"&gt;RPC calls to the rescue&lt;a class="headerlink" href="#rpc-calls-to-the-rescue" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
 &lt;p&gt;The ping mechanism is not really working until the server answers the message. To answer incoming messages we can implement two different strategies; the first is the asynchronous one, which leverages fire-and-forget messages, the second uses RPC calls. While the first is simpler to implement at a system level (you just send messages as usual), it is complex on the user side since it requires the programmer to structure the whole program in an asynchronous way. The second approach, resembling usual function calls, is easier to understand and include in a program; it has many downsides and caveats, however, so do not abuse it.&lt;/p&gt;
 &lt;p&gt;For the sake of simplicity let us implement a RPC version of the ping mechanism. First we add a specific message to the producer&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;PingProducer&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;messaging&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;GenericProducer&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
@@ -289,7 +289,7 @@ Got a custom ping! The custom value is [u&amp;#39;Just ping me&amp;#39;, 1]
 &lt;p&gt;The first part is straightforward: you call the RPC just like a local function. What you get is always a &lt;code&gt;MessageResult&lt;/code&gt; object or derived (&lt;code&gt;MessageResultError&lt;/code&gt; or &lt;code&gt;MessageResultException&lt;/code&gt;). Be warned that the API here is awkward, to be indulgent. I wrote it, but probably the good-coder-in-me (TM) was on holiday that time; &lt;a href="https://github.com/lgiordani/postage/issues/1"&gt;I am going to fix it&lt;/a&gt; in a short time.&lt;/p&gt;
 &lt;p&gt;Anyway, you have to check the answer to be sure that the call was successful; never, never, never trust RPC calls, network is in the middle and everything can happen (yes, even someone tripping over the network cable).&lt;/p&gt;
 &lt;p&gt;If the receiver is unreachable the producer waits some time and then tries the call again: by default it waits 30 seconds and tries again 4 times; after all that it returns a &lt;code&gt;MessageResultException&lt;/code&gt; containing a &lt;code&gt;TimeoutError&lt;/code&gt; exception. You can try it changing the decorator of &lt;code&gt;msg_rpc_ping()&lt;/code&gt; to match &lt;code&gt;ping_other&lt;/code&gt; (or whatever) instead of &lt;code&gt;ping&lt;/code&gt;. After two minutes, you will get your exception. You can easily customize these values by setting the value of &lt;code&gt;GenericProducer.rpc_timeout&lt;/code&gt; and &lt;code&gt;GenericProducer.max_retry&lt;/code&gt;.&lt;/p&gt;
-&lt;h4&gt;Handlers unleashed&lt;/h4&gt;
+&lt;h4 id="handlers-unleashed"&gt;Handlers unleashed&lt;a class="headerlink" href="#handlers-unleashed" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
 &lt;p&gt;Message handlers are powerful, but there is a couple of tricks more in Postage. The first one is &lt;code&gt;MessageHandlerFullBody&lt;/code&gt; that you can use exactly like &lt;code&gt;MessageHandler&lt;/code&gt;; the difference is that the decorated method does not receive the message content (the &lt;code&gt;content&lt;/code&gt; key of the body) but the full body. You can leverage this to access the underlying message structure: this allows you to access the fingerprint included in the message, which contains precious information about the process that sent the message. Let's show how it works; add a new handler to the receiver:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;PingReceiver&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;messaging&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;MessageProcessor&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
     &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="o"&gt;...&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
@@ -334,7 +334,7 @@ Got a ping!
 
 
 &lt;p&gt;Leveraging the full body access and the class handlers you can write advanced filters on incoming messages, and add interesting features like runtime configuration of your handlers or configuration through incoming messages.&lt;/p&gt;
-&lt;h2&gt;Full code&lt;/h2&gt;
+&lt;h2 id="full-code"&gt;Full code&lt;a class="headerlink" href="#full-code" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;This is the full code of the discussed examples.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;time&lt;/span&gt;
 &lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;postage&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;messaging&lt;/span&gt;
@@ -464,7 +464,7 @@ Got a ping!
 
 
 &lt;p&gt;&lt;a href="/code/postage/receive_ping.py"&gt;source code&lt;/a&gt;&lt;/p&gt;
-&lt;h2&gt;Conclusion&lt;/h2&gt;
+&lt;h2 id="conclusion"&gt;Conclusion&lt;a class="headerlink" href="#conclusion" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;Postage aims to make it simple to write components in Python to fully exploit the power of RabbitMQ. It is highly customizable, and its handler mechanism keeps the code compact.&lt;/p&gt;
 &lt;p&gt;Even if the API is already in its third implementation, you can see that it is still not perfect so stay tuned for upcoming versions. Feel free to fork the project, to submit issues or pull request, or to contact me for any question.&lt;/p&gt;
 &lt;p&gt;Oh, did I remember to tell you to never trust RPC calls? =)&lt;/p&gt;</content><category term="Python"></category><category term="Pika"></category><category term="RabbitMQ"></category><category term="Postage"></category></entry></feed>

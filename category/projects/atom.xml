@@ -3,7 +3,7 @@
 &lt;p&gt;Managing the version number of a project is not easy. Not only you need to think about the versioning scheme and what part of the version to increase (see &lt;a href="/blog/2013/03/20/versioning-an-underrated-discipline/"&gt;this post&lt;/a&gt; for some tips on this matter), but you also need to remember in which files you put the actual version number, and, depending on your workflow, to correctly manage the version control system commits.&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Punch&lt;/strong&gt; is a small tool that aims to simplify the latter parts, that is the management of the version number update process. Punch is a young project but the underlying structure should be flexible enough to allow the implementation of advanced usage cases that may arise in the future.&lt;/p&gt;
 &lt;p&gt;&lt;img alt="Punch logo" src="/images/punch/icon_400x400.png"&gt;&lt;/p&gt;
-&lt;h4&gt;Features&lt;/h4&gt;
+&lt;h4 id="features"&gt;Features&lt;a class="headerlink" href="#features" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
 &lt;ul&gt;
 &lt;li&gt;Written in Python, but manages every kind of text file&lt;/li&gt;
 &lt;li&gt;May implement different versioning schemas&lt;/li&gt;
@@ -15,14 +15,14 @@
 &lt;li&gt;May optionally create annotated commits&lt;/li&gt;
 &lt;li&gt;Can simulate the version upgrade and show what is going to happen&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h4&gt;Installation&lt;/h4&gt;
+&lt;h4 id="installation"&gt;Installation&lt;a class="headerlink" href="#installation" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
 &lt;p&gt;You may install Punch in your virtual environment (or in your system) directly from PyPI&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;pip install punch.py
 &lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;and you will have the &lt;code&gt;punch&lt;/code&gt; executable available.&lt;/p&gt;
-&lt;h4&gt;Useful links&lt;/h4&gt;
+&lt;h4 id="useful-links"&gt;Useful links&lt;a class="headerlink" href="#useful-links" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
 &lt;ul&gt;
 &lt;li&gt;Punch official documentation: &lt;a href="https://punch.readthedocs.io/en/latest/"&gt;https://punch.readthedocs.io/en/latest/&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;Official repository &lt;a href="https://github.com/lgiordani/punch"&gt;https://github.com/lgiordani/punch&lt;/a&gt;&lt;/li&gt;
@@ -32,10 +32,10 @@
 &lt;p&gt;When using pika to develop a component-based system I tried to write some code to simplify its use: the result is &lt;a href="https://github.com/lgiordani/postage"&gt;Postage&lt;/a&gt;, a Python library that provides higher level structures such as a message format, components fingerprint, rich producer and consumers.&lt;/p&gt;
 &lt;p&gt;Most notably it provides a handler mechanism for consumers that makes message processing a breeze.&lt;/p&gt;
 &lt;p&gt;Postage is freely available under the GPL2. It is based on the pika BlockingConnection since I had no experience with other adapters. If you want to hack it, feel free to &lt;a href="https://github.com/lgiordani/postage"&gt;fork it on Github&lt;/a&gt; and submit a pull request.&lt;/p&gt;
-&lt;h2&gt;A simple ping example&lt;/h2&gt;
+&lt;h2 id="a-simple-ping-example"&gt;A simple ping example&lt;a class="headerlink" href="#a-simple-ping-example" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;I'll describe here a very simple example of a producer/consumer system using Postage; I'll write a server that answers ping messages and a program that sends them. First I will implement a simple server that receives ping messages without answering, to introduce the reader to the base structures, then I will evolve it.&lt;/p&gt;
 &lt;p&gt;To execute the program you need a working RabbitMQ system, check the RabbitMQ documentation to install and run it. Postage assumes that your system is configured with the standard values (a "/" virtualhost, "guest" user and password). If not check &lt;a href="https://github.com/lgiordani/postage#environment-variables"&gt;this paragraph&lt;/a&gt; of the documentation.&lt;/p&gt;
-&lt;h4&gt;Setting up the exchange&lt;/h4&gt;
+&lt;h4 id="setting-up-the-exchange"&gt;Setting up the exchange&lt;a class="headerlink" href="#setting-up-the-exchange" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
 &lt;p&gt;Put the following code in a &lt;code&gt;facilities.py&lt;/code&gt; file:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;postage&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;messaging&lt;/span&gt;
 
@@ -50,7 +50,7 @@
 
 
 &lt;p&gt;This imports the messaging part of Postage and declares a &lt;code&gt;PingExchange&lt;/code&gt;, which is a simple direct RabbitMQ exchange, which name is &lt;code&gt;ping-exchange&lt;/code&gt;. Remember that in a AMQP system exchanges are unique by name and virtualhost, i.e. given a virtualhost the name of the exchange uniquely identifies it.&lt;/p&gt;
-&lt;h4&gt;Setting up the producer&lt;/h4&gt;
+&lt;h4 id="setting-up-the-producer"&gt;Setting up the producer&lt;a class="headerlink" href="#setting-up-the-producer" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
 &lt;p&gt;Just below the exchange object we declare a producer, a class that can send a given set of messages:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;PingProducer&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;messaging&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;GenericProducer&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
     &lt;span class="n"&gt;eks&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[(&lt;/span&gt;&lt;span class="n"&gt;PingExchange&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;ping_rk&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)]&lt;/span&gt;
@@ -63,7 +63,7 @@
 &lt;p&gt;First of all our producer inherits from &lt;code&gt;GenericProducer&lt;/code&gt;, a rich object that manages low-level stuff such as connection to the AMQP broker (RabbitMQ), exchange declaration and message creation.&lt;/p&gt;
 &lt;p&gt;The &lt;code&gt;eks&lt;/code&gt; class attribute is a list of exchange/routing key couples (tuples); we list here all the exchanges that will receive our messages when the object will send them and for each exchange we give a routing key. Recall that routing keys are used to label messages so that the exchange can route them to the subscribing queues (according to the rules of the exchange type). Here, we declare that the messages of our producer are going to be sent to the &lt;code&gt;PingExchange&lt;/code&gt; exchange with the &lt;code&gt;ping_rk&lt;/code&gt; routing key.&lt;/p&gt;
 &lt;p&gt;Then we declare a &lt;code&gt;build_message_ping()&lt;/code&gt; method, which simply builds a new message and returns it. This latter is a command message that in Postage lingo means a message that contains an action the receiver shall execute (a fire-and-forget call).&lt;/p&gt;
-&lt;h4&gt;The producer&lt;/h4&gt;
+&lt;h4 id="the-producer"&gt;The producer&lt;a class="headerlink" href="#the-producer" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
 &lt;p&gt;The program that sends ping messages is very straightforward; it shall declare a message producer and use it to send the message. Create the &lt;code&gt;send_ping.py&lt;/code&gt; file and write the following code&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;postage&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;messaging&lt;/span&gt;
 &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;facilities&lt;/span&gt;
@@ -80,7 +80,7 @@
 
 &lt;p&gt;The &lt;code&gt;PingProducer&lt;/code&gt; we declared in &lt;code&gt;facilities.py&lt;/code&gt; is instanced, and its &lt;code&gt;message_ping()&lt;/code&gt; method is invoked.
 If you review the above paragraph you will notice that you never defined a &lt;code&gt;message_ping()&lt;/code&gt; method; this is automatically implemented by the &lt;code&gt;GenericProducer&lt;/code&gt; class from the &lt;code&gt;build_message_ping()&lt;/code&gt; method. The class performs many actions under the hood: it executes some code to set up the correct RabbitMQ structures, calls your method to get the actual message data, attaches the fingerprint to the message, and serializes the message data. Eventually, the producer sends the message to the exchange defined in the class (&lt;code&gt;PingExchange&lt;/code&gt;) with the linked routing key (&lt;code&gt;ping_rk&lt;/code&gt;).&lt;/p&gt;
-&lt;h4&gt;The server program&lt;/h4&gt;
+&lt;h4 id="the-server-program"&gt;The server program&lt;a class="headerlink" href="#the-server-program" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
 &lt;p&gt;Now we will write a component that receives ping command messages and performs some action accordingly. Open a &lt;code&gt;receive_ping.py&lt;/code&gt; file and write the following code&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;postage&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;messaging&lt;/span&gt;
 &lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;postage&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;microthreads&lt;/span&gt;
@@ -118,7 +118,7 @@ If you review the above paragraph you will notice that you never defined a &lt;c
 
 
 &lt;p&gt;This code creates a scheduler and adds the receiver, which is a &lt;code&gt;microthreads.Microthread&lt;/code&gt;, then starts the execution loop.&lt;/p&gt;
-&lt;h4&gt;Execution&lt;/h4&gt;
+&lt;h4 id="execution"&gt;Execution&lt;a class="headerlink" href="#execution" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
 &lt;p&gt;Open two different shells on your system and execute the receiver in the first&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ python receive_ping.py 
 postage.messaging: global_vhost set to /
@@ -140,7 +140,7 @@ Got a ping!
 
 
 &lt;p&gt;which is what we expected. You can stop the receiver with &lt;code&gt;Ctrl-C&lt;/code&gt;, this kills the Pika connection somehow abruptly, but I am not going to implement in this article a good signal management.&lt;/p&gt;
-&lt;h4&gt;Adding message parameters&lt;/h4&gt;
+&lt;h4 id="adding-message-parameters"&gt;Adding message parameters&lt;a class="headerlink" href="#adding-message-parameters" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
 &lt;p&gt;Now we want to add a parameter to the message we send, namely the time at which the message was sent. To do this we make some changes to &lt;code&gt;facilities.py&lt;/code&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;time&lt;/span&gt;
 
@@ -187,7 +187,7 @@ Got a timed ping! Time is 1374826309.06
 &lt;/pre&gt;&lt;/div&gt;
 
 
-&lt;h4&gt;Adding call parameters&lt;/h4&gt;
+&lt;h4 id="adding-call-parameters"&gt;Adding call parameters&lt;a class="headerlink" href="#adding-call-parameters" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
 &lt;p&gt;If you want to allow the user to pass a parameter when sending the message, you just need to accept and use it in your &lt;code&gt;build_message_NAME()&lt;/code&gt; method. In &lt;code&gt;facilities.py&lt;/code&gt; add:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;PingProducer&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;messaging&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;GenericProducer&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
     &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="o"&gt;...&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
@@ -222,7 +222,7 @@ Got a custom ping! The custom value is [u&amp;#39;Just ping me&amp;#39;, 1]
 
 
 &lt;p&gt;Pay attention to JSON, which does not tell apart tuples from lists.&lt;/p&gt;
-&lt;h4&gt;RPC calls to the rescue&lt;/h4&gt;
+&lt;h4 id="rpc-calls-to-the-rescue"&gt;RPC calls to the rescue&lt;a class="headerlink" href="#rpc-calls-to-the-rescue" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
 &lt;p&gt;The ping mechanism is not really working until the server answers the message. To answer incoming messages we can implement two different strategies; the first is the asynchronous one, which leverages fire-and-forget messages, the second uses RPC calls. While the first is simpler to implement at a system level (you just send messages as usual), it is complex on the user side since it requires the programmer to structure the whole program in an asynchronous way. The second approach, resembling usual function calls, is easier to understand and include in a program; it has many downsides and caveats, however, so do not abuse it.&lt;/p&gt;
 &lt;p&gt;For the sake of simplicity let us implement a RPC version of the ping mechanism. First we add a specific message to the producer&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;PingProducer&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;messaging&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;GenericProducer&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
@@ -258,7 +258,7 @@ Got a custom ping! The custom value is [u&amp;#39;Just ping me&amp;#39;, 1]
 &lt;p&gt;The first part is straightforward: you call the RPC just like a local function. What you get is always a &lt;code&gt;MessageResult&lt;/code&gt; object or derived (&lt;code&gt;MessageResultError&lt;/code&gt; or &lt;code&gt;MessageResultException&lt;/code&gt;). Be warned that the API here is awkward, to be indulgent. I wrote it, but probably the good-coder-in-me (TM) was on holiday that time; &lt;a href="https://github.com/lgiordani/postage/issues/1"&gt;I am going to fix it&lt;/a&gt; in a short time.&lt;/p&gt;
 &lt;p&gt;Anyway, you have to check the answer to be sure that the call was successful; never, never, never trust RPC calls, network is in the middle and everything can happen (yes, even someone tripping over the network cable).&lt;/p&gt;
 &lt;p&gt;If the receiver is unreachable the producer waits some time and then tries the call again: by default it waits 30 seconds and tries again 4 times; after all that it returns a &lt;code&gt;MessageResultException&lt;/code&gt; containing a &lt;code&gt;TimeoutError&lt;/code&gt; exception. You can try it changing the decorator of &lt;code&gt;msg_rpc_ping()&lt;/code&gt; to match &lt;code&gt;ping_other&lt;/code&gt; (or whatever) instead of &lt;code&gt;ping&lt;/code&gt;. After two minutes, you will get your exception. You can easily customize these values by setting the value of &lt;code&gt;GenericProducer.rpc_timeout&lt;/code&gt; and &lt;code&gt;GenericProducer.max_retry&lt;/code&gt;.&lt;/p&gt;
-&lt;h4&gt;Handlers unleashed&lt;/h4&gt;
+&lt;h4 id="handlers-unleashed"&gt;Handlers unleashed&lt;a class="headerlink" href="#handlers-unleashed" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
 &lt;p&gt;Message handlers are powerful, but there is a couple of tricks more in Postage. The first one is &lt;code&gt;MessageHandlerFullBody&lt;/code&gt; that you can use exactly like &lt;code&gt;MessageHandler&lt;/code&gt;; the difference is that the decorated method does not receive the message content (the &lt;code&gt;content&lt;/code&gt; key of the body) but the full body. You can leverage this to access the underlying message structure: this allows you to access the fingerprint included in the message, which contains precious information about the process that sent the message. Let's show how it works; add a new handler to the receiver:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;PingReceiver&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;messaging&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;MessageProcessor&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
     &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="o"&gt;...&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
@@ -303,7 +303,7 @@ Got a ping!
 
 
 &lt;p&gt;Leveraging the full body access and the class handlers you can write advanced filters on incoming messages, and add interesting features like runtime configuration of your handlers or configuration through incoming messages.&lt;/p&gt;
-&lt;h2&gt;Full code&lt;/h2&gt;
+&lt;h2 id="full-code"&gt;Full code&lt;a class="headerlink" href="#full-code" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;This is the full code of the discussed examples.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;time&lt;/span&gt;
 &lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;postage&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;messaging&lt;/span&gt;
@@ -433,7 +433,7 @@ Got a ping!
 
 
 &lt;p&gt;&lt;a href="/code/postage/receive_ping.py"&gt;source code&lt;/a&gt;&lt;/p&gt;
-&lt;h2&gt;Conclusion&lt;/h2&gt;
+&lt;h2 id="conclusion"&gt;Conclusion&lt;a class="headerlink" href="#conclusion" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;Postage aims to make it simple to write components in Python to fully exploit the power of RabbitMQ. It is highly customizable, and its handler mechanism keeps the code compact.&lt;/p&gt;
 &lt;p&gt;Even if the API is already in its third implementation, you can see that it is still not perfect so stay tuned for upcoming versions. Feel free to fork the project, to submit issues or pull request, or to contact me for any question.&lt;/p&gt;
 &lt;p&gt;Oh, did I remember to tell you to never trust RPC calls? =)&lt;/p&gt;</content><category term="Python"></category><category term="Pika"></category><category term="RabbitMQ"></category><category term="Postage"></category></entry></feed>

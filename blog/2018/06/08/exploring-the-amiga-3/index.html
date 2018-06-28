@@ -71,7 +71,7 @@
         </section>
 
         <section id="content">
-            <h1>Exec and the vector table</h1>
+            <h1 id="exec-and-the-vector-table">Exec and the vector table<a class="headerlink" href="#exec-and-the-vector-table" title="Permanent link">&para;</a></h1>
 <p>The Exec library is the base library of the Amiga system. This library is loaded in memory at boot time, and it is always open and available. Once loaded, it has the same structure of any other library, that is a prefix containing the jump table in reverse order, then the actual code.</p>
 <p>The trick here is that Exec is the library used to load in memory other libraries, so the function that creates the structure in memory of a given library is contained here. To install Exec in memory, thus, we need to use a function which is part of the library itself.</p>
 <p>This is one of the powers of the Assembly language. The property of treating the code as if it was pure data is called homoiconicity, and is something that can be rarely found in other languages. Lisp is a good example of a higher level homoiconic language.</p>
@@ -146,7 +146,7 @@
 
 <p>where <code>&lt;vectors_offset&gt;</code> is a hardcoded offset (as the displacement of <code>vectors</code> relative to <code>setup</code> is known) and <code>setup</code> is the effective address that the <code>setup</code> routine has at runtime.</p>
 <p>This mechanism creates then a library that can install other libraries through a given function, but that can at the same time install itself.</p>
-<h1>The Kickstart vector table</h1>
+<h1 id="the-kickstart-vector-table">The Kickstart vector table<a class="headerlink" href="#the-kickstart-vector-table" title="Permanent link">&para;</a></h1>
 <p>An actual example of the vector table mechanism can be found in the Kickstart code. Kickstart is the BIOS of the Amiga system, and is loaded at boot time either from disk (Amiga 1000 and some Amiga 3000) or from a ROM.</p>
 <p>The code of Kickstart 1.3 can be found <a href="https://www.romcollector.com/emulators-firmware-i-29.html">here</a> and you can easily disassemble it with vdasm</p>
 <div class="highlight"><pre><span></span>vda68k Kickstart1.3.rom &gt; Kickstart1.3.asm
@@ -158,7 +158,7 @@
 <p>When you disassemble some binary code, however, you don't get some nice source code written in a high level language. Well, not with a simple disassembler like vdasm, anyway. What you get is the one to one interpretation of the binary values according to the processor's conventions, and this includes parts of the binary file that are pure data. The disassembler has no way to know if some binary number represents an instruction or a pure number. Moreover, there is no trace of the original labels used by the author(s) of the code, as they are lost in the translation to machine language, when they are converted to pure addresses.</p>
 <p>The practice of understanding how a system works starting from the pure implementation is called "reversing", and personally I consider it one of the most fascinating tasks a programmer can face.</p>
 <p>The purpose of the present investigation is to find the Kickstart 1.3 vector table, and with that to find the position and implementation of the Exec functions. Well, let's start.</p>
-<h2>Step 1</h2>
+<h2 id="step-1">Step 1<a class="headerlink" href="#step-1" title="Permanent link">&para;</a></h2>
 <p>I know that <code>MakeFunctions</code> is used to create in memory the structure of Exec itself. So I know that somewhere that function is invoked on the code that I am studying.</p>
 <p>Since one of the parameters of the <code>MakeFunctions</code> routine is the name of the library a good starting point might be a string containing <code>exec.library</code> (which is the standard name of this library in the Amiga system). Once I find that string I can look for a function call that uses its address as a parameter.</p>
 <p>The byte sequence that represents that string (using ASCII) is <code>65 78 65 63 2E 6C 69 62 72 61 72 79</code>. In Kickstart 1.3 the offset of this string is <code>0x00a8</code>.</p>
@@ -174,7 +174,7 @@
 <p>When looking for strings it's better to use a hexadecimal editor that can show and search in the ASCII representation of the binary code.</p>
 <p><img alt="Search exec.library string" src="/images/exploring-the-amiga-3/search-exec-library-string.png"></p>
 <p>We know that Kickstart is loaded at address 0xfc0000 (Amiga System Programmer's Guide, page 67), so all the 16-bit addresses are relative to 0x00fc. The library name pointer is then <code>00fc 00a8</code>.</p>
-<h2>Step 2</h2>
+<h2 id="step-2">Step 2<a class="headerlink" href="#step-2" title="Permanent link">&para;</a></h2>
 <p>In the Amiga system all libraries have a specific structure when loaded in memory. Apart from the prefixed jump table, the library code itself has a fixed structure that allows us to read and use it.</p>
 <p>First of all all libraries in memory are nodes of a linked list, so we expect to find the structure of the node itself. Then, inside the node, we expect to find the actual library structure.</p>
 <p>The include file <code>include_i/exec/nodes.i</code> tells us that a standard linked list node has the following structure</p>
@@ -229,7 +229,7 @@
 
 <p>From this I know that the version of <code>exec</code> contained in this Kickstart is 34 (<code>0x22</code>) revision 2 (<code>0x02</code>), and this is confirmed byt the ID string at address <code>0xfc0018</code>, which is <code>exec 34.2 (28 Oct 1987)</code>.</p>
 <p><img alt="Exec version string" src="/images/exploring-the-amiga-3/exec-version-string.png"></p>
-<h2>Step 3</h2>
+<h2 id="step-3">Step 3<a class="headerlink" href="#step-3" title="Permanent link">&para;</a></h2>
 <p>What we are really interested in, at this point, is where the address of this structure is mentioned in the code, as it will be used to create the library structure. Since after creating the library structure the <code>MakeFunctions</code> routine will be invoked we can know from here where this latter is defined.</p>
 <p>The structure is at address <code>0x030c</code> and we are looking for and instruction like <code>lea 0x30c(pc),ax</code>, where <code>ax</code> is one of the address registers <code>a0</code>-<code>a7</code>. Loading the address of a table in a register is the standard way to loop on the table to modify it or to copy the bytes somewhere. </p>
 <p>(The 68000 does not allow you to execute a MOVE instruction with a destination relative to the program counter (PC). In the view of the 68000 designers, code should not patch itself. If you must change a table in the middle of code, you must point to it with an instruction like LEA TABLE(PC),An and then alter it through An. (Self-modifying code is especially bad for 68000 programs that may someday run on the 68020, because the 68020's instruction cache normally assumes that code is pure.) from http://www.easy68k.com/paulrsm/doc/trick68k.htm)</p>
@@ -262,7 +262,7 @@
 
 <p>where <code>address</code> is the address where the jump table will be constructed, <code>vectors</code> is a table that lists the function addresses (the onewe are looking for) and <code>offset</code> tells the function if the function addresses are absolute (if value is <code>0</code>) or relative (in which case offset is the base for the displacement). The list of addresses has to be -1-terminated (<code>0xffff</code>).</p>
 <p>So the first line stores in <code>a0</code> the content of <code>a6</code>, which is the ExecBase address. This is where we want to install the library. The second line loads the address of the vectors table in <code>a1</code> and the same value is stored in <code>a2</code>. Then the code branches to the subroutine at <code>0x15b2</code> which at this point we know is the address of <code>MakeFunctions</code>.</p>
-<h2>Step 4</h2>
+<h2 id="step-4">Step 4<a class="headerlink" href="#step-4" title="Permanent link">&para;</a></h2>
 <p>We extracted two useful information from this code. First, the vector table is at address <code>0x1a7c</code>, and second the <code>MakeFunctions</code> subroutine is at address <code>0x15b2</code>. This latter will be useful to double check the content of the vector table.</p>
 <p>After <code>MakeFunctions</code> has been executed the code returns and the next instruction stores the final size of the jump table 16 bytes after the address contained in <code>a6</code>. With the help of the structures shown above we know that at that offset we can find the <code>LIB_NEGSIZE</code> field, that contains the size of the jump table (number of bytes before the library).</p>
 <p>It's time to check if what we found is correct. There should be a table at address <code>0x1a7c</code> that contains function addresses in the order listed by the include file <code>include_i/exec/exec_lib.i</code>. As <code>MakeFunctions</code> in that file is listed at the 11th place we can check if the table is consistent. That address should point a function at <code>0x15b2</code>, according to the previous code.</p>
@@ -289,15 +289,15 @@
 
 <p>The file <code>include_i/exec/exec_lib.i</code> doesn't contain the first 4 reserved vectors (the functions <code>Open</code>, <code>Close</code>, <code>Expunge</code>, and the reserved space), so considering that those are in the vector table we should check the 15th, were we find <code>0xfb36</code>. This is an offset relative to the beginning of the table, so the function is at <code>0x1a7c + 0xfb36 = 0x15b2</code> (addresses are 16 bits numbers), as we already discovered.</p>
 <p>This shows that our investigation is correct. The Kickstart 1.3 vector table is at address <code>0x1a7c</code> and from there we can reach and analyse all the functions contained in the base Amiga library.</p>
-<h1>Resources</h1>
+<h1 id="resources">Resources<a class="headerlink" href="#resources" title="Permanent link">&para;</a></h1>
 <ul>
 <li>Amiga System Programmers Guide, Abacus (<a href="https://archive.org/details/Amiga_System_Programmers_Guide_1988_Abacus">pdf here</a>)</li>
 <li><a href="http://amigadev.elowar.com">AmigaOS Developer Docs</a></li>
 <li>Amiga Forever package sold by Cloanto <a href="www.amigaforever.com">here</a></li>
 </ul>
-<h1>Updates</h1>
+<h1 id="updates">Updates<a class="headerlink" href="#updates" title="Permanent link">&para;</a></h1>
 <p>2018-06-23: As <a href="https://new.reddit.com/user/Malor">Malor</a> pointed out on Reddit (<a href="https://new.reddit.com/r/programming/comments/8pkgk0/exploring_the_amiga_part_1/e0cifax">here</a>) there is no need to own the original hardware, as licenses are still sold by Cloanto. Thanks Malor!</p>
-<h1>Feedback</h1>
+<h1 id="feedback">Feedback<a class="headerlink" href="#feedback" title="Permanent link">&para;</a></h1>
 <p>Feel free to reach me on <a href="https://twitter.com/thedigicat">Twitter</a> if you have questions. The <a href="http://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues">GitHub issues</a> page is the best place to submit corrections.</p>
         </section>
 

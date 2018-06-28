@@ -70,14 +70,14 @@
         <section id="content">
             <p>In the <a href="/blog/2016/03/06/python-mocks-a-gentle-introduction-part-1">first post</a> I introduced you to Python mocks, objects that can imitate other objects and work as placeholders, replacing external systems during unit testing. I described the basic behaviour of mock objects, the <code>return_value</code> and <code>side_effect</code> attributes, and the <code>assert_called_with()</code> method.</p>
 <p>In this post I will briefly review the remaining <code>assert_*</code> methods and some interesting attributes that allow to check the calls received by the mock object. Then I will introduce and exemplify patching, which is a very important topic in testing.</p>
-<h2>Other assertions and attributes</h2>
+<h2 id="other-assertions-and-attributes">Other assertions and attributes<a class="headerlink" href="#other-assertions-and-attributes" title="Permanent link">&para;</a></h2>
 <p>The <a href="https://docs.python.org/dev/library/unittest.mock.html">official documentation</a> of the mock library lists many other assertion, namely <code>assert_called_once_with()</code>, <code>assert_any_call()</code>, <code>assert_has_calls()</code>, <code>assert_not_called()</code>. If you grasped how <code>assert_called_with()</code> works, you will have no troubles in understanding how those other behave. Be sure to check the documentation to get a full description of what mock object can assert about their history after being used by your code.</p>
 <p>Together with those methods, mock objects also provide some useful attributes, two of which have been already reviewed in the first post. The remaining attributes are as expected mostly related to calls, and are <code>called</code>, <code>call_count</code>, <code>call_args</code>, <code>call_args_list</code>, <code>method_calls</code>, <code>mock_calls</code>. While these also are very well described in the official documentation, I want to point out the two <code>method_calls</code> and <code>mock_calls</code> attributes, that store the detailed list of methods which are called on the mock, and the <code>call_args_list</code> attribute that lists the parameters of every call.</p>
 <p>Do not forget that methods called on a mock object are mocks themselves, so you may first access the main mock object to get information about the called methods, and then access those methods to get the arguments they received.</p>
-<h2>Patching</h2>
+<h2 id="patching">Patching<a class="headerlink" href="#patching" title="Permanent link">&para;</a></h2>
 <p>Mocks are very simple to introduce in your tests whenever your objects accept classes or instances from outside. In that case, as described, you just have to instantiate the <code>Mock</code> class and pass the resulting object to your system. However, when the external classes instantiated by your library are hardcoded this simple trick does not work. In this case you have no chance to pass a mock object instead of the real one.</p>
 <p>This is exactly the case addressed by patching. Patching, in a testing framework, means to replace a globally reachable object with a mock, thus achieving the target of having the code run unmodified, while part of it has been hot swapped, that is, replaced at run time.</p>
-<h2>A warm-up example</h2>
+<h2 id="a-warm-up-example">A warm-up example<a class="headerlink" href="#a-warm-up-example" title="Permanent link">&para;</a></h2>
 <p>Let us start with a very simple example. Patching can be complex to grasp at the beginning so it is better to learn it with trivial code. If you do not have it yet, create the testing environment <code>mockplayground</code> with the instruction given in the previous post.</p>
 <p>I want to develop a simple class that returns information about a given file. The class shall be instantiated with the file name, which can be a relative path.</p>
 <p>For the sake of brevity I will not show you every step of the TDD development of the class. Remember that TDD requires you to write a test and then implement the code, but sometimes this could be too fine grained, so do not use the TDD rules without thinking.</p>
@@ -149,7 +149,7 @@
 
 
 <p>Obviously to write the test you have to know that you are going to use the <code>os.path.abspath</code> function, so patching is somehow a "less pure" practice in TDD. In pure OOP/TDD you are only concerned with the external behaviour of the object, and not with its internal structure. This example, however, shows that you have to cope with some real world issues, and patching is a clean way to do it.</p>
-<h1>The patching decorator</h1>
+<h1 id="the-patching-decorator">The patching decorator<a class="headerlink" href="#the-patching-decorator" title="Permanent link">&para;</a></h1>
 <p>The <code>patch</code> function we imported from the <code>unittest.mock</code> module is very powerful, and can be used as a function decorator as well. When used in this fashion you need to change the decorated function to accept a mock as last argument.</p>
 <div class="highlight"><pre><span></span><span class="nd">@patch</span><span class="p">(</span><span class="s1">&#39;os.path.abspath&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">test_get_info</span><span class="p">(</span><span class="n">abspath_mock</span><span class="p">):</span>
@@ -164,7 +164,7 @@
 
 
 <p>As you can see the <code>patch</code> decorator works like a big <code>with</code> statement for the whole function. Obviously in this way you replace the target function <code>os.path.abspath</code> in the scope of the whole function. It is then up to you to decide if you need to use <code>patch</code> as a decorator or in a <code>with</code> block.</p>
-<h1>Multiple patches</h1>
+<h1 id="multiple-patches">Multiple patches<a class="headerlink" href="#multiple-patches" title="Permanent link">&para;</a></h1>
 <p>We can also patch more that one object. Say for example that we want to change the above test to check that the outcome of the <code>FileInfo.get_info()</code> method also contains the size of the file. To get the size of a file in Python we may use the <code>os.path.getsize()</code> function, which returns the size of the file in bytes.</p>
 <p>So now we have to patch <code>os.path.getsize</code> as well, and this can be done with another <code>patch</code> decorator.</p>
 <div class="highlight"><pre><span></span><span class="nd">@patch</span><span class="p">(</span><span class="s1">&#39;os.path.getsize&#39;</span><span class="p">)</span>
@@ -228,7 +228,7 @@
 
 
 <p>Using more than one <code>with</code> statement, however, makes the code difficult to read, in my opinion, so in general I prefer to avoid complex <code>with</code> trees if I do not need a limited scope of the patching.</p>
-<h1>Patching immutable objects</h1>
+<h1 id="patching-immutable-objects">Patching immutable objects<a class="headerlink" href="#patching-immutable-objects" title="Permanent link">&para;</a></h1>
 <p>The most widespread version of Python is CPython, which is written, as the name suggests, in C. Part of the standard library is also written in C, while the rest is written in Python itself.</p>
 <p>The objects (classes, modules, functions, etc) that are implemented in C are shared between interpreters, which is something that you can do embedding the Python interpreter in a C program, for example. This requires those objects to be immutable, so that you cannot alter them at runtime from a single interpreter.</p>
 <p>For an example of this immutability just check the following code</p>
@@ -294,10 +294,10 @@
 
 <p>As you see running the test now the patching works. What we did was to patch <code>logger.datetime.datetime</code> instead of <code>datetime.datetime.now</code>. Two things changed, thus, in our test. First, we are patching the module imported in the <code>logger.py</code> file and not the module provided globally by the Python interpreter. Second, we have to patch the whole module because this is what is imported by the <code>logger.py</code> file. If you try to patch <code>logger.datetime.datetime.now</code> you will find that it is still immutable.</p>
 <p>Another possible solution to this problem is to create a function that invokes the immutable object and returns its value. This last function can be easily patched, because it just uses the builtin objects and thus is not immutable. This solution, however, requires to change the source code to allow testing, which is far from being desirable. Obviously it is better to introduce a small change in the code and have it tested than to leave it untested, but whenever is possible I avoid solutions that introduce code which wouldn't be required without tests.</p>
-<h2>Final words</h2>
+<h2 id="final-words">Final words<a class="headerlink" href="#final-words" title="Permanent link">&para;</a></h2>
 <p>In this second part of this small series on Python testing we reviewed the patching mechanism and run through some of its subtleties. Patching is a really effective technique, and patch-based tests can be found in many different packages. Take your time to become confident with mocks and patching, since they will be one of your main tools while working with Python and any other object-oriented language.</p>
 <p>As always, I strongly recommend finding some time to read the <a href="https://docs.python.org/dev/library/unittest.mock.html">official documentation</a> of the mock library.</p>
-<h2>Feedback</h2>
+<h2 id="feedback">Feedback<a class="headerlink" href="#feedback" title="Permanent link">&para;</a></h2>
 <p>Feel free to use <a href="https://plus.google.com/u/0/111444750762335924049">the blog Google+ page</a> to comment the post. The <a href="http://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues">GitHub issues</a> page is the best place to submit corrections</p>
         </section>
 

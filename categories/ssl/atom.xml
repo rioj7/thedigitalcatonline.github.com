@@ -3,13 +3,13 @@
 &lt;p&gt;But do you know what you actually did?&lt;/p&gt;
 &lt;p&gt;Do you know what the &lt;code&gt;~/.ssh/id_rsa&lt;/code&gt; file really contains, or why that strange file that begins with &lt;code&gt;ssh-rsa&lt;/code&gt; pairs with another that begins with &lt;code&gt;-----BEGIN RSA PRIVATE KEY-----&lt;/code&gt;. Or why does sometimes that same header miss the &lt;code&gt;RSA&lt;/code&gt; part and just say &lt;code&gt;BEGIN PRIVATE KEY&lt;/code&gt;?&lt;/p&gt;
 &lt;p&gt;I think a minimum knowledge of the various formats of RSA keys is mandatory for every developer nowadays, not to mention the importance of understanding them deeply if you want to pursue a career in the infrastructure management world.&lt;/p&gt;
-&lt;h1&gt;RSA algorithm and key pairs&lt;/h1&gt;
+&lt;h1 id="rsa-algorithm-and-key-pairs"&gt;RSA algorithm and key pairs&lt;a class="headerlink" href="#rsa-algorithm-and-key-pairs" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;Since the invention of public-key cryptography various systems have been devised to create the key pair. One of the first ones is RSA, the creation of three brilliant cryptographers, that dates back to 1977. The story of RSA is quite interesting, as it was first invented by an English mathematician, Clifford Cocks, who was however forced to keep it secret by the British intelligence office he was working for.&lt;/p&gt;
 &lt;p&gt;Keeping in mind that RSA is not a synonym for public-key cryptography, the former being only one of the possible implementations, I wanted to write a post on it because it is still, more than 40 years after its publication, one of the most widespread algorithms. In particular it is the standard algorithm used to generate SSH key pairs, and since nowadays every developer has their public key on GitHub, BitBucket, or similar systems, we may arguably say that RSA is pretty ubiquitous.&lt;/p&gt;
 &lt;p&gt;I will not cover the internals of the RSA algorithm in this article, however. If you are interested in the gory details of the mathematical framework you may find plenty of resources both on Internet and in the textbooks. The theory behind it is not trivial, but it is definitely worth the time if you want to be serious about the mathematical part of cryptography.&lt;/p&gt;
 &lt;p&gt;In this article I will instead explore two ways to create RSA key pairs and the formats used to store them. Applied cryptography is, like many other topics in computer science, a moving target, and the tools change often. Sometimes it is pretty easy to find out &lt;em&gt;how&lt;/em&gt; to do something (StackOverflow helps), but less easy to get a clear picture of what is going on.&lt;/p&gt;
 &lt;p&gt;All the examples show in this post use a 2048-bits RSA key created for this purpose, so all the numbers you see come from a real example. The key has been obviously trashed after I wrote the article.&lt;/p&gt;
-&lt;h1&gt;The PEM format&lt;/h1&gt;
+&lt;h1 id="the-pem-format"&gt;The PEM format&lt;a class="headerlink" href="#the-pem-format" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;Let's start the discussion about key pairs with the format used to store them. Nowadays the most widely accepted storage format is called PEM (Privacy-enhanced Electronic Mail). As the name suggests, this format was initially created for e-mail encryption but later became a general format to store cryptographic data like keys and certificates. It is described in &lt;a href="https://tools.ietf.org/html/rfc7468"&gt;RFC 7468&lt;/a&gt; ("Textual Encodings of PKIX, PKCS, and CMS Structures").&lt;/p&gt;
 &lt;p&gt;An example private key in PEM format is the following&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;-----BEGIN PRIVATE KEY-----
@@ -82,7 +82,7 @@ wBLKVfMiwcWAbl121M2DCLj9/g==
 &lt;p&gt;When the PEM format is used to store cryptographic keys the body of the content is in a format called PKCS #8. Initially a standard created by a private company (RSA Laboratories), it became a de facto standard so has been described in various RFCs, most notably &lt;a href="https://tools.ietf.org/html/rfc5208"&gt;RFC 5208&lt;/a&gt; ("Public-Key Cryptography Standards (PKCS) #8: Private-Key Information Syntax Specification Version 1.2").&lt;/p&gt;
 &lt;p&gt;The PKCS #8 format describes the content using the &lt;a href="https://en.wikipedia.org/wiki/Abstract_Syntax_Notation_One"&gt;ASN.1&lt;/a&gt; (Abstract Syntax Notation One) description language and the relative DER (Distinguished Encoding Rules) to serialize the resulting structure. This means that Base64-decoding the content will return some binary content that can be processed only by an ASN.1 parser.&lt;/p&gt;
 &lt;p&gt;Please not that, due to the structure of the underlying ASN.1 structure, every PEM body starts with the &lt;code&gt;MII&lt;/code&gt; characters.&lt;/p&gt;
-&lt;h2&gt;OpenSSL and ASN.1&lt;/h2&gt;
+&lt;h2 id="openssl-and-asn1"&gt;OpenSSL and ASN.1&lt;a class="headerlink" href="#openssl-and-asn1" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;OpenSSL can directly decode a key in PEM format and show the underlying ASN.1 structure with the &lt;code&gt;asn1parse&lt;/code&gt; module&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ openssl asn1parse -inform pem -in private.pem
     &lt;span class="m"&gt;0&lt;/span&gt;:d&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;  &lt;span class="nv"&gt;hl&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;4&lt;/span&gt; &lt;span class="nv"&gt;l&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;1214&lt;/span&gt; cons: SEQUENCE          
@@ -204,7 +204,7 @@ wBLKVfMiwcWAbl121M2DCLj9/g==
 &lt;/pre&gt;&lt;/div&gt;
 
 
-&lt;h2&gt;OpenSSL and RSA keys&lt;/h2&gt;
+&lt;h2 id="openssl-and-rsa-keys"&gt;OpenSSL and RSA keys&lt;a class="headerlink" href="#openssl-and-rsa-keys" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;Another way to look into a private key with OpenSSL is to use the &lt;code&gt;rsa&lt;/code&gt; module. While the &lt;code&gt;asn1parse&lt;/code&gt; module is a generic ASN.1 parser, the &lt;code&gt;rsa&lt;/code&gt; module knows the structure of an RSA key and can properly output the field names&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ openssl rsa -in private.pem -noout -text
 Private-Key: &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="m"&gt;2048&lt;/span&gt; bit&lt;span class="o"&gt;)&lt;/span&gt;
@@ -301,7 +301,7 @@ coefficient:
 
 
 &lt;p&gt;The fields are the same we found in the ASN.1 structure, this being only a different representation of the same data. You can compare the two and see that the value of the fields are the same.&lt;/p&gt;
-&lt;h2&gt;PKCS #8 vs PKCS #1&lt;/h2&gt;
+&lt;h2 id="pkcs-8-vs-pkcs-1"&gt;PKCS #8 vs PKCS #1&lt;a class="headerlink" href="#pkcs-8-vs-pkcs-1" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;The first version of the PKCS standard (PKCS #1) was specifically tailored to contain an RSA key. Its ASN.1 definition can be found in &lt;a href="https://tools.ietf.org/html/rfc8017"&gt;RFC 8017&lt;/a&gt; ("PKCS #1: RSA Cryptography Specifications Version 2.2")&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;   RSAPublicKey ::= SEQUENCE {
        modulus           INTEGER,  -- n
@@ -356,7 +356,7 @@ PrivateKey ::= OCTET STRING
 
 
 &lt;p&gt;The structure of PKCS #8 is the reason why previously we had to parse the field at offset 22 (&lt;code&gt;openssl asn1parse -inform pem -in private.pem -strparse 22&lt;/code&gt;) to access the RSA parameters. If you are parsing a PKCS #1 key in PEM format you don't need this second step.&lt;/p&gt;
-&lt;h1&gt;Private and public key&lt;/h1&gt;
+&lt;h1 id="private-and-public-key"&gt;Private and public key&lt;a class="headerlink" href="#private-and-public-key" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;In the RSA algorithm the public key is made by the modulus and the public exponent, which means that we can derive the public key from the private key. OpenSSL can easily do this with the &lt;code&gt;rsa&lt;/code&gt; module, producing the public key in PEM format&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ openssl rsa -in private.pem -pubout
 writing RSA key
@@ -398,7 +398,7 @@ Exponent: &lt;span class="m"&gt;65537&lt;/span&gt; &lt;span class="o"&gt;(&lt;/s
 &lt;/pre&gt;&lt;/div&gt;
 
 
-&lt;h1&gt;Generating key pairs with OpenSSL&lt;/h1&gt;
+&lt;h1 id="generating-key-pairs-with-openssl"&gt;Generating key pairs with OpenSSL&lt;a class="headerlink" href="#generating-key-pairs-with-openssl" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;If you want to generate an RSA private key you can do it with OpenSSL&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ openssl genpkey -algorithm RSA -out key.pem -pkeyopt rsa_keygen_bits:2048
 ......................................................................+++
@@ -416,7 +416,7 @@ Verifying - Enter PEM pass phrase:
 
 
 &lt;p&gt;You can see the list of supported ciphers with &lt;code&gt;openssl list-cipher-algorithms&lt;/code&gt;. In both cases you can then extract the public key with the method shown previously.&lt;/p&gt;
-&lt;h1&gt;Generating key pairs with OpenSSH&lt;/h1&gt;
+&lt;h1 id="generating-key-pairs-with-openssh"&gt;Generating key pairs with OpenSSH&lt;a class="headerlink" href="#generating-key-pairs-with-openssh" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;Another tool that you can use to generate key pairs is ssh-keygen, which is a tool included in the SSH suite that is specifically used to create and manage SSH keys. As SSH keys are standard asymmetrical keys we can use the tool to create keys for other purposes.&lt;/p&gt;
 &lt;p&gt;To create a key pair just run&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ssh-keygen -t rsa -b &lt;span class="m"&gt;2048&lt;/span&gt; -f private
@@ -433,7 +433,7 @@ Verifying - Enter PEM pass phrase:
 &lt;/pre&gt;&lt;/div&gt;
 
 
-&lt;h2&gt;The OpenSSH public key format&lt;/h2&gt;
+&lt;h2 id="the-openssh-public-key-format"&gt;The OpenSSH public key format&lt;a class="headerlink" href="#the-openssh-public-key-format" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;The public key saved by ssh-keygen is written in the so-called SSH-format, which is not a standard in the cryptography world. It's structure is &lt;code&gt;&amp;lt;algorithm&amp;gt; &amp;lt;key&amp;gt; &amp;lt;comment&amp;gt;&lt;/code&gt;, where the &lt;code&gt;&amp;lt;key&amp;gt;&lt;/code&gt; part of the format is encoded with Base64.&lt;/p&gt;
 &lt;p&gt;For example&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCy9f0/nwkXESzkL4v4ftZ24VJYvkQ/Nt6vsLab3iSWtJXqrRsBythCcbAU6W9
@@ -506,29 +506,29 @@ mpint
 
 &lt;p&gt;Please note that since we created a key of 2048 bits we should have a modulus of 256 bytes. Instead this key uses 257 bytes prefixing the number with a &lt;code&gt;00&lt;/code&gt; byte to avoid it being interpreted as negative (two's complement format).&lt;/p&gt;
 &lt;p&gt;The structure shown above is the reason why all the RSA public SSH keys start with the same 12 characters &lt;code&gt;AAAAB3NzaC1y&lt;/code&gt;. This string, converted in Base64 gives the initial 9 bytes &lt;code&gt;00 00 00 07 73 73 68 2d 72&lt;/code&gt; (Base64 strings are not a one-to-one mapping of the source bytes). If the exponent is the standard 65537 the key starts with &lt;code&gt;AAAAB3NzaC1yc2EAAAADAQAB&lt;/code&gt;, which encoded gives the fist 18 bytes &lt;code&gt;00 00 00 07 73 73 68 2d 72 73 61 00 00 00 03 01 00 01&lt;/code&gt;. &lt;/p&gt;
-&lt;h1&gt;Converting between PEM and OpenSSH format&lt;/h1&gt;
+&lt;h1 id="converting-between-pem-and-openssh-format"&gt;Converting between PEM and OpenSSH format&lt;a class="headerlink" href="#converting-between-pem-and-openssh-format" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;Often you need to convert files created with one tool to a different format, so this is a list of the most common conversions you might need. I prefer to consider the key format instead of the source tool, but I give a short description of the reason why you should want to perform the conversion.&lt;/p&gt;
-&lt;h2&gt;PEM/PKCS#1 to PEM/PKCS#8&lt;/h2&gt;
+&lt;h2 id="pempkcs1-to-pempkcs8"&gt;PEM/PKCS#1 to PEM/PKCS#8&lt;a class="headerlink" href="#pempkcs1-to-pempkcs8" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;This is useful to convert OpenSSh private keys to a newer format.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;openssl pkcs8 -topk8 -inform PEM -outform PEM -in pkcs1.pem -out pkcs8.pem
 &lt;/pre&gt;&lt;/div&gt;
 
 
-&lt;h2&gt;OpenSSH public to PEM/PKCS#8&lt;/h2&gt;
+&lt;h2 id="openssh-public-to-pempkcs8"&gt;OpenSSH public to PEM/PKCS#8&lt;a class="headerlink" href="#openssh-public-to-pempkcs8" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;To convert public OpenSSH keys in a proper PEM format.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ssh-keygen -e -f public.pub -mPKCS8
 &lt;/pre&gt;&lt;/div&gt;
 
 
-&lt;h2&gt;PEM/PKCS#8 to OpenSSH public&lt;/h2&gt;
+&lt;h2 id="pempkcs8-to-openssh-public"&gt;PEM/PKCS#8 to OpenSSH public&lt;a class="headerlink" href="#pempkcs8-to-openssh-public" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;if you need to use in SSH a key pair created with another system.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ssh-keygen -i -f public.pem
 &lt;/pre&gt;&lt;/div&gt;
 
 
-&lt;h1&gt;Final words&lt;/h1&gt;
+&lt;h1 id="final-words"&gt;Final words&lt;a class="headerlink" href="#final-words" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;I hope this post helped you to get a better understanding of RSA public and private keys. I keep finding on StackOverflow and on other boards messages of users that are confused by the output of the various tools and by the subtle but important differences between the formats.&lt;/p&gt;
-&lt;h1&gt;Resources&lt;/h1&gt;
+&lt;h1 id="resources"&gt;Resources&lt;a class="headerlink" href="#resources" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;ul&gt;
 &lt;li&gt;The Wikipedia article on &lt;a href="https://en.wikipedia.org/wiki/RSA_(cryptosystem)"&gt;RSA&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;OpenSSL documentation: &lt;a href="https://www.openssl.org/docs/man1.1.0/apps/asn1parse.html"&gt;asn1parse&lt;/a&gt;, &lt;a href="https://www.openssl.org/docs/man1.1.0/apps/rsa.html"&gt;rsa&lt;/a&gt;, &lt;a href="https://www.openssl.org/docs/man1.1.0/apps/genpkey.html"&gt;genpkey&lt;/a&gt;&lt;/li&gt;
@@ -541,5 +541,5 @@ mpint
 &lt;li&gt;&lt;a href="https://tools.ietf.org/html/rfc7468"&gt;RFC 7468 - Textual Encodings of PKIX, PKCS, and CMS Structures&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://tools.ietf.org/html/rfc8017"&gt;RFC 8017 - PKCS #1: RSA Cryptography Specifications Version 2.2&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h1&gt;Feedback&lt;/h1&gt;
+&lt;h1 id="feedback"&gt;Feedback&lt;a class="headerlink" href="#feedback" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;Feel free to use &lt;a href="https://plus.google.com/u/0/111444750762335924049"&gt;the blog Google+ page&lt;/a&gt; to comment the post or reach me on &lt;a href="https://twitter.com/thedigicat"&gt;Twitter&lt;/a&gt; if you have questions. The &lt;a href="http://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues"&gt;GitHub issues&lt;/a&gt; page is the best place to submit corrections.&lt;/p&gt;</content><category term="algorithms"></category><category term="cryptography"></category><category term="SSL"></category><category term="SSH"></category><category term="RSA"></category></entry></feed>

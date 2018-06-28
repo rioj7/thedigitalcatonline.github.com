@@ -68,7 +68,7 @@
         </section>
 
         <section id="content">
-            <h2>The problem</h2>
+            <h2 id="the-problem">The problem<a class="headerlink" href="#the-problem" title="Permanent link">&para;</a></h2>
 <p><strong>P12</strong> (**) Decode a run-length encoded list.
 Given a run-length code list generated as specified in problem P10, construct its uncompressed version.</p>
 <p>Example:</p>
@@ -77,9 +77,9 @@ Given a run-length code list generated as specified in problem P10, construct it
 </pre></div>
 
 
-<h2>Initial thoughts</h2>
+<h2 id="initial-thoughts">Initial thoughts<a class="headerlink" href="#initial-thoughts" title="Permanent link">&para;</a></h2>
 <p>The problem is simple, being just a reverse version of the last two problems. The target is to build a list from another one, so it should be possible to find both a recursive and a functional solution. The only problem is that we may easily build a list for each element, but we shall end up with a flat list. So <code>flatMap()</code> from <a href="/blog/2015/04/07/99-scala-problems-07-flatten/">problem 07</a> will come in play again.</p>
-<h2>The recursive solution</h2>
+<h2 id="the-recursive-solution">The recursive solution<a class="headerlink" href="#the-recursive-solution" title="Permanent link">&para;</a></h2>
 <p>Since I decided to use <code>flatMap()</code>, which basically acts like <code>map()</code> but then inserts the resulting list into the target list (indeed flattening it), I have to write a function that converts a <code>(Int, A)</code> tuple into a <code>List[A]</code>, where <code>A</code> is a type of choice.</p>
 <p>The only issue in building lists in Scala is that the <code>:::</code> operator works with two lists, so we have to build a list with the current head to be able to append it.</p>
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="n">decode</span><span class="o">[</span><span class="kt">A</span><span class="o">](</span><span class="n">l</span><span class="k">:</span> <span class="kt">List</span><span class="o">[(</span><span class="kt">Int</span>, <span class="kt">A</span><span class="o">)])</span><span class="k">:</span><span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
@@ -94,7 +94,7 @@ Given a run-length code list generated as specified in problem P10, construct it
 
 
 <p>The last call is a mapping. Each element is mapped into a list by the <code>_expand()</code> function, while <code>flatMap()</code> does the flattening job.</p>
-<h2>The functional solution</h2>
+<h2 id="the-functional-solution">The functional solution<a class="headerlink" href="#the-functional-solution" title="Permanent link">&para;</a></h2>
 <p>There is a simpler way that makes use of a function of the <code>List</code> object. Object and classes are two different entities in Scala, and objects are singletons that encapsulate constructor (and de-constructor) methods.</p>
 <p>The <code>fill()</code> method is documented <a href="http://www.scala-lang.org/api/2.11.4/index.html#scala.collection.immutable.List$">here</a>, and we are interested now in the one-dimensional version. As you can see from the documentation, this function is curried (see <a href="/blog/2015/04/07/99-scala-problems-04-length/">problem 04</a>) and accepts as first parameter the length of the list and as second parameter the element to put into the list itself.</p>
 <p>We are just interested in repeating an element this time, so the function invocation is very simple</p>
@@ -105,9 +105,9 @@ Given a run-length code list generated as specified in problem P10, construct it
 
 
 <p>Scala tuples may be indexed using the <code>_index</code> notation, starting from 1 (while lists are indexed from 0). Here, just like in the recursive solution, we have to use <code>flatMap()</code> to flatten the resulting list.</p>
-<h2>Final considerations</h2>
+<h2 id="final-considerations">Final considerations<a class="headerlink" href="#final-considerations" title="Permanent link">&para;</a></h2>
 <p>Writing this solution I renewed my knowledge of <strong>flatmapping</strong>, learned that Scala classes have <strong>companion objects</strong>, learned how to <strong>create lists</strong> and how to <strong>index tuples</strong>.</p>
-<h2>Feedback</h2>
+<h2 id="feedback">Feedback<a class="headerlink" href="#feedback" title="Permanent link">&para;</a></h2>
 <p>Feel free to use <a href="https://plus.google.com/u/0/111444750762335924049">the blog Google+ page</a> to comment the post. The <a href="http://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues">GitHub issues</a> page is the best place to submit corrections.</p>
         </section>
 

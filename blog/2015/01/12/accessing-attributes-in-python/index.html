@@ -69,7 +69,7 @@
         <section id="content">
             <p>Python is a language that tries to push the object-oriented paradigm to its maximum. This means that its object model is very powerful compared to that of other languages, but also that the behaviour of Python code may result surprising to new programmers.</p>
 <p>In this post I want to review the methods that Python provides to access object attributes, trying to provide a comprehensive overview of the matter to everyone wants to start programming in this beautiful language.</p>
-<h2>What are attributes</h2>
+<h2 id="what-are-attributes">What are attributes<a class="headerlink" href="#what-are-attributes" title="Permanent link">&para;</a></h2>
 <p>Since the nomenclature may vary from language to language, let me name things. In Python we call <em>attribute</em> everything is contained inside an object. In Python there is no real distinction between plain data and functions, being both objects, so what I will say about attributes is perfectly valid even for methods.</p>
 <p>As a working example, in this post I will use the following class. It represents a book with a title and an author. It also provides a <code>get_entry()</code> method which returns a string representation of the book.</p>
 <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Book</span><span class="p">:</span>
@@ -84,7 +84,7 @@
 
 <p>Every instance of this class will contain three attributes, namely <code>title</code>, <code>author</code>, and <code>get_entry</code>, in addition to the standard attributes provided by the <code>object</code> ancestor.</p>
 <p><strong>Python 2 users</strong>: remember that in Python 2 you have to specify that <code>Book</code> is a new-style class writing <code>class Book(object):</code></p>
-<h2>Basic attribute access</h2>
+<h2 id="basic-attribute-access">Basic attribute access<a class="headerlink" href="#basic-attribute-access" title="Permanent link">&para;</a></h2>
 <p>In Python you may call an attribute of an object using the widely accepted dotted-syntax</p>
 <div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">Book</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Pawn of Prophecy&quot;</span><span class="p">,</span> <span class="n">author</span><span class="o">=</span><span class="s2">&quot;David Eddings&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">b</span><span class="o">.</span><span class="n">title</span>
@@ -122,7 +122,7 @@
 </pre></div>
 
 
-<h2>Properties</h2>
+<h2 id="properties">Properties<a class="headerlink" href="#properties" title="Permanent link">&para;</a></h2>
 <p>Sometimes you want to have an attribute which value comes from other attributes or, in general, which value shall be computed at the moment. The standard way to deal with this situation is to create a method, called <em>getter</em>, just like I did with <code>get_entry()</code>. </p>
 <p>In Python you can "mask" the method, aliasing it with a data attribute, which in this case is called <em>property</em>.</p>
 <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Book</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -190,7 +190,7 @@
 
 
 <p>Remember however that all instances of that class share the same <em>property object</em>, which is a sort of automatic binding between attributes and methods, and not the value of the attribute itself.</p>
-<h2>Softcoding attribute access</h2>
+<h2 id="softcoding-attribute-access">Softcoding attribute access<a class="headerlink" href="#softcoding-attribute-access" title="Permanent link">&para;</a></h2>
 <p>When you write a basic attribute access like I did in the first section you are <em>hardcoding</em> the attribute name. The attribute you are looking for is part of the source code itself, and shall be known at coding time.</p>
 <p>What happens if you want to access an attribute whose name is contained in a variable as a string? This usually happens when writing debuggers or inspection tools that let the user interactively specify the attributes they want to see.</p>
 <p>To perform this "indirect" access Python provides the <code>getattr()</code> builtin function, which accepts an object and the name of an attribute.</p>
@@ -211,7 +211,7 @@
 
 
 <p>While this type of access is perfectly valid in Python you should not use it as long as you can use the direct dotted access. Writing tricky code may seem very smart, but when it comes to debugging "the simpler the better".</p>
-<h2>Avoiding to fail</h2>
+<h2 id="avoiding-to-fail">Avoiding to fail<a class="headerlink" href="#avoiding-to-fail" title="Permanent link">&para;</a></h2>
 <p>When you try to access an attribute that does not exist, either with the dotted syntax or with <code>getattr()</code>, Python gives you a last chance before raising the <code>AttributeError</code> exception. It calls the <code>__getattr__()</code> special method (pay attention to the double underscores) passing it the name of the attribute: in the previous example, when accessing <code>b.publisher</code>, Python calls <code>b.__getattr__('publisher')</code>. </p>
 <p>In this case, since the <code>Book</code> class or its ancestors do not define the <code>__getattr__()</code> method, the attribute access fails and Python raises the exception.</p>
 <p>Let us try to define the method, just to show that it actually works</p>
@@ -240,12 +240,12 @@
 <p>As you can see the <code>publisher</code> and <code>somename</code> attributes are correctly accessed even if they do not actually exist inside the object.</p>
 <p>To find a good use for <code>__getattr__()</code> and <code>getattr()</code> we need to step into something a bit more complex, which is the explicit delegation mechanism involved in a composition between objects. You may find more details on this topic in <a href="/blog/2014/08/20/python-3-oop-part-3-delegation-composition-and-inheritance">this post</a>. </p>
 <p>Both <code>getattr()</code> and <code>__getattr__()</code> have their counterpart to manage writing access, namely <code>setattr()</code> and <code>__setattr__()</code>.</p>
-<h2>The deepest secret</h2>
+<h2 id="the-deepest-secret">The deepest secret<a class="headerlink" href="#the-deepest-secret" title="Permanent link">&para;</a></h2>
 <p>Every Python object (starting from <code>object</code> itself) contains a very special method called <code>__getattribute__()</code> which should never be called explicitly or overridden. This method implements the attribute resolution inside the object, provides the attribute lookup through the inheritance hierarchy, resolves properties, calls <code>__getattr__()</code> and if needed raises the <code>AttributeError</code> exception.</p>
 <p>Due to the very complex nature of this method, and the uttermost importance of its role in making Python objects run, you shall never, never try to override it. If you find yourself in a situation where dealing explicitly with <code>__getattribute__()</code> is needed, you may be pretty sure that you did something wrong.</p>
-<h2>Conclusions</h2>
+<h2 id="conclusions">Conclusions<a class="headerlink" href="#conclusions" title="Permanent link">&para;</a></h2>
 <p>As you can figure, 95% of your Python code will be based on standard dotted attribute access. Knowing other ways to manage attributes (properties) and being aware of what happens behind the scenes (<code>getattr</code>, <code>__getattr__()</code>, and <code>__getattribute__()</code>) is however essential to master the whole power of Python, which can sometimes lead to very elegant solutions that are otherwise very difficult to achieve.</p>
-<h2>Updates</h2>
+<h2 id="updates">Updates<a class="headerlink" href="#updates" title="Permanent link">&para;</a></h2>
 <p>2015-01-16: Thanks to <a href="https://twitter.com/astronouth7303">Jamie</a> who spotted a wrong <code>__setattribute__()</code> method presented in the last section.</p>
         </section>
 

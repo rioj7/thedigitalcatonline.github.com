@@ -67,10 +67,10 @@
         </section>
 
         <section id="content">
-            <h2>Abstract</h2>
+            <h2 id="abstract">Abstract<a class="headerlink" href="#abstract" title="Permanent link">&para;</a></h2>
 <p>While introducing people to Python metaclasses I realized that sometimes the big problem of the most powerful Python features is that programmers do not perceive how they may simplify their usual tasks. Therefore, features like metaclasses are considered a fancy but rather unuseful addition to a standard OOP language, instead of a real game changer.</p>
 <p>This post wants to show how to use metaclasses and decorators to create a powerful class that can be inherited and customized by easily adding decorated methods.</p>
-<h2>Metaclasses and decorators: a match made in space</h2>
+<h2 id="metaclasses-and-decorators-a-match-made-in-space">Metaclasses and decorators: a match made in space<a class="headerlink" href="#metaclasses-and-decorators-a-match-made-in-space" title="Permanent link">&para;</a></h2>
 <p>Metaclasses are a complex topic, and most of the times even advanced programmers do not see a wide range of practical uses for them. Chances are that this is the part of Python (or other languages that support metaclasses, like Smalltalk and Ruby) that fits the least the "standard" object-oriented patterns or solutions found in C++ and Java, just to mention two big players.</p>
 <p>Indeed metaclasess usually come in play when programming advanced libraries or frameworks, where a lot of automation must be provided. For example, Django Forms system heavily relies on metaclasses to provide all its magic.</p>
 <p>We also have to note, however, that we usually call "magic" or "tricks" all those techniques we are not familiar with, and as a result in Python many things are called this way, being its implementation often peculiar compared to other languages.</p>
@@ -92,7 +92,7 @@
 
 
 <p>The module defines a <code>StringProcessor</code> class that I can inherit and customize adding methods that have a standard signature <code>(self, str)</code> and are decorated with <code>@stringfilter</code>. This class can later be instantiated and the instance used to directly process a string and return the result. Internally the class automatically executes all the decorated methods in succession. I also would like the class to obey the order I defined the filters: first defined, first executed.</p>
-<h2>The Hitchhiker's Guide To Metaclasses</h2>
+<h2 id="the-hitchhikers-guide-to-metaclasses">The Hitchhiker's Guide To Metaclasses<a class="headerlink" href="#the-hitchhikers-guide-to-metaclasses" title="Permanent link">&para;</a></h2>
 <p>How can metaclasses help to reach this target?</p>
 <p>Simply put, metaclasses are classes that are instantiated to get classes. That means that whenever I use a class, for example to instantiate it, first Python <em>builds</em> that class using the metaclass and the class definition we wrote. For example, you know that you can find the class members in the <code>__dict__</code> attribute: this attribute is created by the standard metaclass, which is <code>type</code>.</p>
 <p>Given that, a metaclass is a good starting point for us to insert some code to identify a subset of functions inside the definition of the class. In other words, we want the output of the metaclass (that is, the class) be built exactly as happens in the standard case, but with an addition: a separate list of all the methods decorated with <code>@stringfilter</code>.</p>
@@ -122,7 +122,7 @@
 
 
 <p>Now we have to find a way to mark all filter methods with a <code>_filter</code> attribute.</p>
-<h2>The Anatomy of Purple Decorators</h2>
+<h2 id="the-anatomy-of-purple-decorators">The Anatomy of Purple Decorators<a class="headerlink" href="#the-anatomy-of-purple-decorators" title="Permanent link">&para;</a></h2>
 <p><strong>decorate</strong>: <em>to add something to an object or place, especially in order to make it more attractive</em> (Cambridge Dictionary)</p>
 <p>Decorators are, as the name suggests, the best way to augment functions or methods. Remember that a decorator is basically a callable that accepts another callable, processes it, and returns it.</p>
 <p>Used in conjunction with metaclasses, decorators are a very powerful and expressive way to implement advanced behaviours in our code. In this case we may easily use them to add an attribute to decorated methods, one of the most basic tasks for a decorator.</p>
@@ -135,7 +135,7 @@
 
 
 <p>As you can see the decorator just creates an attribute called <code>_filter</code> into the function (remember that functions are objects). The actual value of this attribute is not important in this case, since we are just interested in telling apart class members that contain it.</p>
-<h2>The Dynamics of a Callable Object</h2>
+<h2 id="the-dynamics-of-a-callable-object">The Dynamics of a Callable Object<a class="headerlink" href="#the-dynamics-of-a-callable-object" title="Permanent link">&para;</a></h2>
 <p>We are used to think about functions as special language components that may be "called" or executed. In Python functions are objects, just like everything else, and the feature that allows them to be executed comes from the presence of the <code>__call__()</code> method. Python is polymorphic by design and based on delegation, so (almost) everything that happens in the code relies on some features of the target object.</p>
 <p>The result of this generalization is that every object that contains the <code>__call__()</code> method may be executed like a function, and gains the name of <em>callable object</em>.</p>
 <p>The <code>StringProcessor</code> class shall thus contain this method and perform there the string processing with all the contained filters. The code is</p>
@@ -181,36 +181,36 @@
 
 
 <p>That's it!</p>
-<h2>Final words</h2>
+<h2 id="final-words">Final words<a class="headerlink" href="#final-words" title="Permanent link">&para;</a></h2>
 <p>There are obviously other ways to accomplish the same task, and this post wanted just to give a practical example of what metaclasses are good for, and why I think that they should be part of any Python programmer's arsenal.</p>
 <p>[Update] Some developers <a href="http://www.reddit.com/r/Python/comments/2jbi2f/advanced_use_of_python_decorators_and_metaclasses/">on Reddit</a> and Linkedin raised objections to the content of the post mainly about the fact that the example may be perfectly implemented without metaclasses and about the dangerous nature of metaclasses. Since I try to learn from everyone, I thank them for their suggestions.</p>
 <p>It is especially interesting to know that some developers consider the use of metaclasses a risky business, because they hide a lot of the structure of the class and the underlying machinery. This is true, so (as you should do for other technologies), think carefully about the reasons that drive you to use metaclasses, and be sure you know them well.</p>
-<h2>Book Trivia</h2>
+<h2 id="book-trivia">Book Trivia<a class="headerlink" href="#book-trivia" title="Permanent link">&para;</a></h2>
 <p>Section titles come from the following books: <em>A Match Made in Space - George McFly</em>, <em>The Hitchhiker's Guide To the Galaxy - Various Authors</em>, <em>The Anatomy of Purple Dragons - Unknown</em>, <em>The Dynamics of an Asteroid - James Moriarty</em>.</p>
-<h2>Source code</h2>
+<h2 id="source-code">Source code<a class="headerlink" href="#source-code" title="Permanent link">&para;</a></h2>
 <p>The <a href="/code/metaclasses/strproc.py">strproc.py</a> file contains the full source code used in this post.</p>
-<h2>Online resources</h2>
+<h2 id="online-resources">Online resources<a class="headerlink" href="#online-resources" title="Permanent link">&para;</a></h2>
 <p>The following resources may be useful.</p>
-<h4>Metaclasses</h4>
+<h4 id="metaclasses">Metaclasses<a class="headerlink" href="#metaclasses" title="Permanent link">&para;</a></h4>
 <ul>
 <li>Python 3 official documentation: <a href="https://docs.python.org/3.4/reference/datamodel.html#customizing-class-creation">customizing class creation</a>.</li>
 <li>Python 3 OOP Part 5 - Metaclasses <a href="/blog/2014/09/01/python-3-oop-part-5-metaclasses">on this blog</a>.</li>
 <li><a href="http://python-3-patterns-idioms-test.readthedocs.org/en/latest/Metaprogramming.html">Metaprogramming examples and patterns</a> (still using some Python 2 code but useful).</li>
 </ul>
-<h4>Decorators</h4>
+<h4 id="decorators">Decorators<a class="headerlink" href="#decorators" title="Permanent link">&para;</a></h4>
 <ul>
 <li><a href="http://www.artima.com/weblogs/viewpost.jsp?thread=240808">Bruce Eckel</a> on decorators (series of three posts, 6 years old but still valid).</li>
 <li><a href="http://simeonfranklin.com/blog/2012/jul/1/python-decorators-in-12-steps/">A different approach</a> on explaining decorators.</li>
 <li><a href="http://www.jeffknupp.com/blog/2013/11/29/improve-your-python-decorators-explained/">Jeff Knupp</a> goes deep inside the concept of function.</li>
 </ul>
-<h4>Callable objects</h4>
+<h4 id="callable-objects">Callable objects<a class="headerlink" href="#callable-objects" title="Permanent link">&para;</a></h4>
 <ul>
 <li><a href="http://www.rafekettler.com/magicmethods.html#callable">Rafe Kettler</a> provides a very detaild guide on Python "magic" methods.</li>
 </ul>
-<h2>Updates</h2>
+<h2 id="updates">Updates<a class="headerlink" href="#updates" title="Permanent link">&para;</a></h2>
 <p>2014-10-17: <a href="https://github.com/thermokarst">Matthew Dillon</a> and <a href="https://github.com/dmcdougall">Damon McDougall</a> spotted two typos. Thank you!</p>
 <p>2014-10-17: <a href="http://www.reddit.com/user/ionelmc">ionelmc</a> suggested two corrections <a href="http://www.reddit.com/r/Python/comments/2jbi2f/advanced_use_of_python_decorators_and_metaclasses/cla696y">here</a> and <a href="http://www.reddit.com/r/Python/comments/2jbi2f/advanced_use_of_python_decorators_and_metaclasses/cla6o77">here</a>. Both are correct so I implemented them. The second one is more about style, but fits well the introductory purpose of the post. Thanks!</p>
-<h2>Feedback</h2>
+<h2 id="feedback">Feedback<a class="headerlink" href="#feedback" title="Permanent link">&para;</a></h2>
 <p>Feel free to use <a href="https://plus.google.com/u/0/111444750762335924049">the blog Google+ page</a> to comment the post. The <a href="http://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues">GitHub issues</a> page is the best place to submit corrections.</p>
         </section>
 

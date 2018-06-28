@@ -69,25 +69,25 @@
         <section id="content">
             <p>Git is a very powerful version control system and much of its power comes from its very simple basic structures. Git is mostly a manager of blob trees and even the most complex operations are basically tree operations.</p>
 <p>The power of Git brings also a great flexibility, which means that Git doesn't dictate a specific workflow, leaving the programmer or the team to come up with a reasonable procedure.</p>
-<h2>Workflows</h2>
+<h2 id="workflows">Workflows<a class="headerlink" href="#workflows" title="Permanent link">&para;</a></h2>
 <p>Two Git workflows are very widespread, for different reasons. The first is the GitHub model and the second is the gitflow one.</p>
 <p>The GitHub model is widely used, because nowadays GitHub is the most used code management and collaboration website for open source projects. GitHub makes use of a workflow based on Pull Requests, and you can find some useful resources about it in the relative section at the end of the post.</p>
 <p>Gitflow was proposed by Vincent Driessen in 2010 and quickly become one of the most used workflows, due to the fact that it covers most of the common needs of a developing team and is very easy to learn. Its workflow is based on different types of branches that are created when specific events occur in the team: a new feature has to be developed, a new release shall be published, a bugfix shall be quickly put in production, etc.</p>
 <p>I personally find gitflow a very useful workflow and always use it even when I'm developing alone on a personal repository. It helps me to keep things in order and the beautiful set of tools named "gitflow AVH Edition" by Peter van der Does minimizes the number of operations I have to remember.</p>
-<h2>GitHub and gitflow</h2>
+<h2 id="github-and-gitflow">GitHub and gitflow<a class="headerlink" href="#github-and-gitflow" title="Permanent link">&para;</a></h2>
 <p>When working with GitHub, however, gitflow is not your best choice, mostly because of the big difference between the two ways of managing new features. GitHub wants you to put everything in a branch and submit a Pull Request, keeping the branch alive. The project maintainer then reviews the code and possibly merges your changes. At that point you are free to delete the branch and update your master.</p>
 <p>Gitflow, on the other hand, usually makes you close features by merging into the special branch called <code>develop</code>, because is from that branch that you create releases (that are put into <code>master</code>). Closing a feature branch and merging the feature into <code>develop</code> is what does not work well with GitHub, since when you close the branch your Pull Request cannot be finalized.</p>
 <p>Sure, you can leave a gitflow feature branch open, publish it, send your Pull Request and eventually delete it without closing the feature, but this way you are just partially using gitflow, not to mention the fact that this way some commands (such as <code>git flow feature finish</code>) become "dangerous", since they shall be avoided to preserve the GitHUb workflow integrity.</p>
 <p>I will suggest here a procedure that allows to manage the local repository with gitflow, while hosting the remote repository on GitHub, without preventing to use gitflow features and GitHub Pull Requests.</p>
-<h2>The basic idea</h2>
+<h2 id="the-basic-idea">The basic idea<a class="headerlink" href="#the-basic-idea" title="Permanent link">&para;</a></h2>
 <p>The concept that allows to use both workflows is very simple: gitflow, when used locally to develop new features, makes use of the sole <code>develop</code> special branch. Every feature is created from that repository and eventually merged back there, so <code>develop</code> for a local repository becomes a sort of big feature branch.</p>
 <p>Given this consideration we may create a local branch that tracks a remote one with the same name, and make it our GitHub feature branch, i.e. the branch that will be used to create a Pull Request. Locally, we create a Git symbolic reference to that branch and we call the reference <code>develop</code>, thus enabling the use of the gitflow workflow and tools.</p>
 <p><img alt="The resulting structure" src="/images/github_gitflow/structure.png"></p>
 <p>When we finish adding features to the local feature branch (<code>develop</code>) we may squash the commits as usual and perform a forced push to the GitHub repository.</p>
 <p>We may also maintain more than one GitHub feature branch, we just need to move the symbolic reference to the branch we want to work on. On every <code>develop</code> branch we may use gitflow features just like in a standard gitflow-enabled repository.</p>
-<h2>Releases</h2>
+<h2 id="releases">Releases<a class="headerlink" href="#releases" title="Permanent link">&para;</a></h2>
 <p>Obviously things change when we talk about releases. If the maintainer wants to use gitflow to create releases he or she needs to merge Pull Requests into their <code>develop</code> branch. This is not yet possible on GitHub web interface, but is already possible with command line Git. It however breaks a little the GitHub flow so I wouldn't suggest it at the moment. This feature has been already requested to the GitHub team (see <a href="https://github.com/isaacs/github/issues/18#issuecomment-25571124">this comment</a>)</p>
-<h2>A simple procedure</h2>
+<h2 id="a-simple-procedure">A simple procedure<a class="headerlink" href="#a-simple-procedure" title="Permanent link">&para;</a></h2>
 <p>To use the described procedure you just need to have a local repository with gitflow enabled, i.e. you need to have two branches <code>master</code> and <code>develop</code>, possibly with <code>master</code> tracking <code>origin/master</code>.</p>
 <p>Then <strong>setup the repository</strong> issuing the following commands</p>
 <div class="highlight"><pre><span></span><span class="gp">$</span> <span class="c1"># Move to the master branch</span>
@@ -134,12 +134,12 @@
 </pre></div>
 
 
-<h2>The <code>gitflow gh</code> command</h2>
+<h2 id="the-gitflow-gh-command">The <code>gitflow gh</code> command<a class="headerlink" href="#the-gitflow-gh-command" title="Permanent link">&para;</a></h2>
 <p><a href="https://github.com/lgiordani/gitflow/tree/github_support">This repository</a> is a fork of the official gitflow repository and inplements a new gitflow command <code>gh</code> to easily perform what has been described in this post. The changes are implemented in the <code>github_support</code> branch, which has been developed with the modified gitflow program itself.</p>
 <p>As of 22-06-2015 I <a href="https://github.com/petervanderdoes/gitflow/pull/208">submitted a PR</a> to the official gitflow repository, but I do not know if it is going to be accepted.</p>
 <p>If you are interested in using this feature feel free to clone my gitflow repository and report any issue either there or in the PR itself. As soon as the PR is processed, I'll update this section.</p>
 <p>The <code>gh</code> command is described in <a href="https://github.com/lgiordani/gitflow/tree/github_support#github-integration">the README</a>. It currently provides six commands: enable, disable, activate, import, squash and publish.</p>
-<h2>Links</h2>
+<h2 id="links">Links<a class="headerlink" href="#links" title="Permanent link">&para;</a></h2>
 <ul>
 <li>The GitHUb workflow <a href="https://guides.github.com/introduction/flow/">official documentation</a></li>
 <li>The gitflow <a href="http://nvie.com/posts/a-successful-git-branching-model/">original post</a></li>
@@ -147,9 +147,9 @@
 <li>Some insights on <a href="https://git-scm.com/book/en/v2/Git-Internals-Git-Objects">Git objects</a></li>
 <li>Another solution to work with GitHub and gitflow: <a href="https://datasift.github.io/gitflow/">HubFlow</a></li>
 </ul>
-<h2>Updates</h2>
+<h2 id="updates">Updates<a class="headerlink" href="#updates" title="Permanent link">&para;</a></h2>
 <p>2015-06-23: Added a section about a gitflow fork that implements the concepts explained in the post.</p>
-<h2>Feedback</h2>
+<h2 id="feedback">Feedback<a class="headerlink" href="#feedback" title="Permanent link">&para;</a></h2>
 <p>Feel free to use <a href="https://plus.google.com/u/0/111444750762335924049">the blog Google+ page</a> to comment the post. The <a href="http://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues">GitHub issues</a> page is the best place to submit corrections.</p>
         </section>
 

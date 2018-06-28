@@ -72,10 +72,10 @@
 <p>In this part I'll go on with the development of the library, discussing the implementation of a binary number with a fixed size, which is a very interesting and useful matter, being the foundation of the computer we are working with. Fixed-size binaries may also represent negative numbers with the two's complement technique, and this will be an important point to test.</p>
 <p>You may happen to dislike some decisions about the interface or the behaviour of the resulting class. Since this post is just a way to show you a concrete TDD session you are totally free to change the tests and to come up with a better solution than mine. Feel free to get in touch and submit better ideas, I'm always looking for something new to learn.</p>
 <p>As already suggested in the first instalment try to follow the post up to the section where I write the tests. Then move on implementing your own class and try to make it pass all the tests: this is the best way for you to learn TDD, actually applying it.</p>
-<h2>Fixed-size binaries</h2>
+<h2 id="fixed-size-binaries">Fixed-size binaries<a class="headerlink" href="#fixed-size-binaries" title="Permanent link">&para;</a></h2>
 <p>As soon as you build an electronic circuit to store information (a flip-flop, for example) you start dealing with binary numbers and with fixed-size quantities. Limiting the number of digits brings immediately the limitation of having a maximum number that can be represented and requires to decide what to do with bigger numbers. Another issue that arises is that of the representation of negative numbers. Since we can only use two symbols (one and zero) we have to decide a "syntax" for negative values.</p>
 <p>You will find a lot of information about some of those issues in the following Wikipedia articles: <a href="https://en.wikipedia.org/wiki/Integer_overflow">Integer overflow</a> and <a href="https://en.wikipedia.org/wiki/Signed_number_representations">signed number representations</a>. Check also this page on <a href="https://en.wikipedia.org/wiki/Bitwise_operation">bitwise operations</a> as some of them will be implemented.</p>
-<h2>Object interface</h2>
+<h2 id="object-interface">Object interface<a class="headerlink" href="#object-interface" title="Permanent link">&para;</a></h2>
 <p>So we aim to create a class called <code>SizeBinary</code> that provides the following interface:</p>
 <ul>
 <li>Can be instantiated giving a size in bits and a value. The value is optional, if not specified is 0.</li>
@@ -88,7 +88,7 @@
 <li>Can be negated with both one's complement and two's complement techniques.</li>
 </ul>
 <p>So now, obeying the TDD methodology, I will write some tests that exploit these features. After this I'm going to develop an object that makes all test pass. Like we did in the previous post you may follow along as I write te tests and then write your own class.</p>
-<h3>Initialization</h3>
+<h3 id="initialization">Initialization<a class="headerlink" href="#initialization" title="Permanent link">&para;</a></h3>
 <p>The <code>SizeBinary</code> object shall support all the initialization options supported by <code>Binary</code>, but its main interface is different because when creating a <code>SizeBinary</code> we must be allowed to specify the size. The first tests are though pretty straightforward.</p>
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">test_size_binary_init_int</span><span class="p">():</span>
     <span class="n">size_binary</span> <span class="o">=</span> <span class="n">SizeBinary</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
@@ -114,7 +114,7 @@
 
 
 <p>I will cover all the cases already covered for the <code>Binary</code> class. As you can see, I'm specifying the bit size when instantiating the object and testing the overflow condition. Other initialization and conversion tests are very similar to their <code>Binary</code> counterpart and I will not copy them here, as you can find them in the source code.</p>
-<h2>Splitting</h2>
+<h2 id="splitting">Splitting<a class="headerlink" href="#splitting" title="Permanent link">&para;</a></h2>
 <p>One of the requirements is to provide a method to split a <code>SizeBinary</code> object into two arbitrarily sized <code>Binary</code> objects. The tests are</p>
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">test_size_binary_split</span><span class="p">():</span>
     <span class="n">size_binary8</span> <span class="o">=</span> <span class="n">SizeBinary</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="s1">&#39;01010110&#39;</span><span class="p">)</span>
@@ -129,7 +129,7 @@
 
 
 <p>As you can see the split shall be able to pad the resulting values if the number of bits exceedes that of the available ones.</p>
-<h2>Negative numbers</h2>
+<h2 id="negative-numbers">Negative numbers<a class="headerlink" href="#negative-numbers" title="Permanent link">&para;</a></h2>
 <p>There are many techniques to represent negative numbers with binary digits, and there is no way to tell from a binary number neither if it is positive or negative nor which technique has been used. It is a matter of conventions into the system in use. We want to implement <a href="https://en.wikipedia.org/wiki/Ones'_complement">one's complement</a> and <a href="https://en.wikipedia.org/wiki/Two's_complement">two's complement</a>, which are described in detail in the linked Wikipedia articles. The tests to check the correct behaviour are</p>
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">test_size_binary_OC</span><span class="p">():</span>
     <span class="c1"># 6 = 0b00000110 -&gt; 0b11111001</span>
@@ -167,7 +167,7 @@
 </pre></div>
 
 
-<h2>Mathematics, indexing and slicing</h2>
+<h2 id="mathematics-indexing-and-slicing">Mathematics, indexing and slicing<a class="headerlink" href="#mathematics-indexing-and-slicing" title="Permanent link">&para;</a></h2>
 <p>The basic mathematical and logical operations are the same implemented for the <code>Binary</code> class. Some tests have been added to check what happens when performing operations between two <code>SizeBinary</code> with a different size. We expect the result to have the size of the bigger of the two operands.</p>
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">test_binary_addition_int</span><span class="p">():</span>
     <span class="k">assert</span> <span class="n">SizeBinary</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">==</span> <span class="n">SizeBinary</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
@@ -183,9 +183,9 @@
 <p>Being very straightforward, I do not copy here all the tests written to cover this part, you will find them in the source code.</p>
 <p>Even the shift left operation now drops bits if there is not enough space for them, while the <code>Binary</code> class did it only for the shift right operation. For simplicity's sake I didn't implement a carry flag, i.e. there is no way to retrieve the bits shifted outside the available space. You are free to try and implement it, it's a good exercise but remember to write tests first!</p>
 <p>The indexing and slicing operations are basically the same as in the <code>Binary</code> case. The slicing operation produces a new <code>SizeBinary</code> with the correct size.</p>
-<h2>Implementation time!</h2>
+<h2 id="implementation-time">Implementation time!<a class="headerlink" href="#implementation-time" title="Permanent link">&para;</a></h2>
 <p>Now be a good OOP programmer and go, write a class that passes all the tests you find in the <a href="/code/python-oop-tdd-part2/test_size_binary.py">source code</a>. Just an advice, before you start headlong: being a <code>SizeBinary</code> mostly a <code>Binary</code> object with some new features it is recommended to use inheritance as the key delegation technique.</p>
-<h2>My solution</h2>
+<h2 id="my-solution">My solution<a class="headerlink" href="#my-solution" title="Permanent link">&para;</a></h2>
 <p>Following my own advice my <code>SizeBinary</code> class inherits from <code>Binary</code></p>
 <div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">binary</span> <span class="kn">import</span> <span class="n">Binary</span>
 
@@ -318,7 +318,7 @@
 
 
 <p>First of all I use the slicing function of the underlying <code>Binary</code> object which was already tested and correctly working. Then I compute the length of that result and act depending on the result.</p>
-<h2>Resources</h2>
+<h2 id="resources">Resources<a class="headerlink" href="#resources" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Wikipedia entries on <a href="https://en.wikipedia.org/wiki/Integer_overflow">integer overflow</a>, <a href="https://en.wikipedia.org/wiki/Signed_number_representations">signed number representations</a>, and <a href="https://en.wikipedia.org/wiki/Bitwise_operation">bitwise operations</a>.</li>
 </ul>
@@ -327,7 +327,7 @@
 <li>The full code of the <code>SizeBinary</code> class is <a href="/code/python-oop-tdd-part2/size_binary.py">here</a>, while the tests file is <a href="/code/python-oop-tdd-part2/test_size_binary.py">here</a>.</li>
 <li><a href="/code/python-oop-tdd-part2/binary.zip">Here</a> you find a zip file containing both source code files and the relative tests.</li>
 </ul>
-<h2>Feedback</h2>
+<h2 id="feedback">Feedback<a class="headerlink" href="#feedback" title="Permanent link">&para;</a></h2>
 <p>Feel free to use <a href="https://plus.google.com/u/0/111444750762335924049">the blog Google+ page</a> to comment the post. The <a href="http://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues">GitHub issues</a> page is the best place to submit corrections.</p>
         </section>
 

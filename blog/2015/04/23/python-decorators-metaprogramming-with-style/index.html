@@ -68,16 +68,16 @@
 
         <section id="content">
             <p>This post is the result of a lot of personal research on Python decorators, meta- and functional programming. I want however to thank Bruce Eckel and the people behind the open source book "Python 3 Patterns, Recipes and Idioms" for a lot of precious information on the subject. See the Resources section at the end of the post to check their work.</p>
-<h2>Is Python functional?</h2>
+<h2 id="is-python-functional">Is Python functional?<a class="headerlink" href="#is-python-functional" title="Permanent link">&para;</a></h2>
 <p>Well, no. Python is a strong object-oriented programming language and is not really going to mix OOP and functional like, for example, Scala (which is a very good language, by the way).</p>
 <p>However, Python provides <em>some</em> features taken from functional programming. <a href="/blog/2013/03/25/python-generators-from-iterators-to-cooperative-multitasking">Generators and iterators</a> are one of them, and Python is not the only non pure functional programming language to have them in their toolbox.</p>
 <p>Perhaps the most distinguishing feature of <a href="http://en.wikipedia.org/wiki/Functional_programming">functional languages</a> is that functions are first-class citizens (or first-class objects). This means that functions can be passed as an argument to other functions or can be returned by them. Functions, in functional languages, are just one of the data types available (even if this is a very rough simplification).</p>
 <p>Python has three important features that allows it to provide a functional behaviour: references, function objects and callables.</p>
-<h3>References</h3>
+<h3 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h3>
 <p>Python variables share a common nature: they are all references. This means that variables are not typed per se, being pure memory addresses, and that functions do not declare the incoming data type for arguments (leaving aside gradual typing). Python polymorphism is based on delegation, and incoming function arguments are expected to provide a given behaviour, not a given structure.</p>
 <p>Python functions are thus ready to accept every type of data that can be referenced, and functions can.</p>
 <p>Read <a href="/blog/2014/08/21/python-3-oop-part-4-polymorphism">this post</a> to dive into delegation-based polymorphism and references in Python.</p>
-<h2>Functions objects</h2>
+<h2 id="functions-objects">Functions objects<a class="headerlink" href="#functions-objects" title="Permanent link">&para;</a></h2>
 <p>Since Python pushes the object-oriented paradigm to its maximum, it makes a point of always following the tenet <em>everything is an object</em>. So Python functions are objects as you can see from this simple example</p>
 <div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">f</span><span class="p">():</span>
 <span class="gp">... </span> <span class="k">pass</span>
@@ -93,7 +93,7 @@
 
 
 <p>Given that, Python does nothing special to treat functions like first-class citizens, it simply recognizes that they are objects just like any other thing.</p>
-<h3>Callables</h3>
+<h3 id="callables">Callables<a class="headerlink" href="#callables" title="Permanent link">&para;</a></h3>
 <p>While Python has the well-defined <code>function</code> class seen in the above example, it relies more on the presence of the <code>__call__</code> method. That is, in Python any object can act as a function, provided that it has this method, which is invoked when the object is "called".</p>
 <p>This will be crucial for the discussion about decorators, so be sure that you remember that we are usually more interested in <em>callable objects</em> and not only in functions, which, obviously, are a particular type of callable objects (or simply <em>callables</em>).</p>
 <p>The fact that functions are callables can also be shown with some simple code</p>
@@ -105,16 +105,16 @@
 </pre></div>
 
 
-<h2>Metaprogramming</h2>
+<h2 id="metaprogramming">Metaprogramming<a class="headerlink" href="#metaprogramming" title="Permanent link">&para;</a></h2>
 <p>While this is not a post on languages theory, it is worth spending a couple of words about metaprogramming. Usually "programming" can be seen as the task of applying transformations to data. Data and functions can be put together by an object-oriented approach, but they still are two different things. But you soon realize that, as you may run some code to change data, you may also run some code to change the code itself.</p>
 <p>In low level languages this can be very simple, since at machine level everything is a sequence of bytes, and changing data or code does not make any difference. One of the most simple examples that I recall from my x86 Assembly years is the very simple self obfuscation code found is some computer viruses. The code was encrypted with a <a href="http://en.wikipedia.org/wiki/XOR_cipher">XOR cipher</a> and the first thing the code itself did upon execution was to decrypt its own code and then run it. The purpose of such tricks was (and is) to obfuscate the code such that it would be difficult for an antivirus to find the virus code and remove it. This is a very primitive form of metaprogramming, since it recognizes that for Assembly language there is no real distinction between code and data.</p>
 <p>In higher lever languages such as Python achieving metaprogramming is no more a matter of changing byte values. It requires the language to treat its own structures as data. Every time we are trying to alter the behaviour of a language part we are actually metaprogramming. The first example that usually comes to mind are metaclasses (probably due to the "meta" word in their name), which are actually a way to change the default behaviour of the class creation process. Classes (part of the language) are created by another part of the language (metaclasses).</p>
-<h2>Decorators</h2>
+<h2 id="decorators">Decorators<a class="headerlink" href="#decorators" title="Permanent link">&para;</a></h2>
 <p><a href="/blog/2014/09/01/python-3-oop-part-5-metaclasses">Metaclasses</a> are often perceived as a very tricky and dangerous thing to play with, and indeed they are seldom required in Python, with the most notable exception (no pun intended) being the <a href="/blog/2014/09/04/python-3-oop-part-6-abstract-base-classes">Abstract Base Classes</a> provided by the <code>collections</code> module.</p>
 <p>Decorators, on the other side, are a feature loved by many experienced programmers and after their introduction the community has developed a big set of very interesting use cases.</p>
 <p>I think that the first approach to decorators is often difficult for beginners because the functional version of decorators are indeed a bit complex to understand. Luckily, Python allows us to write decorators using classes too, which make the whole thing really easy to understand and write, I think.</p>
 <p>So I will now review Python decorators starting from their rationale, then looking at class-based decorators without arguments, class-based decorators with arguments, and finally moving to function-based decorators.</p>
-<h2>Rationale</h2>
+<h2 id="rationale">Rationale<a class="headerlink" href="#rationale" title="Permanent link">&para;</a></h2>
 <p>What are decorators, and why should you learn how to define and use them? </p>
 <p>Well, decorators are a way to change the behaviour of a function or a class, so they are actually a way of metaprogramming, but they make it a lot more accessible than metaclasses do. Decorators are, in my opinion, a very <em>natural</em> way of altering functions and classes.</p>
 <p>Moreover, with the addition of some syntactic sugar, they are a very compact way to both make changes and signal that those changes have been made.</p>
@@ -157,7 +157,7 @@
 
 
 <p>As you can see adding attributes to a class correctly results in a class attribute, which is thus shared by any instance of that class (check <a href="/blog/2014/08/20/python-3-oop-part-2-classes-and-members">this post</a> for some explanations about class attributes and sharing).</p>
-<h2>Class-based decorators without arguments</h2>
+<h2 id="class-based-decorators-without-arguments">Class-based decorators without arguments<a class="headerlink" href="#class-based-decorators-without-arguments" title="Permanent link">&para;</a></h2>
 <p>As already explained, Python allows you to call any object (as you do with functions) as long as it provides the <code>__call__()</code> method. So to write a class-based decorator you just need to create an object that defines such a method.</p>
 <p>When used as a decorator, a class is instantiated at decoration time, that is when the function is defined, and called when the function is called.</p>
 <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">CustomAttr</span><span class="p">:</span>
@@ -202,7 +202,7 @@
 
 
 <p>This replacement is also the reason why you shall also redefine <code>__call__()</code>. When you write <code>func()</code> you are not executing the function but calling the instance of <code>CustomAttr</code> returned by the decoration.</p>
-<h2>Class-based decorators with arguments</h2>
+<h2 id="class-based-decorators-with-arguments">Class-based decorators with arguments<a class="headerlink" href="#class-based-decorators-with-arguments" title="Permanent link">&para;</a></h2>
 <p>This case is the most natural step beyond the previous one. Once you started metaprogramming, you want to do it with style, and the first thing to do is to add parametrization. Adding parameters to decorators has the only purpose of generalizing the metaprogramming code, just like when you write parametrized functions instead of hardcoding values.</p>
 <p>There is a big caveat here. Class-based decorators with arguments behave in a slightly different way to their counterpart without arguments. Specifically, the <code>__call__()</code> method is run during the decoration and not during the call.</p>
 <p>Let us first review the syntax</p>
@@ -253,10 +253,10 @@
 
 
 <p>This pattern enables you to do every sort of things with the decorated object. Not only to change it (adding attributes, for example), but also pre- or post- filtering its results. You may start to understand that what we called metaprogramming may be very useful for everyday tasks, and not only for some obscure wizardry.</p>
-<h3>Decorators and prototypes</h3>
+<h3 id="decorators-and-prototypes">Decorators and prototypes<a class="headerlink" href="#decorators-and-prototypes" title="Permanent link">&para;</a></h3>
 <p>If you write a class-based decorator with arguments, you are in charge of returning a callable object of choice. There is no assumption on the returned object, even if the usual case is that the returned object has the same prototype as the decorated one.</p>
 <p>This means that if the decorated object accepts zero arguments (like in my example), you usually return a callable that accepts zero arguments. This is however by no means enforced by the language, and through this you may push the metaprogramming technique a bit. I'm not providing examples of this technique in this post, however.</p>
-<h2>Function-based decorators</h2>
+<h2 id="function-based-decorators">Function-based decorators<a class="headerlink" href="#function-based-decorators" title="Permanent link">&para;</a></h2>
 <p>Function-based decorators are very simple for simple cases and a bit trickier for complex ones. The problem is that their syntax can be difficult to grasp at first sight if you never saw a decorator. They are indeed not very different from the class-based decorators with arguments case, as they define a local function that wraps the decorated object and return it.</p>
 <p>The case without arguments is always the simplest one</p>
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">decorate</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
@@ -295,7 +295,7 @@
 </ul>
 <p>Obviously the power of the decorator concept is that you are not dealing with <code>func_dec()</code> but with <code>func()</code> itself, and all the "magic" happens under the hood.</p>
 <p>If you feel uncomfortable with function-based decorators don't worry, as they are indeed a bit awkward. I usually stick to function based decorators for the simple cases (setting class attributes, for example), and move to class-based ones when the code is more complex.</p>
-<h2>Example</h2>
+<h2 id="example">Example<a class="headerlink" href="#example" title="Permanent link">&para;</a></h2>
 <p>A good example of the power of decorators which comes out of the box is <code>functools.total_ordering</code>. The <code>functools</code> module provides a lot of interesting tools to push the functional approach in Python, most notably <code>partial()</code> and <code>partialmethod()</code>, which are however out of the scope of this post.</p>
 <p>The <code>total_ordering</code> decorator (documented <a href="https://docs.python.org/3.4/library/functools.html#functools.total_ordering">here</a>) wants to make an object provide a full set of comparison ordering methods starting from a small set of them. Comparison methods are those methods Python calls when two objects are compared. For example when you write <code>a == b</code>, Python executes <code>a.__eq__(b)</code> and the same happens for the other five operators <code>&gt;</code> (<code>__gt__</code>), <code>&lt;</code> (<code>__lt__</code>), <code>&gt;=</code> (<code>__ge__</code>), <code>&lt;=</code> (<code>__le__</code>) and <code>!=</code> (<code>__ne__</code>).</p>
 <p>Mathematically all those operators may be expressed using only one of them and the <code>__eq__()</code> method, for example <code>__ne__</code> is <code>!__eq__</code> and <code>__lt__</code> is <code>__le__ and !__eq__</code>. This decorator makes use of this fact to provide the missing methods for the decorated object. A quick example</p>
@@ -360,13 +360,13 @@
 </pre></div>
 
 
-<h2>Final words</h2>
+<h2 id="final-words">Final words<a class="headerlink" href="#final-words" title="Permanent link">&para;</a></h2>
 <p>Decorators are a very powerful tool, and they are worth learning. This may be for you just the first step into the amazing world of metaprogramming or just an advanced technique you may use to simplify your code. Whatever you do with them be sure to understand the difference between the two cases (with and without arguments) and don't avoid function-based decorators just because their syntax is a bit complex.</p>
-<h2>Resources</h2>
+<h2 id="resources">Resources<a class="headerlink" href="#resources" title="Permanent link">&para;</a></h2>
 <p>Many thanks to Bruce Eckel for <a href="http://www.artima.com/weblogs/viewpost.jsp?thread=240808">his three posts</a> which have been (I think) the source for the page on <a href="http://python-3-patterns-idioms-test.readthedocs.org/en/latest/PythonDecorators.html">Python 3 Patterns, Recipes and Idioms</a> (this latter is still work in progress). Update: as Bruce stated in a comment <a href="https://plus.google.com/110554719587236016835/posts/MKoPaxEvkxq">here</a> "the Python3 Patterns book is kind of a failed project". So beware that information contained there is not going to be updated. It is however still a good starting point for Python studies and investigations.</p>
 <p>A good source of advanced decorators can be found at the <a href="https://wiki.python.org/moin/PythonDecoratorLibrary">Python Decorator Library</a>, and a lot of stuff may be found on Stackoverflow under the <a href="http://stackoverflow.com/questions/tagged/python-decorators">python-decorators tag</a>.</p>
 <p><a href="https://github.com/GrahamDumpleton">Graham Dumpleton</a> wrote a very interesting a in-depth analysis of Python decorators <a href="https://github.com/GrahamDumpleton/wrapt/tree/develop/blog">here</a>.</p>
-<h2>Feedback</h2>
+<h2 id="feedback">Feedback<a class="headerlink" href="#feedback" title="Permanent link">&para;</a></h2>
 <p>Feel free to use <a href="https://plus.google.com/u/0/111444750762335924049">the blog Google+ page</a> to comment the post. The <a href="http://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues">GitHub issues</a> page is the best place to submit corrections.</p>
         </section>
 

@@ -68,7 +68,7 @@
         </section>
 
         <section id="content">
-            <h1>Introduction</h1>
+            <h1 id="introduction">Introduction<a class="headerlink" href="#introduction" title="Permanent link">&para;</a></h1>
 <p>Writing an interpreter or a compiler is usually considered one of the greatest goals that a programmer can achieve, and with good reason. I do not believe the importance of going through this experience is primarily due to its difficulty. After all, writing an efficient compiler is difficult, but the same is true for a good web framework, or a feature-rich editor.</p>
 <p>Being able to write an interpreter is a significant skill mainly because of its recursive (or self-referring) nature. Think about it: you use a language to write a new language. And this new language, if it becomes sufficiently rich, can eventually be used to create its own compiler.</p>
 <p><strong>A language can be used to write the program that executes that same language.</strong></p>
@@ -77,11 +77,11 @@
 <p>In this series of posts I want to try an experiment. I want to guide you through the creation of a simple interpreter in Python using a pure TDD (Test-Driven Development) approach. The posts will be structured like a game, where every level is represented by a new test that I will add to the suite. If you are not confident with TDD, you will find more on it in the specific section.</p>
 <p>Following this series you will learn about Python, compilers, interpreters, parsers, lexers, test-driven development, refactoring, coverage, regular expressions, classes, context managers. </p>
 <p>Are you ready to start?</p>
-<h1>On the TDD game</h1>
+<h1 id="on-the-tdd-game">On the TDD game<a class="headerlink" href="#on-the-tdd-game" title="Permanent link">&para;</a></h1>
 <p>This series of posts will introduce you to TDD with a sort of game. I'll give you the test, and you are supposed to write something that passes that test, finishing the level. This is the reason why I will not provide my solution in the same post as the tests, but in the following one. Let's say that this should help you resisting the temptation.</p>
 <p>My best advice for the TDD game is: remember that the easiest solution for a test that requires the output <code>A</code> is to write a function that returns exactly <code>A</code>.</p>
 <p><strong>Beautiful is better than ugly, but ugly and tested is better than beautiful and untested.</strong></p>
-<h1>About the language</h1>
+<h1 id="about-the-language">About the language<a class="headerlink" href="#about-the-language" title="Permanent link">&para;</a></h1>
 <p>At the time of writing the language we are going to implement is a simple calculator with support for <strong>integer</strong> and <strong>floats</strong>, <strong>binary operators</strong> (addition, subtraction, multiplication, division, and power), <strong>unary operators</strong> (negation), <strong>nested expressions</strong> (parentheses) and <strong>variables</strong>.</p>
 <p>The name <strong>smallcalc</strong> is a homage to one of the most innovative and influential languages ever conceived: <a href="https://en.wikipedia.org/wiki/Smalltalk">Smalltalk</a>.</p>
 <p>I do not know if the final version will be something richer, it depends on how much fun you will find in the series. So, if you are interested, just ask! You can drop a line of appreciation <a href="https://twitter.com/thedigicat">on Twitter</a>.</p>
@@ -96,14 +96,14 @@ line : assignment | expression
 
 
 <p>The syntax of the grammar is pretty self-explanatory if you have some programming background. If you want to know more about grammars like the one above start from the links in the resources section.</p>
-<h1>TDD and refactoring</h1>
+<h1 id="tdd-and-refactoring">TDD and refactoring<a class="headerlink" href="#tdd-and-refactoring" title="Permanent link">&para;</a></h1>
 <p>If you already know what TDD is feel free to skip this section.</p>
 <p><strong>TDD</strong> means <strong>Test-Driven Development</strong>, and in short it is a programming methodology that requires you to write a test for a feature before implementing the feature itself. Much has been said on the benefits of TDD elsewhere. I personally think it is one of the most effective ways to work on a programming task, and something that every programmer should know. I wrote a post on TDD with Python that you can find <a href="/blog/2015/05/13/python-oop-tdd-example-part1">here</a>.</p>
 <p>A <strong>test</strong>, in TDD, is code that uses the code you are going to develop. You will start with a project skeleton and add the tests I will present in the posts one at a time. Once you add the test, you have to write the code that passes the test. Your code doesn't need to be beautiful or smart, it just needs to pass the test. Then you can move to the following test and start the cycle again.</p>
 <p>After adding some tests you can start considering <strong>refactoring</strong>, which means changing the existing code in order to make it more beautiful, simpler or better organised. Every change has to be tested against the existing battery of tests. If the tests do not fail your change is correct, at least in terms of the behaviour that the tests are checking.</p>
 <p><strong>Coverage</strong> is the check of how much of your code is covered by your tests. We call some code "covered" by a test if executing the test makes that code run. So, for example, if you have a test (an <code>if</code> block) you should write two tests. One to cover the first option, and another to cover the second one. If you work with a strict TDD methodology your coverage is going to be always 100%, because you wrote just the code that makes the tests pass.</p>
 <p>You can find more on TDD on this blog <a href="/categories/tdd/">here</a>.</p>
-<h1>About the project</h1>
+<h1 id="about-the-project">About the project<a class="headerlink" href="#about-the-project" title="Permanent link">&para;</a></h1>
 <p>The main components of our interpreter are the following:</p>
 <ul>
 <li><strong>Token</strong>: a token is the minimal element of the language syntax, like an integer (not a digit, but a group of them), a name (not a letter but a group of them), or a symbol (like the mathematical operations).</li>
@@ -114,7 +114,7 @@ line : assignment | expression
 <li><strong>Command Line Interface (CLI)</strong>: the whole stack can be directly used by a REPL (Read, Evaluate, Print Loop), a command line interface similar to the one Python provides. There each line is lexed, parsed, and visited, and the result is printed immediately.</li>
 </ul>
 <p>I will provide two classes: <code>Token</code> and <code>TextBuffer</code>. These will avoid you spending too much time in creating the basic tools, and allow you to get straight into the game. Since those classes come obviously with their own test suites you are free to develop them on your own, however, starting from the same tests.</p>
-<h1>Initial setup</h1>
+<h1 id="initial-setup">Initial setup<a class="headerlink" href="#initial-setup" title="Permanent link">&para;</a></h1>
 <p>I prepared <a href="https://github.com/lgiordani/smallcalc">this repository</a>, which contains everything you need to start the project.</p>
 <div class="highlight"><pre><span></span>$ git clone https://github.com/lgiordani/smallcalc.git
 </pre></div>
@@ -139,7 +139,7 @@ pip install -r requirements/test.txt
 </pre></div>
 
 
-<h1>Tokens</h1>
+<h1 id="tokens">Tokens<a class="headerlink" href="#tokens" title="Permanent link">&para;</a></h1>
 <p>The first class that I provide to start working on our interpreter is <code>Token</code>.</p>
 <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Token</span><span class="p">:</span>
 
@@ -181,7 +181,7 @@ pip install -r requirements/test.txt
 <p>This represents one syntax unit in which we divide the input text. The token can contain information about its original position, which can be useful in case of syntax errors to print meaningful messages for the user. The class implements the <code>__eq__</code> method to provide comparison between tokens.</p>
 <p>The value of a token is always a string, and shall be converted into a different type by an external object according to the value that the token assumes. For example the string <code>'123'</code> can be interpreted as an integer, but could also be the name of a variable if our language supports such a feature.</p>
 <p>Remember that everything you find in this class has been introduced to make one or more tests pass, so check the test suite to understand how the object can be used.</p>
-<h1>Buffer</h1>
+<h1 id="buffer">Buffer<a class="headerlink" href="#buffer" title="Permanent link">&para;</a></h1>
 <p>The second element that you will find in the initial setup is the class <code>TextBuffer</code>, that provides a very basic manager for an input text</p>
 <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">EOLError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
 
@@ -260,14 +260,14 @@ pip install -r requirements/test.txt
 
 <p>As for the <code>Token</code> class you can read the tests to understand how to use the class. Basically, however, the class can <code>load()</code> an input text and extract the <code>current_line()</code>, the <code>current_char()</code>, and the <code>next_char()</code>. You can also <code>skip()</code> a given number of characters, <code>goto()</code> a given position, extract the current <code>position()</code> and read the <code>tail()</code>, which is the remaining text from the current position on.</p>
 <p>This class has not been optimized or designed to manage big files or continuous streams of text. This is perfectly fine for our current project, but be aware that for a real compiler you should implement a better file/memory management.</p>
-<h1>CLI</h1>
+<h1 id="cli">CLI<a class="headerlink" href="#cli" title="Permanent link">&para;</a></h1>
 <p>The third element we will need for the first part of the tutorial (that is, while we will deal with a simple calculator), is a simple Command Line Interface. For the moment is just echoes any text you will input, and gracefully exit when we press Ctrl+D. There are and there will be no tests for the CLI. Testing endpoints like this is complex and not always worth the effort, as in this case.</p>
 <p>The command line can be run from the project main directory with</p>
 <div class="highlight"><pre><span></span>python cli.py
 </pre></div>
 
 
-<h1>Level 1 - End of file</h1>
+<h1 id="level-1-end-of-file">Level 1 - End of file<a class="headerlink" href="#level-1-end-of-file" title="Permanent link">&para;</a></h1>
 <p><em>"End? No, the journey doesn't end here."</em></p>
 <p>The first thing a Lexer shall be able to do is to load and process an empty text. This should return an <code>EOF</code> token (which stands for "End of File"). <code>EOF</code> is used to signal that the input buffer has ended and that there is no more text to process.</p>
 <p>The <code>get_tokens()</code> method returns all the tokens of the input stream in a single list.</p>
@@ -304,14 +304,14 @@ tests/test_calc_lexer.py:6: <span class="nv">AttributeError</span>
 <p>Implement now a class <code>CalcLexer</code> in the file <code>smallcalc/calc_lexer.py</code> that makes the test pass. Remember that you just need the code to pass this test. So do not implement complex systems now and go for the simplest solution (hint: the test expects that specific output...).</p>
 <p>The <code>EOF</code> constant can be a simple string with the <code>'EOF</code> value.</p>
 <p>It is worth executing the test suite with coverage (check the command line above), which will tell you if you overengineered your code. You should aim for 100% coverage, always.</p>
-<h1>Level 2 - Single digit integers</h1>
+<h1 id="level-2-single-digit-integers">Level 2 - Single digit integers<a class="headerlink" href="#level-2-single-digit-integers" title="Permanent link">&para;</a></h1>
 <p><em>"You're missing just a couple of digits there."</em></p>
 <div class="highlight"><pre><span></span># The only accepted value for the input is one single digit between 0 and 9
 integer: [0-9]
 </pre></div>
 
 
-<h2>Lexer</h2>
+<h2 id="lexer">Lexer<a class="headerlink" href="#lexer" title="Permanent link">&para;</a></h2>
 <p>Since a calculator has to deal with numbers let us implement support for integers (we will add floating point numbers later). The first thing that we need is to recognise single-digit integers. This is the test that you have to add to <code>tests\test_calc_lexer.py</code></p>
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">test_get_token_understands_integers</span><span class="p">():</span>
     <span class="n">l</span> <span class="o">=</span> <span class="n">clex</span><span class="o">.</span><span class="n">CalcLexer</span><span class="p">()</span>
@@ -339,7 +339,7 @@ integer: [0-9]
 <p>Please note that now the lexer shall output both an <code>EOF</code> and an <code>EOL</code> token, as the current line of code ends. The biggest issue you have to face here is that when you recognise a token you have to skip it in the original text.</p>
 <p>After this test you may end up with some code duplication, as <code>get_token()</code> and <code>get_tokens()</code> perform similar tasks. If you didn't already use the first one in the second it could be worth doing some refactoring. Remember: as long as the tests pass your changes are correct!</p>
 <p>If you refactor the code creating helper methods you should make them "private" by prefixing their name with an underscore. This also means that you do not need to test them, in principle (watch <a href="https://www.youtube.com/watch?v=URSWYvyc42M">this talk</a> by Sandy Metz on this subject).</p>
-<h2>Parser</h2>
+<h2 id="parser">Parser<a class="headerlink" href="#parser" title="Permanent link">&para;</a></h2>
 <p>Now that we have a working lexer that recognises integers let us work on the parser. This has to use the lexer to process a text and produce a tree of nodes that represent the syntactic structure of the processed code. Don't worry if it seems extremely complex, it is actually pretty simple if you follow the tests.</p>
 <p>Edit the <code>tests/test_calc_parser.py</code> file and insert this code</p>
 <div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">smallcalc</span> <span class="kn">import</span> <span class="n">calc_parser</span> <span class="k">as</span> <span class="n">cpar</span>
@@ -360,7 +360,7 @@ integer: [0-9]
 
 <p>The <code>node</code> variable is an instance of a specific class that contains integers, <code>IntegerNode</code> (but you are free to name it as you want, as this is not tested). Please note that this class doesn't consider the value as a string any more, but as a proper (Python) integer. Now edit the file <code>smallcalc/calc_parser.py</code> and write some code that passes the test.</p>
 <p>Does it work? Well, you just wrote your first parser! Congratulations! From here to something that understands C++ or Python the journey is pretty long, but the initial steps are promising.</p>
-<h2>Visitor</h2>
+<h2 id="visitor">Visitor<a class="headerlink" href="#visitor" title="Permanent link">&para;</a></h2>
 <p>Let us consider the visitor, now. This is the run-time component of our language, the part that actually runs through the tree of nodes and executes it. This part, thus, is where most of the actual behaviour of the language happens. For instance, the fact that the symbol "+" actually sums integers is because the visitor implements that operation.</p>
 <p>This can seem a trivial consideration, but if you think about the division between integers you immediately understand that the visitor has a great responsibility. Does the symbol <code>/</code> divide integers with or without floating point math? Python 3, for instance, opted for a floating point division, and introduced the <code>//</code> operator for the integer version of the operation, but other languages behave differently.</p>
 <p>I'll discuss further about this later when we will implement mathematical operations. For the moment being, let us create the <code>tests/test_calc_visitor.py</code> file and introduce the following test</p>
@@ -419,7 +419,7 @@ smallcalc :&gt; <span class="m">3</span>
 
 
 <p>Let me recap what we just created. We wrote a lexer, which is a component that splits the input text in different tokens with a meaning, and we instructed it to react to single-digits integers. Then, we created a parser, which is the component that tries to make sense of several tokens put together, applying syntactical rules. Last, the visitor runs through the output of the parser and actually performs the actions that the grammar describes. All this to just print out an integer? Seems overkill! It is, actually, but there is a lot to come, and this separation of levels will come handy.</p>
-<h1>Level 3 - Binary operations: addition</h1>
+<h1 id="level-3-binary-operations-addition">Level 3 - Binary operations: addition<a class="headerlink" href="#level-3-binary-operations-addition" title="Permanent link">&para;</a></h1>
 <p><em>"You're about to become a permanent addition to this archaeological find."</em></p>
 <div class="highlight"><pre><span></span>integer: [0-9]
 # Label the symbol &#39;+&#39;&#39; with the name &#39;addsymbol&#39;
@@ -539,7 +539,7 @@ smallcalc :&gt; <span class="m">2</span>+4
 
 <p>Everything? Well, not exactly. If I type just a single integer in the CLI the whole program crashes with and exception. (If your solution doesn't blow up it means that you (probably) overengineered it a little. This is fine, but if you had implemented just what was needed to pass the tests the result would have been an error.)</p>
 <p>Why do we have an error? Because we now parse the input with <code>parse_expression()</code> and this method expects its input to be a full-formed expression, not a single integer. Generally speaking, our parser's entry point should be able to parse different syntax structures. We will improve this behaviour later, when we will address the problem of nested expressions.</p>
-<h1>Level 4 - Multi-digit integers</h1>
+<h1 id="level-4-multi-digit-integers">Level 4 - Multi-digit integers<a class="headerlink" href="#level-4-multi-digit-integers" title="Permanent link">&para;</a></h1>
 <p><em>"So many."</em></p>
 <div class="highlight"><pre><span></span># An integer is a sequence of digits, + here means `one or more`
 integer: [0-9]+
@@ -565,7 +565,7 @@ expression: integer addsymbol integer
 <p>There are many ways to solve this problem, one of the simplest (and a perfectly valid one) is using regular expressions (which are, if you think about it, another language).</p>
 <p>If you do not know how to use regular expressions do yourself a favour and learn them! You can find a nice tutorial on them at <a href="https://regexone.com/">RegexOne</a>. If you already know the syntax and don't know how to use them in Python <a href="https://developers.google.com/edu/python/regular-expressions">this Google for Education page</a> and the <a href="https://docs.python.org/3/howto/regex.html">official documentation</a> are your friends.</p>
 <p>After this test the CLI should be able to handle expressions like <code>123+456</code>. We don't need any change in the parser and in the visitor, can you tell why?</p>
-<h1>Level 5 - Whitespaces</h1>
+<h1 id="level-5-whitespaces">Level 5 - Whitespaces<a class="headerlink" href="#level-5-whitespaces" title="Permanent link">&para;</a></h1>
 <p><em>"Follow the white rabbit."</em></p>
 <div class="highlight"><pre><span></span>integer: [0-9]+
 addsymbol: &#39;+&#39;
@@ -591,7 +591,7 @@ expression: integer addsymbol integer
 
 
 <p>While you change the <code>CalcLexer</code> class to make it pass this test, ask yourself if the current structure of the class satisfies you or if it is the right time to refactor it, possibly even heavily rewriting some parts of it. You have a good test suite, now, so you can be sure that what you implemented is correct, at least according to the current requirements.</p>
-<h1>Level 6 - Subtraction</h1>
+<h1 id="level-6-subtraction">Level 6 - Subtraction<a class="headerlink" href="#level-6-subtraction" title="Permanent link">&para;</a></h1>
 <p><em>"I can add, subtract. I can make coffee. I can shuffle cards."</em></p>
 <div class="highlight"><pre><span></span>integer: [0-9]+
 # An addsymbol can be the symbol &#39;+&#39; or the symbol &#39;-&#39;
@@ -680,7 +680,7 @@ smallcalc :&gt; <span class="m">4</span> - <span class="m">6</span>
 
 
 <p>and since we rely on Python to perform the actual subtraction we get negative numbers for free. Pay attention: we can have negative numbers in the results, but we cannot input negative numbers. This is something that we will have to add later.</p>
-<h1>Level 7 - Multiple operations</h1>
+<h1 id="level-7-multiple-operations">Level 7 - Multiple operations<a class="headerlink" href="#level-7-multiple-operations" title="Permanent link">&para;</a></h1>
 <p><em>"The machine simply does not operate as expected."</em></p>
 <div class="highlight"><pre><span></span>integer: [0-9]+
 addsymbol: &#39;+&#39; | &#39;-&#39;
@@ -810,7 +810,7 @@ expression: integer (addsymbol expression)
 
 
 <p>What changes do you need to make to the <code>CalcVisitor</code> class? Why?</p>
-<h1>Resources</h1>
+<h1 id="resources">Resources<a class="headerlink" href="#resources" title="Permanent link">&para;</a></h1>
 <p>Some links on compilers history</p>
 <ul>
 <li><a href="http://gcc.gnu.org/wiki/History">GCC history</a></li>
@@ -829,13 +829,13 @@ expression: integer (addsymbol expression)
 <li><a href="https://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_form">Extended Backus-Naur form on Wikipedia</a></li>
 <li><a href="http://matt.might.net/articles/grammars-bnf-ebnf/">The language of languages</a></li>
 </ul>
-<h1>Solution</h1>
+<h1 id="solution">Solution<a class="headerlink" href="#solution" title="Permanent link">&para;</a></h1>
 <p>You can find my solution to this part <a href="/blog/2017/07/12/a-game-of-tokens-solution-part-1/">here</a>.</p>
-<h1>Titles</h1>
+<h1 id="titles">Titles<a class="headerlink" href="#titles" title="Permanent link">&para;</a></h1>
 <p>The section quotes come from some good movies, the complete list is: "The Lord of the Rings - The Return of the King" (2003), "Iron Man" (2008), "Raiders of the Lost Ark" (1981), "Braveheart" (1995), "The Matrix" (1999), "The Bourne Identity" (2002), "The Prestige" (2006).</p>
-<h1>Updates</h1>
+<h1 id="updates">Updates<a class="headerlink" href="#updates" title="Permanent link">&para;</a></h1>
 <p>2017-12-24: Victor Uriarte (<a href="https://github.com/vmuriart">vmuriart</a>) spotted an important issue in a previous version of the post. The last two tests (<code>test_parse_expression_with_multiple_operations</code> and <code>test_visitor_expression_with_multiple_operations</code>) used a right-growing tree instead of a left-growing one. The problem with a right-growing tree is that an operator affects <em>everything</em> is on the right side, that is the whole rest of the operation. Thus, an operation like <code>10 - 1 + 1</code> would become <code>10 - (1 + 1)</code>, and the result is obviously different. I fixed the tests and the solution I give in the next posts. You can read Victor's issue <a href="https://github.com/lgiordani/smallcalc/issues/4">here</a>. Thanks Victor for spotting it!</p>
-<h1>Feedback</h1>
+<h1 id="feedback">Feedback<a class="headerlink" href="#feedback" title="Permanent link">&para;</a></h1>
 <p>Feel free to use <a href="https://plus.google.com/u/0/111444750762335924049">the blog Google+ page</a> to comment the post. Feel free to reach me on <a href="https://twitter.com/thedigicat">Twitter</a> if you have questions. The <a href="http://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues">GitHub issues</a> page is the best place to submit corrections.</p>
         </section>
 

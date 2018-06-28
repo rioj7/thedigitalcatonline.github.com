@@ -68,19 +68,19 @@
         </section>
 
         <section id="content">
-            <h2>Introduction</h2>
+            <h2 id="introduction">Introduction<a class="headerlink" href="#introduction" title="Permanent link">&para;</a></h2>
 <p>In this third issue we move on uncovering how generators can be the foundation of a cooperative multitasking system and show some code that implements it. Before we face this topic we will talk shortly about another interesting use of generators, namely generator expressions chains.</p>
-<h2>Chaining generator expressions</h2>
+<h2 id="chaining-generator-expressions">Chaining generator expressions<a class="headerlink" href="#chaining-generator-expressions" title="Permanent link">&para;</a></h2>
 <p>At PyCon 2008 David M. Beazley, author of “Python Essential Reference”, made a very interesting speech about the use of generators in system administration, in other words where usually more or less complex bash scripts are involved and in particular where long pipe sequences are used.</p>
 <p>David starts from the consideration that generators, producing one element at a time, are chainable, that is a generator expression can encompass another generator expression and so on. This way he shows how to write in a very compact and reusable way components that can act as “filters” on a data set, thus following the Unix philosophy of building tools that “do one thing and do it well”, chaining them afterwards to get the needed behaviour.</p>
 <p>The slides of this presentation are freely downloadable, so I suggest the interested reader to take a look at it at the following address: <a href="http://www.dabeaz.com/generators-uk/">Generator Tricks for Systems Programmers</a>.</p>
-<h2>Microthread: cooperative multitasking</h2>
+<h2 id="microthread-cooperative-multitasking">Microthread: cooperative multitasking<a class="headerlink" href="#microthread-cooperative-multitasking" title="Permanent link">&para;</a></h2>
 <p><em>Disclaimer: the concepts and code presented here have been heavily influenced by the Kamaelia project. You can find it <a href="http://www.kamaelia.org">here</a>.</em></p>
 <p>Let us move forward to see how (Python) generators allow us to easily build applications based on the concept of cooperative multitasking. I assume the reader is familiar with the concepts of preemption and thread-based multitasking and is aware of the pro and cons of such solutions.</p>
 <p><strong>Cooperative multitasking</strong> allows an application to hold the control of the CPU for an arbitrary time lapse, waiting for it to voluntarily release the resource to the scheduler. This is a major break with the modern approach to multitasking, where the scheduler is in charge of stopping and resuming applications without any previous agreement with them.</p>
 <p>Since application can now stop on their own initiative every issue related to shared data protection, atomicity and synchronization is greatly simplified if not removed. Applications need however a mechanism to stop running, save their internal state and later resume from the same point.</p>
 <p>Generators, indeed, through the <code>yield</code> statement implement this very behaviour, thus they may be used to create a system based on cooperative multitasking, where processes are now called <strong>microthreads</strong> to highlight that they are a lightweight form of thread.</p>
-<h4>Microthreads</h4>
+<h4 id="microthreads">Microthreads<a class="headerlink" href="#microthreads" title="Permanent link">&para;</a></h4>
 <p>Let’s look at a simple implementation of such a system. First of all we need a <code>MicroThread</code> object, i.e. an object that can run simultaneously with other similar objects, but in a cooperative way.</p>
 <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MicroThread</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -136,7 +136,7 @@
 
 
 <p>Since <code>main()</code> is a generator function it must act as any generator and signal its exhaustion rising a <code>StopIteration</code> exception. The overridden <code>step()</code> method, thus, may raise this exception at any point (even multiple ones) to terminate the microthread.</p>
-<h4>Scheduler</h4>
+<h4 id="scheduler">Scheduler<a class="headerlink" href="#scheduler" title="Permanent link">&para;</a></h4>
 <p>Now we need a scheduler, i.e. the system component that manages running tasks. While in a true multitasking system the scheduler is a big and complex component, in a cooperative environment it can be rather simple: its job is to execute each task and wait till they give control back. In between a task and the following the scheduler can execute other functions, but its basic workflow is very straightforward. Obviously the scheduler shall handle the <code>StopIteration</code> exception possibly raised by a task, removing it from the list of running microthreads.</p>
 <p>The core of the scheduler will be something like the following:</p>
 <div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">thread</span> <span class="ow">in</span> <span class="n">active_microthreads</span><span class="p">:</span>
@@ -221,7 +221,7 @@ Number: <span class="m">3</span>
 
 <p>The three microthreads are executed in a round-robin fashion, as expected from a cooperative multitasking system.</p>
 <p>Note: while all microthreads showed in this article just execute <code>yield 1</code> to freeze the code, <code>yield</code> can return any object, just like the <code>return</code> statement does, and this could be exploited to enhance the communication between microthreads and scheduler.</p>
-<h4>Microschedulers</h4>
+<h4 id="microschedulers">Microschedulers<a class="headerlink" href="#microschedulers" title="Permanent link">&para;</a></h4>
 <p>The scheduler could however be more flexible, specifically it could be converted to a microthread itself. The scheduler, when executed, will return a generator, and each call of its <code>next()</code> method will run one of its microthreads. After this the scheduler will freeze and give control back.</p>
 <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MicroScheduler</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -282,11 +282,11 @@ Number: <span class="m">3</span>
 
 <p><a href="/code/python-generators/test_mscheduler.py">source code</a></p>
 <p>This example is obviously very simple. However it shows how simple it is to build components of a cooperative system and let them live together in an execution space. Executing the scheduler in a different way, for example inside another generator, new microthreads can also be added live. This allows to instance system components on the fly to manage specific needs, such as incoming service requests.</p>
-<h2>Conclusions</h2>
+<h2 id="conclusions">Conclusions<a class="headerlink" href="#conclusions" title="Permanent link">&para;</a></h2>
 <p>Obviously this sort of multitasking cannot provide an interactive execution like that used on our desktop OS or on a Web server, where human users must receive an immediate feedback of their actions. But for systems where task must simply be simultaneously executed without timing needs cooperative multitasking is a valuable solution, due to its simplicity.</p>
 <p>Another interesting scenario is that of a real multitasking system (ruled by threaded code or by the OS itself) where each task is made of small cooperating components. This way putting multiple functionalities inside a single component becomes a breeze; the code of each functionality could also be splitted in several plugins and loaded on demand.</p>
 <p>A package that implements cooperative multitasking with generator based microthreads is <a href="http://www.kamaelia.org">Kamaelia</a>, and this article has been heavily inspired by it. Other solutions you can find interesting are <a href="http://pypi.python.org/pypi/greenlet">greenlet</a>, presently the most used microthread Python library that runs on the standard unmodified Python interpreter and <a href="http://www.stackless.com/">Stackless Python</a>, a fork of Python that natively implements microthreads.</p>
-<h2>Updates</h2>
+<h2 id="updates">Updates<a class="headerlink" href="#updates" title="Permanent link">&para;</a></h2>
 <p>2014-02-17: <a href="https://twitter.com/entropiae">Riccardo</a> spotted an error in the example code after <code>mthread.py</code> and submitted the correct version. Thanks!</p>
         </section>
 

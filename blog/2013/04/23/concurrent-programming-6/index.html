@@ -68,18 +68,18 @@
         </section>
 
         <section id="content">
-            <h2>Abstract</h2>
+            <h2 id="abstract">Abstract<a class="headerlink" href="#abstract" title="Permanent link">&para;</a></h2>
 <p>Issue 5 of this series ended with a small program where two processes exchanged ten numbers through a message queue, thus being a synchronized producer-consumer couple. This time I am going to show and comment the code of a very simple communication simulator written in C. The code leverages IPC queues to allow multiple processes to talk each other while running concurrently.</p>
-<h2>The simulator</h2>
+<h2 id="the-simulator">The simulator<a class="headerlink" href="#the-simulator" title="Permanent link">&para;</a></h2>
 <p>The program simulates a messaging switch, where multiple users (child processes) connect to a central switch (parent process) and send text messages (SMS-like) to other users through it. The switch receives messages and route them if the recipient is reachable (process is running). Moreover, the switch can perform a timing operation on a user, checking how much time the user needs to answer a message, or select it for termination. Last, the switch counts how many times a user sends a message to an unreachable user and when a threshold is reached terminates it. Switch and user decisions are taken extracting pseudo-random numbers and comparing them with thresholds given on the command line. Remember that the simulation wants to demonstrate a concrete use of message queues and does not claim to be a complete communication system between processes.</p>
-<h2>10,000 feet overview</h2>
+<h2 id="10000-feet-overview">10,000 feet overview<a class="headerlink" href="#10000-feet-overview" title="Permanent link">&para;</a></h2>
 <p>I splitted the simulator in 3 parts, namely two stacked layers of function and the main application code. The first layer implements the message structure, provides functions to interact with it (getters and setters), exports basic functions to manage queues and to send and receive messages. The second layer exports functions that implement the protocol, i.e. the actions users and switch can perform. Last, the main function contains the actual logic of the whole simulation. Due to the instructional purpose of the simulation some of the solution implemented are far from optimal or even correct (e.g. random numbers management); I suggest you to try to evolve the simulation, adding new services or messages between users.</p>
-<h2>Debugging nightmares</h2>
+<h2 id="debugging-nightmares">Debugging nightmares<a class="headerlink" href="#debugging-nightmares" title="Permanent link">&para;</a></h2>
 <p>Be ready to spend some time debugging your multiprocessing applications! If you ever debugged some code, you know that the most friendly bugs are by far those which are reproducible: you only need to add some debugging output or step through the code with the debugger and the bug is spotted. Multiprocessing and network application are at the very opposite corner: most of the time the bugs in that sort of applications are very difficult to reproduce, when not impossible. The concurrent execution of multiple processes, indeed, makes every execution unique, since the actual execution sequence is random (random means that it is the result of so many factors that the result is unpredictable and thus irreproducible). Network programs suffers from the same problems (concurrent execution), worsened by network lags that add a factor of randomness.</p>
-<h2>Code and analysis</h2>
+<h2 id="code-and-analysis">Code and analysis<a class="headerlink" href="#code-and-analysis" title="Permanent link">&para;</a></h2>
 <p>I am not going to include the whole code of the layers directly in the post text as they are a straightforward implementation of what was presented in the previous articles; the code of the main application is, on the contrary, analyzed block by block. The links to the source files are at the end of the article, together with compilation instructions.</p>
-<h2>Layer 1</h2>
-<h4>Message structure</h4>
+<h2 id="layer-1">Layer 1<a class="headerlink" href="#layer-1" title="Permanent link">&para;</a></h2>
+<h4 id="message-structure">Message structure<a class="headerlink" href="#message-structure" title="Permanent link">&para;</a></h4>
 <p>The structure of the message is</p>
 <div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="k">struct</span>
 <span class="p">{</span>
@@ -99,7 +99,7 @@
 
 
 <p>Here, <code>sender</code> and <code>recipient</code> are numbers that identify the switch and the users (0 is the switch, then users are numbered increasingly when they connect to the switch); <code>text</code> is the content of a message a user sends to another user, and is 160 characters long to mimic SMS behaviour. Last <code>service</code> is the identifier of some system operation, like a request the switch sends to the users; <code>service_data</code> carries the optional data the service needs to communicate. Actual services are implemented in layer 2 and I am going to describe them later.</p>
-<h4>Other functions</h4>
+<h4 id="other-functions">Other functions<a class="headerlink" href="#other-functions" title="Permanent link">&para;</a></h4>
 <p>Layer 1 exposes many functions: some are simple set and get functions to deal with the message structure while five simplify access to IPC structures; <code>build_key()</code> makes an IPC key from a given character, <code>create_queue()</code> and <code>remove_queue()</code> manage IPC queues and last <code>send_message()</code> and <code>receive_message()</code> give a simple way to route messages.</p>
 <p>A very simple error management code has been introduced here: C language does not allow to use exceptions, so errors have to be managed by functions or returned through the <code>return</code> statement. A solid error management in C is outside the scope of this article, so here you will find the bare minimum.</p>
 <p>The error management of <code>receive_message()</code> needs a little explanation.</p>
@@ -123,21 +123,21 @@
 
 
 <p>Here, <code>msgrcv()</code> fails even when there are no messages of the given type, producing a <code>ENOMSG</code> error. This is the reason why that case has been ignored through the <code>if(errno == ENOMSG)</code> construct.</p>
-<h2>Layer 2</h2>
-<h4>The protocol</h4>
+<h2 id="layer-2">Layer 2<a class="headerlink" href="#layer-2" title="Permanent link">&para;</a></h2>
+<h4 id="the-protocol">The protocol<a class="headerlink" href="#the-protocol" title="Permanent link">&para;</a></h4>
 <p>Layer2 implements the actual communication protocol between the switch and the users. Users send text messages to other users, and those messages are routed by the switch. Users and switch can also send service messages; those are messages encompassing information used to manage the system. </p>
 <p>Every user, when spawned, initializes a queue, connects to the switch and communicates the queue id. Since the queues can contain old unread messages, it is necessary to empty them before the use. Each user enters a loop where it sleeps a while, receives service messages, sends messages and last receives text messages. At the same time, the switch collects queue ids, routes text messages from the sender to the recipient and sometimes sends a service request to a user.</p>
 <p>The services the switch can request from users are to terminate and to test the answering time. Both can be requested on a probability base, but the first is also forced when the user sends too many messages to unreachable recipients.</p>
 <p>The answering time test is performed in a simple way: the switch requests the service and records the time of the request. The user answers with a message that contains the time at which it received the request and the switch computes the difference between the two. Pay attention that both the timing service and the random number extraction used to request services on a probability base are not exact; the code works but is good only for a demonstration system.</p>
 <p>I defined some useful constants in the header file: <code>MAX_SLEEP</code> is the maximum number of seconds a user waits before performing an action while <code>TYPE_SERVICE</code> and <code>TYPE_TEXT</code> identify the type of message. The defines which name starts with <code>SERVICE_</code> list all the possible services: <code>SERVICE_TERMINATE</code> forces a user to quit; <code>SERVICE_TIME</code> makes it perform a timing operation; <code>SERVICE_CONNECT</code> and <code>SERVICE_DISCONNECT</code> tell the switch a new user has connected or disconnected; <code>SERVICE_QID</code> bears the identifier of the user queue to the switch; <code>SERVICE_UNREACHABLE_DESTINATION</code> communicates a user that the recipient of a message is no more online.</p>
-<h4>Queues</h4>
+<h4 id="queues">Queues<a class="headerlink" href="#queues" title="Permanent link">&para;</a></h4>
 <p>Two functions are dedicated to queues, <code>init_queue()</code> and <code>close_queue()</code>. The first builds an IPC key from a given number (previously converting it to a char) and runs the <code>create_queue()</code> function from layer 1. Because of the char conversion the range of integers it can accept is 0-255, and for simplicity's sake there is no check in the whole code that a queue key has not yet been assigned. For this example, I am simply leveraging that different numbers return different keys and, thus, queues.</p>
 <p>The second function closes the queue running the <code>remove_queue()</code> function from layer 1. The underlying system calls are not used directly to allow the future introduction of checks on the assigned queues.</p>
-<h4>User functions</h4>
+<h4 id="user-functions">User functions<a class="headerlink" href="#user-functions" title="Permanent link">&para;</a></h4>
 <p>Users have five functions that implement their part of the protocol. Two functions communicate to the switch that the user connected or disconnected, namely <code>user_send_connect()</code> and <code>user_send_disconnect()</code>; both carry the <code>sender</code> id and the switch id <code>sw</code>, which however in the main program is always 0. The <code>user_send_qid()</code> function communicates to the switch the queue id of the user; <code>user_send_text_message()</code> sends a string of text to another user and <code>user_send_time()</code> answers the timing service.</p>
-<h4>Switch functions</h4>
+<h4 id="switch-functions">Switch functions<a class="headerlink" href="#switch-functions" title="Permanent link">&para;</a></h4>
 <p>The switch can execute <code>switch_send_text_message()</code> to deliver a text message sent by a user; <code>switch_send_terminate()</code> to ask a user to terminate; <code>switch_send_time()</code> to ask a user to perform a timing service.</p>
-<h4>Code analysis</h4>
+<h4 id="code-analysis">Code analysis<a class="headerlink" href="#code-analysis" title="Permanent link">&para;</a></h4>
 <p>Now I will briefly review the whole application code to better explain the different parts of the system. Please remember that this is a demonstration system so many choices have been made for simplicity's sake.</p>
 <div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp"></span>
 <span class="cp">#include</span> <span class="cpf">&lt;stdlib.h&gt;</span><span class="cp"></span>
@@ -512,7 +512,7 @@
 
 
 <p>When there are no incoming messages the switch checks if the number of dead processes is equal to the number of users; when this happens the switch waits for each child process (to avoid zombie processes), removes its queue and terminates.</p>
-<h2>Files and compilation</h2>
+<h2 id="files-and-compilation">Files and compilation<a class="headerlink" href="#files-and-compilation" title="Permanent link">&para;</a></h2>
 <p>The 5 files of this small program can be downloaded here:</p>
 <ul>
 <li><a href="/code/ipc_demo/layer1.h">layer1.h</a></li>
@@ -532,7 +532,7 @@
 
 
 <p>Remember that the output lines of the processes are mixed and generally not in order; indeed, you can find the answer of a user printed before the switch request. Timestamps can help you find the right order, but the resolution of the <code>time()</code> function is a second, and in such a time span many messages can be sent.</p>
-<h2>Conclusions</h2>
+<h2 id="conclusions">Conclusions<a class="headerlink" href="#conclusions" title="Permanent link">&para;</a></h2>
 <p>This article ends by now this little series on concurrent programming in C and IPC structures. As you can see C is not the best language to implement concurrent programming concepts, due to its very low level nature. However, since many OSs are written in C (and/or C++) knowledge of the way this language can provide concurrent execution is useful.</p>
 <p>There is much left to say about concurrent programming structures: atomicity, mutual exclusions, threads, monitors are just some of the most important. I will post new articles on such topics in the future, perhaps showing their implementation in other languages.</p>
         </section>

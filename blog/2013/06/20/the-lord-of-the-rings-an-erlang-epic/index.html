@@ -67,16 +67,16 @@
         </section>
 
         <section id="content">
-            <h2>Abstract</h2>
+            <h2 id="abstract">Abstract<a class="headerlink" href="#abstract" title="Permanent link">&para;</a></h2>
 <p>One of the first really challenging problems an Erlang novice must face is the classical process ring, which can be found around the Internet and most notably in "Erlang Programming" by Cesarini and Thompson (page 115).</p>
 <p>Its formulation may vary, but the core of it requires the programmer to design and implement a closed ring of processes, to make them pass a given number of messages each other and then terminate gracefully.</p>
 <p>I try here to give an in-depth analysis of the matter, to point out some of the most interesting issues of this exercise. I strongly suggest the Erlang novice to try and solve the exercise before looking at the solutions proposed here.</p>
-<h2>Linking processes</h2>
+<h2 id="linking-processes">Linking processes<a class="headerlink" href="#linking-processes" title="Permanent link">&para;</a></h2>
 <p>The aim of the exercise is to build a chain of processes that exchange messages. This latter specification is important since we are required to connect our processes with the only purpose of sending messages and we know that, in Erlang, a process may send a message to another process simply by knowing its pid.</p>
 <p>Actual linking between processes, in Erlang, has the aim of making them exchange <em>exit signals</em>; links are thus a mean to control the way the system collapses (or not) when a process crashes. The processes in the ring will thus be linked to ensure that when one of them exits all other processes will be terminated, but this has nothing to do with the ring itself.</p>
 <p>The point is to let a process know how to send a message to the next one, forming a chain. This chain, then, is closed, i.e. the last process sends messages to the first one.</p>
 <p>There are two main strategies that can be leveraged to get the ring build and behave in a correct way: the <strong>master process</strong> approach and the <strong>recursive</strong> one. For each of the two, I am going to present and analyze the following steps: a ring of processes with <strong>no message</strong> exchange, a ring with <strong>a single message</strong> travelling through it, a ring with <strong>multiple messages</strong> and a ring that exposes a <strong>functional interface</strong> to send messages.</p>
-<h2>Debugging</h2>
+<h2 id="debugging">Debugging<a class="headerlink" href="#debugging" title="Permanent link">&para;</a></h2>
 <p>Debugging concurrent applications is everything but simple. For this exercise, it is however enough to get simple information about which process is forwarding which message. To allow a simple removal of debug prints a very small macro has been included in the file <code>debug.hrl</code>, activated by the definition of <code>debug</code>.</p>
 <div class="highlight"><pre><span></span><span class="p">-</span><span class="ni">ifdef</span><span class="p">(</span><span class="n">debug</span><span class="p">).</span>
 <span class="p">-</span><span class="ni">define</span><span class="p">(</span><span class="no">DEBUG</span><span class="p">(</span><span class="nv">Format</span><span class="p">,</span> <span class="nv">Args</span><span class="p">),</span>
@@ -98,10 +98,10 @@
 
 
 <p>where <code>&lt;0.44.0&gt;</code> is the pid of the message calling <code>?DEBUG</code> (only if <code>-define(debug, true).</code> is in the file).</p>
-<h2>The “master process” solution</h2>
+<h2 id="the-master-process-solution">The “master process” solution<a class="headerlink" href="#the-master-process-solution" title="Permanent link">&para;</a></h2>
 <p>A good way to face the problem of building the ring is to spawn a <em>master process</em>, which will then spawn all other processes. This solution keeps the creation phase simple since everything happens between the master process and the process that is currently being spawned.</p>
 <p>A small caveat: the creation of the ring must be performed <strong>backwards</strong>. When the master process spawns another process the only other process it knows is the process spawned in the previous loop. This means that the master process spawns a process that connects backwards to it, then spawns a process that connects backward to the second one, and so on.</p>
-<h4>Building the ring</h4>
+<h4 id="building-the-ring">Building the ring<a class="headerlink" href="#building-the-ring" title="Permanent link">&para;</a></h4>
 <div class="highlight"><pre><span></span><span class="c">%%% Author:  Leonardo Giordani &lt;giordani.leonardo@gmail.com&gt;</span>
 <span class="c">%%% Description: Implements a simple ring of processes without message passing</span>
 <span class="c">%%% Created: Jun 2013 by Leonardo Giordani</span>
@@ -158,7 +158,7 @@
 </pre></div>
 
 
-<h4>Sending a single message</h4>
+<h4 id="sending-a-single-message">Sending a single message<a class="headerlink" href="#sending-a-single-message" title="Permanent link">&para;</a></h4>
 <p>Now I am going to develop further the solution by making a single message travel the whole ring.</p>
 <p>The code undergoes the following modifications:</p>
 <ul>
@@ -225,7 +225,7 @@
 
 <p><a href="/code/erlang-rings/ring_master_single_message.erl">source code</a></p>
 <p>Beware that a subtle mechanism conceals here: in Erlang, you can always send a message to a pid, even if it the relative process does not exist; in this latter case the message is simply discarded. This feature allows us to make the first process send the message and terminate without having the last process crash by sending a message to it. Remember that you cannot do this with registered processes alias, only with pids.</p>
-<h4>Sending multiple messages</h4>
+<h4 id="sending-multiple-messages">Sending multiple messages<a class="headerlink" href="#sending-multiple-messages" title="Permanent link">&para;</a></h4>
 <p>The exercise requests that a message can travel more than once through the whole ring. Adding this possibility is pretty straightforward: it simply requires to add a parameter to <code>start()</code> and <code>create()</code> and to change the loop clauses.</p>
 <p>Function <code>loop/1</code> now becomes <code>loop/2</code> and has the following clauses:</p>
 <ul>
@@ -300,7 +300,7 @@
 
 <p><a href="/code/erlang-rings/ring_master_multiple_messages.erl">source code</a></p>
 <p>As before, we are here relying on the possibility of sending a message to a non existent process.</p>
-<h4>Exposing a functional interface</h4>
+<h4 id="exposing-a-functional-interface">Exposing a functional interface<a class="headerlink" href="#exposing-a-functional-interface" title="Permanent link">&para;</a></h4>
 <p>An Erlang best practice is to expose a functional interface to the user that hides the underlying message passing. We are going to convert our ring program to expose the following functions:</p>
 <ul>
 <li><code>start/1</code> - starts a ring with the given number of processes</li>
@@ -421,7 +421,7 @@
 <p>The exposed functions are very simple. As you can see they use two different messages: <code>{command, stop}</code> and <code>{command, message, [Message, Times]}</code>. One of the advantages of exposing a functional API is that you are free to format your messages according to the current status of the software and change the format if it does no more suit the application needs.</p>
 <p>The <code>loop()</code> function has been splitted in two different functions now: <code>loop/1</code> rules the behaviour of the standard ring process, while <code>loop_master/1</code> rules the behaviour of the master process.</p>
 <p>The standard process has to react to a stop command, forwarding it and terminating, and to a message command, simply forwarding it. The master process has to check an incoming message to decide if it shall be injected again in the ring.</p>
-<h2>A recursive solution</h2>
+<h2 id="a-recursive-solution">A recursive solution<a class="headerlink" href="#a-recursive-solution" title="Permanent link">&para;</a></h2>
 <p>The simplest way to make a process know the pid of another process is to let the first spawn the second, and this gives us a hint about another way the process ring can be built. Like many things in Erlang, this can be solved recursively by saying:</p>
 <p>In a process do:</p>
 <ul>
@@ -718,7 +718,7 @@
 
 
 <p><a href="/code/erlang-rings/ring_recursion_functional.erl">source code</a></p>
-<h2>Conclusions</h2>
+<h2 id="conclusions">Conclusions<a class="headerlink" href="#conclusions" title="Permanent link">&para;</a></h2>
 <p>The process ring is an exercise that can be solved in many ways (I just presented the two more straightforward ones) but makes the programmer face problems that may later rise in real-world applications. For this reason, it is an invaluable sandbox where the Erlang programmer can try different approaches to solve both the concurrency and the topology problems.</p>
 <p>Keep in touch for other Erlang articles on <a href="/categories/erlang/">this page</a>.</p>
         </section>

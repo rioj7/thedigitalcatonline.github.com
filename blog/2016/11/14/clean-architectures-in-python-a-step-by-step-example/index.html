@@ -82,7 +82,7 @@
 </ul>
 <p>The purpose of this post is to show how to build a web service in Python from scratch using a clean architecture. One of the main advantages of this layered design is testability, so I will develop it following a TDD approach. The project was initially developed from scratch in around 3 hours of work. Given the toy nature of the project some choices have been made to simplify the resulting code. Whenever meaningful I will point out those simplifications and discuss them.</p>
 <p>If you want to know more about TDD in Python read the posts in <a href="/categories/tdd/">this category</a>.</p>
-<h1>Project overview</h1>
+<h1 id="project-overview">Project overview<a class="headerlink" href="#project-overview" title="Permanent link">&para;</a></h1>
 <p>The goal of the "Rent-o-matic" project (fans of Day of the Tentacle may get the reference) is to create a simple search engine on top of a dataset of objects which are described by some quantities. The search engine shall allow to set some filters to narrow the search.</p>
 <p>The objects in the dataset are storage rooms for rent described by the following quantities:</p>
 <ul>
@@ -92,28 +92,28 @@
 <li>Latitude and longitude</li>
 </ul>
 <p>As pushed by the clean architecture model, we are interested in separating the different layers of the system. The architecture is described by four layers, which however can be implemented by more than four actual code modules. I will give here a brief description of those layers.</p>
-<h2>Entities</h2>
+<h2 id="entities">Entities<a class="headerlink" href="#entities" title="Permanent link">&para;</a></h2>
 <p>This is the level in which the domain models are described. Since we work in Python, I will put here the class that represent my storage rooms, with the data contained in the database, and whichever data I think is useful to perform the core business processing.</p>
 <p>It is very important to understand that the models in this layer are different from the usual models of framework like Django. These models are not connected with a storage system, so they cannot be directly saved or queried using methods of their classes. They may however contain helper methods that implement code related to the business rules.</p>
-<h2>Use cases</h2>
+<h2 id="use-cases">Use cases<a class="headerlink" href="#use-cases" title="Permanent link">&para;</a></h2>
 <p>This layer contains the use cases implemented by the system. In this simple example there will be only one use case, which is the list of storage rooms according to the given filters. Here you would put for example a use case that shows the detail of a given storage room or every business process you want to implement, such as booking a storage room, filling it with goods, etc.</p>
-<h2>Interface Adapters</h2>
+<h2 id="interface-adapters">Interface Adapters<a class="headerlink" href="#interface-adapters" title="Permanent link">&para;</a></h2>
 <p>This layer corresponds to the boundary between the business logic and external systems and implements the APIs used to exchange data with them. Both the storage system and the user interface are external systems that need to exchange data with the use cases and this layer shall provide an interface for this data flow. In this project the presentation part of this layer is provided by a JSON serializer, on top of which an external web service may be built. The storage adapter shall define here the common API of the storage systems. </p>
-<h2>External interfaces</h2>
+<h2 id="external-interfaces">External interfaces<a class="headerlink" href="#external-interfaces" title="Permanent link">&para;</a></h2>
 <p>This part of the architecture is made by external systems that implement the interfaces defined in the previous layer. Here for example you will find a web server that implements (REST) entry points, which access the data provided by use cases through the JSON serializer. You will also find here the storage system implementation, for example a given database such as MongoDB.</p>
-<h1>API and shades of grey</h1>
+<h1 id="api-and-shades-of-grey">API and shades of grey<a class="headerlink" href="#api-and-shades-of-grey" title="Permanent link">&para;</a></h1>
 <p>The word API is of uttermost importance in a clean architecture. Every layer may be accessed by an API, that is a fixed collection of entry points (methods or objects). Here "fixed" means "the same among every implementation", obviously an API may change with time. Every presentation tool, for example, will access the same use cases, and the same methods, to obtain a set of domain models, which are the output of that particular use case. It is up to the presentation layer to format data according to the specific presentation media, for example HTML, PDF, images, etc. If you understand plugin-based architectures you already grasped the main concept of a separate, API-driven component (or layer).</p>
 <p>The same concept is valid for the storage layer. Every storage implementation shall provide the same methods. When dealing with use cases you shall not be concerned with the actual system that stores data, it may be a MongoDB local installation, a cloud storage system or a trivial in-memory dictionary.</p>
 <p>The separation between layers, and the content of each layer, is not always fixed and immutable. A well-designed system shall also cope with practical world issues such as performances, for example, or other specific needs. When designing an architecture it is very important to know "what is where and why", and this is even more important when you "bend" the rules. Many issues do not have a black-or-white answer, and many decisions are "shades of grey", that is it is up to you to justify why you put something in a given place.</p>
 <p>Keep in mind however, that you should not break the <em>structure</em> of the clean architecture, in particular you shall be inflexible about the data flow (see the "Crossing boundaries" section in the original post of Robert Martin). If you break the data flow, you are basically invalidating the whole structure. Let me stress it again: <strong>never break the data flow</strong>. A simple example of breaking the data flow is to let a use case output a Python class instead of a <em>representation</em> of that class such as a JSON string.</p>
-<h1>Project structure</h1>
+<h1 id="project-structure">Project structure<a class="headerlink" href="#project-structure" title="Permanent link">&para;</a></h1>
 <p>Let us take a look at the final structure of the project</p>
 <p><structure here></p>
 <p>The global structure of the package has been built with Cookiecutter, and I will run quickly through that part. The <code>rentomatic</code> directory contains the following subdirectories: <code>domain</code>, <code>repositories</code>, <code>REST</code>, <code>serializers</code>, <code>use_cases</code>. Those directories reflect the layered structure introduced in the previous section, and the structure of the <code>tests</code> directory mirrors this structure so that tests are easily found.</p>
-<h1>Source code</h1>
+<h1 id="source-code">Source code<a class="headerlink" href="#source-code" title="Permanent link">&para;</a></h1>
 <p>You can find the source code in <a href="https://github.com/lgiordani/rentomatic">this GitHub repository</a>. Feel free to fork it and experiment, change it, and find better solutions to the problem I will discuss in this post. The source code contains tagged commits to allow you to follow the actual development as presented in the post. You can find the current tag in the <strong>Git tag: <code>&lt;tag name&gt;</code></strong> label under the section titles. The label is actually a link to the tagged commit on GitHub, if you want to see the code without cloning it.</p>
-<h1>Project initialization</h1>
-<h4><strong>Git tag: <a href="https://github.com/lgiordani/rentomatic/tree/step01">step01</a></strong></h4>
+<h1 id="project-initialization">Project initialization<a class="headerlink" href="#project-initialization" title="Permanent link">&para;</a></h1>
+<h4 id="git-tag-step01"><strong>Git tag: <a href="https://github.com/lgiordani/rentomatic/tree/step01">step01</a></strong><a class="headerlink" href="#git-tag-step01" title="Permanent link">&para;</a></h4>
 <p><em>Update</em>: <a href="https://github.com/ardydedase/cookiecutter-pypackage">this</a> Cookiecutter package creates an environment like the one I am creating in this section. I will keep the following explanation so that you can see how to manage requirements and configurations, but for your next project consider using this automated tool.</p>
 <p>I usually like maintaining a Python virtual environment inside the project, so I will create a temporary virtualenv to install cookiecutter, create the project, and remove the virtualenv. Cookiecutter is going to ask you some questions about you and the project, to provide an initial file structure. We are going to build our own testing environment, so it is safe to answer no to <code>use_pytest</code>. Since this is a demo project we are not going to need any publishing feature, so you can answer no to <code>use_pypi_deployment_with_travis</code> as well. The project does not have a command line interface, and you can safely create the author file and use any license.</p>
 <div class="highlight"><pre><span></span>virtualenv venv3 -p python3
@@ -174,7 +174,7 @@ Sphinx
 </pre></div>
 
 
-<h2>Miscellaneous configuration</h2>
+<h2 id="miscellaneous-configuration">Miscellaneous configuration<a class="headerlink" href="#miscellaneous-configuration" title="Permanent link">&para;</a></h2>
 <p>The <code>pytest</code> testing library needs to be configured. This is the <code>pytest.ini</code> file that you can create in the root directory (where the <code>setup.py</code> file is located)</p>
 <div class="highlight"><pre><span></span>[pytest]
 minversion = 2.0
@@ -209,7 +209,7 @@ max-complexity = 10
 
 <p>Flake8 documentation is available <a href="http://flake8.pycqa.org/en/latest/">here</a>.</p>
 <p>Note that every step in this post produces tested code and a of coverage of 100%. One of the benefits of a clean architecture is the separation between layers, and this guarantees a great degree of testability. Note however that in this tutorial, in particular in the REST sections, some tests have been omitted in favour of a simpler description of the architecture. </p>
-<h1>Domain models</h1>
+<h1 id="domain-models">Domain models<a class="headerlink" href="#domain-models" title="Permanent link">&para;</a></h1>
 <p><strong>Git tag: <a href="https://github.com/lgiordani/rentomatic/tree/step02">step02</a></strong></p>
 <p>Let us start with a simple definition of the <code>StorageRoom</code> model. As said before, the clean architecture models are very lightweight, or at least they are lighter than their counterparts in a framework.</p>
 <p>Following the TDD methodology the first thing that I write are the tests. Create the <code>tests/domain/test_storageroom.py</code> and put this code inside it</p>
@@ -283,7 +283,7 @@ max-complexity = 10
 <p>The <code>from_dict</code> method comes in handy when we have to create a model from data coming from another layer (such as the database layer or the query string of the REST layer).</p>
 <p>One could be tempted to try to simplify the <code>from_dict</code> function, abstracting it and providing it through a <code>Model</code> class. Given that a certain level of abstraction and generalization is possible and desirable, the initialization part of the models shall probably deal with various different cases, and thus is better off being implemented directly in the class.</p>
 <p>The <code>DomainModel</code> abstract base class is an easy way to categorize the model for future uses like checking if a class is a model in the system. For more information about this use of Abstract Base Classes in Python see <a href="/blog/2016/04/03/abstract-base-classes-in-python/">this post</a>.</p>
-<h1>Serializers</h1>
+<h1 id="serializers">Serializers<a class="headerlink" href="#serializers" title="Permanent link">&para;</a></h1>
 <p><strong>Git tag: <a href="https://github.com/lgiordani/rentomatic/tree/step03">step03</a></strong></p>
 <p>Our model needs to be serialized if we want to return it as a result of an API call. The typical serialization format is JSON, as this is a broadly accepted standard for web-based API. The serializer is not part of the model, but is an external specialized class that receives the model instance and produces a representation of its structure and values.</p>
 <p>To test the JSON serialization of our <code>StorageRoom</code> class put in the <code>tests/serializers/test_storageroom_serializer.py</code> file the following code</p>
@@ -337,7 +337,7 @@ max-complexity = 10
 
 <p>Providing a class that inherits from <code>json.JSONEncoder</code> let us use the <code>json.dumps(room, cls=StorageRoomEncoder)</code> syntax to serialize the model.</p>
 <p>There is a certain degree of repetition in the code we wrote, and this is the annoying part of a clean architecture. Since we want to isolate layers as much as possible and create lightweight classes we end up somehow repeating certain types of actions. For example the serialization code that assigns attributes of a <code>StorageRoom</code> to JSON attributes is very similar to that we use to create the object from a dictionary. Not exactly the same, obviously, but the two functions are very close.</p>
-<h1>Use cases (part 1)</h1>
+<h1 id="use-cases-part-1">Use cases (part 1)<a class="headerlink" href="#use-cases-part-1" title="Permanent link">&para;</a></h1>
 <p><strong>Git tag: <a href="https://github.com/lgiordani/rentomatic/tree/step04">step04</a></strong></p>
 <p>It's time to implement the actual business logic our application wants to expose to the outside world. Use cases are the place where we implement classes that query the repository, apply business rules, logic, and whatever transformation we need for our data, and return the results.</p>
 <p>With those requirements in mind, let us start to build a use case step by step. The simplest use case we can create is one that fetches all the storage rooms from the repository and returns them. Please note that we did not implement any repository layer yet, so our tests will mock it.</p>
@@ -412,7 +412,7 @@ max-complexity = 10
 
 <p>With such an implementation of the use case, however, we will soon experience issues. For starters, we do not have a standard way to transport the call parameters, which means that we do not have a standard way to check for their correctness either. The second problem is that we miss a standard way to return the call results and consequently we lack a way to communicate if the call was successful of if it failed, and in the latter case what are the reasons of the failure. This applies also to the case of bad parameters discussed in the previous point.</p>
 <p>We want thus to introduce some structures to wrap input and outputs of our use cases. Those structures are called request and response objects.</p>
-<h1>Requests and responses</h1>
+<h1 id="requests-and-responses">Requests and responses<a class="headerlink" href="#requests-and-responses" title="Permanent link">&para;</a></h1>
 <p><strong>Git tag: <a href="https://github.com/lgiordani/rentomatic/tree/step05">step05</a></strong></p>
 <p>Request and response objects are an important part of a clean architecture, as they transport call parameters, inputs and results from outside the application into the use cases layer.</p>
 <p>More specifically, requests are objects created from incoming API calls, thus they shall deal with things like incorrect values, missing parameters, wrong formats, etc. Responses, on the other hand, have to contain the actual results of the API calls, but shall also be able to represent error cases and to deliver rich information on what happened.</p>
@@ -467,7 +467,7 @@ max-complexity = 10
 </pre></div>
 
 
-<h1>Use cases (part 2)</h1>
+<h1 id="use-cases-part-2">Use cases (part 2)<a class="headerlink" href="#use-cases-part-2" title="Permanent link">&para;</a></h1>
 <p><strong>Git tag: <a href="https://github.com/lgiordani/rentomatic/tree/step06">step06</a></strong></p>
 <p>Now that we have implemented the request and response object we can change the test code to include those structures. Change the <code>tests/use_cases/test_storageroom_list_use_case.py</code> to contain this code</p>
 <div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pytest</span>
@@ -549,7 +549,7 @@ max-complexity = 10
 <p>Let us consider what we have achieved with our clean architecture up to this point. We have a very lightweight model that can be serialized to JSON and which is completely independent from other parts of the system. The code also contains a use case that, given a repository that exposes a given API, extracts all the models and returns them contained in a structured object.</p>
 <p>We are missing some objects, however. For example, we have not implemented any unsuccessful response object or validated the incoming request object.</p>
 <p>To explore these missing parts of the architecture let us improve the current use case to accept a <code>filters</code> parameter that represents some filters that we want to apply to the extracted list of models. This will generate some possible error conditions for the input, forcing us to introduce some validation for the incoming request object.</p>
-<h1>Requests and validation</h1>
+<h1 id="requests-and-validation">Requests and validation<a class="headerlink" href="#requests-and-validation" title="Permanent link">&para;</a></h1>
 <p><strong>Git tag: <a href="https://github.com/lgiordani/rentomatic/tree/step07">step07</a></strong></p>
 <p>I want to add a <code>filters</code> parameter to the request. Through that parameter the caller can add different filters by specifying a name and a value for each filter (for instance <code>{'price_lt': 100}</code> to get all results with a price lesser than 100).</p>
 <p>The first thing to do is to change the request object, starting from the test. The new version of the <code>tests/use_cases/test_storageroom_list_request_objects.py</code> file is the following</p>
@@ -665,7 +665,7 @@ max-complexity = 10
 <p>Second, the <code>StorageRoomListRequestObject</code> accepts an optional <code>filters</code> parameter when instantiated. There are no validation checks in the <code>__init__()</code> method because this is considered to be an internal method that gets called when the parameters have already been validated.</p>
 <p>Last, the <code>from_dict()</code> method performs the validation of the <code>filters</code> parameter, if it is present. I leverage the <code>collections.Mapping</code> abstract base class to check if the incoming parameter is a dictionary-like object and return either an <code>InvalidRequestObject</code> or a <code>ValidRequestObject</code> instance.</p>
 <p>Since we can now tell bad requests from good ones we need to introduce a new type of response as well, to manage bad requests or other errors in the use case.</p>
-<h1>Responses and failures</h1>
+<h1 id="responses-and-failures">Responses and failures<a class="headerlink" href="#responses-and-failures" title="Permanent link">&para;</a></h1>
 <p><strong>Git tag: <a href="https://github.com/lgiordani/rentomatic/tree/step08">step08</a></strong></p>
 <p>What happens if the use case encounter an error? Use cases can encounter a wide set of errors: validation errors, as we just discussed in the previous section, but also business logic errors or errors that come from the repository layer. Whatever the error, the use case shall always return an object with a known structure (the response), so we need a new object that provides a good support for different types of failures.</p>
 <p>As happened for the requests there is no unique way to provide such an object, and the following code is just one of the possible solutions.</p>
@@ -843,7 +843,7 @@ max-complexity = 10
 </pre></div>
 
 
-<h1>Use cases (part 3)</h1>
+<h1 id="use-cases-part-3">Use cases (part 3)<a class="headerlink" href="#use-cases-part-3" title="Permanent link">&para;</a></h1>
 <p><strong>Git tag: <a href="https://github.com/lgiordani/rentomatic/tree/step09">step09</a></strong></p>
 <p>Our implementation of responses and requests is finally complete, so now we can implement the last version of our use case. The use case correctly returns a <code>ResponseSuccess</code> object but is still missing a proper validation of the incoming request.</p>
 <p>Let's change the test in the <code>tests/use_cases/test_storageroom_list_use_case.py</code> file and add two more tests. The resulting set of tests (after the <code>domain_storagerooms</code> fixture) is the following</p>
@@ -951,7 +951,7 @@ max-complexity = 10
 
 
 <p>As you can see the first thing that the <code>execute()</code> method does is to check if the request is valid, otherwise returns a <code>ResponseFailure</code> build with the same request object. Then the actual business logic is implemented, calling the repository and returning a success response. If something goes wrong in this phase the exception is caught and returned as an aptly formatted <code>ResponseFailure</code>.</p>
-<h1>Intermezzo: refactoring</h1>
+<h1 id="intermezzo-refactoring">Intermezzo: refactoring<a class="headerlink" href="#intermezzo-refactoring" title="Permanent link">&para;</a></h1>
 <p><strong>Git tag: <a href="https://github.com/lgiordani/rentomatic/tree/step10">step10</a></strong></p>
 <p>A clean architecture is <em>not</em> a framework, so it provides very few generic features, unlike products like for example Django, which provide models, ORM, and all sorts of structures and libraries. Nevertheless, some classes can be isolated from our code and provided as a library, so that we can reuse the code. In this section I will guide you through a refactoring of the code we already have, during which we will isolate common features for requests, responses, and use cases.</p>
 <p>We already isolated the response object. We can move the <code>test_valid_request_object_cannot_be_used</code> from <code>tests/use_cases/test_storageroom_list_request_objects.py</code> to <code>tests/shared/test_response_object.py</code> since it tests a generic behaviour and not something related to the <code>StorageRoom</code> model and use cases.</p>
@@ -1047,7 +1047,7 @@ max-complexity = 10
 </pre></div>
 
 
-<h1>The repository layer</h1>
+<h1 id="the-repository-layer">The repository layer<a class="headerlink" href="#the-repository-layer" title="Permanent link">&para;</a></h1>
 <p><strong>Git tag: <a href="https://github.com/lgiordani/rentomatic/tree/step11">step11</a></strong></p>
 <p>The repository layer is the one in which we run the data storage system. As you saw when we implemented the use case we access the data storage through an API, in this case the <code>list()</code> method of the repository. The level of abstraction provided by a repository level is higher than that provided by an ORM or by a tool like SQLAlchemy. The repository layer provides only the endpoints that the application needs, with an interface which is tailored on the specific business problems the application implements.</p>
 <p>To clarify the matter in terms of concrete technologies, SQLAlchemy is a wonderful tool to abstract the access to an SQL database, so the internal implementation of the repository layer could use it to access a PostgreSQL database. But the external API of the layer is not that provided by SQLAlchemy. The API is a (usually reduced) set of functions that the use cases call to get the data, and indeed the internal implementation could also use raw SQL queries on a proprietary network interface. The repository does not even need to be based on a database. We can have a repository layer that fetches data from a REST service, for example, or that makes remote procedure calls through a RabbitMQ network.</p>
@@ -1205,7 +1205,7 @@ max-complexity = 10
 </pre></div>
 
 
-<h1>The REST layer (part1)</h1>
+<h1 id="the-rest-layer-part1">The REST layer (part1)<a class="headerlink" href="#the-rest-layer-part1" title="Permanent link">&para;</a></h1>
 <p><strong>Git tag: <a href="https://github.com/lgiordani/rentomatic/tree/step12">step12</a></strong></p>
 <p>This is the last step of our journey into the clean architecture. We created the domain models, the serializers, the use cases and the repository. We are actually missing an interface that glues everything together, that is gets the call parameters from the user, initializes a use case with a repository, runs the use case that fetches the domain models from the repository and converts them to a standard format. This layer can be represented by a wide number of interfaces and technologies. For example a command line interface (CLI) can implement exactly those steps, getting the parameters via command line switches, and returning the results as plain text on the console. The same underlying system, however, can be leveraged by a web page that gets the call parameters from a set of widgets, perform the steps described above, and parses the returned JSON data to show the result on the same page.</p>
 <p>Whatever technology we want to use to interact with the user to collect inputs and provide results we need to interface with the clean architecture we just built, so now we will create a layer to expose an HTTP API. This can be done with a server that exposes a set of HTTP addresses (API endpoints) that once accessed return some data. Such a layer is commonly called a REST layer, because usually the semantic of the addresses comes from the REST recommendations.</p>
@@ -1418,7 +1418,7 @@ pytest-flask
 
 
 <p>This code demonstrates how the clean architecture works in a nutshell. The function we wrote is however not complete, as it doesn't consider querystring parameters and error cases.</p>
-<h1>The server in action</h1>
+<h1 id="the-server-in-action">The server in action<a class="headerlink" href="#the-server-in-action" title="Permanent link">&para;</a></h1>
 <p><strong>Git tag: <a href="https://github.com/lgiordani/rentomatic/tree/step13">step13</a></strong></p>
 <p>Before I fix the missing parts of the endpoint let us see the server in action, so we can finally enjoy the product we have been building during this long post.</p>
 <p>To actually see some results when accessing the endpoint we need to fill the repository with some data. This part is obviously required only because of the ephemeral nature of the repository we are using. A real repository would wrap a persistent source of data and providing data at this point wouldn't be necessary. To initialize the repository we have to define some data</p>
@@ -1468,7 +1468,7 @@ Rule                     Endpoint
 
 
 <p>If you open your browser and navigate to <a href="http://127.0.0.1:5000/storagerooms">http://127.0.0.1:5000/storagerooms</a>, you can see the API call results. I recommend installing a formatter extension for the browser to better check the output. If you are using Chrome try <a href="https://github.com/callumlocke/json-formatter">JSON Formatter</a>.</p>
-<h1>The REST layer (part2)</h1>
+<h1 id="the-rest-layer-part2">The REST layer (part2)<a class="headerlink" href="#the-rest-layer-part2" title="Permanent link">&para;</a></h1>
 <p><strong>Git tag: <a href="https://github.com/lgiordani/rentomatic/tree/step14">step14</a></strong></p>
 <p>Let us cover the two missing cases in the endpoint. First I introduce a test to check if the endpoint correctly handles querystring parameters</p>
 <div class="highlight"><pre><span></span><span class="nd">@mock.patch</span><span class="p">(</span><span class="s1">&#39;rentomatic.use_cases.storageroom_use_cases.StorageRoomListUseCase&#39;</span><span class="p">)</span>
@@ -1599,7 +1599,7 @@ Rule                     Endpoint
 
 
 <p>Note that we extract the querystring parameters from the global <code>request</code> object provided by Flask. Once the querystring parameters are in a dictionary, we just need to create the request object from it.</p>
-<h2>Conclusions</h2>
+<h2 id="conclusions">Conclusions<a class="headerlink" href="#conclusions" title="Permanent link">&para;</a></h2>
 <p>Well, that's all! Some tests are missing in the REST part, but as I said I just wanted to show a working implementation of a clean architecture and not a fully developed project. I suggest that you try to implement some changes, for example:</p>
 <ul>
 <li>another endpoint like the access to a single resource (<code>/storagerooms/&lt;code&gt;</code>)</li>
@@ -1608,10 +1608,10 @@ Rule                     Endpoint
 </ul>
 <p>While you develop your code always try to work following the TDD approach. Testability is one of the main features of a clean architecture, so don't ignore it.</p>
 <p>Whether you decide to use a clean architecture or not, I really hope this post helped you to get a fresh view on software architectures, as happened to me when I first discovered the concepts exemplified here.</p>
-<h2>Updates</h2>
+<h2 id="updates">Updates<a class="headerlink" href="#updates" title="Permanent link">&para;</a></h2>
 <p>2016-11-15: Two tests contained variables with a wrong name (artist), which came from an initial version of the project. The name did not affect the tests. Added some instructions on the virtual environment and the development requirements.</p>
 <p>2016-12-12: Thanks to <a href="https://twitter.com/Taifu">Marco Beri</a> who spotted a typo in the code of step 6, which was already correct in the GitHub repository. He also suggested using the Cookiecutter package by <a href="https://github.com/ardydedase">Ardy Dedase</a>. Thanks to Marco and to Ardy!</p>
-<h2>Feedback</h2>
+<h2 id="feedback">Feedback<a class="headerlink" href="#feedback" title="Permanent link">&para;</a></h2>
 <p>Feel free to use <a href="https://plus.google.com/u/0/111444750762335924049">the blog Google+ page</a> to comment the post. The <a href="http://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues">GitHub issues</a> page is the best place to submit corrections.</p>
         </section>
 

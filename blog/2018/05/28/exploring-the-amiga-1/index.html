@@ -72,11 +72,11 @@
 <p>I am deeply convinced that learning architectures is a perfect way to become a better programmer, even now that we have 64-bits processors, fifth generation languages, and Internet. Those old systems had many limitations and to get interesting results the programmer has to know the hardware and exploit every single bit of power it can deliver.</p>
 <p>This is sometimes not true any more nowadays. On the one hand this is good, as it allows us to concentrate on business decisions and on higher layer of abstraction. On the other hand it was and it will always be useful for a programmer to face a limited system and to try to get the maximum out of it.</p>
 <p>This series of posts is about the Commodore Amiga. Thousands of words have already been written on the Amiga, and I will not add anything but "milestone" to the adjectives used to describe it. This post and the following ones are not intended to be a complete and well-organised review of the architecture. Instead, they will be more a set of "lab notes" for myself that I write while I explore the platform. I put them on the blog in the hope that they will be useful for other programmers that try to crack the same problems.</p>
-<h1>Assembly language and the Amiga</h1>
+<h1 id="assembly-language-and-the-amiga">Assembly language and the Amiga<a class="headerlink" href="#assembly-language-and-the-amiga" title="Permanent link">&para;</a></h1>
 <p>If you want to write Assembly programs for the Amiga you can either work directly on a real system or use a cross-compiler. I prefer to work on my Linux system because, as much as I like retro architectures, I also like the power of a good Unix system and a modern editor.</p>
 <p>Cross-compiling is a very simple concept: instead of compiling source code and creating binaries for the architecture you are running the compiler on, you create binaries for a different architecture. In this case the host architecture is Linux/amd64 and the target architecture is Amiga.</p>
 <p>As this is not the only project I am following at the moment, I created a directory to host everything I need for the Amiga development: compiler, documentation, scripts.</p>
-<h2>Install vasm</h2>
+<h2 id="install-vasm">Install vasm<a class="headerlink" href="#install-vasm" title="Permanent link">&para;</a></h2>
 <p>On Linux you can both use the GCC compiler or install vasm. This latter uses the same syntax as the standard Amiga assemblers, especially for compiler directives like <code>macro</code> and <code>include</code>, thus making it easier to pick up and use code published in books and in magazines during the 80s.</p>
 <p>To install the latest vasm you can run the following code</p>
 <div class="highlight"><pre><span></span>wget -q <span class="s2">&quot;http://sun.hasenbraten.de/vasm/release/vasm.tar.gz&quot;</span>
@@ -88,7 +88,7 @@ make <span class="nv">CPU</span><span class="o">=</span>m68k <span class="nv">SY
 </pre></div>
 
 
-<h2>Install a disassembler</h2>
+<h2 id="install-a-disassembler">Install a disassembler<a class="headerlink" href="#install-a-disassembler" title="Permanent link">&para;</a></h2>
 <p>The vbcc suite written by Volker Barthelmann contains a disassembler for the M68k architecture that you can find <a href="http://sun.hasenbraten.de/~frank/projects/">here</a>.</p>
 <p>A disassembler is a handy tool that can reveal a lot about how a program works. You can install it with the following code</p>
 <div class="highlight"><pre><span></span>wget -q <span class="s2">&quot;http://sun.hasenbraten.de/~frank/projects/download/vdam68k.tar.gz&quot;</span>
@@ -99,11 +99,11 @@ make
 
 
 <p>which will create the <code>vda/M68k/vda68k</code> that you can use to disassemble Amiga programs or ROM dumps.</p>
-<h2>Install the NDK</h2>
+<h2 id="install-the-ndk">Install the NDK<a class="headerlink" href="#install-the-ndk" title="Permanent link">&para;</a></h2>
 <p>The Native Development Kit (the Amiga SDK) contains include files that can be very helpful (though not strictly necessary) when developing. Unfortunately the NDK is still copyrighted by some of the guys that are trying to resurrect the Amiga. This latter idea is nice, but I really do not understand how preventing distribution of development documentation about a platform dead more than 20 years ago might help such a project.</p>
 <p>Whatever, you can get an old version of the Amiga Developer CD <a href="https://archive.org/details/amiga-developer-cd-v1_1">here</a>. This contains the NDK version 3.1 which is enough for what we are going to learn in this series.</p>
 <p>You may want to rename the <code>Includes&amp;Libs</code> directory to <code>Includes_Libs</code> to simplify its access by the compiler command line (<code>&amp;</code> is a special character in bash).</p>
-<h2>Helper script and test</h2>
+<h2 id="helper-script-and-test">Helper script and test<a class="headerlink" href="#helper-script-and-test" title="Permanent link">&para;</a></h2>
 <p>I created a <code>asm.sh</code> helper script to simplify the development process</p>
 <div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
 
@@ -134,7 +134,7 @@ test: AmigaOS loadseg<span class="o">()</span>ble executable/binary
 </pre></div>
 
 
-<h1>LEA, the PC and the relative offset</h1>
+<h1 id="lea-the-pc-and-the-relative-offset">LEA, the PC and the relative offset<a class="headerlink" href="#lea-the-pc-and-the-relative-offset" title="Permanent link">&para;</a></h1>
 <p>In Assembly you can manage memory cells using either their content or the address, as you can do with pointers in C or similar concepts in other high-level languages. You can also set labels that the assembler will convert in instruction addresses, but these are (almost) always relative to the beginning of the code itself, as the code may be loaded anywhere in memory.</p>
 <p>This means that, generally speaking, all the addresses we use when we branch to other parts of the code should be relative to the current instruction.</p>
 <p>The Motorola 68k calls this addressing mode <em>Program Counter Indirect with Displacement Mode</em>. Its description contained in the Programmer's Reference Manual is</p>
@@ -149,7 +149,7 @@ test: AmigaOS loadseg<span class="o">()</span>ble executable/binary
 
 <p>Here the instruction is stored at address <code>0x0364</code> and it loads in the <code>a0</code> register the <em>effective address</em> of the instruction at <code>0x030c</code>.</p>
 <p>Pay attention: since your code starts always at address <code>0x0</code>, you might be tempted to store the value <code>0x030c</code> into <code>a0</code> and go on. You want however to load the address that instruction has at runtime, which will be different from the current one. The displacement, however, will be the same, as the code doesn't change its form, and this is why this addressing mode is useful.</p>
-<h2>Relative offset encoding</h2>
+<h2 id="relative-offset-encoding">Relative offset encoding<a class="headerlink" href="#relative-offset-encoding" title="Permanent link">&para;</a></h2>
 <p>A question may arise, then: why does the code show the address <code>0x30</code> if the displacement is relative?</p>
 <p>Let's dig into the binary representation of the instruction to see how the processor receives it. The value <code>0x41faffa6</code> in binary form is </p>
 <div class="highlight"><pre><span></span>01000001111110101111111110100110
@@ -171,7 +171,7 @@ The value is the two's complement representation of the decimal <code>-90</code>
 2.2.11 (2-13)</p>
 </blockquote>
 <p>So, while the Assembly code uses the correct value for simplicity's sake, the actual opcode contains a true displacement from the current position.</p>
-<h1>How to open a library</h1>
+<h1 id="how-to-open-a-library">How to open a library<a class="headerlink" href="#how-to-open-a-library" title="Permanent link">&para;</a></h1>
 <p>When you code in a high level language like C you usually refer to functions of an external library in your code and then provide the library object files on the compiler command line. The code of the library is either included in the code of your program or loaded into memory at runtime (shared libraries), but in both cases the function call is, at the machine language level, just a jump to a different address in memory.</p>
 <p>If you write a program directly in Assembly language things are not different, you can always rely on the linker to properly address external libraries. In a platform like Amiga, however, it's custom to access the system libraries in a direct way, manually jumping to the right address, which is why sometimes tutorials and books contain "magic numbers".</p>
 <p>When the Amiga OS loads a library in memory the Exec master library analyses its structure and creates the so-called <em>jump table</em>. This is nothing more than an array that lists the addresses of the functions exposed by the library. This is a very simple and effective way to let the OS free to load the library anywhere in memory (relocation).</p>
@@ -194,12 +194,12 @@ The value is the two's complement representation of the decimal <code>-90</code>
 </pre></div>
 
 
-<h1>Resources</h1>
+<h1 id="resources">Resources<a class="headerlink" href="#resources" title="Permanent link">&para;</a></h1>
 <ul>
 <li>Motorola M68000 Family Programmer's Reference Manual <a href="https://www.nxp.com/docs/en/reference-manual/M68000PRM.pdf">PDF here</a></li>
 <li><a href="http://amigadev.elowar.com">AmigaOS Developer Docs</a></li>
 </ul>
-<h1>Feedback</h1>
+<h1 id="feedback">Feedback<a class="headerlink" href="#feedback" title="Permanent link">&para;</a></h1>
 <p>Feel free to reach me on <a href="https://twitter.com/thedigicat">Twitter</a> if you have questions. The <a href="http://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues">GitHub issues</a> page is the best place to submit corrections.</p>
         </section>
 

@@ -70,10 +70,10 @@
         <section id="content">
             <p>This is the third instalment of a series of posts on how to write an interpreter in Python. In the <a href="/blog/2017/05/09/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-1">first part</a> we developed together a small command line calculator that could sum and subtract numbers, while in the <a href="/blog/2017/10/01/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-2">second part</a> we went further adding multiplication, division and unary plus and minus. Both parts give only the tests your code is supposed to pass, and my personal solution can be found <a href="/blog/2017/07/12/a-game-of-tokens-solution-part-1">here</a> for the first part, and <a href="/blog/2017/10/17/a-game-of-tokens-solution-part-2">here</a> for the second.</p>
 <p>In this third part we wil start adding variables to our calculator, moving towards a real programming language.</p>
-<h1>Level 13 - Variables</h1>
+<h1 id="level-13-variables">Level 13 - Variables<a class="headerlink" href="#level-13-variables" title="Permanent link">&para;</a></h1>
 <p><em>I have been assigned by my strength and cunning.</em></p>
 <p>Variables are labels assigned to values, so what we need to add is a way for the user to make this assignment and then to use variables intead of actual values. The simplest syntax, used by many languages is <code>name = value</code> and we will stick to this. Usually languages allow only a subset of symbols in the name of a variable and we will learn how to use lower- and uppercase names that may also contain an underscore.</p>
-<h2>Lexer</h2>
+<h2 id="lexer">Lexer<a class="headerlink" href="#lexer" title="Permanent link">&para;</a></h2>
 <p>We want the lexer to recognise a new token called <code>NAME</code>, so the test we have to add to <code>tests/test_calc_lexer.py</code> is</p>
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">test_get_tokens_understands_letters</span><span class="p">():</span>
     <span class="n">l</span> <span class="o">=</span> <span class="n">clex</span><span class="o">.</span><span class="n">CalcLexer</span><span class="p">()</span>
@@ -114,7 +114,7 @@
 </pre></div>
 
 
-<h2>Parser</h2>
+<h2 id="parser">Parser<a class="headerlink" href="#parser" title="Permanent link">&para;</a></h2>
 <p>To support variables in expressions we need to change the behaviour of <code>parse_factor()</code>, which is the method where we parse the building blocks like integers of unary operators. The test you need to add to <code>tests/test_calc_parser.py</code> is</p>
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">test_parse_factor_variable</span><span class="p">():</span>
     <span class="n">p</span> <span class="o">=</span> <span class="n">cpar</span><span class="o">.</span><span class="n">CalcParser</span><span class="p">()</span>
@@ -187,7 +187,7 @@
 </pre></div>
 
 
-<h2>Visitor</h2>
+<h2 id="visitor">Visitor<a class="headerlink" href="#visitor" title="Permanent link">&para;</a></h2>
 <p>It is now time to implement the code that actually stores and retrieves variables, which is what happens in the visitor when an <code>assignment</code> or a <code>variable</code> node are processed. For the moment we do not have specific requirements for variables and we can treat the storage space as a big global dictionary.</p>
 <p>The test we want to pass specifies the initial API of the storage space when we assign a value to a variable</p>
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">test_visitor_assignment</span><span class="p">():</span>
@@ -232,7 +232,7 @@
 
 
 <p>where two different ASTs have been created. The first one assigns a value to the variable, the second one reads it and returns its value. Note that the visitor returns both value and type of the variable, which seems reasonable to implement later checks of equality or other operations on variables.</p>
-<h1>Level 14 - Parsing expressions and assignments</h1>
+<h1 id="level-14-parsing-expressions-and-assignments">Level 14 - Parsing expressions and assignments<a class="headerlink" href="#level-14-parsing-expressions-and-assignments" title="Permanent link">&para;</a></h1>
 <p><em>Speak words we can all understand!</em></p>
 <p>We are missing a final step. The CLI uses <code>parse_expression()</code> as its default entry point, which means that it doesn't understand variable assignments for the time being. We need then to introduce a new entry point <code>parse_line()</code> that we will use to process general language statements. The test for this goes in <code>tests/test_calc_parser.py</code></p>
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">test_parse_line_supports_expression</span><span class="p">():</span>
@@ -321,12 +321,12 @@
 
 
 <p>Try to fire the CLI and enjoy a calculator with variables! Everything works, but you now know it is not magic, but the outcome of a good amount of code. And you wrote it, so you may proudly say that you created a simple but working programming language.</p>
-<h1>Conclusion</h1>
+<h1 id="conclusion">Conclusion<a class="headerlink" href="#conclusion" title="Permanent link">&para;</a></h1>
 <p>Managing variables may look like a very easy task, but as soon as we will start implementing functions and local scopes we will have to move to something richer than a simple global dictionary. Memory management is another big topic that I didn't touch here, perhaps in the future I might discuss garbage collections and related problems.
 In the next issue I will face with you the task of adding the power operator, support for floating point numbers, and a big refactoring with context managers that will greatly simplify the code.</p>
-<h1>Titles</h1>
+<h1 id="titles">Titles<a class="headerlink" href="#titles" title="Permanent link">&para;</a></h1>
 <p>The section quotes come from some good films: "Up" (2009), "The Lord of the Rings: The Fellowship of the Ring" (2001).</p>
-<h1>Feedback</h1>
+<h1 id="feedback">Feedback<a class="headerlink" href="#feedback" title="Permanent link">&para;</a></h1>
 <p>Feel free to use <a href="https://plus.google.com/u/0/111444750762335924049">the blog Google+ page</a> to comment the post. Feel free to reach me on <a href="https://twitter.com/thedigicat">Twitter</a> if you have questions. The <a href="http://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues">GitHub issues</a> page is the best place to submit corrections.</p>
         </section>
 

@@ -70,13 +70,13 @@
             <p><em>EDIT: thanks to Alvaro Videla that pointed out that a queue can be connected to more than one exchange; sorry for the wrong information.</em></p>
 <p>Everyone who started using AMQP learned from the very beginning that there are three different types of exchanges, namely direct, fanout and topic. In this post, I am going to highlight some interesting properties of direct exchanges, which were not clear to me when I started using RabbitMQ.</p>
 <p>Now some time has passed since I started, and reading the <a href="http://www.rabbitmq.com/getstarted.html">RabbitMQ tutorials</a> again I can see that these properties are no mystery. However, in this short post I want to clearly point out three different uses of direct exchanges, in the hope that other novices will be helped to better understand those powerful components of an AMQP system.</p>
-<h2>Movie cast</h2>
+<h2 id="movie-cast">Movie cast<a class="headerlink" href="#movie-cast" title="Permanent link">&para;</a></h2>
 <p>The cast of an AMQP message delivery is made of three different type of components: the exchange, the queues, and the consumers.</p>
 <p>The exchange is the container of all the messages other components sent; each message has been tagged with a routing key and they can be extracted from the exchange by means of those keys.</p>
 <p>The consumers are those which are interested in getting messages from the exchange, so their main activity is to connect to the exchange, pick messages from it and act according to its content. A consumer can connect to more than one exchange and receive messages concurrently.</p>
 <p>The queues are the real core of the system. They actually extract messages from the exchange according to their configuration, and you are not wrong if you think that they are the real routing component of AMQP; indeed exchanges do not exist as separate components, so the routing game is played by the channel and the queues. </p>
 <p>Let us consider queues at a deeper level. They are two sided components, messages enter from one side and exit from the other one. Thus each queue can establish connections on both sides: on the input side a queue fetches messages from <strong>one or more exchanges</strong> while on the output side the queue can be connected to <strong>one or more consumers</strong>. From the single queue point of view being connected to more than one exchange with the same routing key is transparent, since the only thing that concerns the queue itself are the incoming messages; being connected to more than one exchange with different routing keys leads to complex scenarios, so in this article I will consider a single direct exchange delivering messages to queues.</p>
-<h2>Three configurations</h2>
+<h2 id="three-configurations">Three configurations<a class="headerlink" href="#three-configurations" title="Permanent link">&para;</a></h2>
 <p>As you can easily see, the most general case with direct exchanges is that of multiple queues connected to the same exchange, with multiple consumers connected to each queue.</p>
 <p><img alt="Image 01" src="/images/amqp_direct_exchanges/image01.jpg"></p>
 <p>The edge cases of this configuration can be obtained decreasing the number of queues, the number of consumers, or both, to a single unit. This leads to three different configurations:</p>
@@ -93,7 +93,7 @@
 </ul>
 <p><img alt="Image 04" src="/images/amqp_direct_exchanges/image04.jpg"></p>
 <p>The last consideration about the fanout case is important. A pure fanout exchange is somehow limited since it can only blindly dispatch messages to everyone connects. A direct exchange can behave like a fanout only for certain keys while acting as a direct or round robin dispatcher with other keys, at the same time.</p>
-<h2>A real use case</h2>
+<h2 id="a-real-use-case">A real use case<a class="headerlink" href="#a-real-use-case" title="Permanent link">&para;</a></h2>
 <p>Let us look at a concrete example to better understand why direct exchanges can be used to solve the most part of routing issues we face. Remember that in AMQP queues are named objects and that names are primary keys, i.e. there cannot be two queues with the same name under the same virtual host.</p>
 <p>This example is a simplified version of a real RabbitMQ system running Python programs based on <a href="https://github.com/lgiordani/postage">Postage</a>.</p>
 <p>In a cluster, a single program can be uniquely identified by the compound value <code>(pid,host)</code>, since given a host only one program can have the given PID. To simplify the notation say that any program in the cluster is identified by a string of the form <code>pid@host</code> (for example <code>8669@yoda</code>, which is the editor I'm using in this very moment). To further simplify the management of our cluster say that each program has a name, such as the name of its executable file.</p>
@@ -116,7 +116,7 @@
 <p><img alt="Image 08" src="/images/amqp_direct_exchanges/image08.jpg"></p>
 <p>If the routing key changes to "program1" the connections become the following</p>
 <p><img alt="Image 09" src="/images/amqp_direct_exchanges/image09.jpg"></p>
-<h2>Direct exchanges and load balance</h2>
+<h2 id="direct-exchanges-and-load-balance">Direct exchanges and load balance<a class="headerlink" href="#direct-exchanges-and-load-balance" title="Permanent link">&para;</a></h2>
 <p>In the previous section we looked at a smart use of the third of the three configurations explained at the beginning of the post. We can profitably leverage the second one (the "round robin" case) to selectively reach cluster programs while balancing the load. Remember that the main use of a round robin message delivery is indeed to avoid overloading a single component or machine.</p>
 <p>To balance the load among a set of programs we need each of them to declare a queue and share it with others: in other words we need to declare a queue with a shared name. This is very easy: for each of the properties of our programs a shared queue can be declared simply by naming it with the value of the property itself.</p>
 <p>For example, declaring a queue named "@host1" creates a queue shared by each program running on host1, while a queue named "program1" is shared among all the programs running the same executable. Even PIDs can be used in this way, but since it is usually not interesting to get the set of all programs on the cluster running with the same pid, there is also no point in defining queues based on them.</p>
@@ -124,7 +124,7 @@
 <p>The resulting setup is portrayed in the following picture</p>
 <p><img alt="Image 10" src="/images/amqp_direct_exchanges/image10.jpg"></p>
 <p>Here you can see, for example, that sending a message with the routing key "@host1/rr" makes the message flow into the queue called "@host1", which is shared by all the processes running on that host. Since the queue is shared, messages are not duplicated but delivered in a balanced way. The "/rr" suffix stands for Round Robin and usefully tells apart fanout routing keys from load balance ones.</p>
-<h2>Conclusions</h2>
+<h2 id="conclusions">Conclusions<a class="headerlink" href="#conclusions" title="Permanent link">&para;</a></h2>
 <p>Well, after all I just explained again and more verbosely the basic RabbitMQ examples, didn't I?</p>
 <p>Yes. However, I think such considerations can be useful for novices and from time to time it is a good thing for experts to refresh the plain old basic stuff. So this post can be used as a quick memo of the different configurations you can create with an AMQP direct exchange.</p>
 <p>Stay tuned for other <a href="/categories/rabbitmq/">RabbitMQ</a> and <a href="/categories/amqp/">AMQP</a> posts!</p>
