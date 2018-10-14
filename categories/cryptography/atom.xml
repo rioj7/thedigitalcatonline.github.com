@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>The Digital Cat - cryptography</title><link href="http://blog.thedigitalcatonline.com/" rel="alternate"></link><link href="http://blog.thedigitalcatonline.com/categories/cryptography/atom.xml" rel="self"></link><id>http://blog.thedigitalcatonline.com/</id><updated>2018-04-25T13:00:00+01:00</updated><entry><title>Public key cryptography: RSA keys</title><link href="http://blog.thedigitalcatonline.com/blog/2018/04/25/rsa-keys/" rel="alternate"></link><published>2018-04-25T13:00:00+01:00</published><updated>2018-04-25T13:00:00+01:00</updated><author><name>Leonardo Giordani</name></author><id>tag:blog.thedigitalcatonline.com,2018-04-25:/blog/2018/04/25/rsa-keys/</id><summary type="html"></summary><content type="html">&lt;p&gt;I bet you created at least once an RSA key pair, usually because you needed to connect to GitHub and you wanted to avoid typing your password every time. You diligently followed the documentation on how to create SSH keys and after a couple of minutes your setup was complete.&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>The Digital Cat - cryptography</title><link href="http://blog.thedigitalcatonline.com/" rel="alternate"></link><link href="http://blog.thedigitalcatonline.com/categories/cryptography/atom.xml" rel="self"></link><id>http://blog.thedigitalcatonline.com/</id><updated>2018-10-14T23:00:00+00:00</updated><entry><title>Public key cryptography: RSA keys</title><link href="http://blog.thedigitalcatonline.com/blog/2018/04/25/rsa-keys/" rel="alternate"></link><published>2018-04-25T13:00:00+01:00</published><updated>2018-10-14T23:00:00+00:00</updated><author><name>Leonardo Giordani</name></author><id>tag:blog.thedigitalcatonline.com,2018-04-25:/blog/2018/04/25/rsa-keys/</id><summary type="html"></summary><content type="html">&lt;p&gt;I bet you created at least once an RSA key pair, usually because you needed to connect to GitHub and you wanted to avoid typing your password every time. You diligently followed the documentation on how to create SSH keys and after a couple of minutes your setup was complete.&lt;/p&gt;
 &lt;p&gt;But do you know what you actually did?&lt;/p&gt;
-&lt;p&gt;Do you know what the &lt;code&gt;~/.ssh/id_rsa&lt;/code&gt; file really contains, or why that strange file that begins with &lt;code&gt;ssh-rsa&lt;/code&gt; pairs with another that begins with &lt;code&gt;-----BEGIN RSA PRIVATE KEY-----&lt;/code&gt;. Or why does sometimes that same header miss the &lt;code&gt;RSA&lt;/code&gt; part and just say &lt;code&gt;BEGIN PRIVATE KEY&lt;/code&gt;?&lt;/p&gt;
+&lt;p&gt;Do you know what the &lt;code&gt;~/.ssh/id_rsa&lt;/code&gt; file really contains, or why that strange file that begins with &lt;code&gt;ssh-rsa&lt;/code&gt; pairs with another that begins with &lt;code&gt;-----BEGIN RSA PRIVATE KEY-----&lt;/code&gt;. Or why sometimes that same header misses the &lt;code&gt;RSA&lt;/code&gt; part and just says &lt;code&gt;BEGIN PRIVATE KEY&lt;/code&gt;?&lt;/p&gt;
 &lt;p&gt;I think a minimum knowledge of the various formats of RSA keys is mandatory for every developer nowadays, not to mention the importance of understanding them deeply if you want to pursue a career in the infrastructure management world.&lt;/p&gt;
 &lt;h1 id="rsa-algorithm-and-key-pairs"&gt;RSA algorithm and key pairs&lt;a class="headerlink" href="#rsa-algorithm-and-key-pairs" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
-&lt;p&gt;Since the invention of public-key cryptography various systems have been devised to create the key pair. One of the first ones is RSA, the creation of three brilliant cryptographers, that dates back to 1977. The story of RSA is quite interesting, as it was first invented by an English mathematician, Clifford Cocks, who was however forced to keep it secret by the British intelligence office he was working for.&lt;/p&gt;
-&lt;p&gt;Keeping in mind that RSA is not a synonym for public-key cryptography, the former being only one of the possible implementations, I wanted to write a post on it because it is still, more than 40 years after its publication, one of the most widespread algorithms. In particular it is the standard algorithm used to generate SSH key pairs, and since nowadays every developer has their public key on GitHub, BitBucket, or similar systems, we may arguably say that RSA is pretty ubiquitous.&lt;/p&gt;
+&lt;p&gt;Since the invention of public-key cryptography, various systems have been devised to create the key pair. One of the first ones is RSA, the creation of three brilliant cryptographers, that dates back to 1977. The story of RSA is quite interesting, as it was first invented by an English mathematician, Clifford Cocks, who was however forced to keep it secret by the British intelligence office he was working for.&lt;/p&gt;
+&lt;p&gt;Keeping in mind that RSA is not a synonym for public-key cryptography but only one of the possible implementations, I wanted to write a post on it because it is still, more than 40 years after its publication, one of the most widespread algorithms. In particular it is the standard algorithm used to generate SSH key pairs, and since nowadays every developer has their public key on GitHub, BitBucket, or similar systems, we may arguably say that RSA is pretty ubiquitous.&lt;/p&gt;
 &lt;p&gt;I will not cover the internals of the RSA algorithm in this article, however. If you are interested in the gory details of the mathematical framework you may find plenty of resources both on Internet and in the textbooks. The theory behind it is not trivial, but it is definitely worth the time if you want to be serious about the mathematical part of cryptography.&lt;/p&gt;
 &lt;p&gt;In this article I will instead explore two ways to create RSA key pairs and the formats used to store them. Applied cryptography is, like many other topics in computer science, a moving target, and the tools change often. Sometimes it is pretty easy to find out &lt;em&gt;how&lt;/em&gt; to do something (StackOverflow helps), but less easy to get a clear picture of what is going on.&lt;/p&gt;
 &lt;p&gt;All the examples show in this post use a 2048-bits RSA key created for this purpose, so all the numbers you see come from a real example. The key has been obviously trashed after I wrote the article.&lt;/p&gt;
@@ -303,23 +303,23 @@ coefficient:
 &lt;p&gt;The fields are the same we found in the ASN.1 structure, this being only a different representation of the same data. You can compare the two and see that the value of the fields are the same.&lt;/p&gt;
 &lt;h2 id="pkcs-8-vs-pkcs-1"&gt;PKCS #8 vs PKCS #1&lt;a class="headerlink" href="#pkcs-8-vs-pkcs-1" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;The first version of the PKCS standard (PKCS #1) was specifically tailored to contain an RSA key. Its ASN.1 definition can be found in &lt;a href="https://tools.ietf.org/html/rfc8017"&gt;RFC 8017&lt;/a&gt; ("PKCS #1: RSA Cryptography Specifications Version 2.2")&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;   RSAPublicKey ::= SEQUENCE {
-       modulus           INTEGER,  -- n
-       publicExponent    INTEGER   -- e
-   }
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;RSAPublicKey ::= SEQUENCE {
+    modulus           INTEGER,  -- n
+    publicExponent    INTEGER   -- e
+}
 
-   RSAPrivateKey ::= SEQUENCE {
-       version           Version,
-       modulus           INTEGER,  -- n
-       publicExponent    INTEGER,  -- e
-       privateExponent   INTEGER,  -- d
-       prime1            INTEGER,  -- p
-       prime2            INTEGER,  -- q
-       exponent1         INTEGER,  -- d mod (p-1)
-       exponent2         INTEGER,  -- d mod (q-1)
-       coefficient       INTEGER,  -- (inverse of q) mod p
-       otherPrimeInfos   OtherPrimeInfos OPTIONAL
-   }
+RSAPrivateKey ::= SEQUENCE {
+    version           Version,
+    modulus           INTEGER,  -- n
+    publicExponent    INTEGER,  -- e
+    privateExponent   INTEGER,  -- d
+    prime1            INTEGER,  -- p
+    prime2            INTEGER,  -- q
+    exponent1         INTEGER,  -- d mod (p-1)
+    exponent2         INTEGER,  -- d mod (q-1)
+    coefficient       INTEGER,  -- (inverse of q) mod p
+    otherPrimeInfos   OtherPrimeInfos OPTIONAL
+}
 &lt;/pre&gt;&lt;/div&gt;
 
 
@@ -333,6 +333,7 @@ coefficient:
      [[2: publicKey        [1] PublicKey OPTIONAL ]],
      ...
    }
+
 PrivateKey ::= OCTET STRING
                      -- Content varies based on type of key. The
                      -- algorithm identifier dictates the format of
@@ -355,7 +356,7 @@ PrivateKey ::= OCTET STRING
 &lt;/pre&gt;&lt;/div&gt;
 
 
-&lt;p&gt;The structure of PKCS #8 is the reason why previously we had to parse the field at offset 22 (&lt;code&gt;openssl asn1parse -inform pem -in private.pem -strparse 22&lt;/code&gt;) to access the RSA parameters. If you are parsing a PKCS #1 key in PEM format you don't need this second step.&lt;/p&gt;
+&lt;p&gt;The structure of PKCS #8 is the reason why previously we had to parse the field at offset 22 to access the RSA parameters. If you are parsing a PKCS #1 key in PEM format you don't need this second step.&lt;/p&gt;
 &lt;h1 id="private-and-public-key"&gt;Private and public key&lt;a class="headerlink" href="#private-and-public-key" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;In the RSA algorithm the public key is made by the modulus and the public exponent, which means that we can derive the public key from the private key. OpenSSL can easily do this with the &lt;code&gt;rsa&lt;/code&gt; module, producing the public key in PEM format&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ openssl rsa -in private.pem -pubout
@@ -526,8 +527,48 @@ mpint
 &lt;/pre&gt;&lt;/div&gt;
 
 
+&lt;h1 id="reading-rsa-keys-in-python"&gt;Reading RSA keys in Python&lt;a class="headerlink" href="#reading-rsa-keys-in-python" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
+&lt;p&gt;In Python you can use the &lt;code&gt;pycrypto&lt;/code&gt; package to access a PEM file containing an RSA key with the &lt;code&gt;RSA.importKey&lt;/code&gt; function. Now you can hopefully understand the &lt;a href="https://www.dlitz.net/software/pycrypto/api/current/Crypto.PublicKey.RSA-module.html"&gt;documentation&lt;/a&gt; that says&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;externKey (string) - The RSA key to import, encoded as a string.
+
+An RSA public key can be in any of the following formats:
+    * X.509 subjectPublicKeyInfo DER SEQUENCE (binary or PEM encoding)
+    * PKCS#1 RSAPublicKey DER SEQUENCE (binary or PEM encoding)
+    * OpenSSH (textual public key only)
+
+An RSA private key can be in any of the following formats:
+    * PKCS#1 RSAPrivateKey DER SEQUENCE (binary or PEM encoding)
+    * PKCS#8 PrivateKeyInfo DER SEQUENCE (binary or PEM encoding)
+    * OpenSSH (textual public key only)
+
+For details about the PEM encoding, see RFC1421/RFC1423.
+
+In case of PEM encoding, the private key can be encrypted with DES or 3TDES
+according to a certain pass phrase. Only OpenSSL-compatible pass phrases are
+supported.
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;In practice what you can do with a &lt;code&gt;private.pem&lt;/code&gt; file is&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;Crypto.PublicKey&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;RSA&lt;/span&gt;
+
+&lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;open&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;private.pem&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;r&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;key&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;RSA&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;importKey&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;read&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;and the &lt;code&gt;key&lt;/code&gt; variable will contain an instance of &lt;code&gt;_RSAobj&lt;/code&gt; (not a very pythonic name, to be honest). This instance contains the RSA parameters as attributes as stated in the &lt;a href="https://www.dlitz.net/software/pycrypto/api/current/Crypto.PublicKey.RSA._RSAobj-class.html"&gt;documentation&lt;/a&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;modulus&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;key&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;
+&lt;span class="n"&gt;public_exponent&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;key&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;e&lt;/span&gt;
+&lt;span class="n"&gt;private_exponent&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;key&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;d&lt;/span&gt;
+&lt;span class="n"&gt;first_prime_number&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;key&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;p&lt;/span&gt;
+&lt;span class="n"&gt;second_prime_number&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;key&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;q&lt;/span&gt;
+&lt;span class="n"&gt;q_inv_crt&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;key&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;u&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
 &lt;h1 id="final-words"&gt;Final words&lt;a class="headerlink" href="#final-words" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
-&lt;p&gt;I hope this post helped you to get a better understanding of RSA public and private keys. I keep finding on StackOverflow and on other boards messages of users that are confused by the output of the various tools and by the subtle but important differences between the formats.&lt;/p&gt;
+&lt;p&gt;I keep finding on StackOverflow (and on other boards) messages of users that are confused by RSA keys, the output of the various tools, and by the subtle but important differences between the formats, so I hope this post helped you to get a better understanding of the matter.&lt;/p&gt;
 &lt;h1 id="resources"&gt;Resources&lt;a class="headerlink" href="#resources" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;ul&gt;
 &lt;li&gt;The Wikipedia article on &lt;a href="https://en.wikipedia.org/wiki/RSA_(cryptosystem)"&gt;RSA&lt;/a&gt;&lt;/li&gt;
@@ -540,6 +581,7 @@ mpint
 &lt;li&gt;&lt;a href="https://tools.ietf.org/html/rfc5958"&gt;RFC 5958 - Asymmetric Key Packages&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://tools.ietf.org/html/rfc7468"&gt;RFC 7468 - Textual Encodings of PKIX, PKCS, and CMS Structures&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://tools.ietf.org/html/rfc8017"&gt;RFC 8017 - PKCS #1: RSA Cryptography Specifications Version 2.2&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://www.dlitz.net/software/pycrypto/"&gt;PyCrypto&lt;/a&gt; - The Python Cryptography Toolkit&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h1 id="feedback"&gt;Feedback&lt;a class="headerlink" href="#feedback" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
-&lt;p&gt;Feel free to use &lt;a href="https://plus.google.com/u/0/111444750762335924049"&gt;the blog Google+ page&lt;/a&gt; to comment the post or reach me on &lt;a href="https://twitter.com/thedigicat"&gt;Twitter&lt;/a&gt; if you have questions. The &lt;a href="http://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues"&gt;GitHub issues&lt;/a&gt; page is the best place to submit corrections.&lt;/p&gt;</content><category term="algorithms"></category><category term="cryptography"></category><category term="SSL"></category><category term="SSH"></category><category term="RSA"></category></entry></feed>
+&lt;p&gt;Feel free to use &lt;a href="https://plus.google.com/u/0/111444750762335924049"&gt;the blog Google+ page&lt;/a&gt; to comment the post or reach me on &lt;a href="https://twitter.com/thedigicat"&gt;Twitter&lt;/a&gt; if you have questions. The &lt;a href="http://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues"&gt;GitHub issues&lt;/a&gt; page is the best place to submit corrections.&lt;/p&gt;</content><category term="algorithms"></category><category term="cryptography"></category><category term="SSL"></category><category term="SSH"></category><category term="RSA"></category><category term="Python"></category></entry></feed>
