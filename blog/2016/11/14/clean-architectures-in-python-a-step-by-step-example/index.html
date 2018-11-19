@@ -65,7 +65,7 @@
             <time datetime="2016-11-14T19:00:00+00:00"> 14/11/2016</time>
 
                 Last update on
-                <time datetime="2018-06-05T11:00:00+00:00"> 05/06/2018</time>
+                <time datetime="2018-11-18T20:00:00+00:00"> 18/11/2018</time>
                 <span class="separator">•</span>
         </section>
 
@@ -214,14 +214,14 @@ max-complexity = 10
 <p>Let us start with a simple definition of the <code>StorageRoom</code> model. As said before, the clean architecture models are very lightweight, or at least they are lighter than their counterparts in a framework.</p>
 <p>Following the TDD methodology the first thing that I write are the tests. Create the <code>tests/domain/test_storageroom.py</code> and put this code inside it</p>
 <div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">uuid</span>
-<span class="kn">from</span> <span class="nn">rentomatic.domain</span> <span class="kn">import</span> <span class="n">models</span> <span class="k">as</span> <span class="n">m</span>
+<span class="kn">from</span> <span class="nn">rentomatic.domain.storageroom</span> <span class="kn">import</span> <span class="n">StorageRoom</span>
 
 
 <span class="k">def</span> <span class="nf">test_storageroom_model_init</span><span class="p">():</span>
     <span class="n">code</span> <span class="o">=</span> <span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span>
-    <span class="n">storageroom</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">StorageRoom</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">price</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-                           <span class="n">longitude</span><span class="o">=</span><span class="s1">&#39;-0.09998975&#39;</span><span class="p">,</span>
-                           <span class="n">latitude</span><span class="o">=</span><span class="s1">&#39;51.75436293&#39;</span><span class="p">)</span>
+    <span class="n">storageroom</span> <span class="o">=</span> <span class="n">StorageRoom</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">price</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                              <span class="n">longitude</span><span class="o">=-</span><span class="mf">0.09998975</span><span class="p">,</span>
+                              <span class="n">latitude</span><span class="o">=</span><span class="mf">51.75436293</span><span class="p">)</span>
     <span class="k">assert</span> <span class="n">storageroom</span><span class="o">.</span><span class="n">code</span> <span class="o">==</span> <span class="n">code</span>
     <span class="k">assert</span> <span class="n">storageroom</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">200</span>
     <span class="k">assert</span> <span class="n">storageroom</span><span class="o">.</span><span class="n">price</span> <span class="o">==</span> <span class="mi">10</span>
@@ -231,13 +231,13 @@ max-complexity = 10
 
 <span class="k">def</span> <span class="nf">test_storageroom_model_from_dict</span><span class="p">():</span>
     <span class="n">code</span> <span class="o">=</span> <span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span>
-    <span class="n">storageroom</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">StorageRoom</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span>
+    <span class="n">storageroom</span> <span class="o">=</span> <span class="n">StorageRoom</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span>
         <span class="p">{</span>
             <span class="s1">&#39;code&#39;</span><span class="p">:</span> <span class="n">code</span><span class="p">,</span>
             <span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
             <span class="s1">&#39;price&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
-            <span class="s1">&#39;longitude&#39;</span><span class="p">:</span> <span class="s1">&#39;-0.09998975&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;latitude&#39;</span><span class="p">:</span> <span class="s1">&#39;51.75436293&#39;</span>
+            <span class="s1">&#39;longitude&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.09998975</span><span class="p">,</span>
+            <span class="s1">&#39;latitude&#39;</span><span class="p">:</span> <span class="mf">51.75436293</span>
         <span class="p">}</span>
     <span class="p">)</span>
     <span class="k">assert</span> <span class="n">storageroom</span><span class="o">.</span><span class="n">code</span> <span class="o">==</span> <span class="n">code</span>
@@ -259,8 +259,8 @@ max-complexity = 10
         <span class="bp">self</span><span class="o">.</span><span class="n">code</span> <span class="o">=</span> <span class="n">code</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">=</span> <span class="n">size</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">price</span> <span class="o">=</span> <span class="n">price</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">latitude</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">latitude</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">longitude</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">longitude</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">latitude</span> <span class="o">=</span> <span class="n">latitude</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">longitude</span> <span class="o">=</span> <span class="n">longitude</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">adict</span><span class="p">):</span>
@@ -283,34 +283,95 @@ max-complexity = 10
 <p>The <code>from_dict</code> method comes in handy when we have to create a model from data coming from another layer (such as the database layer or the query string of the REST layer).</p>
 <p>One could be tempted to try to simplify the <code>from_dict</code> function, abstracting it and providing it through a <code>Model</code> class. Given that a certain level of abstraction and generalization is possible and desirable, the initialization part of the models shall probably deal with various different cases, and thus is better off being implemented directly in the class.</p>
 <p>The <code>DomainModel</code> abstract base class is an easy way to categorize the model for future uses like checking if a class is a model in the system. For more information about this use of Abstract Base Classes in Python see <a href="/blog/2016/04/03/abstract-base-classes-in-python/">this post</a>.</p>
+<p>Since we have a method creates an object form a dictionary it is useful to have a method that returns a dictionary version of the object. This allows us to easily write a comparison operator between objects, that we will use later in some tests.</p>
+<p>The new tests in <code>tests/domain/test_storageroom.py</code> are</p>
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">test_storageroom_model_to_dict</span><span class="p">():</span>
+    <span class="n">storageroom_dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;code&#39;</span><span class="p">:</span> <span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">(),</span>
+        <span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+        <span class="s1">&#39;price&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="s1">&#39;longitude&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.09998975</span><span class="p">,</span>
+        <span class="s1">&#39;latitude&#39;</span><span class="p">:</span> <span class="mf">51.75436293</span>
+    <span class="p">}</span>
+
+    <span class="n">storageroom</span> <span class="o">=</span> <span class="n">StorageRoom</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">storageroom_dict</span><span class="p">)</span>
+
+    <span class="k">assert</span> <span class="n">storageroom</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="o">==</span> <span class="n">storageroom_dict</span>
+
+
+<span class="k">def</span> <span class="nf">test_storageroom_model_comparison</span><span class="p">():</span>
+    <span class="n">storageroom_dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;code&#39;</span><span class="p">:</span> <span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">(),</span>
+        <span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+        <span class="s1">&#39;price&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="s1">&#39;longitude&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.09998975</span><span class="p">,</span>
+        <span class="s1">&#39;latitude&#39;</span><span class="p">:</span> <span class="mf">51.75436293</span>
+    <span class="p">}</span>
+    <span class="n">storageroom1</span> <span class="o">=</span> <span class="n">StorageRoom</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">storageroom_dict</span><span class="p">)</span>
+    <span class="n">storageroom2</span> <span class="o">=</span> <span class="n">StorageRoom</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">storageroom_dict</span><span class="p">)</span>
+
+    <span class="k">assert</span> <span class="n">storageroom1</span> <span class="o">==</span> <span class="n">storageroom2</span>
+</pre></div>
+
+
+<p>and the new methods of the object in <code>rentomatic/domain/storageroom.py</code> are</p>
+<div class="highlight"><pre><span></span>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;code&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">code</span><span class="p">,</span>
+            <span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">,</span>
+            <span class="s1">&#39;price&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">price</span><span class="p">,</span>
+            <span class="s1">&#39;latitude&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">latitude</span><span class="p">,</span>
+            <span class="s1">&#39;longitude&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">longitude</span><span class="p">,</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+</pre></div>
+
+
 <h1 id="serializers">Serializers<a class="headerlink" href="#serializers" title="Permanent link">&para;</a></h1>
 <p><strong>Git tag: <a href="https://github.com/lgiordani/rentomatic/tree/step03">step03</a></strong></p>
 <p>Our model needs to be serialized if we want to return it as a result of an API call. The typical serialization format is JSON, as this is a broadly accepted standard for web-based API. The serializer is not part of the model, but is an external specialized class that receives the model instance and produces a representation of its structure and values.</p>
 <p>To test the JSON serialization of our <code>StorageRoom</code> class put in the <code>tests/serializers/test_storageroom_serializer.py</code> file the following code</p>
-<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">json</span>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">uuid</span>
+
+<span class="kn">import</span> <span class="nn">pytest</span>
 
 <span class="kn">from</span> <span class="nn">rentomatic.serializers</span> <span class="kn">import</span> <span class="n">storageroom_serializer</span> <span class="k">as</span> <span class="n">srs</span>
-<span class="kn">from</span> <span class="nn">rentomatic.domain</span> <span class="kn">import</span> <span class="n">models</span>
+<span class="kn">from</span> <span class="nn">rentomatic.domain.storageroom</span> <span class="kn">import</span> <span class="n">StorageRoom</span>
 
 
 <span class="k">def</span> <span class="nf">test_serialize_domain_storageroom</span><span class="p">():</span>
-    <span class="n">room</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">StorageRoom</span><span class="p">(</span><span class="s1">&#39;f853578c-fc0f-4e65-81b8-566c5dffa35a&#39;</span><span class="p">,</span>
-                              <span class="n">size</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
-                              <span class="n">price</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-                              <span class="n">longitude</span><span class="o">=</span><span class="s1">&#39;-0.09998975&#39;</span><span class="p">,</span>
-                              <span class="n">latitude</span><span class="o">=</span><span class="s1">&#39;51.75436293&#39;</span><span class="p">)</span>
+    <span class="n">code</span> <span class="o">=</span> <span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span>
+
+    <span class="n">room</span> <span class="o">=</span> <span class="n">StorageRoom</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
+        <span class="n">size</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
+        <span class="n">price</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">longitude</span><span class="o">=-</span><span class="mf">0.09998975</span><span class="p">,</span>
+        <span class="n">latitude</span><span class="o">=</span><span class="mf">51.75436293</span>
+    <span class="p">)</span>
 
     <span class="n">expected_json</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">        {</span>
-<span class="s2">            &quot;code&quot;: &quot;f853578c-fc0f-4e65-81b8-566c5dffa35a&quot;,</span>
+<span class="s2">        {{</span>
+<span class="s2">            &quot;code&quot;: &quot;{}&quot;,</span>
 <span class="s2">            &quot;size&quot;: 200,</span>
 <span class="s2">            &quot;price&quot;: 10,</span>
 <span class="s2">            &quot;longitude&quot;: -0.09998975,</span>
 <span class="s2">            &quot;latitude&quot;: 51.75436293</span>
-<span class="s2">        }</span>
-<span class="s2">    &quot;&quot;&quot;</span>
+<span class="s2">        }}</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
 
-    <span class="k">assert</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">room</span><span class="p">,</span> <span class="bp">cls</span><span class="o">=</span><span class="n">srs</span><span class="o">.</span><span class="n">StorageRoomEncoder</span><span class="p">))</span> <span class="o">==</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">expected_json</span><span class="p">)</span>
+    <span class="n">json_storageroom</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">room</span><span class="p">,</span> <span class="bp">cls</span><span class="o">=</span><span class="n">srs</span><span class="o">.</span><span class="n">StorageRoomEncoder</span><span class="p">)</span>
+
+    <span class="k">assert</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">json_storageroom</span><span class="p">)</span> <span class="o">==</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">expected_json</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">test_serialize_domain_storageruum_wrong_type</span><span class="p">():</span>
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">):</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(),</span> <span class="bp">cls</span><span class="o">=</span><span class="n">srs</span><span class="o">.</span><span class="n">StorageRoomEncoder</span><span class="p">)</span>
 </pre></div>
 
 
@@ -323,7 +384,7 @@ max-complexity = 10
     <span class="k">def</span> <span class="nf">default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">o</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">to_serialize</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s1">&#39;code&#39;</span><span class="p">:</span> <span class="n">o</span><span class="o">.</span><span class="n">code</span><span class="p">,</span>
+                <span class="s1">&#39;code&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">o</span><span class="o">.</span><span class="n">code</span><span class="p">),</span>
                 <span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="n">o</span><span class="o">.</span><span class="n">size</span><span class="p">,</span>
                 <span class="s1">&#39;price&#39;</span><span class="p">:</span> <span class="n">o</span><span class="o">.</span><span class="n">price</span><span class="p">,</span>
                 <span class="s2">&quot;latitude&quot;</span><span class="p">:</span> <span class="n">o</span><span class="o">.</span><span class="n">latitude</span><span class="p">,</span>
@@ -342,45 +403,47 @@ max-complexity = 10
 <p>It's time to implement the actual business logic our application wants to expose to the outside world. Use cases are the place where we implement classes that query the repository, apply business rules, logic, and whatever transformation we need for our data, and return the results.</p>
 <p>With those requirements in mind, let us start to build a use case step by step. The simplest use case we can create is one that fetches all the storage rooms from the repository and returns them. Please note that we did not implement any repository layer yet, so our tests will mock it.</p>
 <p>This is the skeleton for a basic test of a use case that lists all the storage rooms. Put this code in the <code>tests/use_cases/test_storageroom_list_use_case.py</code></p>
-<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pytest</span>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">uuid</span>
+
+<span class="kn">import</span> <span class="nn">pytest</span>
 <span class="kn">from</span> <span class="nn">unittest</span> <span class="kn">import</span> <span class="n">mock</span>
 
-<span class="kn">from</span> <span class="nn">rentomatic.domain</span> <span class="kn">import</span> <span class="n">models</span>
+<span class="kn">from</span> <span class="nn">rentomatic.domain.storageroom</span> <span class="kn">import</span> <span class="n">StorageRoom</span>
 <span class="kn">from</span> <span class="nn">rentomatic.use_cases</span> <span class="kn">import</span> <span class="n">storageroom_use_cases</span> <span class="k">as</span> <span class="n">uc</span>
 
 
 <span class="nd">@pytest.fixture</span>
 <span class="k">def</span> <span class="nf">domain_storagerooms</span><span class="p">():</span>
-    <span class="n">storageroom_1</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">StorageRoom</span><span class="p">(</span>
-        <span class="n">code</span><span class="o">=</span><span class="s1">&#39;f853578c-fc0f-4e65-81b8-566c5dffa35a&#39;</span><span class="p">,</span>
+    <span class="n">storageroom_1</span> <span class="o">=</span> <span class="n">StorageRoom</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">(),</span>
         <span class="n">size</span><span class="o">=</span><span class="mi">215</span><span class="p">,</span>
         <span class="n">price</span><span class="o">=</span><span class="mi">39</span><span class="p">,</span>
-        <span class="n">longitude</span><span class="o">=</span><span class="s1">&#39;-0.09998975&#39;</span><span class="p">,</span>
-        <span class="n">latitude</span><span class="o">=</span><span class="s1">&#39;51.75436293&#39;</span><span class="p">,</span>
+        <span class="n">longitude</span><span class="o">=-</span><span class="mf">0.09998975</span><span class="p">,</span>
+        <span class="n">latitude</span><span class="o">=</span><span class="mf">51.75436293</span><span class="p">,</span>
     <span class="p">)</span>
 
-    <span class="n">storageroom_2</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">StorageRoom</span><span class="p">(</span>
-        <span class="n">code</span><span class="o">=</span><span class="s1">&#39;fe2c3195-aeff-487a-a08f-e0bdc0ec6e9a&#39;</span><span class="p">,</span>
+    <span class="n">storageroom_2</span> <span class="o">=</span> <span class="n">StorageRoom</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">(),</span>
         <span class="n">size</span><span class="o">=</span><span class="mi">405</span><span class="p">,</span>
         <span class="n">price</span><span class="o">=</span><span class="mi">66</span><span class="p">,</span>
-        <span class="n">longitude</span><span class="o">=</span><span class="s1">&#39;0.18228006&#39;</span><span class="p">,</span>
-        <span class="n">latitude</span><span class="o">=</span><span class="s1">&#39;51.74640997&#39;</span><span class="p">,</span>
+        <span class="n">longitude</span><span class="o">=</span><span class="mf">0.18228006</span><span class="p">,</span>
+        <span class="n">latitude</span><span class="o">=</span><span class="mf">51.74640997</span><span class="p">,</span>
     <span class="p">)</span>
 
-    <span class="n">storageroom_3</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">StorageRoom</span><span class="p">(</span>
-        <span class="n">code</span><span class="o">=</span><span class="s1">&#39;913694c6-435a-4366-ba0d-da5334a611b2&#39;</span><span class="p">,</span>
+    <span class="n">storageroom_3</span> <span class="o">=</span> <span class="n">StorageRoom</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">(),</span>
         <span class="n">size</span><span class="o">=</span><span class="mi">56</span><span class="p">,</span>
         <span class="n">price</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span>
-        <span class="n">longitude</span><span class="o">=</span><span class="s1">&#39;0.27891577&#39;</span><span class="p">,</span>
-        <span class="n">latitude</span><span class="o">=</span><span class="s1">&#39;51.45994069&#39;</span><span class="p">,</span>
+        <span class="n">longitude</span><span class="o">=</span><span class="mf">0.27891577</span><span class="p">,</span>
+        <span class="n">latitude</span><span class="o">=</span><span class="mf">51.45994069</span><span class="p">,</span>
     <span class="p">)</span>
 
-    <span class="n">storageroom_4</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">StorageRoom</span><span class="p">(</span>
-        <span class="n">code</span><span class="o">=</span><span class="s1">&#39;eed76e77-55c1-41ce-985d-ca49bf6c0585&#39;</span><span class="p">,</span>
+    <span class="n">storageroom_4</span> <span class="o">=</span> <span class="n">StorageRoom</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">(),</span>
         <span class="n">size</span><span class="o">=</span><span class="mi">93</span><span class="p">,</span>
         <span class="n">price</span><span class="o">=</span><span class="mi">48</span><span class="p">,</span>
-        <span class="n">longitude</span><span class="o">=</span><span class="s1">&#39;0.33894476&#39;</span><span class="p">,</span>
-        <span class="n">latitude</span><span class="o">=</span><span class="s1">&#39;51.39916678&#39;</span><span class="p">,</span>
+        <span class="n">longitude</span><span class="o">=</span><span class="mf">0.33894476</span><span class="p">,</span>
+        <span class="n">latitude</span><span class="o">=</span><span class="mf">51.39916678</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="k">return</span> <span class="p">[</span><span class="n">storageroom_1</span><span class="p">,</span> <span class="n">storageroom_2</span><span class="p">,</span> <span class="n">storageroom_3</span><span class="p">,</span> <span class="n">storageroom_4</span><span class="p">]</span>
@@ -470,46 +533,48 @@ max-complexity = 10
 <h1 id="use-cases-part-2">Use cases (part 2)<a class="headerlink" href="#use-cases-part-2" title="Permanent link">&para;</a></h1>
 <p><strong>Git tag: <a href="https://github.com/lgiordani/rentomatic/tree/step06">step06</a></strong></p>
 <p>Now that we have implemented the request and response object we can change the test code to include those structures. Change the <code>tests/use_cases/test_storageroom_list_use_case.py</code> to contain this code</p>
-<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pytest</span>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">uuid</span>
+
+<span class="kn">import</span> <span class="nn">pytest</span>
 <span class="kn">from</span> <span class="nn">unittest</span> <span class="kn">import</span> <span class="n">mock</span>
 
-<span class="kn">from</span> <span class="nn">rentomatic.domain</span> <span class="kn">import</span> <span class="n">models</span>
+<span class="kn">from</span> <span class="nn">rentomatic.domain.storageroom</span> <span class="kn">import</span> <span class="n">StorageRoom</span>
 <span class="kn">from</span> <span class="nn">rentomatic.use_cases</span> <span class="kn">import</span> <span class="n">request_objects</span> <span class="k">as</span> <span class="n">ro</span>
 <span class="kn">from</span> <span class="nn">rentomatic.use_cases</span> <span class="kn">import</span> <span class="n">storageroom_use_cases</span> <span class="k">as</span> <span class="n">uc</span>
 
 
 <span class="nd">@pytest.fixture</span>
 <span class="k">def</span> <span class="nf">domain_storagerooms</span><span class="p">():</span>
-    <span class="n">storageroom_1</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">StorageRoom</span><span class="p">(</span>
-        <span class="n">code</span><span class="o">=</span><span class="s1">&#39;f853578c-fc0f-4e65-81b8-566c5dffa35a&#39;</span><span class="p">,</span>
+    <span class="n">storageroom_1</span> <span class="o">=</span> <span class="n">StorageRoom</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">(),</span>
         <span class="n">size</span><span class="o">=</span><span class="mi">215</span><span class="p">,</span>
         <span class="n">price</span><span class="o">=</span><span class="mi">39</span><span class="p">,</span>
-        <span class="n">longitude</span><span class="o">=</span><span class="s1">&#39;-0.09998975&#39;</span><span class="p">,</span>
-        <span class="n">latitude</span><span class="o">=</span><span class="s1">&#39;51.75436293&#39;</span><span class="p">,</span>
+        <span class="n">longitude</span><span class="o">=-</span><span class="mf">0.09998975</span><span class="p">,</span>
+        <span class="n">latitude</span><span class="o">=</span><span class="mf">51.75436293</span><span class="p">,</span>
     <span class="p">)</span>
 
-    <span class="n">storageroom_2</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">StorageRoom</span><span class="p">(</span>
-        <span class="n">code</span><span class="o">=</span><span class="s1">&#39;fe2c3195-aeff-487a-a08f-e0bdc0ec6e9a&#39;</span><span class="p">,</span>
+    <span class="n">storageroom_2</span> <span class="o">=</span> <span class="n">StorageRoom</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">(),</span>
         <span class="n">size</span><span class="o">=</span><span class="mi">405</span><span class="p">,</span>
         <span class="n">price</span><span class="o">=</span><span class="mi">66</span><span class="p">,</span>
-        <span class="n">longitude</span><span class="o">=</span><span class="s1">&#39;0.18228006&#39;</span><span class="p">,</span>
-        <span class="n">latitude</span><span class="o">=</span><span class="s1">&#39;51.74640997&#39;</span><span class="p">,</span>
+        <span class="n">longitude</span><span class="o">=</span><span class="mf">0.18228006</span><span class="p">,</span>
+        <span class="n">latitude</span><span class="o">=</span><span class="mf">51.74640997</span><span class="p">,</span>
     <span class="p">)</span>
 
-    <span class="n">storageroom_3</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">StorageRoom</span><span class="p">(</span>
-        <span class="n">code</span><span class="o">=</span><span class="s1">&#39;913694c6-435a-4366-ba0d-da5334a611b2&#39;</span><span class="p">,</span>
+    <span class="n">storageroom_3</span> <span class="o">=</span> <span class="n">StorageRoom</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">(),</span>
         <span class="n">size</span><span class="o">=</span><span class="mi">56</span><span class="p">,</span>
         <span class="n">price</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span>
-        <span class="n">longitude</span><span class="o">=</span><span class="s1">&#39;0.27891577&#39;</span><span class="p">,</span>
-        <span class="n">latitude</span><span class="o">=</span><span class="s1">&#39;51.45994069&#39;</span><span class="p">,</span>
+        <span class="n">longitude</span><span class="o">=</span><span class="mf">0.27891577</span><span class="p">,</span>
+        <span class="n">latitude</span><span class="o">=</span><span class="mf">51.45994069</span><span class="p">,</span>
     <span class="p">)</span>
 
-    <span class="n">storageroom_4</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">StorageRoom</span><span class="p">(</span>
-        <span class="n">code</span><span class="o">=</span><span class="s1">&#39;eed76e77-55c1-41ce-985d-ca49bf6c0585&#39;</span><span class="p">,</span>
+    <span class="n">storageroom_4</span> <span class="o">=</span> <span class="n">StorageRoom</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">(),</span>
         <span class="n">size</span><span class="o">=</span><span class="mi">93</span><span class="p">,</span>
         <span class="n">price</span><span class="o">=</span><span class="mi">48</span><span class="p">,</span>
-        <span class="n">longitude</span><span class="o">=</span><span class="s1">&#39;0.33894476&#39;</span><span class="p">,</span>
-        <span class="n">latitude</span><span class="o">=</span><span class="s1">&#39;51.39916678&#39;</span><span class="p">,</span>
+        <span class="n">longitude</span><span class="o">=</span><span class="mf">0.33894476</span><span class="p">,</span>
+        <span class="n">latitude</span><span class="o">=</span><span class="mf">51.39916678</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="k">return</span> <span class="p">[</span><span class="n">storageroom_1</span><span class="p">,</span> <span class="n">storageroom_2</span><span class="p">,</span> <span class="n">storageroom_3</span><span class="p">,</span> <span class="n">storageroom_4</span><span class="p">]</span>
@@ -1058,47 +1123,44 @@ max-complexity = 10
 <p>First we add some data that we will be using in the tests. We import the domain model to check if the results of the API calls have the correct type</p>
 <div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pytest</span>
 
+<span class="kn">from</span> <span class="nn">rentomatic.domain.storageroom</span> <span class="kn">import</span> <span class="n">StorageRoom</span>
 <span class="kn">from</span> <span class="nn">rentomatic.shared.domain_model</span> <span class="kn">import</span> <span class="n">DomainModel</span>
 
 <span class="kn">from</span> <span class="nn">rentomatic.repository</span> <span class="kn">import</span> <span class="n">memrepo</span>
 
 
-<span class="n">storageroom1</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;code&#39;</span><span class="p">:</span> <span class="s1">&#39;f853578c-fc0f-4e65-81b8-566c5dffa35a&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="mi">215</span><span class="p">,</span>
-    <span class="s1">&#39;price&#39;</span><span class="p">:</span> <span class="mi">39</span><span class="p">,</span>
-    <span class="s1">&#39;longitude&#39;</span><span class="p">:</span> <span class="s1">&#39;-0.09998975&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;latitude&#39;</span><span class="p">:</span> <span class="s1">&#39;51.75436293&#39;</span><span class="p">,</span>
-<span class="p">}</span>
-
-<span class="n">storageroom2</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;code&#39;</span><span class="p">:</span> <span class="s1">&#39;fe2c3195-aeff-487a-a08f-e0bdc0ec6e9a&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="mi">405</span><span class="p">,</span>
-    <span class="s1">&#39;price&#39;</span><span class="p">:</span> <span class="mi">66</span><span class="p">,</span>
-    <span class="s1">&#39;longitude&#39;</span><span class="p">:</span> <span class="s1">&#39;0.18228006&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;latitude&#39;</span><span class="p">:</span> <span class="s1">&#39;51.74640997&#39;</span><span class="p">,</span>
-<span class="p">}</span>
-
-<span class="n">storageroom3</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;code&#39;</span><span class="p">:</span> <span class="s1">&#39;913694c6-435a-4366-ba0d-da5334a611b2&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="mi">56</span><span class="p">,</span>
-    <span class="s1">&#39;price&#39;</span><span class="p">:</span> <span class="mi">60</span><span class="p">,</span>
-    <span class="s1">&#39;longitude&#39;</span><span class="p">:</span> <span class="s1">&#39;0.27891577&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;latitude&#39;</span><span class="p">:</span> <span class="s1">&#39;51.45994069&#39;</span><span class="p">,</span>
-<span class="p">}</span>
-
-<span class="n">storageroom4</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;code&#39;</span><span class="p">:</span> <span class="s1">&#39;eed76e77-55c1-41ce-985d-ca49bf6c0585&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="mi">93</span><span class="p">,</span>
-    <span class="s1">&#39;price&#39;</span><span class="p">:</span> <span class="mi">48</span><span class="p">,</span>
-    <span class="s1">&#39;longitude&#39;</span><span class="p">:</span> <span class="s1">&#39;0.33894476&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;latitude&#39;</span><span class="p">:</span> <span class="s1">&#39;51.39916678&#39;</span><span class="p">,</span>
-<span class="p">}</span>
-
-
 <span class="nd">@pytest.fixture</span>
-<span class="k">def</span> <span class="nf">storagerooms</span><span class="p">():</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">storageroom1</span><span class="p">,</span> <span class="n">storageroom2</span><span class="p">,</span> <span class="n">storageroom3</span><span class="p">,</span> <span class="n">storageroom4</span><span class="p">]</span>
+<span class="k">def</span> <span class="nf">storageroom_dicts</span><span class="p">():</span>
+    <span class="k">return</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s1">&#39;code&#39;</span><span class="p">:</span> <span class="s1">&#39;f853578c-fc0f-4e65-81b8-566c5dffa35a&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="mi">215</span><span class="p">,</span>
+            <span class="s1">&#39;price&#39;</span><span class="p">:</span> <span class="mi">39</span><span class="p">,</span>
+            <span class="s1">&#39;longitude&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.09998975</span><span class="p">,</span>
+            <span class="s1">&#39;latitude&#39;</span><span class="p">:</span> <span class="mf">51.75436293</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s1">&#39;code&#39;</span><span class="p">:</span> <span class="s1">&#39;fe2c3195-aeff-487a-a08f-e0bdc0ec6e9a&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="mi">405</span><span class="p">,</span>
+            <span class="s1">&#39;price&#39;</span><span class="p">:</span> <span class="mi">66</span><span class="p">,</span>
+            <span class="s1">&#39;longitude&#39;</span><span class="p">:</span> <span class="mf">0.18228006</span><span class="p">,</span>
+            <span class="s1">&#39;latitude&#39;</span><span class="p">:</span> <span class="mf">51.74640997</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s1">&#39;code&#39;</span><span class="p">:</span> <span class="s1">&#39;913694c6-435a-4366-ba0d-da5334a611b2&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="mi">56</span><span class="p">,</span>
+            <span class="s1">&#39;price&#39;</span><span class="p">:</span> <span class="mi">60</span><span class="p">,</span>
+            <span class="s1">&#39;longitude&#39;</span><span class="p">:</span> <span class="mf">0.27891577</span><span class="p">,</span>
+            <span class="s1">&#39;latitude&#39;</span><span class="p">:</span> <span class="mf">51.45994069</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s1">&#39;code&#39;</span><span class="p">:</span> <span class="s1">&#39;eed76e77-55c1-41ce-985d-ca49bf6c0585&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="mi">93</span><span class="p">,</span>
+            <span class="s1">&#39;price&#39;</span><span class="p">:</span> <span class="mi">48</span><span class="p">,</span>
+            <span class="s1">&#39;longitude&#39;</span><span class="p">:</span> <span class="mf">0.33894476</span><span class="p">,</span>
+            <span class="s1">&#39;latitude&#39;</span><span class="p">:</span> <span class="mf">51.39916678</span><span class="p">,</span>
+        <span class="p">}</span>
+    <span class="p">]</span>
 </pre></div>
 
 
@@ -1106,29 +1168,33 @@ max-complexity = 10
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">_check_results</span><span class="p">(</span><span class="n">domain_models_list</span><span class="p">,</span> <span class="n">data_list</span><span class="p">):</span>
     <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">domain_models_list</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_list</span><span class="p">)</span>
     <span class="k">assert</span> <span class="nb">all</span><span class="p">([</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">dm</span><span class="p">,</span> <span class="n">DomainModel</span><span class="p">)</span> <span class="k">for</span> <span class="n">dm</span> <span class="ow">in</span> <span class="n">domain_models_list</span><span class="p">])</span>
-    <span class="k">assert</span> <span class="nb">set</span><span class="p">([</span><span class="n">dm</span><span class="o">.</span><span class="n">code</span> <span class="k">for</span> <span class="n">dm</span> <span class="ow">in</span> <span class="n">domain_models_list</span><span class="p">])</span> <span class="o">==</span> <span class="nb">set</span><span class="p">([</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;code&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">data_list</span><span class="p">])</span>
+    <span class="k">assert</span> <span class="nb">set</span><span class="p">([</span><span class="n">dm</span><span class="o">.</span><span class="n">code</span> <span class="k">for</span> <span class="n">dm</span> <span class="ow">in</span> <span class="n">domain_models_list</span><span class="p">]</span>
+               <span class="p">)</span> <span class="o">==</span> <span class="nb">set</span><span class="p">([</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;code&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">data_list</span><span class="p">])</span>
 </pre></div>
 
 
 <p>We need to be able to initialize the repository with a list of dictionaries, and the <code>list()</code> method without any parameter shall return the same list of entries.</p>
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">test_repository_list_without_parameters</span><span class="p">(</span><span class="n">storagerooms</span><span class="p">):</span>
-    <span class="n">repo</span> <span class="o">=</span> <span class="n">memrepo</span><span class="o">.</span><span class="n">MemRepo</span><span class="p">(</span><span class="n">storagerooms</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">test_repository_list_without_parameters</span><span class="p">(</span><span class="n">storageroom_dicts</span><span class="p">):</span>
+    <span class="n">repo</span> <span class="o">=</span> <span class="n">memrepo</span><span class="o">.</span><span class="n">MemRepo</span><span class="p">(</span><span class="n">storageroom_dicts</span><span class="p">)</span>
 
-    <span class="k">assert</span> <span class="n">repo</span><span class="o">.</span><span class="n">list</span><span class="p">()</span> <span class="o">==</span> <span class="n">storagerooms</span>
+    <span class="n">_check_results</span><span class="p">(</span>
+        <span class="n">repo</span><span class="o">.</span><span class="n">list</span><span class="p">(),</span>
+        <span class="n">storageroom_dicts</span>
+    <span class="p">)</span>
 </pre></div>
 
 
 <p>The <code>list()</code> method shall accept a <code>filters</code> parameter, which is a dictionary. The dictionary keys shall be in the form <code>&lt;attribute&gt;__&lt;operator&gt;</code>, similar to the syntax used by the Django ORM. So to express that the price shall be less than 65 we can write <code>filters={'price__lt': 60}</code>.</p>
 <p>A couple of error conditions shall be checked: using an unknown key shall raise a <code>KeyError</code> exception, and using a wrong operator shall raise a <code>ValueError</code> exception.</p>
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">test_repository_list_with_filters_unknown_key</span><span class="p">(</span><span class="n">storagerooms</span><span class="p">):</span>
-    <span class="n">repo</span> <span class="o">=</span> <span class="n">memrepo</span><span class="o">.</span><span class="n">MemRepo</span><span class="p">(</span><span class="n">storagerooms</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">test_repository_list_with_filters_unknown_key</span><span class="p">(</span><span class="n">storageroom_dicts</span><span class="p">):</span>
+    <span class="n">repo</span> <span class="o">=</span> <span class="n">memrepo</span><span class="o">.</span><span class="n">MemRepo</span><span class="p">(</span><span class="n">storageroom_dicts</span><span class="p">)</span>
 
     <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">KeyError</span><span class="p">):</span>
         <span class="n">repo</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;aname&#39;</span><span class="p">})</span>
 
 
-<span class="k">def</span> <span class="nf">test_repository_list_with_filters_unknown_operator</span><span class="p">(</span><span class="n">storagerooms</span><span class="p">):</span>
-    <span class="n">repo</span> <span class="o">=</span> <span class="n">memrepo</span><span class="o">.</span><span class="n">MemRepo</span><span class="p">(</span><span class="n">storagerooms</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">test_repository_list_with_filters_unknown_operator</span><span class="p">(</span><span class="n">storageroom_dicts</span><span class="p">):</span>
+    <span class="n">repo</span> <span class="o">=</span> <span class="n">memrepo</span><span class="o">.</span><span class="n">MemRepo</span><span class="p">(</span><span class="n">storageroom_dicts</span><span class="p">)</span>
 
     <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
         <span class="n">repo</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;price__in&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">]})</span>
@@ -1136,29 +1202,80 @@ max-complexity = 10
 
 
 <p>Let us then test that the filtering mechanism actually works. We want the default operator to be <code>__eq</code>, which means that if we do not put any operator an equality check shall be performed.</p>
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">test_repository_list_with_filters_price</span><span class="p">(</span><span class="n">storagerooms</span><span class="p">):</span>
-    <span class="n">repo</span> <span class="o">=</span> <span class="n">memrepo</span><span class="o">.</span><span class="n">MemRepo</span><span class="p">(</span><span class="n">storagerooms</span><span class="p">)</span>
-
-    <span class="n">_check_results</span><span class="p">(</span><span class="n">repo</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;price&#39;</span><span class="p">:</span> <span class="mi">60</span><span class="p">}),</span> <span class="p">[</span><span class="n">storageroom3</span><span class="p">])</span>
-    <span class="n">_check_results</span><span class="p">(</span><span class="n">repo</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;price__eq&#39;</span><span class="p">:</span> <span class="mi">60</span><span class="p">}),</span> <span class="p">[</span><span class="n">storageroom3</span><span class="p">])</span>
-    <span class="n">_check_results</span><span class="p">(</span><span class="n">repo</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;price__lt&#39;</span><span class="p">:</span> <span class="mi">60</span><span class="p">}),</span> <span class="p">[</span><span class="n">storageroom1</span><span class="p">,</span> <span class="n">storageroom4</span><span class="p">])</span>
-    <span class="n">_check_results</span><span class="p">(</span><span class="n">repo</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;price__gt&#39;</span><span class="p">:</span> <span class="mi">60</span><span class="p">}),</span> <span class="p">[</span><span class="n">storageroom2</span><span class="p">])</span>
-
-
-<span class="k">def</span> <span class="nf">test_repository_list_with_filters_size</span><span class="p">(</span><span class="n">storagerooms</span><span class="p">):</span>
-    <span class="n">repo</span> <span class="o">=</span> <span class="n">memrepo</span><span class="o">.</span><span class="n">MemRepo</span><span class="p">(</span><span class="n">storagerooms</span><span class="p">)</span>
-
-    <span class="n">_check_results</span><span class="p">(</span><span class="n">repo</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="mi">93</span><span class="p">}),</span> <span class="p">[</span><span class="n">storageroom4</span><span class="p">])</span>
-    <span class="n">_check_results</span><span class="p">(</span><span class="n">repo</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;size__eq&#39;</span><span class="p">:</span> <span class="mi">93</span><span class="p">}),</span> <span class="p">[</span><span class="n">storageroom4</span><span class="p">])</span>
-    <span class="n">_check_results</span><span class="p">(</span><span class="n">repo</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;size__lt&#39;</span><span class="p">:</span> <span class="mi">60</span><span class="p">}),</span> <span class="p">[</span><span class="n">storageroom3</span><span class="p">])</span>
-    <span class="n">_check_results</span><span class="p">(</span><span class="n">repo</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;size__gt&#39;</span><span class="p">:</span> <span class="mi">400</span><span class="p">}),</span> <span class="p">[</span><span class="n">storageroom2</span><span class="p">])</span>
-
-
-<span class="k">def</span> <span class="nf">test_repository_list_with_filters_code</span><span class="p">(</span><span class="n">storagerooms</span><span class="p">):</span>
-    <span class="n">repo</span> <span class="o">=</span> <span class="n">memrepo</span><span class="o">.</span><span class="n">MemRepo</span><span class="p">(</span><span class="n">storagerooms</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">test_repository_list_with_filters_price</span><span class="p">(</span><span class="n">storageroom_dicts</span><span class="p">):</span>
+    <span class="n">repo</span> <span class="o">=</span> <span class="n">memrepo</span><span class="o">.</span><span class="n">MemRepo</span><span class="p">(</span><span class="n">storageroom_dicts</span><span class="p">)</span>
 
     <span class="n">_check_results</span><span class="p">(</span>
-        <span class="n">repo</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;code&#39;</span><span class="p">:</span> <span class="s1">&#39;913694c6-435a-4366-ba0d-da5334a611b2&#39;</span><span class="p">}),</span> <span class="p">[</span><span class="n">storageroom3</span><span class="p">])</span>
+        <span class="n">repo</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;price&#39;</span><span class="p">:</span> <span class="mi">60</span><span class="p">}),</span>
+        <span class="p">[</span><span class="n">storageroom_dicts</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">test_repository_list_with_filters_price_eq</span><span class="p">(</span><span class="n">storageroom_dicts</span><span class="p">):</span>
+    <span class="n">repo</span> <span class="o">=</span> <span class="n">memrepo</span><span class="o">.</span><span class="n">MemRepo</span><span class="p">(</span><span class="n">storageroom_dicts</span><span class="p">)</span>
+
+    <span class="n">_check_results</span><span class="p">(</span>
+        <span class="n">repo</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;price__eq&#39;</span><span class="p">:</span> <span class="mi">60</span><span class="p">}),</span>
+        <span class="p">[</span><span class="n">storageroom_dicts</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">test_repository_list_with_filters_price_lt</span><span class="p">(</span><span class="n">storageroom_dicts</span><span class="p">):</span>
+    <span class="n">repo</span> <span class="o">=</span> <span class="n">memrepo</span><span class="o">.</span><span class="n">MemRepo</span><span class="p">(</span><span class="n">storageroom_dicts</span><span class="p">)</span>
+
+    <span class="n">_check_results</span><span class="p">(</span>
+        <span class="n">repo</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;price__lt&#39;</span><span class="p">:</span> <span class="mi">60</span><span class="p">}),</span>
+        <span class="p">[</span><span class="n">storageroom_dicts</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">storageroom_dicts</span><span class="p">[</span><span class="mi">3</span><span class="p">]])</span>
+
+
+<span class="k">def</span> <span class="nf">test_repository_list_with_filters_price_gt</span><span class="p">(</span><span class="n">storageroom_dicts</span><span class="p">):</span>
+    <span class="n">repo</span> <span class="o">=</span> <span class="n">memrepo</span><span class="o">.</span><span class="n">MemRepo</span><span class="p">(</span><span class="n">storageroom_dicts</span><span class="p">)</span>
+    <span class="n">_check_results</span><span class="p">(</span>
+        <span class="n">repo</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;price__gt&#39;</span><span class="p">:</span> <span class="mi">60</span><span class="p">}),</span>
+        <span class="p">[</span><span class="n">storageroom_dicts</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">test_repository_list_with_filters_size</span><span class="p">(</span><span class="n">storageroom_dicts</span><span class="p">):</span>
+    <span class="n">repo</span> <span class="o">=</span> <span class="n">memrepo</span><span class="o">.</span><span class="n">MemRepo</span><span class="p">(</span><span class="n">storageroom_dicts</span><span class="p">)</span>
+
+    <span class="n">_check_results</span><span class="p">(</span>
+        <span class="n">repo</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="mi">93</span><span class="p">}),</span>
+        <span class="p">[</span><span class="n">storageroom_dicts</span><span class="p">[</span><span class="mi">3</span><span class="p">]]</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">test_repository_list_with_filters_size_eq</span><span class="p">(</span><span class="n">storageroom_dicts</span><span class="p">):</span>
+    <span class="n">repo</span> <span class="o">=</span> <span class="n">memrepo</span><span class="o">.</span><span class="n">MemRepo</span><span class="p">(</span><span class="n">storageroom_dicts</span><span class="p">)</span>
+    <span class="n">_check_results</span><span class="p">(</span>
+        <span class="n">repo</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;size__eq&#39;</span><span class="p">:</span> <span class="mi">93</span><span class="p">}),</span>
+        <span class="p">[</span><span class="n">storageroom_dicts</span><span class="p">[</span><span class="mi">3</span><span class="p">]]</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">test_repository_list_with_filters_size_lt</span><span class="p">(</span><span class="n">storageroom_dicts</span><span class="p">):</span>
+    <span class="n">repo</span> <span class="o">=</span> <span class="n">memrepo</span><span class="o">.</span><span class="n">MemRepo</span><span class="p">(</span><span class="n">storageroom_dicts</span><span class="p">)</span>
+    <span class="n">_check_results</span><span class="p">(</span>
+        <span class="n">repo</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;size__lt&#39;</span><span class="p">:</span> <span class="mi">60</span><span class="p">}),</span>
+        <span class="p">[</span><span class="n">storageroom_dicts</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">test_repository_list_with_filters_size_gt</span><span class="p">(</span><span class="n">storageroom_dicts</span><span class="p">):</span>
+    <span class="n">repo</span> <span class="o">=</span> <span class="n">memrepo</span><span class="o">.</span><span class="n">MemRepo</span><span class="p">(</span><span class="n">storageroom_dicts</span><span class="p">)</span>
+    <span class="n">_check_results</span><span class="p">(</span>
+        <span class="n">repo</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;size__gt&#39;</span><span class="p">:</span> <span class="mi">400</span><span class="p">}),</span>
+        <span class="p">[</span><span class="n">storageroom_dicts</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">test_repository_list_with_filters_code</span><span class="p">(</span><span class="n">storageroom_dicts</span><span class="p">):</span>
+    <span class="n">repo</span> <span class="o">=</span> <span class="n">memrepo</span><span class="o">.</span><span class="n">MemRepo</span><span class="p">(</span><span class="n">storageroom_dicts</span><span class="p">)</span>
+
+    <span class="n">_check_results</span><span class="p">(</span>
+        <span class="n">repo</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;code&#39;</span><span class="p">:</span> <span class="s1">&#39;913694c6-435a-4366-ba0d-da5334a611b2&#39;</span><span class="p">}),</span>
+        <span class="p">[</span><span class="n">storageroom_dicts</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+    <span class="p">)</span>
 </pre></div>
 
 
@@ -1193,13 +1310,13 @@ max-complexity = 10
 
     <span class="k">def</span> <span class="nf">list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">filters</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entries</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entries</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_entries</span><span class="p">)</span>
 
-        <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">result</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_entries</span><span class="p">)</span>
-
-        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">filters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">result</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">result</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)]</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">filters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">result</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)]</span>
 
         <span class="k">return</span> <span class="p">[</span><span class="n">sr</span><span class="o">.</span><span class="n">StorageRoom</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">r</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">result</span><span class="p">]</span>
 </pre></div>
@@ -1211,19 +1328,14 @@ max-complexity = 10
 <p>Whatever technology we want to use to interact with the user to collect inputs and provide results we need to interface with the clean architecture we just built, so now we will create a layer to expose an HTTP API. This can be done with a server that exposes a set of HTTP addresses (API endpoints) that once accessed return some data. Such a layer is commonly called a REST layer, because usually the semantic of the addresses comes from the REST recommendations.</p>
 <p>Flask is a lightweight web server with a modular structure that provides just the parts that the user needs. In particular, we will not use any database/ORM, since we already implemented our own repository layer.</p>
 <p>Please keep in mind that this part of the project, together with the repository layer, is usually implemented as a separate package, and I am keeping them together just for the sake of this introductory tutorial.</p>
-<p>Let us start updating the requirements files. The <code>prod.txt</code> file shall contain Flask</p>
-<div class="highlight"><pre><span></span>Flask
-</pre></div>
-
-
-<p>The <code>dev.txt</code> file will contain the <a href="https://flask-script.readthedocs.io/en/latest/">Flask-Script extension</a></p>
+<p>Let us start updating the requirements files. The <code>dev.txt</code> file shall contain Flask</p>
 <div class="highlight"><pre><span></span>-r test.txt
 
 pip
 wheel
 flake8
 Sphinx
-Flask-Script
+Flask
 </pre></div>
 
 
@@ -1240,7 +1352,7 @@ pytest-flask
 
 <p>Remember to run <code>pip install -r requirements/dev.txt</code> again after those changes to actually install the new packages in your virtual environment.</p>
 <p>The setup of a Flask application is not complex, but a lot of concepts are involved, and since this is not a tutorial on Flask I will run quickly through these steps. I will however provide links to the Flask documentation for every concept.</p>
-<p>I usually define different configurations for my testing, development, and production environments. Since the Flask application can be configured using a plain Python object (<a href="http://flask.pocoo.org/docs/latest/api/#flask.Config.from_object">documentation</a>), I create the file <code>rentomatic/settings.py</code> to host those objects</p>
+<p>I usually define different configurations for my testing, development, and production environments. Since the Flask application can be configured using a plain Python object (<a href="http://flask.pocoo.org/docs/latest/api/#flask.Config.from_object">documentation</a>), I created the file <code>rentomatic/settings.py</code> to host those objects</p>
 <div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
 
 
@@ -1348,6 +1460,20 @@ pytest-flask
 </pre></div>
 
 
+<p>If you run pytest you'll notice that the test suite fails because of the <code>app</code> fixture, which is missing. The <code>pytest-flask</code> plugin provides the <code>client</code> fixture, but relies on the <code>app</code> fixture which has to be provided. The best place to define it is in <code>tests/conftest.py</code></p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pytest</span>
+
+
+<span class="kn">from</span> <span class="nn">rentomatic.app</span> <span class="kn">import</span> <span class="n">create_app</span>
+<span class="kn">from</span> <span class="nn">rentomatic.settings</span> <span class="kn">import</span> <span class="n">TestConfig</span>
+
+
+<span class="nd">@pytest.yield_fixture</span><span class="p">(</span><span class="n">scope</span><span class="o">=</span><span class="s1">&#39;function&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">app</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">create_app</span><span class="p">(</span><span class="n">TestConfig</span><span class="p">)</span>
+</pre></div>
+
+
 <p>It's time to write the endpoint, where we will finally see all the pieces of the architecture working together. </p>
 <p>The minimal Flask endpoint we can put in <code>rentomatic/rest/storageroom.py</code> is something like</p>
 <div class="highlight"><pre><span></span><span class="n">blueprint</span> <span class="o">=</span> <span class="n">Blueprint</span><span class="p">(</span><span class="s1">&#39;storageroom&#39;</span><span class="p">,</span> <span class="vm">__name__</span><span class="p">)</span>
@@ -1421,70 +1547,71 @@ pytest-flask
 <h1 id="the-server-in-action">The server in action<a class="headerlink" href="#the-server-in-action" title="Permanent link">&para;</a></h1>
 <p><strong>Git tag: <a href="https://github.com/lgiordani/rentomatic/tree/step13">step13</a></strong></p>
 <p>Before I fix the missing parts of the endpoint let us see the server in action, so we can finally enjoy the product we have been building during this long post.</p>
-<p>To actually see some results when accessing the endpoint we need to fill the repository with some data. This part is obviously required only because of the ephemeral nature of the repository we are using. A real repository would wrap a persistent source of data and providing data at this point wouldn't be necessary. To initialize the repository we have to define some data</p>
+<p>To actually see some results when accessing the endpoint we need to fill the repository with some data. This part is obviously required only because of the ephemeral nature of the repository we are using. A real repository would wrap a persistent source of data and providing data at this point wouldn't be necessary. To initialize the repository we have to define some data, so add these dictionaries to the <code>rentomatic/rest/storageroom.py</code> file</p>
 <div class="highlight"><pre><span></span><span class="n">storageroom1</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">&#39;code&#39;</span><span class="p">:</span> <span class="s1">&#39;f853578c-fc0f-4e65-81b8-566c5dffa35a&#39;</span><span class="p">,</span>
     <span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="mi">215</span><span class="p">,</span>
     <span class="s1">&#39;price&#39;</span><span class="p">:</span> <span class="mi">39</span><span class="p">,</span>
-    <span class="s1">&#39;longitude&#39;</span><span class="p">:</span> <span class="s1">&#39;-0.09998975&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;latitude&#39;</span><span class="p">:</span> <span class="s1">&#39;51.75436293&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;longitude&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.09998975</span><span class="p">,</span>
+    <span class="s1">&#39;latitude&#39;</span><span class="p">:</span> <span class="mf">51.75436293</span><span class="p">,</span>
 <span class="p">}</span>
 
 <span class="n">storageroom2</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">&#39;code&#39;</span><span class="p">:</span> <span class="s1">&#39;fe2c3195-aeff-487a-a08f-e0bdc0ec6e9a&#39;</span><span class="p">,</span>
     <span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="mi">405</span><span class="p">,</span>
     <span class="s1">&#39;price&#39;</span><span class="p">:</span> <span class="mi">66</span><span class="p">,</span>
-    <span class="s1">&#39;longitude&#39;</span><span class="p">:</span> <span class="s1">&#39;0.18228006&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;latitude&#39;</span><span class="p">:</span> <span class="s1">&#39;51.74640997&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;longitude&#39;</span><span class="p">:</span> <span class="mf">0.18228006</span><span class="p">,</span>
+    <span class="s1">&#39;latitude&#39;</span><span class="p">:</span> <span class="mf">51.74640997</span><span class="p">,</span>
 <span class="p">}</span>
 
 <span class="n">storageroom3</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">&#39;code&#39;</span><span class="p">:</span> <span class="s1">&#39;913694c6-435a-4366-ba0d-da5334a611b2&#39;</span><span class="p">,</span>
     <span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="mi">56</span><span class="p">,</span>
     <span class="s1">&#39;price&#39;</span><span class="p">:</span> <span class="mi">60</span><span class="p">,</span>
-    <span class="s1">&#39;longitude&#39;</span><span class="p">:</span> <span class="s1">&#39;0.27891577&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;latitude&#39;</span><span class="p">:</span> <span class="s1">&#39;51.45994069&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;longitude&#39;</span><span class="p">:</span> <span class="mf">0.27891577</span><span class="p">,</span>
+    <span class="s1">&#39;latitude&#39;</span><span class="p">:</span> <span class="mf">51.45994069</span><span class="p">,</span>
 <span class="p">}</span>
 </pre></div>
 
 
-<p>And them feed them into the repository</p>
+<p>And then use them to initialise the repository</p>
 <div class="highlight"><pre><span></span>    <span class="n">repo</span> <span class="o">=</span> <span class="n">mr</span><span class="o">.</span><span class="n">MemRepo</span><span class="p">([</span><span class="n">storageroom1</span><span class="p">,</span> <span class="n">storageroom2</span><span class="p">,</span> <span class="n">storageroom3</span><span class="p">])</span>
 </pre></div>
 
 
-<p>Now we can run the Flask <code>manage.py</code> file to check the exposed URLs</p>
-<div class="highlight"><pre><span></span>$ python manage.py urls
-Rule                     Endpoint               
-------------------------------------------------
-/static/&lt;path:filename&gt;  static                 
-/storagerooms            storageroom.storageroom
+<p>To run the web server we need to create a <code>wsgi.py</code> file in the main project folder (the folder where <code>setup.py</code> is stored)</p>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">rentomatic.app</span> <span class="kn">import</span> <span class="n">create_app</span>
+
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">create_app</span><span class="p">()</span>
 </pre></div>
 
 
-<p>and run the development server</p>
-<div class="highlight"><pre><span></span>$ python manage.py server
+<p>Now we can run the Flask development server</p>
+<div class="highlight"><pre><span></span>$ flask run
 </pre></div>
 
 
-<p>If you open your browser and navigate to <a href="http://127.0.0.1:5000/storagerooms">http://127.0.0.1:5000/storagerooms</a>, you can see the API call results. I recommend installing a formatter extension for the browser to better check the output. If you are using Chrome try <a href="https://github.com/callumlocke/json-formatter">JSON Formatter</a>.</p>
+<p>At this point, if you open your browser and navigate to <a href="http://localhost:5000/storagerooms">http://localhost:5000/storagerooms</a>, you can see the API call results. I recommend installing a formatter extension for the browser to better check the output. If you are using Chrome try <a href="https://github.com/callumlocke/json-formatter">JSON Formatter</a>.</p>
 <h1 id="the-rest-layer-part2">The REST layer (part2)<a class="headerlink" href="#the-rest-layer-part2" title="Permanent link">&para;</a></h1>
 <p><strong>Git tag: <a href="https://github.com/lgiordani/rentomatic/tree/step14">step14</a></strong></p>
-<p>Let us cover the two missing cases in the endpoint. First I introduce a test to check if the endpoint correctly handles querystring parameters</p>
-<div class="highlight"><pre><span></span><span class="nd">@mock.patch</span><span class="p">(</span><span class="s1">&#39;rentomatic.use_cases.storageroom_use_cases.StorageRoomListUseCase&#39;</span><span class="p">)</span>
+<p>Let us cover the two missing cases in the endpoint. First I introduce a test to check if the endpoint correctly handles querystring parameters. Add it to the <code>tests/rest/test_get_storagerooms_list.py</code> file</p>
+<div class="highlight"><pre><span></span><span class="nd">@mock.patch</span><span class="p">(</span>
+    <span class="s1">&#39;rentomatic.use_cases.storageroom_use_cases.StorageRoomListUseCase&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">test_get_failed_response</span><span class="p">(</span><span class="n">mock_use_case</span><span class="p">,</span> <span class="n">client</span><span class="p">):</span>
-    <span class="n">mock_use_case</span><span class="p">()</span><span class="o">.</span><span class="n">execute</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">ResponseFailure</span><span class="o">.</span><span class="n">build_system_error</span><span class="p">(</span><span class="s1">&#39;test message&#39;</span><span class="p">)</span>
+    <span class="n">mock_use_case</span><span class="p">()</span><span class="o">.</span><span class="n">execute</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> \
+        <span class="n">res</span><span class="o">.</span><span class="n">ResponseFailure</span><span class="o">.</span><span class="n">build_system_error</span><span class="p">(</span><span class="s1">&#39;test message&#39;</span><span class="p">)</span>
 
     <span class="n">http_response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;/storagerooms&#39;</span><span class="p">)</span>
 
-    <span class="k">assert</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">http_response</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;UTF-8&#39;</span><span class="p">))</span> <span class="o">==</span> <span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;SYSTEM_ERROR&#39;</span><span class="p">,</span>
-                                                              <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;test message&#39;</span><span class="p">}</span>
+    <span class="k">assert</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">http_response</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;UTF-8&#39;</span><span class="p">))</span> <span class="o">==</span> \
+        <span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;SYSTEM_ERROR&#39;</span><span class="p">,</span> <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;test message&#39;</span><span class="p">}</span>
     <span class="k">assert</span> <span class="n">http_response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">500</span>
     <span class="k">assert</span> <span class="n">http_response</span><span class="o">.</span><span class="n">mimetype</span> <span class="o">==</span> <span class="s1">&#39;application/json&#39;</span>
 </pre></div>
 
 
-<p>This makes the use case return a failed response and check that the HTTP response contains a formatted version of the error. To make this test pass we have to introduce a proper mapping between domain responses codes and HTTP codes</p>
+<p>This makes the use case return a failed response and check that the HTTP response contains a formatted version of the error. To make this test pass we have to introduce a proper mapping between domain responses codes and HTTP codes in the <code>rentomatic/rest/storageroom.py</code> file</p>
 <div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">rentomatic.shared</span> <span class="kn">import</span> <span class="n">response_object</span> <span class="k">as</span> <span class="n">res</span>
 
 <span class="n">STATUS_CODES</span> <span class="o">=</span> <span class="p">{</span>
@@ -1496,14 +1623,14 @@ Rule                     Endpoint
 </pre></div>
 
 
-<p>Then we need to create the Flask response with the correct code</p>
+<p>Then we need to create the Flask response with the correct code in the definition of the endpoint</p>
 <div class="highlight"><pre><span></span>    <span class="k">return</span> <span class="n">Response</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="o">=</span><span class="n">ser</span><span class="o">.</span><span class="n">StorageRoomEncoder</span><span class="p">),</span>
                     <span class="n">mimetype</span><span class="o">=</span><span class="s1">&#39;application/json&#39;</span><span class="p">,</span>
                     <span class="n">status</span><span class="o">=</span><span class="n">STATUS_CODES</span><span class="p">[</span><span class="n">response</span><span class="o">.</span><span class="n">type</span><span class="p">])</span>
 </pre></div>
 
 
-<p>The second and last test is a bit more complex. As before we will mock the use case, but this time we will also patch <code>StorageRoomListRequestObject</code>. We need in fact to know if the request object is initialized with the correct parameters from the command line. So, step by step</p>
+<p>The second and last test is a bit more complex. As before we will mock the use case, but this time we will also patch <code>StorageRoomListRequestObject</code>. We do this because we need to know if the request object is initialized with the correct parameters from the command line. So, step by step</p>
 <div class="highlight"><pre><span></span><span class="nd">@mock.patch</span><span class="p">(</span><span class="s1">&#39;rentomatic.use_cases.storageroom_use_cases.StorageRoomListUseCase&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">test_request_object_initialisation_and_use_with_filters</span><span class="p">(</span><span class="n">mock_use_case</span><span class="p">,</span> <span class="n">client</span><span class="p">):</span>
     <span class="n">mock_use_case</span><span class="p">()</span><span class="o">.</span><span class="n">execute</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">ResponseSuccess</span><span class="p">([])</span>
@@ -1611,6 +1738,7 @@ Rule                     Endpoint
 <h2 id="updates">Updates<a class="headerlink" href="#updates" title="Permanent link">&para;</a></h2>
 <p>2016-11-15: Two tests contained variables with a wrong name (artist), which came from an initial version of the project. The name did not affect the tests. Added some instructions on the virtual environment and the development requirements.</p>
 <p>2016-12-12: Thanks to <a href="https://twitter.com/Taifu">Marco Beri</a> who spotted a typo in the code of step 6, which was already correct in the GitHub repository. He also suggested using the Cookiecutter package by <a href="https://github.com/ardydedase">Ardy Dedase</a>. Thanks to Marco and to Ardy!</p>
+<p>2018-11-18 Two years have passed since I wrote this post and I found some errors that I fixed, like <code>longitude</code> and <code>latitude</code> passed as string instead of floats. I also moved the project from Flask-script to the Flask development server and added a couple of clarifications here and there.</p>
 <h2 id="feedback">Feedback<a class="headerlink" href="#feedback" title="Permanent link">&para;</a></h2>
 <p>Feel free to use <a href="https://plus.google.com/u/0/111444750762335924049">the blog Google+ page</a> to comment the post. The <a href="http://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues">GitHub issues</a> page is the best place to submit corrections.</p>
         </section>
