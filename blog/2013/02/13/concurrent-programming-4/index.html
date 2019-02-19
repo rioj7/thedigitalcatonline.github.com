@@ -222,7 +222,7 @@
 </pre></div>
 
 
-<p>where <code>semid</code> is the set identifier, <code>sops</code> an array of operations and <code>nsops</code> the length of this latter. Each operation is declared through a <code>struct sembuf</code></p>
+<p>where <code>semid</code> is the set identifier, <code>sops</code> an array of operations and <code>nsops</code> the length of the latter. Each operation is declared through a <code>struct sembuf</code></p>
 <div class="highlight"><pre><span></span><span class="k">struct</span> <span class="n">sembuf</span> <span class="p">{</span>
     <span class="n">ushort</span>  <span class="n">sem_num</span><span class="p">;</span>        <span class="cm">/* semaphore index in array */</span>
              <span class="kt">short</span>   <span class="n">sem_op</span><span class="p">;</span>         <span class="cm">/* semaphore operation */</span>
@@ -246,7 +246,7 @@
 <p>Now we can write some code to implement the buffer example previously given. We are going to create 5 processes called W (writers) and a process called R (reader). Each W process tries to lock the resource (the buffer) through a semaphore, and if the buffer is not full, adds an element and releases the lock. The R process tries to lock the buffer, removes an element if available (buffer not empty) and releases the lock.</p>
 <p>Since we did not yet talk about shared memory we have to simulate read and write operation, i.e. pretend the operation has been performed. This is necessary since each process has its own memory space and cannot access that of another process. So each process has its own copy of the buffer, and the copies are not linked each other. Later in this series we will talk about techniques that allow sharing memory regions between processes.</p>
 <p>As already stated, we need 3 semaphores: the first acts as access controller and its maximum value is 1 while the other two manage overflow and underflow conditions. A single semaphore could not handle both conditions, since <code>semop()</code> acts one-way only.</p>
-<p>Let's clarify this latter statement before looking at the code. Say we have a single semaphore to manage over- and underflow conditions, with a value equal to the number of empty spaces in the buffer. Each time a W process fills the buffer it can decrease the semaphore value by one unit until the value reaches 0, which represents the condition of full buffer. This way however the empty buffer condition cannot be managed since the R process can increment the value of the semaphore without any limit. Semaphores, indeed, just control the lower boundary and not the upper one.</p>
+<p>Let's clarify the latter statement before looking at the code. Say we have a single semaphore to manage over- and underflow conditions, with a value equal to the number of empty spaces in the buffer. Each time a W process fills the buffer it can decrease the semaphore value by one unit until the value reaches 0, which represents the condition of full buffer. This way however the empty buffer condition cannot be managed since the R process can increment the value of the semaphore without any limit. Semaphores, indeed, just control the lower boundary and not the upper one.</p>
 <div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp"></span>
 <span class="cp">#include</span> <span class="cpf">&lt;stdlib.h&gt;</span><span class="cp"></span>
 <span class="cp">#include</span> <span class="cpf">&lt;errno.h&gt;</span><span class="cp"></span>
@@ -488,7 +488,7 @@
         <li><a href="http://blog.thedigitalcatonline.com/atom.xml"><i class="fa fa-rss"></i> All posts</a></li>
 
 
-        <li><a href="http://blog.thedigitalcatonline.com/category/programming/atom.xml"><i class="fa fa-rss"></i> All posts in category: Programming</a></li>
+        <li><a href="http://blog.thedigitalcatonline.com/category/{slug}/atom.xml"><i class="fa fa-rss"></i> All posts in category: Programming</a></li>
     </ul>
 </section>
     <!-- Recent posts -->
@@ -497,6 +497,14 @@
         <h2>Recent posts</h2>
     </header>
     <div class="mini-posts">
+        <article>
+            Exploring the Amiga - Part 8
+            <a href="http://blog.thedigitalcatonline.com/blog/2019/02/19/exploring-the-amiga-8/"> Read</a>
+        </article>
+        <article>
+            Exploring the Amiga - Part 7
+            <a href="http://blog.thedigitalcatonline.com/blog/2019/02/19/exploring-the-amiga-7/"> Read</a>
+        </article>
         <article>
             Clean Architectures in Python: the book
             <a href="http://blog.thedigitalcatonline.com/blog/2018/12/20/cabook/"> Read</a>
@@ -508,14 +516,6 @@
         <article>
             Exploring the Amiga - Part 6
             <a href="http://blog.thedigitalcatonline.com/blog/2018/06/25/exploring-the-amiga-6/"> Read</a>
-        </article>
-        <article>
-            Exploring the Amiga - Part 5
-            <a href="http://blog.thedigitalcatonline.com/blog/2018/06/25/exploring-the-amiga-5/"> Read</a>
-        </article>
-        <article>
-            Exploring the Amiga - Part 4
-            <a href="http://blog.thedigitalcatonline.com/blog/2018/06/14/exploring-the-amiga-4/"> Read</a>
         </article>
     </div>
 </section>

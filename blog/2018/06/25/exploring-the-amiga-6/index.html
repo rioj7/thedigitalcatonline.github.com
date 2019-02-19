@@ -44,7 +44,7 @@
     <header id="header">
         <a href="http://blog.thedigitalcatonline.com/category/retro/" title="Retro">Retro</a>
         <div class="align-right">        
-            <a href="#series">Exploring the Amiga</a> part 6/6
+            <a href="#series">Exploring the Amiga</a> part 6/8
         </div>
     </header>
     
@@ -65,6 +65,9 @@
             Published on
             <time datetime="2018-06-25T13:00:00+01:00"> 25/06/2018</time>
 
+                Last update on
+                <time datetime="2019-02-12T20:00:00+00:00"> 12/02/2019</time>
+                <span class="separator">•</span>
         </section>
 
         <section id="content">
@@ -73,270 +76,284 @@
 <p>The second type of memory is called "Fast Memory" because the CPU has exclusive access to it, thus providing better performances. It is also referred to as "expansion memory" since it comes with expansion boards.</p>
 <p>At a certain point during boot time Kickstart figures out the types of memory installed in the Amiga machine and puts the expansion memory size in <code>a4</code>. If this register contains a non-zero value, Kickstart knows that an expansion board has been installed and configures the memory accordingly.</p>
 <p>The memory initialisation code is the following</p>
-<div class="highlight"><pre><span></span><span class="nl">00000380:</span> <span class="mi">200c</span>                      <span class="k">move</span><span class="o">.l</span>  <span class="o">a4</span><span class="p">,</span><span class="o">d0</span>
-<span class="nl">00000382:</span> <span class="mi">6724</span>                      <span class="k">beq</span><span class="o">.b</span>   <span class="mi">0x3a8</span>
-<span class="nl">00000384:</span> <span class="mi">41ee</span> <span class="mi">024c</span>                 <span class="k">lea</span>     <span class="mi">0x24c</span><span class="p">(</span><span class="o">a6</span><span class="p">),</span><span class="o">a0</span>
-<span class="nl">00000388:</span> <span class="mi">43fa</span> <span class="mi">ffa8</span>                 <span class="k">lea</span>     <span class="mi">0x332</span><span class="p">(</span><span class="o">pc</span><span class="p">),</span><span class="o">a1</span>
-<span class="nl">0000038c:</span> <span class="mi">7400</span>                      <span class="k">moveq</span>   <span class="nl">#0</span><span class="p">,</span><span class="o">d2</span>
-<span class="nl">0000038e:</span> <span class="mi">323c</span> <span class="mi">0005</span>                 <span class="k">move</span><span class="o">.w</span>  <span class="nl">#0x5</span><span class="p">,</span><span class="o">d1</span>
-<span class="nl">00000392:</span> <span class="mi">200c</span>                      <span class="k">move</span><span class="o">.l</span>  <span class="o">a4</span><span class="p">,</span><span class="o">d0</span>
-<span class="nl">00000394:</span> <span class="mi">9088</span>                      <span class="k">sub</span><span class="o">.l</span>   <span class="o">a0</span><span class="p">,</span><span class="o">d0</span>
-<span class="nl">00000396:</span> <span class="mi">0480</span> <span class="mi">0000</span> <span class="mi">1800</span>            <span class="k">subi</span><span class="o">.l</span>  <span class="nl">#0x1800</span><span class="p">,</span><span class="o">d0</span>
-<span class="nl">0000039c:</span> <span class="mi">6100</span> <span class="mi">1688</span>                 <span class="k">bsr</span><span class="o">.w</span>   <span class="mi">0x1a26</span>
-<span class="nl">000003a0:</span> <span class="mi">41f8</span> <span class="mi">0400</span>                 <span class="k">lea</span>     <span class="mi">0x400</span><span class="o">.w</span><span class="p">,</span><span class="o">a0</span>
-<span class="nl">000003a4:</span> <span class="mi">7000</span>                      <span class="k">moveq</span>   <span class="nl">#0</span><span class="p">,</span><span class="o">d0</span>
-<span class="nl">000003a6:</span> <span class="mi">600a</span>                      <span class="k">bra</span><span class="o">.b</span>   <span class="mi">0x3b2</span>
-<span class="nl">000003a8:</span> <span class="mi">41ee</span> <span class="mi">024c</span>                 <span class="k">lea</span>     <span class="mi">0x24c</span><span class="p">(</span><span class="o">a6</span><span class="p">),</span><span class="o">a0</span>
-<span class="nl">000003ac:</span> <span class="mi">203c</span> <span class="mi">ffff</span> <span class="mi">e800</span>            <span class="k">move</span><span class="o">.l</span>  <span class="p">#-</span><span class="mi">0x1800</span><span class="p">,</span><span class="o">d0</span>
-<span class="nl">000003b2:</span> <span class="mi">323c</span> <span class="mi">0003</span>                 <span class="k">move</span><span class="o">.w</span>  <span class="nl">#0x3</span><span class="p">,</span><span class="o">d1</span>
-<span class="nl">000003b6:</span> <span class="mi">2448</span>                      <span class="k">movea</span><span class="o">.l</span> <span class="o">a0</span><span class="p">,</span><span class="o">a2</span>
-<span class="nl">000003b8:</span> <span class="mi">43fa</span> <span class="mi">ff6c</span>                 <span class="k">lea</span>     <span class="mi">0x326</span><span class="p">(</span><span class="o">pc</span><span class="p">),</span><span class="o">a1</span>
-<span class="nl">000003bc:</span> <span class="mi">74f6</span>                      <span class="k">moveq</span>   <span class="p">#-</span><span class="mi">0xa</span><span class="p">,</span><span class="o">d2</span>
-<span class="nl">000003be:</span> <span class="o">d0</span><span class="mi">8b</span>                      <span class="k">add</span><span class="o">.l</span>   <span class="o">a3</span><span class="p">,</span><span class="o">d0</span>
-<span class="nl">000003c0:</span> <span class="mi">9088</span>                      <span class="k">sub</span><span class="o">.l</span>   <span class="o">a0</span><span class="p">,</span><span class="o">d0</span>
-<span class="nl">000003c2:</span> <span class="mi">6100</span> <span class="mi">1662</span>                 <span class="k">bsr</span><span class="o">.w</span>   <span class="mi">0x1a26</span>
-<span class="nl">000003c6:</span> <span class="mi">224e</span>                      <span class="k">movea</span><span class="o">.l</span> <span class="o">a6</span><span class="p">,</span><span class="o">a1</span>
-<span class="nl">000003c8:</span> <span class="mi">6100</span> <span class="mi">107e</span>                 <span class="k">bsr</span><span class="o">.w</span>   <span class="mi">0x1448</span>
+<div class="highlight"><pre><span></span><span class="m">00000380: 200c</span>                      <span class="k">move.l</span>  <span class="nv">a4</span><span class="p">,</span><span class="nv">d0</span>
+<span class="m">00000382: 6724</span>                      <span class="k">beq.b</span>   <span class="mi">0x3a8</span>
+<span class="m">00000384: 41ee 024c</span>                 <span class="k">lea</span>     <span class="mi">0x24c</span><span class="p">(</span><span class="nv">a6</span><span class="p">),</span><span class="nv">a0</span>
+<span class="m">00000388: 43fa ffa8</span>                 <span class="k">lea</span>     <span class="mi">0x332</span><span class="p">(</span><span class="nv">pc</span><span class="p">),</span><span class="nv">a1</span>
+<span class="m">0000038c: 7400</span>                      <span class="k">moveq</span>   <span class="p">#</span><span class="mi">0</span><span class="p">,</span><span class="nv">d2</span>
+<span class="m">0000038e: 323c 0005</span>                 <span class="k">move.w</span>  <span class="p">#</span><span class="mi">0x5</span><span class="p">,</span><span class="nv">d1</span>
+<span class="m">00000392: 200c</span>                      <span class="k">move.l</span>  <span class="nv">a4</span><span class="p">,</span><span class="nv">d0</span>
+<span class="m">00000394: 9088</span>                      <span class="k">sub.l</span>   <span class="nv">a0</span><span class="p">,</span><span class="nv">d0</span>
+<span class="m">00000396: 0480 0000 1800</span>            <span class="k">subi.l</span>  <span class="p">#</span><span class="mi">0x1800</span><span class="p">,</span><span class="nv">d0</span>
+<span class="m">0000039c: 6100 1688</span>                 <span class="k">bsr.w</span>   <span class="mi">0x1a26</span>
+<span class="m">000003a0: 41f8 0400</span>                 <span class="k">lea</span>     <span class="mi">0x400</span><span class="p">.</span><span class="nl">w</span><span class="p">,</span><span class="nv">a0</span>
+<span class="m">000003a4: 7000</span>                      <span class="k">moveq</span>   <span class="p">#</span><span class="mi">0</span><span class="p">,</span><span class="nv">d0</span>
+<span class="m">000003a6: 600a</span>                      <span class="k">bra.b</span>   <span class="mi">0x3b2</span>
+<span class="m">000003a8: 41ee 024c</span>                 <span class="k">lea</span>     <span class="mi">0x24c</span><span class="p">(</span><span class="nv">a6</span><span class="p">),</span><span class="nv">a0</span>
+<span class="m">000003ac: 203c ffff e800</span>            <span class="k">move.l</span>  <span class="p">#-</span><span class="mi">0x1800</span><span class="p">,</span><span class="nv">d0</span>
+<span class="m">000003b2: 323c 0003</span>                 <span class="k">move.w</span>  <span class="p">#</span><span class="mi">0x3</span><span class="p">,</span><span class="nv">d1</span>
+<span class="m">000003b6: 2448</span>                      <span class="k">movea.l</span> <span class="nv">a0</span><span class="p">,</span><span class="nv">a2</span>
+<span class="m">000003b8: 43fa ff6c</span>                 <span class="k">lea</span>     <span class="mi">0x326</span><span class="p">(</span><span class="nv">pc</span><span class="p">),</span><span class="nv">a1</span>
+<span class="m">000003bc: 74f6</span>                      <span class="k">moveq</span>   <span class="p">#-</span><span class="mi">0xa</span><span class="p">,</span><span class="nv">d2</span>
+<span class="m">000003be: d08b</span>                      <span class="k">add.l</span>   <span class="nv">a3</span><span class="p">,</span><span class="nv">d0</span>
+<span class="m">000003c0: 9088</span>                      <span class="k">sub.l</span>   <span class="nv">a0</span><span class="p">,</span><span class="nv">d0</span>
+<span class="m">000003c2: 6100 1662</span>                 <span class="k">bsr.w</span>   <span class="mi">0x1a26</span>
+<span class="m">000003c6: 224e</span>                      <span class="k">movea.l</span> <span class="nv">a6</span><span class="p">,</span><span class="nv">a1</span>
+<span class="m">000003c8: 6100 107e</span>                 <span class="k">bsr.w</span>   <span class="mi">0x1448</span>
 </pre></div>
 
 
 <p>As I did in the previous post I will split the code in parts and replace some addresses with labels to try and make the routine more understandable</p>
-<div class="highlight"><pre><span></span><span class="n">Check_expansion</span><span class="p">:</span>
-<span class="nl">00000380:</span> <span class="mi">200c</span>                      <span class="k">move</span><span class="o">.l</span>  <span class="o">a4</span><span class="p">,</span><span class="o">d0</span>
-<span class="nl">00000382:</span> <span class="mi">6724</span>                      <span class="k">beq</span><span class="o">.b</span>   <span class="n">Only_chip</span>
+<div class="highlight"><pre><span></span><span class="nl">Check_expansion:</span>
+<span class="m">00000380: 200c</span>                      <span class="k">move.l</span>  <span class="nv">a4</span><span class="p">,</span><span class="nv">d0</span>
+<span class="m">00000382: 6724</span>                      <span class="k">beq.b</span>   <span class="nl">Only_chip</span>
 
-<span class="n">Add_expansion</span><span class="p">:</span>
-<span class="nl">00000384:</span> <span class="mi">41ee</span> <span class="mi">024c</span>                 <span class="k">lea</span>     <span class="mi">0x24c</span><span class="p">(</span><span class="o">a6</span><span class="p">),</span><span class="o">a0</span>
-<span class="nl">00000388:</span> <span class="mi">43fa</span> <span class="mi">ffa8</span>                 <span class="k">lea</span>     <span class="mi">0x332</span><span class="p">(</span><span class="o">pc</span><span class="p">),</span><span class="o">a1</span>
-<span class="nl">0000038c:</span> <span class="mi">7400</span>                      <span class="k">moveq</span>   <span class="nl">#0</span><span class="p">,</span><span class="o">d2</span>
-<span class="nl">0000038e:</span> <span class="mi">323c</span> <span class="mi">0005</span>                 <span class="k">move</span><span class="o">.w</span>  <span class="nl">#0x5</span><span class="p">,</span><span class="o">d1</span>
-<span class="nl">00000392:</span> <span class="mi">200c</span>                      <span class="k">move</span><span class="o">.l</span>  <span class="o">a4</span><span class="p">,</span><span class="o">d0</span>
-<span class="nl">00000394:</span> <span class="mi">9088</span>                      <span class="k">sub</span><span class="o">.l</span>   <span class="o">a0</span><span class="p">,</span><span class="o">d0</span>
-<span class="nl">00000396:</span> <span class="mi">0480</span> <span class="mi">0000</span> <span class="mi">1800</span>            <span class="k">subi</span><span class="o">.l</span>  <span class="nl">#0x1800</span><span class="p">,</span><span class="o">d0</span>
-<span class="nl">0000039c:</span> <span class="mi">6100</span> <span class="mi">1688</span>                 <span class="k">bsr</span><span class="o">.w</span>   <span class="mi">0x1a26</span>
-<span class="nl">000003a0:</span> <span class="mi">41f8</span> <span class="mi">0400</span>                 <span class="k">lea</span>     <span class="mi">0x400</span><span class="o">.w</span><span class="p">,</span><span class="o">a0</span>
-<span class="nl">000003a4:</span> <span class="mi">7000</span>                      <span class="k">moveq</span>   <span class="nl">#0</span><span class="p">,</span><span class="o">d0</span>
-<span class="nl">000003a6:</span> <span class="mi">600a</span>                      <span class="k">bra</span><span class="o">.b</span>   <span class="n">Add_chip</span>
+<span class="nl">Add_expansion:</span>
+<span class="m">00000384: 41ee 024c</span>                 <span class="k">lea</span>     <span class="mi">0x24c</span><span class="p">(</span><span class="nv">a6</span><span class="p">),</span><span class="nv">a0</span>
+<span class="m">00000388: 43fa ffa8</span>                 <span class="k">lea</span>     <span class="mi">0x332</span><span class="p">(</span><span class="nv">pc</span><span class="p">),</span><span class="nv">a1</span>
+<span class="m">0000038c: 7400</span>                      <span class="k">moveq</span>   <span class="p">#</span><span class="mi">0</span><span class="p">,</span><span class="nv">d2</span>
+<span class="m">0000038e: 323c 0005</span>                 <span class="k">move.w</span>  <span class="p">#</span><span class="mi">0x5</span><span class="p">,</span><span class="nv">d1</span>
+<span class="m">00000392: 200c</span>                      <span class="k">move.l</span>  <span class="nv">a4</span><span class="p">,</span><span class="nv">d0</span>
+<span class="m">00000394: 9088</span>                      <span class="k">sub.l</span>   <span class="nv">a0</span><span class="p">,</span><span class="nv">d0</span>
+<span class="m">00000396: 0480 0000 1800</span>            <span class="k">subi.l</span>  <span class="p">#</span><span class="mi">0x1800</span><span class="p">,</span><span class="nv">d0</span>
+<span class="m">0000039c: 6100 1688</span>                 <span class="k">bsr.w</span>   <span class="mi">0x1a26</span>
+<span class="m">000003a0: 41f8 0400</span>                 <span class="k">lea</span>     <span class="mi">0x400</span><span class="p">.</span><span class="nl">w</span><span class="p">,</span><span class="nv">a0</span>
+<span class="m">000003a4: 7000</span>                      <span class="k">moveq</span>   <span class="p">#</span><span class="mi">0</span><span class="p">,</span><span class="nv">d0</span>
+<span class="m">000003a6: 600a</span>                      <span class="k">bra.b</span>   <span class="nl">Add_chip</span>
 
-<span class="n">Only_chip</span><span class="p">:</span>
-<span class="nl">000003a8:</span> <span class="mi">41ee</span> <span class="mi">024c</span>                 <span class="k">lea</span>     <span class="mi">0x24c</span><span class="p">(</span><span class="o">a6</span><span class="p">),</span><span class="o">a0</span>
-<span class="nl">000003ac:</span> <span class="mi">203c</span> <span class="mi">ffff</span> <span class="mi">e800</span>            <span class="k">move</span><span class="o">.l</span>  <span class="p">#-</span><span class="mi">0x1800</span><span class="p">,</span><span class="o">d0</span>
+<span class="nl">Only_chip:</span>
+<span class="m">000003a8: 41ee 024c</span>                 <span class="k">lea</span>     <span class="mi">0x24c</span><span class="p">(</span><span class="nv">a6</span><span class="p">),</span><span class="nv">a0</span>
+<span class="m">000003ac: 203c ffff e800</span>            <span class="k">move.l</span>  <span class="p">#-</span><span class="mi">0x1800</span><span class="p">,</span><span class="nv">d0</span>
 
-<span class="n">Add_chip</span><span class="p">:</span>
-<span class="nl">000003b2:</span> <span class="mi">323c</span> <span class="mi">0003</span>                 <span class="k">move</span><span class="o">.w</span>  <span class="nl">#0x3</span><span class="p">,</span><span class="o">d1</span>
-<span class="nl">000003b6:</span> <span class="mi">2448</span>                      <span class="k">movea</span><span class="o">.l</span> <span class="o">a0</span><span class="p">,</span><span class="o">a2</span>
-<span class="nl">000003b8:</span> <span class="mi">43fa</span> <span class="mi">ff6c</span>                 <span class="k">lea</span>     <span class="mi">0x326</span><span class="p">(</span><span class="o">pc</span><span class="p">),</span><span class="o">a1</span>
-<span class="nl">000003bc:</span> <span class="mi">74f6</span>                      <span class="k">moveq</span>   <span class="p">#-</span><span class="mi">0xa</span><span class="p">,</span><span class="o">d2</span>
-<span class="nl">000003be:</span> <span class="o">d0</span><span class="mi">8b</span>                      <span class="k">add</span><span class="o">.l</span>   <span class="o">a3</span><span class="p">,</span><span class="o">d0</span>
-<span class="nl">000003c0:</span> <span class="mi">9088</span>                      <span class="k">sub</span><span class="o">.l</span>   <span class="o">a0</span><span class="p">,</span><span class="o">d0</span>
-<span class="nl">000003c2:</span> <span class="mi">6100</span> <span class="mi">1662</span>                 <span class="k">bsr</span><span class="o">.w</span>   <span class="mi">0x1a26</span>
-<span class="nl">000003c6:</span> <span class="mi">224e</span>                      <span class="k">movea</span><span class="o">.l</span> <span class="o">a6</span><span class="p">,</span><span class="o">a1</span>
-<span class="nl">000003c8:</span> <span class="mi">6100</span> <span class="mi">107e</span>                 <span class="k">bsr</span><span class="o">.w</span>   <span class="mi">0x1448</span>
+<span class="nl">Add_chip:</span>
+<span class="m">000003b2: 323c 0003</span>                 <span class="k">move.w</span>  <span class="p">#</span><span class="mi">0x3</span><span class="p">,</span><span class="nv">d1</span>
+<span class="m">000003b6: 2448</span>                      <span class="k">movea.l</span> <span class="nv">a0</span><span class="p">,</span><span class="nv">a2</span>
+<span class="m">000003b8: 43fa ff6c</span>                 <span class="k">lea</span>     <span class="mi">0x326</span><span class="p">(</span><span class="nv">pc</span><span class="p">),</span><span class="nv">a1</span>
+<span class="m">000003bc: 74f6</span>                      <span class="k">moveq</span>   <span class="p">#-</span><span class="mi">0xa</span><span class="p">,</span><span class="nv">d2</span>
+<span class="m">000003be: d08b</span>                      <span class="k">add.l</span>   <span class="nv">a3</span><span class="p">,</span><span class="nv">d0</span>
+<span class="m">000003c0: 9088</span>                      <span class="k">sub.l</span>   <span class="nv">a0</span><span class="p">,</span><span class="nv">d0</span>
+<span class="m">000003c2: 6100 1662</span>                 <span class="k">bsr.w</span>   <span class="mi">0x1a26</span>
+<span class="m">000003c6: 224e</span>                      <span class="k">movea.l</span> <span class="nv">a6</span><span class="p">,</span><span class="nv">a1</span>
+<span class="m">000003c8: 6100 107e</span>                 <span class="k">bsr.w</span>   <span class="mi">0x1448</span>
 </pre></div>
 
 
 <p>The two addresses <code>0x326</code> and <code>0x332</code> mentioned in the code contain the two zero-terminated strings <code>Chip Memory</code> and <code>Fast Memory</code></p>
-<div class="highlight"><pre><span></span><span class="o">;</span> <span class="s2">&quot;Chip Memory&quot;</span>
+<div class="highlight"><pre><span></span><span class="c">; ################################################################</span>
+<span class="c">; &#39;Chip Memory&#39; string</span>
 
-<span class="nt">00000326</span><span class="o">:</span> <span class="nt">4368</span> <span class="o">;</span> <span class="nt">Ch</span>
-<span class="nt">00000328</span><span class="o">:</span> <span class="nt">6970</span> <span class="o">;</span> <span class="nt">ip</span>
-<span class="nt">0000032a</span><span class="o">:</span> <span class="nt">204d</span> <span class="o">;</span>  <span class="nt">M</span>
-<span class="nt">0000032c</span><span class="o">:</span> <span class="nt">656d</span> <span class="o">;</span> <span class="nt">em</span>
-<span class="nt">0000032e</span><span class="o">:</span> <span class="nt">6f72</span> <span class="o">;</span> <span class="nt">or</span>
-<span class="nt">00000330</span><span class="o">:</span> <span class="nt">7900</span> <span class="o">;</span> <span class="nt">y</span><span class="err">\</span><span class="nt">0</span>
+<span class="m">00000326: 43</span> <span class="c">; C</span>
+<span class="m">00000327: 68</span> <span class="c">; h</span>
+<span class="m">00000328: 69</span> <span class="c">; i</span>
+<span class="m">00000329: 70</span> <span class="c">; p</span>
+<span class="m">0000032a: 20</span> <span class="c">; SP</span>
+<span class="m">0000032b: 4d</span> <span class="c">; M</span>
+<span class="m">0000032c: 65</span> <span class="c">; e</span>
+<span class="m">0000032d: 6d</span> <span class="c">; m</span>
+<span class="m">0000032e: 6f</span> <span class="c">; o</span>
+<span class="m">0000032f: 72</span> <span class="c">; r</span>
+<span class="m">00000330: 79</span> <span class="c">; y</span>
+<span class="m">00000331: 00</span> <span class="c">; NUL</span>
 
-<span class="o">;</span> <span class="s2">&quot;Fast Memory&quot;</span>
+<span class="c">; ################################################################</span>
+<span class="c">; &#39;Fast Memory&#39; string</span>
 
-<span class="nt">00000332</span><span class="o">:</span> <span class="nt">4661</span> <span class="o">;</span> <span class="nt">Fa</span>
-<span class="nt">00000334</span><span class="o">:</span> <span class="nt">7374</span> <span class="o">;</span> <span class="nt">st</span>
-<span class="nt">00000336</span><span class="o">:</span> <span class="nt">204d</span> <span class="o">;</span>  <span class="nt">M</span>
-<span class="nt">00000338</span><span class="o">:</span> <span class="nt">656d</span> <span class="o">;</span> <span class="nt">em</span>
-<span class="nt">0000033a</span><span class="o">:</span> <span class="nt">6f72</span> <span class="o">;</span> <span class="nt">or</span>
-<span class="nt">0000033c</span><span class="o">:</span> <span class="nt">7900</span> <span class="o">;</span> <span class="nt">y</span><span class="err">\</span><span class="nt">0</span>
+<span class="m">00000332: 46</span> <span class="c">; F</span>
+<span class="m">00000333: 61</span> <span class="c">; a</span>
+<span class="m">00000334: 73</span> <span class="c">; s</span>
+<span class="m">00000335: 74</span> <span class="c">; t</span>
+<span class="m">00000336: 20</span> <span class="c">; SP</span>
+<span class="m">00000337: 4d</span> <span class="c">; M </span>
+<span class="m">00000338: 65</span> <span class="c">; e</span>
+<span class="m">00000339: 6d</span> <span class="c">; m</span>
+<span class="m">0000033a: 6f</span> <span class="c">; o</span>
+<span class="m">0000033b: 72</span> <span class="c">; r</span>
+<span class="m">0000033c: 79</span> <span class="c">; y</span>
+<span class="m">0000033d: 00</span> <span class="c">; NUL</span>
 </pre></div>
 
 
 <p>Let's analyse the code line by line.</p>
-<div class="highlight"><pre><span></span><span class="n">Check_expansion</span><span class="p">:</span>
-<span class="nl">00000380:</span> <span class="mi">200c</span>                      <span class="k">move</span><span class="o">.l</span>  <span class="o">a4</span><span class="p">,</span><span class="o">d0</span>
-<span class="nl">00000382:</span> <span class="mi">6724</span>                      <span class="k">beq</span><span class="o">.b</span>   <span class="n">Only_chip</span>
+<div class="highlight"><pre><span></span><span class="nl">Check_expansion:</span>
+<span class="m">00000380: 200c</span>                      <span class="k">move.l</span>  <span class="nv">a4</span><span class="p">,</span><span class="nv">d0</span>
+<span class="m">00000382: 6724</span>                      <span class="k">beq.b</span>   <span class="nl">Only_chip</span>
 </pre></div>
 
 
 <p>The first thing that Kickstart does is to check if <code>a4</code> contains a non-zero value, which signals that we have a memory expansion board available. If <code>a4</code> is zero the code jumps to the part that initialises chip memory only.</p>
-<div class="highlight"><pre><span></span><span class="n">Add_expansion</span><span class="p">:</span>
-<span class="nl">00000384:</span> <span class="mi">41ee</span> <span class="mi">024c</span>                 <span class="k">lea</span>     <span class="mi">0x24c</span><span class="p">(</span><span class="o">a6</span><span class="p">),</span><span class="o">a0</span>
-<span class="nl">00000388:</span> <span class="mi">43fa</span> <span class="mi">ffa8</span>                 <span class="k">lea</span>     <span class="mi">0x332</span><span class="p">(</span><span class="o">pc</span><span class="p">),</span><span class="o">a1</span>
+<div class="highlight"><pre><span></span><span class="nl">Add_expansion:</span>
+<span class="m">00000384: 41ee 024c</span>                 <span class="k">lea</span>     <span class="mi">0x24c</span><span class="p">(</span><span class="nv">a6</span><span class="p">),</span><span class="nv">a0</span>
+<span class="m">00000388: 43fa ffa8</span>                 <span class="k">lea</span>     <span class="mi">0x332</span><span class="p">(</span><span class="nv">pc</span><span class="p">),</span><span class="nv">a1</span>
 </pre></div>
 
 
-<p>The code then loads two effective addresses. The first one is the first free location (<code>0x24c</code>) and the second one is the string <code>Fast Memory</code>. The reason behind the address <code>0x24c</code> is explained in a later section in detail.</p>
+<p>The code then loads two effective addresses. The first one is the first free memory location (<code>0x24c</code>) and the second one is the string <code>Fast Memory</code>. The reason behind the address <code>0x24c</code> is explained in a later section in detail.</p>
 <p>The purpose of the code is to call the <code>AddMemList</code> routine, which adds the memory to the system free memory pool. It has the following prototype</p>
-<div class="highlight"><pre><span></span><span class="p">;</span>   <span class="n">error</span> <span class="o">=</span> <span class="n">AddMemList</span><span class="p">(</span> <span class="n">size</span><span class="p">,</span> <span class="n">attributes</span><span class="p">,</span> <span class="n">pri</span><span class="p">,</span> <span class="n">base</span><span class="p">,</span> <span class="n">name</span> <span class="p">)</span>
-<span class="p">;</span>   <span class="n">D0</span>                  <span class="n">D0</span>    <span class="n">D1</span>          <span class="n">D2</span>   <span class="n">A0</span>    <span class="n">A1</span>
+<div class="highlight"><pre><span></span>size = AddMemList(size, attributes, pri, base, name)
+D0                D0    D1          D2   A0    A1
 </pre></div>
 
 
 <p>where <code>size</code> is the size of the memory (bytes), <code>attributes</code> contains flags that identify memory attributes, <code>pri</code> is the priority of the memory, <code>base</code> is the base address of the new area and <code>name</code> is a name for this list.</p>
-<div class="highlight"><pre><span></span><span class="nl">0000038c:</span> <span class="mi">7400</span>                      <span class="k">moveq</span>   <span class="nl">#0</span><span class="p">,</span><span class="o">d2</span>
-<span class="nl">0000038e:</span> <span class="mi">323c</span> <span class="mi">0005</span>                 <span class="k">move</span><span class="o">.w</span>  <span class="nl">#0x5</span><span class="p">,</span><span class="o">d1</span>
+<div class="highlight"><pre><span></span><span class="m">0000038c: 7400</span>                      <span class="k">moveq</span>   <span class="p">#</span><span class="mi">0</span><span class="p">,</span><span class="nv">d2</span>
+<span class="m">0000038e: 323c 0005</span>                 <span class="k">move.w</span>  <span class="p">#</span><span class="mi">0x5</span><span class="p">,</span><span class="nv">d1</span>
 </pre></div>
 
 
 <p>The code then prepares the registers for the <code>AddMemList</code> call. It gives this memory priority <code>0</code> and sets the <code>attributes</code> flags to <code>0x5</code>, which is <code>101</code>, or <code>PUBLIC</code> and <code>FAST</code> (see <code>include_i/exec/memory.i</code>).</p>
-<div class="highlight"><pre><span></span><span class="nl">00000392:</span> <span class="mi">200c</span>                      <span class="k">move</span><span class="o">.l</span>  <span class="o">a4</span><span class="p">,</span><span class="o">d0</span>
-<span class="nl">00000394:</span> <span class="mi">9088</span>                      <span class="k">sub</span><span class="o">.l</span>   <span class="o">a0</span><span class="p">,</span><span class="o">d0</span>
-<span class="nl">00000396:</span> <span class="mi">0480</span> <span class="mi">0000</span> <span class="mi">1800</span>            <span class="k">subi</span><span class="o">.l</span>  <span class="nl">#0x1800</span><span class="p">,</span><span class="o">d0</span>
-<span class="nl">0000039c:</span> <span class="mi">6100</span> <span class="mi">1688</span>                 <span class="k">bsr</span><span class="o">.w</span>   <span class="mi">0x1a26</span>
+<div class="highlight"><pre><span></span><span class="m">00000392: 200c</span>                      <span class="k">move.l</span>  <span class="nv">a4</span><span class="p">,</span><span class="nv">d0</span>
+<span class="m">00000394: 9088</span>                      <span class="k">sub.l</span>   <span class="nv">a0</span><span class="p">,</span><span class="nv">d0</span>
+<span class="m">00000396: 0480 0000 1800</span>            <span class="k">subi.l</span>  <span class="p">#</span><span class="mi">0x1800</span><span class="p">,</span><span class="nv">d0</span>
+<span class="m">0000039c: 6100 1688</span>                 <span class="k">bsr.w</span>   <span class="mi">0x1a26</span>
 </pre></div>
 
 
 <p>The expansion memory base address is copied in <code>d0</code> (this is actually an unneeded repetition of what the code did 6 lines before, I think). It then subtracts the address of the first free location (because if this is not 0 it means that something is already stored in memory) and the size of the stack, that was initialised previously by Kickstart to 6 KBytes (hardcoded). After that the code jumps to <code>AddMemList</code> (<code>0x1a26</code>).</p>
-<p>When the routine returns the code has to move on initialising the chip memory. The chip memory has to be initialised in two different ways depending on the presence of the expansion memory, as this latter is preferably used by the CPU.</p>
-<div class="highlight"><pre><span></span><span class="mi">000003</span><span class="n">a0</span><span class="o">:</span> <span class="mi">41</span><span class="n">f8</span> <span class="mi">0400</span>                 <span class="n">lea</span>     <span class="mh">0x400</span><span class="o">.</span><span class="na">w</span><span class="o">,</span><span class="n">a0</span>
-<span class="mi">000003</span><span class="n">a4</span><span class="o">:</span> <span class="mi">7000</span>                      <span class="n">moveq</span>   <span class="err">#</span><span class="mi">0</span><span class="o">,</span><span class="n">d0</span>
-<span class="mi">000003</span><span class="n">a6</span><span class="o">:</span> <span class="mi">600</span><span class="n">a</span>                      <span class="n">bra</span><span class="o">.</span><span class="na">b</span>   <span class="n">Add_chip</span>
+<p>When the routine returns the code begins the initialisation of the chip memory. The chip memory has to be initialised in two different ways depending on the presence of the expansion memory, as the latter is preferably used by the CPU.</p>
+<div class="highlight"><pre><span></span><span class="m">000003a0: 41f8 0400</span>                 <span class="k">lea</span>     <span class="mi">0x400</span><span class="p">.</span><span class="nl">w</span><span class="p">,</span><span class="nv">a0</span>
+<span class="m">000003a4: 7000</span>                      <span class="k">moveq</span>   <span class="p">#</span><span class="mi">0</span><span class="p">,</span><span class="nv">d0</span>
+<span class="m">000003a6: 600a</span>                      <span class="k">bra.b</span>   <span class="nl">Add_chip</span>
 
-<span class="n">Only_chip</span><span class="o">:</span>
-<span class="mi">000003</span><span class="n">a8</span><span class="o">:</span> <span class="mi">41</span><span class="n">ee</span> <span class="mi">024</span><span class="n">c</span>                 <span class="n">lea</span>     <span class="mh">0x24c</span><span class="o">(</span><span class="n">a6</span><span class="o">),</span><span class="n">a0</span>
-<span class="mi">000003</span><span class="n">ac</span><span class="o">:</span> <span class="mi">203</span><span class="n">c</span> <span class="n">ffff</span> <span class="n">e800</span>            <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="err">#</span><span class="o">-</span><span class="mh">0x1800</span><span class="o">,</span><span class="n">d0</span>
+<span class="nl">Only_chip:</span>
+<span class="m">000003a8: 41ee 024c</span>                 <span class="k">lea</span>     <span class="mi">0x24c</span><span class="p">(</span><span class="nv">a6</span><span class="p">),</span><span class="nv">a0</span>
+<span class="m">000003ac: 203c ffff e800</span>            <span class="k">move.l</span>  <span class="p">#-</span><span class="mi">0x1800</span><span class="p">,</span><span class="nv">d0</span>
 </pre></div>
 
 
 <p>If the initial test on the presence of the expansion memory fails the code jumps directly to <code>0x03a8</code>. If the expansion memory has already been initialised, instead, the CPU executes the code at <code>0x03a0</code> and then jumps to <code>0x03b2</code> (Renamed <code>Add_chip</code> here).</p>
-<div class="highlight"><pre><span></span><span class="nl">000003a0:</span> <span class="mi">41f8</span> <span class="mi">0400</span>                 <span class="k">lea</span>     <span class="mi">0x400</span><span class="o">.w</span><span class="p">,</span><span class="o">a0</span>
+<div class="highlight"><pre><span></span><span class="m">000003a0: 41f8 0400</span>                 <span class="k">lea</span>     <span class="mi">0x400</span><span class="p">.</span><span class="nl">w</span><span class="p">,</span><span class="nv">a0</span>
 </pre></div>
 
 
 <p>So if there is expansion memory, Exec will be loaded there, which means that both it and the system stack are not in the chip memory. We can then add the whole space above <code>0x400</code> (more on this number in a later section)</p>
-<div class="highlight"><pre><span></span><span class="nl">000003a4:</span> <span class="mi">7000</span>                      <span class="k">moveq</span>   <span class="nl">#0</span><span class="p">,</span><span class="o">d0</span>
-<span class="nl">000003a6:</span> <span class="mi">600a</span>                      <span class="k">bra</span><span class="o">.b</span>   <span class="n">Add_chip</span>
+<div class="highlight"><pre><span></span><span class="m">000003a4: 7000</span>                      <span class="k">moveq</span>   <span class="p">#</span><span class="mi">0</span><span class="p">,</span><span class="nv">d0</span>
+<span class="m">000003a6: 600a</span>                      <span class="k">bra.b</span>   <span class="nl">Add_chip</span>
 </pre></div>
 
 
 <p>Since the stack has already been created in fast memory we can store a 0 in <code>d0</code> and jump to the code that adds the memory to the system lists</p>
 <p>If the expansion is not present, instead, Exec is installed in the chip memory, so we compute the base like we did for the fast memory.</p>
-<div class="highlight"><pre><span></span><span class="n">Only_chip</span><span class="p">:</span>
-<span class="nl">000003a8:</span> <span class="mi">41ee</span> <span class="mi">024c</span>                 <span class="k">lea</span>     <span class="mi">0x24c</span><span class="p">(</span><span class="o">a6</span><span class="p">),</span><span class="o">a0</span>
-<span class="nl">000003ac:</span> <span class="mi">203c</span> <span class="mi">ffff</span> <span class="mi">e800</span>            <span class="k">move</span><span class="o">.l</span>  <span class="p">#-</span><span class="mi">0x1800</span><span class="p">,</span><span class="o">d0</span>
+<div class="highlight"><pre><span></span><span class="nl">Only_chip:</span>
+<span class="m">000003a8: 41ee 024c</span>                 <span class="k">lea</span>     <span class="mi">0x24c</span><span class="p">(</span><span class="nv">a6</span><span class="p">),</span><span class="nv">a0</span>
+<span class="m">000003ac: 203c ffff e800</span>            <span class="k">move.l</span>  <span class="p">#-</span><span class="mi">0x1800</span><span class="p">,</span><span class="nv">d0</span>
 </pre></div>
 
 
 <p>Here we load the effective address of the first free location, <code>0x24c</code> bytes after the ExecBase address, and we specify the size of the memory as 6 Kbytes less than the maximum, to keep some space for the system stack. The size is negative as later the memory size will be added to the register.</p>
-<div class="highlight"><pre><span></span><span class="n">Add_chip</span><span class="p">:</span>
-<span class="nl">000003b2:</span> <span class="mi">323c</span> <span class="mi">0003</span>                 <span class="k">move</span><span class="o">.w</span>  <span class="nl">#0x3</span><span class="p">,</span><span class="o">d1</span>
-<span class="nl">000003b6:</span> <span class="mi">2448</span>                      <span class="k">movea</span><span class="o">.l</span> <span class="o">a0</span><span class="p">,</span><span class="o">a2</span>
-<span class="nl">000003b8:</span> <span class="mi">43fa</span> <span class="mi">ff6c</span>                 <span class="k">lea</span>     <span class="mi">0x326</span><span class="p">(</span><span class="o">pc</span><span class="p">),</span><span class="o">a1</span>
-<span class="nl">000003bc:</span> <span class="mi">74f6</span>                      <span class="k">moveq</span>   <span class="p">#-</span><span class="mi">0xa</span><span class="p">,</span><span class="o">d2</span>
-<span class="nl">000003be:</span> <span class="o">d0</span><span class="mi">8b</span>                      <span class="k">add</span><span class="o">.l</span>   <span class="o">a3</span><span class="p">,</span><span class="o">d0</span>
-<span class="nl">000003c0:</span> <span class="mi">9088</span>                      <span class="k">sub</span><span class="o">.l</span>   <span class="o">a0</span><span class="p">,</span><span class="o">d0</span>
-<span class="nl">000003c2:</span> <span class="mi">6100</span> <span class="mi">1662</span>                 <span class="k">bsr</span><span class="o">.w</span>   <span class="mi">0x1a26</span>
+<div class="highlight"><pre><span></span><span class="nl">Add_chip:</span>
+<span class="m">000003b2: 323c 0003</span>                 <span class="k">move.w</span>  <span class="p">#</span><span class="mi">0x3</span><span class="p">,</span><span class="nv">d1</span>
+<span class="m">000003b6: 2448</span>                      <span class="k">movea.l</span> <span class="nv">a0</span><span class="p">,</span><span class="nv">a2</span>
+<span class="m">000003b8: 43fa ff6c</span>                 <span class="k">lea</span>     <span class="mi">0x326</span><span class="p">(</span><span class="nv">pc</span><span class="p">),</span><span class="nv">a1</span>
+<span class="m">000003bc: 74f6</span>                      <span class="k">moveq</span>   <span class="p">#-</span><span class="mi">0xa</span><span class="p">,</span><span class="nv">d2</span>
+<span class="m">000003be: d08b</span>                      <span class="k">add.l</span>   <span class="nv">a3</span><span class="p">,</span><span class="nv">d0</span>
+<span class="m">000003c0: 9088</span>                      <span class="k">sub.l</span>   <span class="nv">a0</span><span class="p">,</span><span class="nv">d0</span>
+<span class="m">000003c2: 6100 1662</span>                 <span class="k">bsr.w</span>   <span class="mi">0x1a26</span>
 </pre></div>
 
 
 <p>After this we repeat the same procedure that was described for the fast memory. The attributes are now <code>CHIP</code> and <code>PUBLIC</code> (<code>0x3</code>), the string at <code>0x326</code> is <code>Chip Memory</code>, and the priority is -10 (<code>-0xa</code>). The <code>a3</code> register already contains the end address of the chip memory, so we add it to <code>d0</code> and then subtract the first free location computed before to get the size of the memory. As happened before, the routine calls <code>AddMemList</code> at <code>0x1a26</code>.</p>
-<div class="highlight"><pre><span></span><span class="nl">000003c6:</span> <span class="mi">224e</span>                      <span class="k">movea</span><span class="o">.l</span> <span class="o">a6</span><span class="p">,</span><span class="o">a1</span>
-<span class="nl">000003c8:</span> <span class="mi">6100</span> <span class="mi">107e</span>                 <span class="k">bsr</span><span class="o">.w</span>   <span class="mi">0x1448</span>
+<div class="highlight"><pre><span></span><span class="m">000003c6: 224e</span>                      <span class="k">movea.l</span> <span class="nv">a6</span><span class="p">,</span><span class="nv">a1</span>
+<span class="m">000003c8: 6100 107e</span>                 <span class="k">bsr.w</span>   <span class="mi">0x1448</span>
 </pre></div>
 
 
 <p>The last action of this part of the code is to call <code>AddLibrary</code> at <code>0x1448</code>. The only parameter the routine requires is the base address of the library in <code>a1</code>, which is why the code copies <code>a6</code> there.</p>
 <h1 id="the-magic-number-0x24c">The "magic number" <code>0x24c</code><a class="headerlink" href="#the-magic-number-0x24c" title="Permanent link">&para;</a></h1>
 <p>When we discussed the way the memory is initialised we discovered a "magic number" that Kickstart uses to find the first free location in memory</p>
-<div class="highlight"><pre><span></span><span class="nl">00000384:</span> <span class="mi">41ee</span> <span class="mi">024c</span>                 <span class="k">lea</span>     <span class="mi">0x24c</span><span class="p">(</span><span class="o">a6</span><span class="p">),</span><span class="o">a0</span>
+<div class="highlight"><pre><span></span><span class="m">00000384: 41ee 024c</span>                 <span class="k">lea</span>     <span class="mi">0x24c</span><span class="p">(</span><span class="nv">a6</span><span class="p">),</span><span class="nv">a0</span>
 </pre></div>
 
 
 <p>The first free location, according to this code is <code>0x24c</code> (588) bytes after the Exec base address. The reason behind this number is simple. When the Exec library is installed its structures use exactly 588 bytes, thus that is the address of the first free space in memory.</p>
 <p>It's easy to calculate this number. Here you find the annotated version of the <code>ExecBase</code> structure that I already used in the previous instalment.</p>
-<p>The structure is described in the <code>include_i/exec/execbase.i</code> include file, and I added the displacement in bytes of each field. The first column is the displacement in the <code>ExecBase</code> structure, while the second starts from <code>0x22</code>. This latter comes from the fact that the structure follows an <code>LN</code> structure and a <code>LIB</code> structure, described in the fourth instalment of this series.</p>
-<div class="highlight"><pre><span></span><span class="mi">0000</span> <span class="mi">0022</span>    <span class="n">UWORD</span>   <span class="n">SoftVer</span> <span class="c1">; kickstart release number (obs.)</span>
-<span class="mi">0002</span> <span class="mi">0024</span>    <span class="n">WORD</span>    <span class="n">LowMemChkSum</span>    <span class="c1">; checksum of 68000 trap vectors</span>
-<span class="mi">0004</span> <span class="mi">0026</span>    <span class="n">ULONG</span>   <span class="n">ChkBase</span> <span class="c1">; system base pointer complement</span>
-<span class="mi">0008</span> <span class="mi">002a</span>    <span class="n">APTR</span>    <span class="n">ColdCapture</span> <span class="c1">; coldstart soft capture vector</span>
-<span class="mi">000c</span> <span class="mi">002e</span>    <span class="n">APTR</span>    <span class="n">CoolCapture</span> <span class="c1">; coolstart soft capture vector</span>
-<span class="mi">0010</span> <span class="mi">0032</span>    <span class="n">APTR</span>    <span class="n">WarmCapture</span> <span class="c1">; warmstart soft capture vector</span>
-<span class="mi">0014</span> <span class="mi">0036</span>    <span class="n">APTR</span>    <span class="n">SysStkUpper</span> <span class="c1">; system stack base   (upper bound)</span>
-<span class="mi">0018</span> <span class="mi">003a</span>    <span class="n">APTR</span>    <span class="n">SysStkLower</span> <span class="c1">; top of system stack (lower bound)</span>
-<span class="mi">001c</span> <span class="mi">003e</span>    <span class="n">ULONG</span>   <span class="n">MaxLocMem</span>   <span class="c1">; top of chip memory</span>
-<span class="mi">0020</span> <span class="mi">0042</span>    <span class="n">APTR</span>    <span class="n">DebugEntry</span>  <span class="c1">; global debugger entry point</span>
-<span class="mi">0024</span> <span class="mi">0046</span>    <span class="n">APTR</span>    <span class="n">DebugData</span>   <span class="c1">; global debugger data segment</span>
-<span class="mi">0028</span> <span class="mi">004a</span>    <span class="n">APTR</span>    <span class="n">AlertData</span>   <span class="c1">; alert data segment</span>
-<span class="mi">002c</span> <span class="mi">004e</span>    <span class="n">APTR</span>    <span class="n">MaxExtMem</span>   <span class="c1">; top of extended mem, or null if none</span>
+<p>The structure is described in the <code>include_i/exec/execbase.i</code> include file, and I added the displacement in bytes of each field. The first column is the displacement in the <code>ExecBase</code> structure, while the second starts from <code>0x22</code>. The latter comes from the fact that the structure follows an <code>LN</code> structure and a <code>LIB</code> structure, described in the fourth instalment of this series.</p>
+<div class="highlight"><pre><span></span><span class="nv">0000</span> <span class="mi">0022</span><span class="s">    UWORD   SoftVer</span>
+<span class="nv">0002</span> <span class="mi">0024</span><span class="s">    WORD    LowMemChkSum</span>
+<span class="nv">0004</span> <span class="mi">0026</span><span class="s">    ULONG   ChkBase</span>
+<span class="nv">0008</span> <span class="mi">002a</span><span class="s">    APTR    ColdCapture</span>
+<span class="nv">000c</span> <span class="mi">002e</span><span class="s">    APTR    CoolCapture</span>
+<span class="nv">0010</span> <span class="mi">0032</span><span class="s">    APTR    WarmCapture</span>
+<span class="nv">0014</span> <span class="mi">0036</span><span class="s">    APTR    SysStkUpper</span>
+<span class="nv">0018</span> <span class="mi">003a</span><span class="s">    APTR    SysStkLower</span>
+<span class="nv">001c</span> <span class="mi">003e</span><span class="s">    ULONG   MaxLocMem</span>
+<span class="nv">0020</span> <span class="mi">0042</span><span class="s">    APTR    DebugEntry</span>
+<span class="nv">0024</span> <span class="mi">0046</span><span class="s">    APTR    DebugData</span>
+<span class="nv">0028</span> <span class="mi">004a</span><span class="s">    APTR    AlertData</span>
+<span class="nv">002c</span> <span class="mi">004e</span><span class="s">    APTR    MaxExtMem</span>
 
-<span class="mi">0030</span> <span class="mi">0052</span>    <span class="n">WORD</span>    <span class="n">ChkSum</span>      <span class="c1">; for all of the above (minus 2)</span>
-
-
-<span class="c1">******* Interrupt Related ********************************************</span>
-
-    <span class="n">LABEL</span>   <span class="n">IntVects</span>
-<span class="mi">0032</span> <span class="mi">0054</span>    <span class="n">STRUCT</span>  <span class="n">IVTBE</span><span class="p">,</span><span class="n">IV_SIZE</span>
-<span class="mi">003e</span> <span class="mi">0060</span>    <span class="n">STRUCT</span>  <span class="n">IVDSKBLK</span><span class="p">,</span><span class="n">IV_SIZE</span>
-<span class="mi">004a</span> <span class="mi">006c</span>    <span class="n">STRUCT</span>  <span class="n">IVSOFTINT</span><span class="p">,</span><span class="n">IV_SIZE</span>
-<span class="mi">0056</span> <span class="mi">0078</span>    <span class="n">STRUCT</span>  <span class="n">IVPORTS</span><span class="p">,</span><span class="n">IV_SIZE</span>
-<span class="mi">0062</span> <span class="mi">0084</span>    <span class="n">STRUCT</span>  <span class="n">IVCOPER</span><span class="p">,</span><span class="n">IV_SIZE</span>
-<span class="mi">006e</span> <span class="mi">0090</span>    <span class="n">STRUCT</span>  <span class="n">IVVERTB</span><span class="p">,</span><span class="n">IV_SIZE</span>
-<span class="mi">007a</span> <span class="mi">009c</span>    <span class="n">STRUCT</span>  <span class="n">IVBLIT</span><span class="p">,</span><span class="n">IV_SIZE</span>
-<span class="mi">0086</span> <span class="mi">00a8</span>    <span class="n">STRUCT</span>  <span class="n">IVAUD0</span><span class="p">,</span><span class="n">IV_SIZE</span>
-<span class="mi">0092</span> <span class="mi">00b4</span>    <span class="n">STRUCT</span>  <span class="n">IVAUD1</span><span class="p">,</span><span class="n">IV_SIZE</span>
-<span class="mi">009e</span> <span class="mi">00c0</span>    <span class="n">STRUCT</span>  <span class="n">IVAUD2</span><span class="p">,</span><span class="n">IV_SIZE</span>
-<span class="mi">00aa</span> <span class="mi">00cc</span>    <span class="n">STRUCT</span>  <span class="n">IVAUD3</span><span class="p">,</span><span class="n">IV_SIZE</span>
-<span class="mi">00b6</span> <span class="mi">00d8</span>    <span class="n">STRUCT</span>  <span class="n">IVRBF</span><span class="p">,</span><span class="n">IV_SIZE</span>
-<span class="mi">00c2</span> <span class="mi">00e4</span>    <span class="n">STRUCT</span>  <span class="n">IVDSKSYNC</span><span class="p">,</span><span class="n">IV_SIZE</span>
-<span class="mi">00ce</span> <span class="mi">00f0</span>    <span class="n">STRUCT</span>  <span class="n">IVEXTER</span><span class="p">,</span><span class="n">IV_SIZE</span>
-<span class="mi">00da</span> <span class="mi">00fc</span>    <span class="n">STRUCT</span>  <span class="n">IVINTEN</span><span class="p">,</span><span class="n">IV_SIZE</span>
-<span class="mi">00e6</span> <span class="mi">0108</span>    <span class="n">STRUCT</span>  <span class="n">IVNMI</span><span class="p">,</span><span class="n">IV_SIZE</span>
+<span class="nv">0030</span> <span class="mi">0052</span><span class="s">    WORD    ChkSum</span>
 
 
-<span class="c1">******* Dynamic System Variables *************************************</span>
+<span class="c">******* Interrupt Related ********************************************</span>
 
-<span class="mi">00f2</span> <span class="mi">0114</span>    <span class="n">APTR</span>    <span class="n">ThisTask</span>    <span class="c1">; pointer to current task (readable)</span>
-
-<span class="mi">00f6</span> <span class="mi">0118</span>    <span class="n">ULONG</span>   <span class="n">IdleCount</span>   <span class="c1">; idle counter</span>
-<span class="mi">00fa</span> <span class="mi">011c</span>    <span class="n">ULONG</span>   <span class="n">DispCount</span>   <span class="c1">; dispatch counter</span>
-<span class="mi">00fe</span> <span class="mi">0120</span>    <span class="n">UWORD</span>   <span class="n">Quantum</span> <span class="c1">; time slice quantum</span>
-<span class="mi">0100</span> <span class="mi">0122</span>    <span class="n">UWORD</span>   <span class="n">Elapsed</span> <span class="c1">; current quantum ticks</span>
-<span class="mi">0102</span> <span class="mi">0124</span>    <span class="n">UWORD</span>   <span class="n">SysFlags</span>    <span class="c1">; misc internal system flags</span>
-<span class="mi">0104</span> <span class="mi">0126</span>    <span class="n">BYTE</span>    <span class="n">IDNestCnt</span>   <span class="c1">; interrupt disable nesting count</span>
-<span class="mi">0105</span> <span class="mi">0127</span>    <span class="n">BYTE</span>    <span class="n">TDNestCnt</span>   <span class="c1">; task disable nesting count</span>
-
-<span class="mi">0106</span> <span class="mi">0128</span>    <span class="n">UWORD</span>   <span class="n">AttnFlags</span>   <span class="c1">; special attention flags (readable)</span>
-
-<span class="mi">0108</span> <span class="mi">012a</span>    <span class="n">UWORD</span>   <span class="n">AttnResched</span> <span class="c1">; rescheduling attention</span>
-<span class="mi">010a</span> <span class="mi">012c</span>    <span class="n">APTR</span>    <span class="n">ResModules</span>  <span class="c1">; pointer to resident module array</span>
-<span class="mi">010e</span> <span class="mi">0130</span>    <span class="n">APTR</span>    <span class="n">TaskTrapCode</span>    <span class="c1">; default task trap routine</span>
-<span class="mi">0112</span> <span class="mi">0134</span>    <span class="n">APTR</span>    <span class="n">TaskExceptCode</span>  <span class="c1">; default task exception code</span>
-<span class="mi">0116</span> <span class="mi">0138</span>    <span class="n">APTR</span>    <span class="n">TaskExitCode</span>    <span class="c1">; default task exit code</span>
-<span class="mi">011a</span> <span class="mi">013c</span>    <span class="n">ULONG</span>   <span class="n">TaskSigAlloc</span>    <span class="c1">; preallocated signal mask</span>
-<span class="mi">011e</span> <span class="mi">0140</span>    <span class="n">UWORD</span>   <span class="n">TaskTrapAlloc</span>   <span class="c1">; preallocated trap mask</span>
+    <span class="nv">LABEL</span>   <span class="s">IntVects</span>
+<span class="nv">0032</span> <span class="mi">0054</span><span class="s">    STRUCT  IVTBE</span><span class="p">,</span><span class="s">IV_SIZE</span>
+<span class="nv">003e</span> <span class="mi">0060</span><span class="s">    STRUCT  IVDSKBLK</span><span class="p">,</span><span class="s">IV_SIZE</span>
+<span class="nv">004a</span> <span class="mi">006c</span><span class="s">    STRUCT  IVSOFTINT</span><span class="p">,</span><span class="s">IV_SIZE</span>
+<span class="nv">0056</span> <span class="mi">0078</span><span class="s">    STRUCT  IVPORTS</span><span class="p">,</span><span class="s">IV_SIZE</span>
+<span class="nv">0062</span> <span class="mi">0084</span><span class="s">    STRUCT  IVCOPER</span><span class="p">,</span><span class="s">IV_SIZE</span>
+<span class="nv">006e</span> <span class="mi">0090</span><span class="s">    STRUCT  IVVERTB</span><span class="p">,</span><span class="s">IV_SIZE</span>
+<span class="nv">007a</span> <span class="mi">009c</span><span class="s">    STRUCT  IVBLIT</span><span class="p">,</span><span class="s">IV_SIZE</span>
+<span class="nv">0086</span> <span class="mi">00a8</span><span class="s">    STRUCT  IVAUD0</span><span class="p">,</span><span class="s">IV_SIZE</span>
+<span class="nv">0092</span> <span class="mi">00b4</span><span class="s">    STRUCT  IVAUD1</span><span class="p">,</span><span class="s">IV_SIZE</span>
+<span class="nv">009e</span> <span class="mi">00c0</span><span class="s">    STRUCT  IVAUD2</span><span class="p">,</span><span class="s">IV_SIZE</span>
+<span class="nv">00aa</span> <span class="mi">00cc</span><span class="s">    STRUCT  IVAUD3</span><span class="p">,</span><span class="s">IV_SIZE</span>
+<span class="nv">00b6</span> <span class="mi">00d8</span><span class="s">    STRUCT  IVRBF</span><span class="p">,</span><span class="s">IV_SIZE</span>
+<span class="nv">00c2</span> <span class="mi">00e4</span><span class="s">    STRUCT  IVDSKSYNC</span><span class="p">,</span><span class="s">IV_SIZE</span>
+<span class="nv">00ce</span> <span class="mi">00f0</span><span class="s">    STRUCT  IVEXTER</span><span class="p">,</span><span class="s">IV_SIZE</span>
+<span class="nv">00da</span> <span class="mi">00fc</span><span class="s">    STRUCT  IVINTEN</span><span class="p">,</span><span class="s">IV_SIZE</span>
+<span class="nv">00e6</span> <span class="mi">0108</span><span class="s">    STRUCT  IVNMI</span><span class="p">,</span><span class="s">IV_SIZE</span>
 
 
-<span class="c1">******* System List Headers (private!) ********************************</span>
+<span class="c">******* Dynamic System Variables *************************************</span>
 
-<span class="mi">0120</span> <span class="mi">0142</span>    <span class="n">STRUCT</span>  <span class="n">MemList</span><span class="p">,</span><span class="n">LH_SIZE</span>
-<span class="mi">012e</span> <span class="mi">0150</span>    <span class="n">STRUCT</span>  <span class="n">ResourceList</span><span class="p">,</span><span class="n">LH_SIZE</span>
-<span class="mi">013c</span> <span class="mi">015e</span>    <span class="n">STRUCT</span>  <span class="n">DeviceList</span><span class="p">,</span><span class="n">LH_SIZE</span>
-<span class="mi">014a</span> <span class="mi">016c</span>    <span class="n">STRUCT</span>  <span class="n">IntrList</span><span class="p">,</span><span class="n">LH_SIZE</span>
-<span class="mi">0158</span> <span class="mi">017a</span>    <span class="n">STRUCT</span>  <span class="n">LibList</span><span class="p">,</span><span class="n">LH_SIZE</span>
-<span class="mi">0166</span> <span class="mi">0188</span>    <span class="n">STRUCT</span>  <span class="n">PortList</span><span class="p">,</span><span class="n">LH_SIZE</span>
-<span class="mi">0174</span> <span class="mi">0196</span>    <span class="n">STRUCT</span>  <span class="n">TaskReady</span><span class="p">,</span><span class="n">LH_SIZE</span>
-<span class="mi">0182</span> <span class="mi">01a4</span>    <span class="n">STRUCT</span>  <span class="n">TaskWait</span><span class="p">,</span><span class="n">LH_SIZE</span>
-<span class="mi">0190</span> <span class="mi">01b2</span>    <span class="n">STRUCT</span>  <span class="n">SoftInts</span><span class="p">,</span><span class="n">SH_SIZE</span><span class="c1">*5</span>
+<span class="nv">00f2</span> <span class="mi">0114</span><span class="s">    APTR    ThisTask</span>
 
-<span class="mi">01e0</span> <span class="mi">0202</span>    <span class="n">STRUCT</span>  <span class="n">LastAlert</span><span class="p">,</span><span class="mi">4</span><span class="c1">*4</span>
+<span class="nv">00f6</span> <span class="mi">0118</span><span class="s">    ULONG   IdleCount</span>
+<span class="nv">00fa</span> <span class="mi">011c</span><span class="s">    ULONG   DispCount</span>
+<span class="nv">00fe</span> <span class="mi">0120</span><span class="s">    UWORD   Quantum</span>
+<span class="nv">0100</span> <span class="mi">0122</span><span class="s">    UWORD   Elapsed</span>
+<span class="nv">0102</span> <span class="mi">0124</span><span class="s">    UWORD   SysFlags</span>
+<span class="nv">0104</span> <span class="mi">0126</span><span class="s">    BYTE    IDNestCnt</span>
+<span class="nv">0105</span> <span class="mi">0127</span><span class="s">    BYTE    TDNestCnt</span>
 
-<span class="mi">01f0</span> <span class="mi">0212</span>    <span class="n">UBYTE</span>   <span class="n">VBlankFrequency</span>     <span class="c1">;(readable)</span>
-<span class="mi">01f1</span> <span class="mi">0213</span>    <span class="n">UBYTE</span>   <span class="n">PowerSupplyFrequency</span>    <span class="c1">;(readable)</span>
+<span class="nv">0106</span> <span class="mi">0128</span><span class="s">    UWORD   AttnFlags</span>
 
-<span class="mi">01f2</span> <span class="mi">0214</span>    <span class="n">STRUCT</span>  <span class="n">SemaphoreList</span><span class="p">,</span><span class="n">LH_SIZE</span>
+<span class="nv">0108</span> <span class="mi">012a</span><span class="s">    UWORD   AttnResched</span>
+<span class="nv">010a</span> <span class="mi">012c</span><span class="s">    APTR    ResModules</span>
+<span class="nv">010e</span> <span class="mi">0130</span><span class="s">    APTR    TaskTrapCode</span>
+<span class="nv">0112</span> <span class="mi">0134</span><span class="s">    APTR    TaskExceptCode</span>
+<span class="nv">0116</span> <span class="mi">0138</span><span class="s">    APTR    TaskExitCode</span>
+<span class="nv">011a</span> <span class="mi">013c</span><span class="s">    ULONG   TaskSigAlloc</span>
+<span class="nv">011e</span> <span class="mi">0140</span><span class="s">    UWORD   TaskTrapAlloc</span>
 
-<span class="mi">0200</span> <span class="mi">0222</span>    <span class="n">APTR</span>    <span class="n">KickMemPtr</span>  <span class="c1">; ptr to queue of mem lists</span>
-<span class="mi">0204</span> <span class="mi">0226</span>    <span class="n">APTR</span>    <span class="n">KickTagPtr</span>  <span class="c1">; ptr to rom tag queue</span>
-<span class="mi">0208</span> <span class="mi">022a</span>    <span class="n">APTR</span>    <span class="n">KickCheckSum</span>    <span class="c1">; checksum for mem and tags</span>
 
-<span class="mi">020c</span> <span class="mi">022e</span>    <span class="n">UBYTE</span> <span class="n">ExecBaseReserved</span><span class="p">[</span><span class="mi">10</span><span class="p">]</span><span class="c1">;</span>
-<span class="mi">0216</span> <span class="mi">0238</span>    <span class="n">UBYTE</span> <span class="n">ExecBaseNewReserved</span><span class="p">[</span><span class="mi">20</span><span class="p">]</span><span class="c1">;</span>
-<span class="mi">022a</span> <span class="mi">024c</span>    <span class="n">LABEL</span>   <span class="n">SYSBASESIZE</span>
+<span class="c">******* System List Headers (private!) ********************************</span>
+
+<span class="nv">0120</span> <span class="mi">0142</span><span class="s">    STRUCT  MemList</span><span class="p">,</span><span class="s">LH_SIZE</span>
+<span class="nv">012e</span> <span class="mi">0150</span><span class="s">    STRUCT  ResourceList</span><span class="p">,</span><span class="s">LH_SIZE</span>
+<span class="nv">013c</span> <span class="mi">015e</span><span class="s">    STRUCT  DeviceList</span><span class="p">,</span><span class="s">LH_SIZE</span>
+<span class="nv">014a</span> <span class="mi">016c</span><span class="s">    STRUCT  IntrList</span><span class="p">,</span><span class="s">LH_SIZE</span>
+<span class="nv">0158</span> <span class="mi">017a</span><span class="s">    STRUCT  LibList</span><span class="p">,</span><span class="s">LH_SIZE</span>
+<span class="nv">0166</span> <span class="mi">0188</span><span class="s">    STRUCT  PortList</span><span class="p">,</span><span class="s">LH_SIZE</span>
+<span class="nv">0174</span> <span class="mi">0196</span><span class="s">    STRUCT  TaskReady</span><span class="p">,</span><span class="s">LH_SIZE</span>
+<span class="nv">0182</span> <span class="mi">01a4</span><span class="s">    STRUCT  TaskWait</span><span class="p">,</span><span class="s">LH_SIZE</span>
+<span class="nv">0190</span> <span class="mi">01b2</span><span class="s">    STRUCT  SoftInts</span><span class="p">,</span><span class="s">SH_SIZE*5</span>
+
+<span class="nv">01e0</span> <span class="mi">0202</span><span class="s">    STRUCT  LastAlert</span><span class="p">,</span><span class="mi">4</span><span class="s">*4</span>
+
+<span class="nv">01f0</span> <span class="mi">0212</span><span class="s">    UBYTE   VBlankFrequency</span>
+<span class="nv">01f1</span> <span class="mi">0213</span><span class="s">    UBYTE   PowerSupplyFrequency</span>
+
+<span class="nv">01f2</span> <span class="mi">0214</span><span class="s">    STRUCT  SemaphoreList</span><span class="p">,</span><span class="s">LH_SIZE</span>
+
+<span class="nv">0200</span> <span class="mi">0222</span><span class="s">    APTR    KickMemPtr</span>
+<span class="nv">0204</span> <span class="mi">0226</span><span class="s">    APTR    KickTagPtr</span>
+<span class="nv">0208</span> <span class="mi">022a</span><span class="s">    APTR    KickCheckSum</span>
+
+<span class="nv">020c</span> <span class="mi">022e</span><span class="s">    UBYTE   ExecBaseReserved</span><span class="err">[</span><span class="mi">10</span><span class="err">]</span><span class="c">;</span>
+<span class="mi">0216</span><span class="s"> 0238    UBYTE   ExecBaseNewReserved</span><span class="err">[</span><span class="mi">20</span><span class="err">]</span><span class="c">;</span>
+<span class="mi">022a</span><span class="s"> 024c    LABEL   SYSBASESIZE</span>
 </pre></div>
 
 
@@ -344,37 +361,39 @@
 <p>As you can see the final address is <code>0x24c</code>, which is exactly where the free memory begins (remember that <code>LABEL</code> is a macro and not a field, so it doesn't use space).</p>
 <h1 id="the-magic-numbers-0x676-and-0x400">The "magic numbers" <code>0x676</code> and <code>0x400</code><a class="headerlink" href="#the-magic-numbers-0x676-and-0x400" title="Permanent link">&para;</a></h1>
 <p>The Motorola 68000 architecture forces to reserve the first 1024 bytes (<code>0x400</code>) for the exception vectors. The table of these vectors can be found in the Programmer's Reference Manual, page B-2, and this is the source for the magic number used when adding the chip memory to the system lists in case an expansion memory is installed.</p>
-<p>The Exec base address, however, is not <code>0x400</code> but <code>0x676</code>. As we already know the library is preceded by the jump table, and since Exec exports 105 functions we use <code>105*6 = 630</code> bytes (<code>0x676</code>) for the jump vectors.</p>
+<p>The Exec base address, however, is not <code>0x400</code> but <code>0x676</code>. As we already know the library is preceded by the jump table, and since Exec exports 105 functions we use <code>105*6 = 630</code> bytes for the jump vectors. Adding these 630 bytes to the first 1024 reserved for the exception vectors gives 1654 (<code>0x676</code>) as the base address of the library.</p>
 <div class="highlight"><pre><span></span>        <span class="o">+---------------------------------------+</span>
-        <span class="o">|</span> First free address                    <span class="o">|</span>
-   <span class="m">2242</span> <span class="o">+---------------------------------------+</span> <span class="mh">0x8c2</span> <span class="o">&lt;-+</span>
-        <span class="o">|</span> ExecBase structure                    <span class="o">|</span>         <span class="o">|</span>
-   <span class="m">1688</span> <span class="o">+---------------------------------------+</span> <span class="mh">0x698</span>   <span class="o">|</span>
-        <span class="o">|</span> LIB structure                         <span class="o">|</span>         <span class="o">|</span> Exec base
-   <span class="m">1668</span> <span class="o">+---------------------------------------+</span> <span class="mh">0x684</span>   <span class="o">|</span> <span class="kp">structure</span>
-        <span class="o">|</span> LN structure                          <span class="o">|</span>         <span class="o">|</span>
-   <span class="m">1654</span> <span class="o">+---------------------------------------+</span> <span class="mh">0x676</span> <span class="o">&lt;-+</span>
-        <span class="o">|</span> Jump <span class="kt">vector</span> <span class="c1">#105                      |         |</span>
+        <span class="o">|</span> <span class="n">First</span> <span class="n">free</span> <span class="n">address</span>                    <span class="o">|</span>
+   <span class="mi">2242</span> <span class="o">+---------------------------------------+</span> <span class="mh">0x8c2</span> <span class="o">&lt;-+</span>
+        <span class="o">|</span> <span class="n">ExecBase</span> <span class="n">structure</span>                    <span class="o">|</span>         <span class="o">|</span>
+   <span class="mi">1688</span> <span class="o">+---------------------------------------+</span> <span class="mh">0x698</span>   <span class="o">|</span>
+        <span class="o">|</span> <span class="n">LIB</span> <span class="n">structure</span>                         <span class="o">|</span>         <span class="o">|</span> <span class="n">Exec</span> <span class="n">base</span>
+   <span class="mi">1668</span> <span class="o">+---------------------------------------+</span> <span class="mh">0x684</span>   <span class="o">|</span> <span class="n">structure</span>
+        <span class="o">|</span> <span class="n">LN</span> <span class="n">structure</span>                          <span class="o">|</span>         <span class="o">|</span>
+   <span class="mi">1654</span> <span class="o">+---------------------------------------+</span> <span class="mh">0x676</span> <span class="o">&lt;-+</span>
+        <span class="o">|</span> <span class="n">Jump</span> <span class="n">vector</span> <span class="err">#</span><span class="mi">105</span>                      <span class="o">|</span>         <span class="o">|</span>
         <span class="o">+---------------------------------------+</span>         <span class="o">|</span>
-        <span class="o">|</span> <span class="p">[</span><span class="kc">...</span><span class="p">]</span>                                 <span class="o">|</span>         <span class="o">|</span>
-        <span class="o">+---------------------------------------+</span>         <span class="o">|</span> Exec jump
-        <span class="o">|</span> Jump <span class="kt">vector</span> <span class="c1">#2                        |         | vector table</span>
-   <span class="m">1030</span> <span class="o">+---------------------------------------+</span> <span class="mh">0x406</span>   <span class="o">|</span>
-        <span class="o">|</span> Jump <span class="kt">vector</span> <span class="c1">#1                        |         |</span>
-   <span class="m">1024</span> <span class="o">+---------------------------------------+</span> <span class="mh">0x400</span> <span class="o">&lt;-+</span>
-        <span class="o">|</span> End of reserved space                 <span class="o">|</span>         <span class="o">|</span>
+        <span class="o">|</span> <span class="p">[...]</span>                                 <span class="o">|</span>         <span class="o">|</span>
+        <span class="o">+---------------------------------------+</span>         <span class="o">|</span> <span class="n">Exec</span> <span class="n">jump</span>
+        <span class="o">|</span> <span class="n">Jump</span> <span class="n">vector</span> <span class="err">#</span><span class="mi">2</span>                        <span class="o">|</span>         <span class="o">|</span> <span class="n">vector</span> <span class="n">table</span>
+   <span class="mi">1030</span> <span class="o">+---------------------------------------+</span> <span class="mh">0x406</span>   <span class="o">|</span>
+        <span class="o">|</span> <span class="n">Jump</span> <span class="n">vector</span> <span class="err">#</span><span class="mi">1</span>                        <span class="o">|</span>         <span class="o">|</span>
+   <span class="mi">1024</span> <span class="o">+---------------------------------------+</span> <span class="mh">0x400</span> <span class="o">&lt;-+</span>
+        <span class="o">|</span> <span class="n">End</span> <span class="n">of</span> <span class="n">reserved</span> <span class="n">space</span>                 <span class="o">|</span>         <span class="o">|</span>
         <span class="o">+---------------------------------------+</span>         <span class="o">|</span>
-        <span class="o">|</span> <span class="p">[</span><span class="kc">...</span><span class="p">]</span>                                 <span class="o">|</span>         <span class="o">|</span>
-     <span class="m">12</span> <span class="o">+---------------------------------------+</span> <span class="mh">0xc</span>     <span class="o">|</span> <span class="m">1</span> Kilobyte
-        <span class="o">|</span> Vector <span class="c1">#2                             |         | reserved by</span>
-      <span class="m">8</span> <span class="o">+---------------------------------------+</span> <span class="mh">0x8</span>     <span class="o">|</span> the M68k
-        <span class="o">|</span> Reset Initial Program Counter         <span class="o">|</span>         <span class="o">|</span> architecture
-      <span class="m">4</span> <span class="o">+---------------------------------------+</span> <span class="mh">0x4</span>     <span class="o">|</span>
-        <span class="o">|</span> Reset Initial Interrupt Stack Pointer <span class="o">|</span>         <span class="o">|</span>
-      <span class="m">0</span> <span class="o">+---------------------------------------+</span> <span class="mh">0x0</span>   <span class="o">&lt;-+</span>
+        <span class="o">|</span> <span class="p">[...]</span>                                 <span class="o">|</span>         <span class="o">|</span>
+     <span class="mi">12</span> <span class="o">+---------------------------------------+</span> <span class="mh">0xc</span>     <span class="o">|</span> <span class="mi">1</span> <span class="n">Kilobyte</span>
+        <span class="o">|</span> <span class="n">Vector</span> <span class="err">#</span><span class="mi">2</span>                             <span class="o">|</span>         <span class="o">|</span> <span class="n">reserved</span> <span class="n">by</span>
+      <span class="mi">8</span> <span class="o">+---------------------------------------+</span> <span class="mh">0x8</span>     <span class="o">|</span> <span class="n">the</span> <span class="n">M68k</span>
+        <span class="o">|</span> <span class="n">Reset</span> <span class="n">Initial</span> <span class="n">Program</span> <span class="n">Counter</span>         <span class="o">|</span>         <span class="o">|</span> <span class="n">architecture</span>
+      <span class="mi">4</span> <span class="o">+---------------------------------------+</span> <span class="mh">0x4</span>     <span class="o">|</span>
+        <span class="o">|</span> <span class="n">Reset</span> <span class="n">Initial</span> <span class="n">Interrupt</span> <span class="n">Stack</span> <span class="n">Pointer</span> <span class="o">|</span>         <span class="o">|</span>
+      <span class="mi">0</span> <span class="o">+---------------------------------------+</span> <span class="mh">0x0</span>   <span class="o">&lt;-+</span>
 </pre></div>
 
 
+<h1 id="whats-next">What's next<a class="headerlink" href="#whats-next" title="Permanent link">&para;</a></h1>
+<p>It's time to show the complete Exec vector table, as we are going to use and analyse all the functions defined there. I will then discuss the structure of the memory list header and its relationship with linked lists. Last I will dissect the code of <code>AddMemList</code> and thus show in detail how the chip and expansion memory areas are added to to free memory pool.</p>
 <h1 id="resources">Resources<a class="headerlink" href="#resources" title="Permanent link">&para;</a></h1>
 <ul>
 <li>Microprocessor-based system design by Ricardo Gutierrez-Osuna (<a href="http://courses.cs.tamu.edu/rgutier/ceg411_f01/">slides</a>), in particular <a href="http://courses.cs.tamu.edu/rgutier/ceg411_f01/l9.pdf">Lesson 9 - Exception processing</a></li>
@@ -389,11 +408,11 @@
     <h2>Related Posts</h2>
     <div class="box">
         <ul>
+            <li><a href="http://blog.thedigitalcatonline.com/blog/2019/02/19/exploring-the-amiga-8/">Exploring the Amiga - Part 8</a></li>
+            <li><a href="http://blog.thedigitalcatonline.com/blog/2019/02/19/exploring-the-amiga-7/">Exploring the Amiga - Part 7</a></li>
             <li><a href="http://blog.thedigitalcatonline.com/blog/2018/06/25/exploring-the-amiga-5/">Exploring the Amiga - Part 5</a></li>
             <li><a href="http://blog.thedigitalcatonline.com/blog/2018/06/14/exploring-the-amiga-4/">Exploring the Amiga - Part 4</a></li>
             <li><a href="http://blog.thedigitalcatonline.com/blog/2018/06/08/exploring-the-amiga-3/">Exploring the Amiga - Part 3</a></li>
-            <li><a href="http://blog.thedigitalcatonline.com/blog/2018/05/28/exploring-the-amiga-2/">Exploring the Amiga - Part 2</a></li>
-            <li><a href="http://blog.thedigitalcatonline.com/blog/2018/05/28/exploring-the-amiga-1/">Exploring the Amiga - Part 1</a></li>
         </ul>
     </div>
 </section>
@@ -409,6 +428,11 @@
             <li><a href="http://blog.thedigitalcatonline.com/blog/2018/06/25/exploring-the-amiga-5/">Exploring the Amiga - Part 5</a></li>
         </ul>
     
+        <h5>Next articles</h5>
+        <ul>
+            <li><a href="http://blog.thedigitalcatonline.com/blog/2019/02/19/exploring-the-amiga-7/">Exploring the Amiga - Part 7</a></li>
+            <li><a href="http://blog.thedigitalcatonline.com/blog/2019/02/19/exploring-the-amiga-8/">Exploring the Amiga - Part 8</a></li>
+        </ul>
     </div>
 </section>
     </article>
@@ -441,7 +465,7 @@
         <li><a href="http://blog.thedigitalcatonline.com/atom.xml"><i class="fa fa-rss"></i> All posts</a></li>
 
 
-        <li><a href="http://blog.thedigitalcatonline.com/category/retro/atom.xml"><i class="fa fa-rss"></i> All posts in category: Retro</a></li>
+        <li><a href="http://blog.thedigitalcatonline.com/category/{slug}/atom.xml"><i class="fa fa-rss"></i> All posts in category: Retro</a></li>
     </ul>
 </section>
     <!-- Recent posts -->
@@ -450,6 +474,14 @@
         <h2>Recent posts</h2>
     </header>
     <div class="mini-posts">
+        <article>
+            Exploring the Amiga - Part 8
+            <a href="http://blog.thedigitalcatonline.com/blog/2019/02/19/exploring-the-amiga-8/"> Read</a>
+        </article>
+        <article>
+            Exploring the Amiga - Part 7
+            <a href="http://blog.thedigitalcatonline.com/blog/2019/02/19/exploring-the-amiga-7/"> Read</a>
+        </article>
         <article>
             Clean Architectures in Python: the book
             <a href="http://blog.thedigitalcatonline.com/blog/2018/12/20/cabook/"> Read</a>
@@ -461,14 +493,6 @@
         <article>
             Exploring the Amiga - Part 6
             <a href="http://blog.thedigitalcatonline.com/blog/2018/06/25/exploring-the-amiga-6/"> Read</a>
-        </article>
-        <article>
-            Exploring the Amiga - Part 5
-            <a href="http://blog.thedigitalcatonline.com/blog/2018/06/25/exploring-the-amiga-5/"> Read</a>
-        </article>
-        <article>
-            Exploring the Amiga - Part 4
-            <a href="http://blog.thedigitalcatonline.com/blog/2018/06/14/exploring-the-amiga-4/"> Read</a>
         </article>
     </div>
 </section>

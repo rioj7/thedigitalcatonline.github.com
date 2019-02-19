@@ -204,7 +204,7 @@
 </ol>
 <h2 id="the-form-workflow-part-ii">The form workflow - part II<a class="headerlink" href="#the-form-workflow-part-ii" title="Permanent link">&para;</a></h2>
 <p>Now the user obtained the requested page and is facing an empty form. Once the form has been filled, he or she clicks the submit button and a new HTTP request reaches the server, this time carrying the POST method and a set of data taken from the input fields of the form itself. Our view shall now handle the second interaction step, the one that in functional views is usually managed by the part starting with <code>if request.method == 'POST':</code>.</p>
-<p>As we already know, the incoming request is processed by the <code>post()</code> method of <code>ProcessFormView</code>, which works like the <code>get()</code> method in its first part, calling <code>get_form_class()</code> and <code>get_form()</code>. This latter method now deals with a POST request, so the code of <code>get_form_kwargs()</code> in <code>FormMixin</code> (<a href="https://github.com/django/django/blob/stable/1.5.x/django/views/generic/edit.py#L10">views/generic/edit.py#L10</a>) adds to the keywords dictionary the submitted data with the <code>data</code> key and the uploaded files under the <code>files</code> key. Why does Django do this? Well, as you can see at <a href="https://github.com/django/django/blob/stable/1.5.x/django/forms/forms.py#L77">forms/forms.py#L77</a> a Django form can be instanced with an optional <code>data</code> keyword, which is stored inside the form object for the subsequent validation phase.</p>
+<p>As we already know, the incoming request is processed by the <code>post()</code> method of <code>ProcessFormView</code>, which works like the <code>get()</code> method in its first part, calling <code>get_form_class()</code> and <code>get_form()</code>. The latter method now deals with a POST request, so the code of <code>get_form_kwargs()</code> in <code>FormMixin</code> (<a href="https://github.com/django/django/blob/stable/1.5.x/django/views/generic/edit.py#L10">views/generic/edit.py#L10</a>) adds to the keywords dictionary the submitted data with the <code>data</code> key and the uploaded files under the <code>files</code> key. Why does Django do this? Well, as you can see at <a href="https://github.com/django/django/blob/stable/1.5.x/django/forms/forms.py#L77">forms/forms.py#L77</a> a Django form can be instanced with an optional <code>data</code> keyword, which is stored inside the form object for the subsequent validation phase.</p>
 <p>So now the form is bound (that is, it contains some data or files - see <a href="https://github.com/django/django/blob/stable/1.5.x/django/forms/forms.py#L80">forms/forms.py#L80</a>). The <code>post()</code> method now tests the result of <code>is_valid()</code> and acts accordingly calling either <code>form_valid()</code> or <code>form_invalid()</code>. Pay attention that, while <code>is_valid()</code> is a method of the form itself, the two latter methods belong to the <code>BaseCreateView</code>, defined by the same ancestor classes that implement <code>get_form_kwargs()</code>, <code>ModelFormMixin</code> and <code>FormMixin</code>.</p>
 <p>The former class implements it at <a href="https://github.com/django/django/blob/stable/1.5.x/django/views/generic/edit.py#L123">views/generic/edit.py#L123</a> and puts the result of <code>form.save()</code> into <code>self.object</code>. Remember that <code>self.object</code> is appended to the context under the <code>object</code> key by the <code>get_context_data()</code> method, as shown in the previous section. The <code>form.save()</code> method for modelforms is defined by <code>BaseModelForm</code> at <a href="https://github.com/django/django/blob/stable/1.5.x/django/forms/models.py#L357">forms/models.py#L357</a> and basically saves the instance of the Django model connected with the modelform, that is implements the actual creation at the base of the <code>CreateView</code> form view. As <code>form.save()</code> returns the object saved to the database, it makes sense to store it in <code>self.object</code> and pass it to the template.</p>
 <p>The execution of <code>form_valid()</code> continues with the implementation in the <code>FormMixin</code> class at <a href="https://github.com/django/django/blob/stable/1.5.x/django/views/generic/edit.py#L61">views/generic/edit.py#L61</a>. This method returns a <code>HttpResponseRedirect</code> object, which is the way you make the browser point to the given URL in Django. In this case the URL is given by <code>self.get_success_url()</code> which tries to return <code>self.success_url</code> if defined, otherwise returns the result of <code>get_absolute_url()</code> for the fresh-made object.</p>
@@ -273,7 +273,7 @@
         <li><a href="http://blog.thedigitalcatonline.com/atom.xml"><i class="fa fa-rss"></i> All posts</a></li>
 
 
-        <li><a href="http://blog.thedigitalcatonline.com/category/programming/atom.xml"><i class="fa fa-rss"></i> All posts in category: Programming</a></li>
+        <li><a href="http://blog.thedigitalcatonline.com/category/{slug}/atom.xml"><i class="fa fa-rss"></i> All posts in category: Programming</a></li>
     </ul>
 </section>
     <!-- Recent posts -->
@@ -282,6 +282,14 @@
         <h2>Recent posts</h2>
     </header>
     <div class="mini-posts">
+        <article>
+            Exploring the Amiga - Part 8
+            <a href="http://blog.thedigitalcatonline.com/blog/2019/02/19/exploring-the-amiga-8/"> Read</a>
+        </article>
+        <article>
+            Exploring the Amiga - Part 7
+            <a href="http://blog.thedigitalcatonline.com/blog/2019/02/19/exploring-the-amiga-7/"> Read</a>
+        </article>
         <article>
             Clean Architectures in Python: the book
             <a href="http://blog.thedigitalcatonline.com/blog/2018/12/20/cabook/"> Read</a>
@@ -293,14 +301,6 @@
         <article>
             Exploring the Amiga - Part 6
             <a href="http://blog.thedigitalcatonline.com/blog/2018/06/25/exploring-the-amiga-6/"> Read</a>
-        </article>
-        <article>
-            Exploring the Amiga - Part 5
-            <a href="http://blog.thedigitalcatonline.com/blog/2018/06/25/exploring-the-amiga-5/"> Read</a>
-        </article>
-        <article>
-            Exploring the Amiga - Part 4
-            <a href="http://blog.thedigitalcatonline.com/blog/2018/06/14/exploring-the-amiga-4/"> Read</a>
         </article>
     </div>
 </section>

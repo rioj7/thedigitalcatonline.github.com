@@ -1,0 +1,1273 @@
+<!DOCTYPE HTML>
+<!--
+    Editorial by HTML5 UP
+    html5up.net | @ajlkn
+    Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+    <head>
+        <title>Exploring the Amiga - Part 7 - The Digital Cat</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+        <!--[if lte IE 8]><script src="http://blog.thedigitalcatonline.com/theme/js/ie/html5shiv.js"></script><![endif]-->
+        <link rel="stylesheet" href="http://blog.thedigitalcatonline.com/theme/css/main.css" />
+
+        <!-- Pygments CSS START -->
+        <link rel="stylesheet" href="http://blog.thedigitalcatonline.com/theme/css/pygments/monokai.css">
+        <!-- Pygments CSS END -->
+
+        <link href="http://blog.thedigitalcatonline.com/images/TheDigitalCat_favicon_32.png" rel="icon">
+
+        <!--[if lte IE 9]><link rel="stylesheet" href="http://blog.thedigitalcatonline.com/theme/css/ie9.css" /><![endif]-->
+        <!--[if lte IE 8]><link rel="stylesheet" href="http://blog.thedigitalcatonline.com/theme/css/ie8.css" /><![endif]-->
+
+        <!-- Google Analytics Universal -->
+            <script type="text/javascript">
+                (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+                    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+                    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+                })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+                ga('create', 'UA-74364524-1', 'auto');
+                ga('send', 'pageview');
+            </script>
+        <!-- End Google Analytics Universal Code -->
+    </head>
+    <body>
+
+        <!-- Wrapper -->
+            <div id="wrapper">
+
+                <!-- Main -->
+                    <div id="main">
+                        <div class="inner ">
+
+    <header id="header">
+        <a href="http://blog.thedigitalcatonline.com/category/retro/" title="Retro">Retro</a>
+        <div class="align-right">        
+            <a href="#series">Exploring the Amiga</a> part 7/8
+        </div>
+    </header>
+    
+
+    <article class="post">
+        <header class="page-header">
+            <h1>Exploring the Amiga - Part 7</h1>
+        </header>
+
+        <section id="tags" class="align-center">
+            <a class="button special small" href="http://blog.thedigitalcatonline.com/categories/assembly/">assembly</a>            <a class="button special small" href="http://blog.thedigitalcatonline.com/categories/amiga/">amiga</a>            <a class="button special small" href="http://blog.thedigitalcatonline.com/categories/retroprogramming/">retroprogramming</a>        </section>
+
+        <section id="author" class="align-center">
+                By
+                <a href="http://blog.thedigitalcatonline.com/authors/leonardo-giordani/">Leonardo Giordani</a>
+                <span class="separator">•</span>
+
+            Published on
+            <time datetime="2019-02-19T13:00:00+01:00"> 19/02/2019</time>
+
+        </section>
+
+        <section id="content">
+            <h1 id="the-complete-exec-vector-table">The complete Exec vector table<a class="headerlink" href="#the-complete-exec-vector-table" title="Permanent link">&para;</a></h1>
+<p>In <a href="http://blog.thedigitalcatonline.com/blog/2018/06/08/exploring-the-amiga-3/">the 3rd post</a> of this series I showed the Exec vectors table and the way <code>MakeFunctions</code> creates the jump table when Exec is installed in memory. In that post I focused on the first 4 reserved vectors, but it is useful to have the full table while reading the Kickstart code. This is the full vectors table for Exec 34.2 (28 Oct 1987).</p>
+<p>The <strong>Relative offset</strong> column contains the offset of the function in the jump table once the library has been installed, which allows any Amiga program to call Exec functions through the <code>offset(a6)</code> syntax (e.g. <code>OpenLibrary</code> can be called by <code>jsr -0x228(a6)</code>). <strong>Vector position</strong> is the offset of the vector in the Kickstart 1.3 ROM (i.e. <code>0x0001a7c</code> is the position of the vector table itself), <strong>Relative address</strong> is the hexadecimal value stored in the table before the relocation, <strong>Absolute address</strong> is the function position after relocation (i.e. the wrapped sum between the table address and the relative address), and <strong>Function</strong> is the function name according to the include files and the Amiga documentation.</p>
+<table>
+<thead>
+<tr>
+<th>Relative offset</th>
+<th>Vector position</th>
+<th>Relative address</th>
+<th>Absolute address</th>
+<th>Function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-0x00</td>
+<td>00001a7c</td>
+<td>08a0</td>
+<td>0000231c</td>
+<td>Open()</td>
+</tr>
+<tr>
+<td>-0x06</td>
+<td>00001a7e</td>
+<td>08a8</td>
+<td>00002324</td>
+<td>Close()</td>
+</tr>
+<tr>
+<td>-0x12</td>
+<td>00001a80</td>
+<td>08ac</td>
+<td>00002328</td>
+<td>Expunge()</td>
+</tr>
+<tr>
+<td>-0x18</td>
+<td>00001a82</td>
+<td>08ac</td>
+<td>00002328</td>
+<td>Reserved for future use</td>
+</tr>
+<tr>
+<td>-0x1e</td>
+<td>00001a84</td>
+<td>ee6a</td>
+<td>000008e6</td>
+<td>Supervisor()</td>
+</tr>
+<tr>
+<td>-0x24</td>
+<td>00001a86</td>
+<td>f420</td>
+<td>00000e9c</td>
+<td>ExitIntr()</td>
+</tr>
+<tr>
+<td>-0x2a</td>
+<td>00001a88</td>
+<td>f446</td>
+<td>00000ec2</td>
+<td>Schedule()</td>
+</tr>
+<tr>
+<td>-0x30</td>
+<td>00001a8a</td>
+<td>04f8</td>
+<td>00001f74</td>
+<td>Reschedule()</td>
+</tr>
+<tr>
+<td>-0x36</td>
+<td>00001a8c</td>
+<td>f4a0</td>
+<td>00000f1c</td>
+<td>Switch()</td>
+</tr>
+<tr>
+<td>-0x3c</td>
+<td>00001a8e</td>
+<td>f4ea</td>
+<td>00000f66</td>
+<td>Dispatch()</td>
+</tr>
+<tr>
+<td>-0x42</td>
+<td>00001a90</td>
+<td>f58e</td>
+<td>0000100a</td>
+<td>Exception()</td>
+</tr>
+<tr>
+<td>-0x48</td>
+<td>00001a92</td>
+<td>f0b0</td>
+<td>00000b2c</td>
+<td>InitCode()</td>
+</tr>
+<tr>
+<td>-0x4e</td>
+<td>00001a94</td>
+<td>f188</td>
+<td>00000c04</td>
+<td>InitStruct()</td>
+</tr>
+<tr>
+<td>-0x54</td>
+<td>00001a96</td>
+<td>faac</td>
+<td>00001528</td>
+<td>MakeLibrary()</td>
+</tr>
+<tr>
+<td>-0x5a</td>
+<td>00001a98</td>
+<td>fb36</td>
+<td>000015b2</td>
+<td>MakeFunctions()</td>
+</tr>
+<tr>
+<td>-0x60</td>
+<td>00001a9a</td>
+<td>f080</td>
+<td>00000afc</td>
+<td>FindResident()</td>
+</tr>
+<tr>
+<td>-0x66</td>
+<td>00001a9c</td>
+<td>f0e8</td>
+<td>00000b64</td>
+<td>InitResident()</td>
+</tr>
+<tr>
+<td>-0x6c</td>
+<td>00001a9e</td>
+<td>1596</td>
+<td>00003012</td>
+<td>Alert()</td>
+</tr>
+<tr>
+<td>-0x72</td>
+<td>00001aa0</td>
+<td>08ee</td>
+<td>0000236a</td>
+<td>Debug()</td>
+</tr>
+<tr>
+<td>-0x78</td>
+<td>00001aa2</td>
+<td>f9ac</td>
+<td>00001428</td>
+<td>Disable()</td>
+</tr>
+<tr>
+<td>-0x7e</td>
+<td>00001aa4</td>
+<td>f9ba</td>
+<td>00001436</td>
+<td>Enable()</td>
+</tr>
+<tr>
+<td>-0x84</td>
+<td>00001aa6</td>
+<td>051a</td>
+<td>00001f96</td>
+<td>Forbid()</td>
+</tr>
+<tr>
+<td>-0x8a</td>
+<td>00001aa8</td>
+<td>0520</td>
+<td>00001f9c</td>
+<td>Permit()</td>
+</tr>
+<tr>
+<td>-0x90</td>
+<td>00001aaa</td>
+<td>f6e2</td>
+<td>0000115e</td>
+<td>SetSR()</td>
+</tr>
+<tr>
+<td>-0x96</td>
+<td>00001aac</td>
+<td>f708</td>
+<td>00001184</td>
+<td>SuperState()</td>
+</tr>
+<tr>
+<td>-0x9c</td>
+<td>00001aae</td>
+<td>f734</td>
+<td>000011b0</td>
+<td>UserState()</td>
+</tr>
+<tr>
+<td>-0xa2</td>
+<td>00001ab0</td>
+<td>f74e</td>
+<td>000011ca</td>
+<td>SetIntVector()</td>
+</tr>
+<tr>
+<td>-0xa8</td>
+<td>00001ab2</td>
+<td>f794</td>
+<td>00001210</td>
+<td>AddIntServer()</td>
+</tr>
+<tr>
+<td>-0xae</td>
+<td>00001ab4</td>
+<td>f7d4</td>
+<td>00001250</td>
+<td>RemIntServer()</td>
+</tr>
+<tr>
+<td>-0xb4</td>
+<td>00001ab6</td>
+<td>f8e0</td>
+<td>0000135c</td>
+<td>Cause()</td>
+</tr>
+<tr>
+<td>-0xba</td>
+<td>00001ab8</td>
+<td>fc5c</td>
+<td>000016d8</td>
+<td>Allocate()</td>
+</tr>
+<tr>
+<td>-0xc0</td>
+<td>00001ac0</td>
+<td>fcc4</td>
+<td>00001740</td>
+<td>Deallocate()</td>
+</tr>
+<tr>
+<td>-0xc6</td>
+<td>00001abc</td>
+<td>fd54</td>
+<td>000017d0</td>
+<td>AllocMem()</td>
+</tr>
+<tr>
+<td>-0xcc</td>
+<td>00001abe</td>
+<td>fe00</td>
+<td>0000187c</td>
+<td>AllocAbs()</td>
+</tr>
+<tr>
+<td>-0xd2</td>
+<td>00001ac0</td>
+<td>fdb0</td>
+<td>0000182c</td>
+<td>FreeMem()</td>
+</tr>
+<tr>
+<td>-0xd8</td>
+<td>00001ac2</td>
+<td>fe90</td>
+<td>0000190c</td>
+<td>AvailMem()</td>
+</tr>
+<tr>
+<td>-0xde</td>
+<td>00001ac4</td>
+<td>fede</td>
+<td>0000195a</td>
+<td>AllocEntry()</td>
+</tr>
+<tr>
+<td>-0xe4</td>
+<td>00001ac6</td>
+<td>ff6c</td>
+<td>000019e8</td>
+<td>FreeEntry()</td>
+</tr>
+<tr>
+<td>-0xea</td>
+<td>00001ac8</td>
+<td>fb6c</td>
+<td>000015e8</td>
+<td>Insert()</td>
+</tr>
+<tr>
+<td>-0xf0</td>
+<td>00001aca</td>
+<td>fb98</td>
+<td>00001614</td>
+<td>AddHead()</td>
+</tr>
+<tr>
+<td>-0xf6</td>
+<td>00001acc</td>
+<td>fba8</td>
+<td>00001624</td>
+<td>AddTail()</td>
+</tr>
+<tr>
+<td>-0xfc</td>
+<td>00001ace</td>
+<td>fbc0</td>
+<td>0000163c</td>
+<td>Remove()</td>
+</tr>
+<tr>
+<td>-0x102</td>
+<td>00001ad0</td>
+<td>fbce</td>
+<td>0000164a</td>
+<td>RemHead()</td>
+</tr>
+<tr>
+<td>-0x108</td>
+<td>00001ad2</td>
+<td>fbde</td>
+<td>0000165a</td>
+<td>RemTail()</td>
+</tr>
+<tr>
+<td>-0x10e</td>
+<td>00001ad4</td>
+<td>fbf4</td>
+<td>00001670</td>
+<td>Enqueue()</td>
+</tr>
+<tr>
+<td>-0x114</td>
+<td>00001ad6</td>
+<td>fc1a</td>
+<td>00001696</td>
+<td>FindName()</td>
+</tr>
+<tr>
+<td>-0x11a</td>
+<td>00001ad8</td>
+<td>0208</td>
+<td>00001c84</td>
+<td>AddTask()</td>
+</tr>
+<tr>
+<td>-0x120</td>
+<td>00001ada</td>
+<td>02b4</td>
+<td>00001d30</td>
+<td>RemTask()</td>
+</tr>
+<tr>
+<td>-0x126</td>
+<td>00001adc</td>
+<td>0334</td>
+<td>00001db0</td>
+<td>FindTask()</td>
+</tr>
+<tr>
+<td>-0x12c</td>
+<td>00001ade</td>
+<td>0388</td>
+<td>00001e04</td>
+<td>SetTaskPri()</td>
+</tr>
+<tr>
+<td>-0x132</td>
+<td>00001ae0</td>
+<td>03e2</td>
+<td>00001e5e</td>
+<td>SetSignal()</td>
+</tr>
+<tr>
+<td>-0x138</td>
+<td>00001ae2</td>
+<td>03d8</td>
+<td>00001e54</td>
+<td>SetExcept()</td>
+</tr>
+<tr>
+<td>-0x13e</td>
+<td>00001ae4</td>
+<td>0490</td>
+<td>00001f0c</td>
+<td>Wait()</td>
+</tr>
+<tr>
+<td>-0x144</td>
+<td>00001ae6</td>
+<td>0408</td>
+<td>00001e84</td>
+<td>Signal()</td>
+</tr>
+<tr>
+<td>-0x14a</td>
+<td>00001ae8</td>
+<td>0584</td>
+<td>00002000</td>
+<td>AllocSignal()</td>
+</tr>
+<tr>
+<td>-0x150</td>
+<td>00001aea</td>
+<td>05bc</td>
+<td>00002038</td>
+<td>FreeSignal()</td>
+</tr>
+<tr>
+<td>-0x156</td>
+<td>00001aec</td>
+<td>054e</td>
+<td>00001fca</td>
+<td>AllocTrap()</td>
+</tr>
+<tr>
+<td>-0x15c</td>
+<td>00001aee</td>
+<td>0574</td>
+<td>00001ff0</td>
+<td>FreeTrap()</td>
+</tr>
+<tr>
+<td>-0x162</td>
+<td>00001af0</td>
+<td>00d8</td>
+<td>00001b54</td>
+<td>AddPort()</td>
+</tr>
+<tr>
+<td>-0x168</td>
+<td>00001af2</td>
+<td>00f0</td>
+<td>00001b6c</td>
+<td>RemPort()</td>
+</tr>
+<tr>
+<td>-0x16e</td>
+<td>00001af4</td>
+<td>00f4</td>
+<td>00001b70</td>
+<td>PutMsg()</td>
+</tr>
+<tr>
+<td>-0x174</td>
+<td>00001af6</td>
+<td>016e</td>
+<td>00001bea</td>
+<td>GetMsg()</td>
+</tr>
+<tr>
+<td>-0x17a</td>
+<td>00001af8</td>
+<td>019c</td>
+<td>00001c18</td>
+<td>ReplyMsg()</td>
+</tr>
+<tr>
+<td>-0x180</td>
+<td>00001afa</td>
+<td>01b6</td>
+<td>00001c32</td>
+<td>WaitPort()</td>
+</tr>
+<tr>
+<td>-0x186</td>
+<td>00001afc</td>
+<td>01de</td>
+<td>00001c5a</td>
+<td>FindPort()</td>
+</tr>
+<tr>
+<td>-0x18c</td>
+<td>00001afe</td>
+<td>f9cc</td>
+<td>00001448</td>
+<td>AddLibrary()</td>
+</tr>
+<tr>
+<td>-0x192</td>
+<td>00001b00</td>
+<td>f9da</td>
+<td>00001456</td>
+<td>RemLibrary()</td>
+</tr>
+<tr>
+<td>-0x198</td>
+<td>00001b02</td>
+<td>f9f0</td>
+<td>0000146c</td>
+<td>OldOpenLibrary()</td>
+</tr>
+<tr>
+<td>-0x19e</td>
+<td>00001b04</td>
+<td>fa26</td>
+<td>000014a2</td>
+<td>CloseLibrary()</td>
+</tr>
+<tr>
+<td>-0x1a4</td>
+<td>00001b06</td>
+<td>fa3a</td>
+<td>000014b6</td>
+<td>SetFunction()</td>
+</tr>
+<tr>
+<td>-0x1aa</td>
+<td>00001b08</td>
+<td>fa58</td>
+<td>000014d4</td>
+<td>SumLibrary()</td>
+</tr>
+<tr>
+<td>-0x1b0</td>
+<td>00001b0a</td>
+<td>ec14</td>
+<td>00000690</td>
+<td>AddDevice()</td>
+</tr>
+<tr>
+<td>-0x1b6</td>
+<td>00001b0c</td>
+<td>ec22</td>
+<td>0000069e</td>
+<td>RemDevice()</td>
+</tr>
+<tr>
+<td>-0x1bc</td>
+<td>00001b0e</td>
+<td>ec26</td>
+<td>000006a2</td>
+<td>OpenDevice()</td>
+</tr>
+<tr>
+<td>-0x1c2</td>
+<td>00001b10</td>
+<td>ec74</td>
+<td>000006f0</td>
+<td>CloseDevice()</td>
+</tr>
+<tr>
+<td>-0x1c8</td>
+<td>00001b12</td>
+<td>ec9c</td>
+<td>00000718</td>
+<td>DoIO()</td>
+</tr>
+<tr>
+<td>-0x1ce</td>
+<td>00001b14</td>
+<td>ec8a</td>
+<td>00000706</td>
+<td>SendIO()</td>
+</tr>
+<tr>
+<td>-0x1d4</td>
+<td>00001b16</td>
+<td>ed0e</td>
+<td>0000078a</td>
+<td>CheckIO()</td>
+</tr>
+<tr>
+<td>-0x1da</td>
+<td>00001b18</td>
+<td>ecb2</td>
+<td>0000072e</td>
+<td>WaitIO()</td>
+</tr>
+<tr>
+<td>-0x1e0</td>
+<td>00001b1a</td>
+<td>ed2a</td>
+<td>000007a6</td>
+<td>AbortIO()</td>
+</tr>
+<tr>
+<td>-0x1e6</td>
+<td>00001b1c</td>
+<td>01e8</td>
+<td>00001c64</td>
+<td>AddResource()</td>
+</tr>
+<tr>
+<td>-0x1ec</td>
+<td>00001b1e</td>
+<td>01f0</td>
+<td>00001c6c</td>
+<td>RemResource()</td>
+</tr>
+<tr>
+<td>-0x1f2</td>
+<td>00001b20</td>
+<td>01f4</td>
+<td>00001c70</td>
+<td>OpenResource()</td>
+</tr>
+<tr>
+<td>-0x1f8</td>
+<td>00001b22</td>
+<td>07b8</td>
+<td>00002234</td>
+<td>execPrivate7()</td>
+</tr>
+<tr>
+<td>-0x1fe</td>
+<td>00001b24</td>
+<td>07c2</td>
+<td>0000223e</td>
+<td>execPrivate8()</td>
+</tr>
+<tr>
+<td>-0x204</td>
+<td>00001b26</td>
+<td>07ee</td>
+<td>0000226a</td>
+<td>execPrivate9()</td>
+</tr>
+<tr>
+<td>-0x20a</td>
+<td>00001b28</td>
+<td>06a8</td>
+<td>00002124</td>
+<td>RawDoFmt()</td>
+</tr>
+<tr>
+<td>-0x210</td>
+<td>00001b2a</td>
+<td>f700</td>
+<td>0000117c</td>
+<td>GetCC()</td>
+</tr>
+<tr>
+<td>-0x216</td>
+<td>00001b2c</td>
+<td>fdda</td>
+<td>00001856</td>
+<td>TypeOfMem()</td>
+</tr>
+<tr>
+<td>-0x21c</td>
+<td>00001b2e</td>
+<td>131c</td>
+<td>00002d98</td>
+<td>Procure()</td>
+</tr>
+<tr>
+<td>-0x222</td>
+<td>00001b30</td>
+<td>1332</td>
+<td>00002dae</td>
+<td>Vacate()</td>
+</tr>
+<tr>
+<td>-0x228</td>
+<td>00001b32</td>
+<td>f9f8</td>
+<td>00001474</td>
+<td>OpenLibrary()</td>
+</tr>
+<tr>
+<td>-0x22e</td>
+<td>00001b34</td>
+<td>1354</td>
+<td>00002dd0</td>
+<td>InitSemaphore()</td>
+</tr>
+<tr>
+<td>-0x234</td>
+<td>00001b36</td>
+<td>1374</td>
+<td>00002df0</td>
+<td>ObtainSemaphore()</td>
+</tr>
+<tr>
+<td>-0x23a</td>
+<td>00001b38</td>
+<td>13c4</td>
+<td>00002e40</td>
+<td>ReleaseSemaphore()</td>
+</tr>
+<tr>
+<td>-0x240</td>
+<td>00001b3a</td>
+<td>1428</td>
+<td>00002ea4</td>
+<td>AttemptSemaphore()</td>
+</tr>
+<tr>
+<td>-0x246</td>
+<td>00001b3c</td>
+<td>1458</td>
+<td>00002ed4</td>
+<td>ObtainSemaphoreList()</td>
+</tr>
+<tr>
+<td>-0x24c</td>
+<td>00001b3e</td>
+<td>14ce</td>
+<td>00002f4a</td>
+<td>ReleaseSemaphoreList()</td>
+</tr>
+<tr>
+<td>-0x252</td>
+<td>00001b40</td>
+<td>14f4</td>
+<td>00002f70</td>
+<td>FindSemaphore()</td>
+</tr>
+<tr>
+<td>-0x258</td>
+<td>00001b42</td>
+<td>14e4</td>
+<td>00002f60</td>
+<td>AddSemaphore()</td>
+</tr>
+<tr>
+<td>-0x25e</td>
+<td>00001b44</td>
+<td>14f0</td>
+<td>00002f6c</td>
+<td>RemSemaphore()</td>
+</tr>
+<tr>
+<td>-0x264</td>
+<td>00001b46</td>
+<td>effc</td>
+<td>00000a78</td>
+<td>SumKickData()</td>
+</tr>
+<tr>
+<td>-0x26a</td>
+<td>00001b48</td>
+<td>ffaa</td>
+<td>00001a26</td>
+<td>AddMemList()</td>
+</tr>
+<tr>
+<td>-0x270</td>
+<td>00001b4a</td>
+<td>1504</td>
+<td>00002f80</td>
+<td>CopyMem()</td>
+</tr>
+<tr>
+<td>-0x276</td>
+<td>00001b4c</td>
+<td>1500</td>
+<td>00002f7c</td>
+<td>CopyMemQuick()</td>
+</tr>
+</tbody>
+</table>
+<h1 id="the-memory-list-header">The memory list header<a class="headerlink" href="#the-memory-list-header" title="Permanent link">&para;</a></h1>
+<p>Before we dig into the code of the <code>AddMemList</code> function to see how the memory space is added to the free memory list, let's have a look at the status of the memory list itself, as we need to be familiar with its structure to understand the rest of the process.</p>
+<p>You might recall from the <a href="http://blog.thedigitalcatonline.com/blog/2018/06/25/exploring-the-amiga-5/">fifth article</a> that the <code>MemList</code> structure is created <code>0x142</code> bytes after ExecBase, and that the structure is the following</p>
+<div class="highlight"><pre><span></span>    <span class="mh">0xe</span> <span class="o">+-------+</span> <span class="mh">0x150</span>
+        <span class="o">|</span>       <span class="o">|</span>
+    <span class="mh">0xd</span> <span class="o">+-------+</span> <span class="mh">0x14f</span> <span class="p">(</span><span class="n">LH_pad</span><span class="p">)</span>
+        <span class="o">|</span> <span class="mh">0xa</span>   <span class="o">|</span>
+    <span class="mh">0xc</span> <span class="o">+-------+</span> <span class="mh">0x14e</span> <span class="p">(</span><span class="n">LH_TYPE</span><span class="p">)</span>
+        <span class="o">|</span> <span class="mh">0x142</span> <span class="o">|</span>
+    <span class="mh">0x8</span> <span class="o">+-------+</span> <span class="mh">0x14a</span> <span class="p">(</span><span class="n">LH_TAILPRED</span><span class="p">)</span>
+        <span class="o">|</span> <span class="mh">0x0</span>   <span class="o">|</span>
+    <span class="mh">0x4</span> <span class="o">+-------+</span> <span class="mh">0x146</span> <span class="p">(</span><span class="n">LH_TAIL</span><span class="p">)</span>
+        <span class="o">|</span> <span class="mh">0x146</span> <span class="o">|</span>
+    <span class="mh">0x0</span> <span class="o">+-------+</span> <span class="mh">0x142</span> <span class="p">(</span><span class="n">LH_HEAD</span><span class="p">)</span>
+</pre></div>
+
+
+<p>This means that we can access the memory list with <code>lea 0x142(a6),a0</code>, as <code>0x142</code> is the relative address, i.e. assuming ExecBase is 0. Once the absolute address is in one of the address registers we can access the first node through <code>(a0)</code>, which is the Motorola Assembly version of the C pointer dereference operation (Address Register Indirect Mode). With <code>(a0)</code> we do not use the content of <code>a0</code>, but the content of the memory location which address is contained in <code>a0</code>.</p>
+<p>So if <code>a0</code> is <code>0x142</code> in the previous figure, <code>(a0)</code> is <code>0x0</code> (<code>0x142</code> contains <code>0x146</code>, <code>0x146</code> contains <code>0x0</code>). It's thus convenient to think of <code>a0</code> as the pointer, and of <code>(a0)</code> as the value.</p>
+<p>It is also interesting to note that the structure at <code>0x146</code> is very similar to the <code>LN</code> structure. Recall that the latter is defined in <code>include_i/exec/nodes.i</code> as</p>
+<div class="highlight"><pre><span></span> <span class="nv">STRUCTURE</span>    <span class="s">LN</span><span class="p">,</span><span class="mi">0</span><span class="s">    </span><span class="c">; List Node</span>
+    <span class="nv">APTR</span>    <span class="s">LN_SUCC </span><span class="c">; Pointer to next (successor)</span>
+    <span class="nv">APTR</span>    <span class="s">LN_PRED </span><span class="c">; Pointer to previous (predecessor)</span>
+    <span class="nv">UBYTE</span>   <span class="s">LN_TYPE</span>
+    <span class="nv">BYTE</span>    <span class="s">LN_PRI  </span><span class="c">; Priority, for sorting</span>
+    <span class="nv">APTR</span>    <span class="s">LN_NAME </span><span class="c">; ID string, null terminated</span>
+    <span class="nv">LABEL</span>   <span class="s">LN_SIZE </span><span class="c">; Note: word aligned</span>
+</pre></div>
+
+
+<p>and as you can see <code>LH_TAIL</code>, <code>LH_TAILPRED</code>, and <code>LH_TYPE</code> can act as a proper node of a linked list. This is done on purpose (obviously), as the tail of the list has to be processed by the code that manages linked lists.</p>
+<h1 id="adding-free-memory-to-the-system-list">Adding free memory to the system list<a class="headerlink" href="#adding-free-memory-to-the-system-list" title="Permanent link">&para;</a></h1>
+<p>At the end of the <a href="http://blog.thedigitalcatonline.com/blog/2018/06/25/exploring-the-amiga-6/">previous post</a> we left Exec just after its code prepared the parameters of the free memory that was available on the system. As we saw in that post, this operation is always executed for the chip memory, and optionally for the fast memory if the hardware expansion is installed.</p>
+<p>The <code>AddMemList</code> function at <code>0x1a26</code> is called with the following prototype</p>
+<div class="highlight"><pre><span></span>size = AddMemList(size, attributes, pri, base, name)
+D0                D0    D1          D2   A0    A1
+</pre></div>
+
+
+<p>with the purpose of adding the given memory <code>size</code>, starting from the <code>base</code> address, to the system pool. The memory <code>attributes</code> will be store in the memory block and the priority (<code>pri</code>) will be used to find the insertion point. The name is also added to the memory node to identify it.</p>
+<p>We can split the memory addition in two different parts. <code>AddMemList</code> will create a node that contain the parameters of the memory region, then will call <code>Enqueue</code> to add it to the <code>MemList</code> linked list. When Exec bootstraps the system the memory list is empty, but these functions must work in a generic case. Actually when the system has a memory expansion (fast memory), this is the first that is added to the list, but it's immediately followed by the chip memory.</p>
+<p>To help you to follow what happens in the function, this is a depiction of the memory area that we want to add to the system pool at the end of <code>AddMemList</code>, just before the call to <code>Enqueue</code>. The area contains a header made of three structures, <code>LN</code> (linked list node), <code>MH</code> (memory header), and <code>MC</code> (memory chunk)</p>
+<div class="highlight"><pre><span></span>   <span class="n">SIZE</span> <span class="o">+---------------+</span>
+        <span class="o">|</span> <span class="n">Free</span> <span class="n">memory</span>   <span class="o">|</span>
+        <span class="o">+---------------+</span>
+        <span class="o">|</span> <span class="p">...</span>           <span class="o">|</span>
+        <span class="o">+---------------+</span>
+        <span class="o">|</span> <span class="n">Free</span> <span class="n">memory</span>   <span class="o">|</span>
+   <span class="mh">0x2c</span> <span class="o">+---------------+</span> <span class="o">&lt;-+</span>
+        <span class="o">|</span> <span class="n">MC_SIZE</span>       <span class="o">|</span>   <span class="o">|</span>
+   <span class="mh">0x28</span> <span class="o">+---------------+</span>   <span class="o">|</span>
+        <span class="o">|</span> <span class="n">MC_BYTES</span>      <span class="o">|</span>   <span class="o">|</span> <span class="n">MC</span>
+   <span class="mh">0x24</span> <span class="o">+---------------+</span>   <span class="o">|</span>
+        <span class="o">|</span> <span class="n">MC_NEXT</span>       <span class="o">|</span>   <span class="o">|</span>
+   <span class="mh">0x20</span> <span class="o">+---------------+</span> <span class="o">&lt;-+</span>
+        <span class="o">|</span> <span class="n">MH_FREE</span>       <span class="o">|</span>   <span class="o">|</span>
+   <span class="mh">0x1c</span> <span class="o">+---------------+</span>   <span class="o">|</span>
+        <span class="o">|</span> <span class="n">MH_UPPER</span>      <span class="o">|</span>   <span class="o">|</span>
+   <span class="mh">0x18</span> <span class="o">+---------------+</span>   <span class="o">|</span>
+        <span class="o">|</span> <span class="n">MH_LOWER</span>      <span class="o">|</span>   <span class="o">|</span> <span class="n">MH</span>
+   <span class="mh">0x14</span> <span class="o">+---------------+</span>   <span class="o">|</span>
+        <span class="o">|</span> <span class="n">MH_FIRST</span>      <span class="o">|</span>   <span class="o">|</span>
+   <span class="mh">0x10</span> <span class="o">+---------------+</span>   <span class="o">|</span>
+        <span class="o">|</span> <span class="n">MH_ATTRIBUTES</span> <span class="o">|</span>   <span class="o">|</span>
+    <span class="mh">0xe</span> <span class="o">+---------------+</span> <span class="o">&lt;-+</span>
+        <span class="o">|</span> <span class="n">LN_NAME</span>       <span class="o">|</span>   <span class="o">|</span>
+    <span class="mh">0xa</span> <span class="o">+---------------+</span>   <span class="o">|</span>
+        <span class="o">|</span> <span class="n">LN_PRI</span>        <span class="o">|</span>   <span class="o">|</span>
+    <span class="mh">0x9</span> <span class="o">+---------------+</span>   <span class="o">|</span>
+        <span class="o">|</span> <span class="n">LN_TYPE</span>       <span class="o">|</span>   <span class="o">|</span> <span class="n">LN</span>
+    <span class="mh">0x8</span> <span class="o">+---------------+</span>   <span class="o">|</span>
+        <span class="o">|</span> <span class="n">LN_PRED</span>       <span class="o">|</span>   <span class="o">|</span>
+    <span class="mh">0x4</span> <span class="o">+---------------+</span>   <span class="o">|</span>
+        <span class="o">|</span> <span class="n">LN_SUCC</span>       <span class="o">|</span>   <span class="o">|</span>
+    <span class="mh">0x0</span> <span class="o">+---------------+</span> <span class="o">&lt;-+</span>
+</pre></div>
+
+
+<p>It is interesting to note that, since we are managing the system memory, we cannot store information about it other than in the memory itself. The presence of management structures, then, is reducing the amount of free memory. This has to taken into account when designing a memory management system, but will not be considered in this article.</p>
+<p>When we create the structure shown in figure, we need to ensure that the actual free memory is a multiple of a long word (8 bytes), as this is generally desirable. The memory space we are dealing with starts from 0 in the picture, but can actually be anywhere in the system memory, so it is not guaranteed that either the beginning or the end of the free memory space are aligned with long words.</p>
+<p>The code of <code>AddMemList</code> performs the alignment in two steps. First it aligns the address of <code>MC</code> to the upper nearest long word (multiple of 8), then aligns the total size to the lower nearest long word. For example, if the starting point was 0 and the total size 64 bytes, we would leave all the values untouched:<code>LN_SUCC</code> at <code>0x0</code>, <code>MC_NEXT</code> at <code>0x20</code>, and the total size of the chunk (structure 'MC' + free memory) would be 32 bytes.</p>
+<div class="highlight"><pre><span></span>   <span class="mh">0x40</span> <span class="o">+---------------+</span> <span class="o">&lt;-+</span>
+        <span class="o">|</span> <span class="n">Free</span> <span class="n">memory</span>   <span class="o">|</span>   <span class="o">|</span>
+        <span class="o">+---------------+</span>   <span class="o">|</span> <span class="mi">32</span> <span class="n">bytes</span>
+        <span class="o">|</span> <span class="n">MC</span>            <span class="o">|</span>   <span class="o">|</span>
+   <span class="mh">0x20</span> <span class="o">+---------------+</span> <span class="o">&lt;-+</span>
+        <span class="o">|</span> <span class="n">MH</span>            <span class="o">|</span>   <span class="o">|</span>
+        <span class="o">+---------------+</span>   <span class="o">|</span> <span class="mi">32</span> <span class="n">bytes</span>
+        <span class="o">|</span> <span class="n">LN</span>            <span class="o">|</span>   <span class="o">|</span>
+    <span class="mh">0x0</span> <span class="o">+---------------+</span> <span class="o">&lt;-+</span>
+</pre></div>
+
+
+<p>If the starting point was 1 and the total size 65 bytes, however, the result would be: <code>LN_SUCC</code> at <code>0x1</code>, <code>MC_NEXT</code> at <code>0x28</code> (upper long word), and the total size of the memory would be 56 bytes (65-7 gives 58, rounded down to a multiple of 8), which means a chunk of 24 bytes</p>
+<div class="highlight"><pre><span></span>   <span class="mh">0x42</span> <span class="o">+---------------+</span> <span class="o">&lt;-+</span>
+        <span class="o">|</span> <span class="n">Ignored</span>       <span class="o">|</span>   <span class="o">|</span> <span class="mi">2</span> <span class="n">bytes</span>
+   <span class="mh">0x40</span> <span class="o">+---------------+</span> <span class="o">&lt;-+</span>
+        <span class="o">|</span> <span class="n">Free</span> <span class="n">memory</span>   <span class="o">|</span>   <span class="o">|</span>
+        <span class="o">+---------------+</span>   <span class="o">|</span> <span class="mi">24</span> <span class="n">bytes</span>
+        <span class="o">|</span> <span class="n">MC</span>            <span class="o">|</span>   <span class="o">|</span>
+   <span class="mh">0x28</span> <span class="o">+---------------+</span> <span class="o">&lt;-+</span>
+        <span class="o">|</span> <span class="n">EMPTY</span>         <span class="o">|</span>   <span class="o">|</span> <span class="mi">7</span> <span class="n">bytes</span>
+   <span class="mh">0x21</span> <span class="o">+---------------+</span> <span class="o">&lt;-+</span>
+        <span class="o">|</span> <span class="n">MH</span>            <span class="o">|</span>   <span class="o">|</span>
+        <span class="o">+---------------+</span>   <span class="o">|</span> <span class="mi">32</span> <span class="n">bytes</span>
+        <span class="o">|</span> <span class="n">LN</span>            <span class="o">|</span>   <span class="o">|</span>
+    <span class="mh">0x1</span> <span class="o">+---------------+</span> <span class="o">&lt;-+</span>
+</pre></div>
+
+
+<h1 id="addmemlist-internals"><code>AddMemList</code> internals<a class="headerlink" href="#addmemlist-internals" title="Permanent link">&para;</a></h1>
+<p>According to the Exec vectors table, <code>AddMemList</code> can be found at <code>00001a26</code>, and ends at <code>00001a78</code>. It is immediately followed by a padding word <code>0000</code> and the vectors table itself</p>
+<div class="highlight"><pre><span></span><span class="m">00001a26: 2149 000a</span>                 <span class="k">move.l</span>  <span class="nv">a1</span><span class="p">,</span><span class="mi">0xa</span><span class="p">(</span><span class="nv">a0</span><span class="p">)</span>
+<span class="m">00001a2a: 43e8 0020</span>                 <span class="k">lea</span>     <span class="mi">0x20</span><span class="p">(</span><span class="nv">a0</span><span class="p">),</span><span class="nv">a1</span>
+<span class="m">00001a2e: 117c 000a 0008</span>            <span class="k">move.b</span>  <span class="p">#</span><span class="mi">0xa</span><span class="p">,</span><span class="mi">0x8</span><span class="p">(</span><span class="nv">a0</span><span class="p">)</span>
+<span class="m">00001a34: 1142 0009</span>                 <span class="k">move.b</span>  <span class="nv">d2</span><span class="p">,</span><span class="mi">0x9</span><span class="p">(</span><span class="nv">a0</span><span class="p">)</span>
+<span class="m">00001a38: 3141 000e</span>                 <span class="k">move.w</span>  <span class="nv">d1</span><span class="p">,</span><span class="mi">0xe</span><span class="p">(</span><span class="nv">a0</span><span class="p">)</span>
+<span class="m">00001a3c: 2209</span>                      <span class="k">move.l</span>  <span class="nv">a1</span><span class="p">,</span><span class="nv">d1</span>
+<span class="m">00001a3e: 5e81</span>                      <span class="k">addq.l</span>  <span class="p">#</span><span class="mi">0x7</span><span class="p">,</span><span class="nv">d1</span>
+<span class="m">00001a40: 0201 00f8</span>                 <span class="k">andi.b</span>  <span class="p">#-</span><span class="mi">0x8</span><span class="p">,</span><span class="nv">d1</span>
+<span class="m">00001a44: c389</span>                      <span class="k">exg</span>     <span class="nv">d1</span><span class="p">,</span><span class="nv">a1</span>
+<span class="m">00001a46: 9289</span>                      <span class="k">sub.l</span>   <span class="nv">a1</span><span class="p">,</span><span class="nv">d1</span>
+<span class="m">00001a48: d081</span>                      <span class="k">add.l</span>   <span class="nv">d1</span><span class="p">,</span><span class="nv">d0</span>
+<span class="m">00001a4a: 0200 00f8</span>                 <span class="k">andi.b</span>  <span class="p">#-</span><span class="mi">0x8</span><span class="p">,</span><span class="nv">d0</span>
+<span class="m">00001a4e: 0480 0000 0020</span>            <span class="k">subi.l</span>  <span class="p">#</span><span class="mi">0x20</span><span class="p">,</span><span class="nv">d0</span>
+<span class="m">00001a54: 2149 0010</span>                 <span class="k">move.l</span>  <span class="nv">a1</span><span class="p">,</span><span class="mi">0x10</span><span class="p">(</span><span class="nv">a0</span><span class="p">)</span>
+<span class="m">00001a58: 2149 0014</span>                 <span class="k">move.l</span>  <span class="nv">a1</span><span class="p">,</span><span class="mi">0x14</span><span class="p">(</span><span class="nv">a0</span><span class="p">)</span>
+<span class="m">00001a5c: 2209</span>                      <span class="k">move.l</span>  <span class="nv">a1</span><span class="p">,</span><span class="nv">d1</span>
+<span class="m">00001a5e: d280</span>                      <span class="k">add.l</span>   <span class="nv">d0</span><span class="p">,</span><span class="nv">d1</span>
+<span class="m">00001a60: 2141 0018</span>                 <span class="k">move.l</span>  <span class="nv">d1</span><span class="p">,</span><span class="mi">0x18</span><span class="p">(</span><span class="nv">a0</span><span class="p">)</span>
+<span class="m">00001a64: 2140 001c</span>                 <span class="k">move.l</span>  <span class="nv">d0</span><span class="p">,</span><span class="mi">0x1c</span><span class="p">(</span><span class="nv">a0</span><span class="p">)</span>
+<span class="m">00001a68: 2340 0004</span>                 <span class="k">move.l</span>  <span class="nv">d0</span><span class="p">,</span><span class="mi">0x4</span><span class="p">(</span><span class="nv">a1</span><span class="p">)</span>
+<span class="m">00001a6c: 4291</span>                      <span class="k">clr.l</span>   <span class="p">(</span><span class="nv">a1</span><span class="p">)</span>
+<span class="m">00001a6e: 2248</span>                      <span class="k">movea.l</span> <span class="nv">a0</span><span class="p">,</span><span class="nv">a1</span>
+<span class="m">00001a70: 41ee 0142</span>                 <span class="k">lea</span>     <span class="mi">0x142</span><span class="p">(</span><span class="nv">a6</span><span class="p">),</span><span class="nv">a0</span>
+<span class="m">00001a74: 6100 fc48</span>                 <span class="k">bsr.w</span>   <span class="mi">0x16be</span>
+<span class="m">00001a78: 4e75</span>                      <span class="k">rts</span>     
+</pre></div>
+
+
+<p>Let's comment the function line by line. I will refer to the fields shown in the picture above by name, mentioning the offsets for clarity.</p>
+<div class="highlight"><pre><span></span><span class="m">00001a26: 2149 000a</span>                 <span class="k">move.l</span>  <span class="nv">a1</span><span class="p">,</span><span class="mi">0xa</span><span class="p">(</span><span class="nv">a0</span><span class="p">)</span>
+</pre></div>
+
+
+<p>This code stores the address of the memory area name in <code>LN_NAME</code> (<code>0xa(a0)</code>).</p>
+<div class="highlight"><pre><span></span><span class="m">00001a2a: 43e8 0020</span>                 <span class="k">lea</span>     <span class="mi">0x20</span><span class="p">(</span><span class="nv">a0</span><span class="p">),</span><span class="nv">a1</span>
+</pre></div>
+
+
+<p>This loads the absolute address of the memory chunk (structure <code>MC</code>). The purpose of this is to align the memory chunk to a long word later in the code.</p>
+<div class="highlight"><pre><span></span><span class="m">00001a2e: 117c 000a 0008</span>            <span class="k">move.b</span>  <span class="p">#</span><span class="mi">0xa</span><span class="p">,</span><span class="mi">0x8</span><span class="p">(</span><span class="nv">a0</span><span class="p">)</span>
+<span class="m">00001a34: 1142 0009</span>                 <span class="k">move.b</span>  <span class="nv">d2</span><span class="p">,</span><span class="mi">0x9</span><span class="p">(</span><span class="nv">a0</span><span class="p">)</span>
+<span class="m">00001a38: 3141 000e</span>                 <span class="k">move.w</span>  <span class="nv">d1</span><span class="p">,</span><span class="mi">0xe</span><span class="p">(</span><span class="nv">a0</span><span class="p">)</span>
+</pre></div>
+
+
+<p>This stores <code>0xa</code> in the <code>LN_TYPE</code> field (<code>0x8(a0)</code>). This corresponds to <code>NT_MEMORY</code> (see <code>include_i/exec/nodes.i</code>). It then copies the list priority into the <code>LN_PRI</code> field (<code>0x9(a0)</code>), and the memory attributes in the <code>MH_ATTRIBUTES</code> field (<code>0xe(a0)</code>).</p>
+<div class="highlight"><pre><span></span><span class="m">00001a3c: 2209</span>                      <span class="k">move.l</span>  <span class="nv">a1</span><span class="p">,</span><span class="nv">d1</span>
+<span class="m">00001a3e: 5e81</span>                      <span class="k">addq.l</span>  <span class="p">#</span><span class="mi">0x7</span><span class="p">,</span><span class="nv">d1</span>
+<span class="m">00001a40: 0201 00f8</span>                 <span class="k">andi.b</span>  <span class="p">#-</span><span class="mi">0x8</span><span class="p">,</span><span class="nv">d1</span>
+<span class="m">00001a4e: 0480 0000 0020</span>            <span class="k">subi.l</span>  <span class="p">#</span><span class="mi">0x20</span><span class="p">,</span><span class="nv">d0</span>
+</pre></div>
+
+
+<p>These three lines of code align the address of <code>MC</code> (<code>a1</code>) to a long word, adding 7 and removing the least significant 3 bits. Then the size of the headers (<code>0x20</code>) is removed from the total size of the memory region that was passed as an argument.</p>
+<div class="highlight"><pre><span></span><span class="m">00001a54: 2149 0010</span>                 <span class="k">move.l</span>  <span class="nv">a1</span><span class="p">,</span><span class="mi">0x10</span><span class="p">(</span><span class="nv">a0</span><span class="p">)</span>
+<span class="m">00001a58: 2149 0014</span>                 <span class="k">move.l</span>  <span class="nv">a1</span><span class="p">,</span><span class="mi">0x14</span><span class="p">(</span><span class="nv">a0</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Store the first free memory location (<code>a1</code>) in <code>MH_FIRST</code> (<code>0x10(a0)</code>) and in <code>MH_LOWER</code> (<code>0x14(a0)</code>).</p>
+<div class="highlight"><pre><span></span><span class="m">00001a5c: 2209</span>                      <span class="k">move.l</span>  <span class="nv">a1</span><span class="p">,</span><span class="nv">d1</span>
+<span class="m">00001a5e: d280</span>                      <span class="k">add.l</span>   <span class="nv">d0</span><span class="p">,</span><span class="nv">d1</span>
+<span class="m">00001a60: 2141 0018</span>                 <span class="k">move.l</span>  <span class="nv">d1</span><span class="p">,</span><span class="mi">0x18</span><span class="p">(</span><span class="nv">a0</span><span class="p">)</span>
+<span class="m">00001a64: 2140 001c</span>                 <span class="k">move.l</span>  <span class="nv">d0</span><span class="p">,</span><span class="mi">0x1c</span><span class="p">(</span><span class="nv">a0</span><span class="p">)</span>
+</pre></div>
+
+
+<p>The size of the free memory is then added to the first free address and stored in <code>MH_UPPER</code> (<code>0x18(a0)</code>). The size of the free memory is stored in <code>MH_FREE</code> (<code>0x1c(a0)</code>).</p>
+<div class="highlight"><pre><span></span><span class="m">00001a68: 2340 0004</span>                 <span class="k">move.l</span>  <span class="nv">d0</span><span class="p">,</span><span class="mi">0x4</span><span class="p">(</span><span class="nv">a1</span><span class="p">)</span>
+<span class="m">00001a6c: 4291</span>                      <span class="k">clr.l</span>   <span class="p">(</span><span class="nv">a1</span><span class="p">)</span>
+</pre></div>
+
+
+<p>This code creates the memory chunk in the free memory area. The size of the chunk is stored in the <code>MC_BYTES</code> field (<code>0x4(a1)</code>), and the <code>MC_NEXT</code> field is cleared.</p>
+<div class="highlight"><pre><span></span><span class="m">00001a6e: 2248</span>                      <span class="k">movea.l</span> <span class="nv">a0</span><span class="p">,</span><span class="nv">a1</span>
+<span class="m">00001a70: 41ee 0142</span>                 <span class="k">lea</span>     <span class="mi">0x142</span><span class="p">(</span><span class="nv">a6</span><span class="p">),</span><span class="nv">a0</span>
+<span class="m">00001a74: 6100 fc48</span>                 <span class="k">bsr.w</span>   <span class="mi">0x16be</span>
+<span class="m">00001a78: 4e75</span>                      <span class="k">rts</span>     
+</pre></div>
+
+
+<p>The rest of the code prepares the call to the protected version of <code>Enqueue</code>, copying the address of the node in <code>a1</code> , the absolute address of <code>MemList</code> in <code>a0</code>, and branching to the subroutine. When <code>Enqueue</code> returns, <code>AddMemList</code> terminates and returns as well.</p>
+<h1 id="resources">Resources<a class="headerlink" href="#resources" title="Permanent link">&para;</a></h1>
+<ul>
+<li>Motorola M68000 Family Programmer's Reference Manual <a href="https://www.nxp.com/docs/en/reference-manual/M68000PRM.pdf">PDF here</a></li>
+<li>Amiga System Programmers Guide, Abacus (<a href="https://archive.org/details/Amiga_System_Programmers_Guide_1988_Abacus">pdf here</a>)</li>
+</ul>
+<h1 id="feedback">Feedback<a class="headerlink" href="#feedback" title="Permanent link">&para;</a></h1>
+<p>Feel free to reach me on <a href="https://twitter.com/thedigicat">Twitter</a> if you have questions. The <a href="http://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues">GitHub issues</a> page is the best place to submit corrections.</p>
+        </section>
+
+<section id="related-posts">
+    <h2>Related Posts</h2>
+    <div class="box">
+        <ul>
+            <li><a href="http://blog.thedigitalcatonline.com/blog/2019/02/19/exploring-the-amiga-8/">Exploring the Amiga - Part 8</a></li>
+            <li><a href="http://blog.thedigitalcatonline.com/blog/2018/06/25/exploring-the-amiga-6/">Exploring the Amiga - Part 6</a></li>
+            <li><a href="http://blog.thedigitalcatonline.com/blog/2018/06/25/exploring-the-amiga-5/">Exploring the Amiga - Part 5</a></li>
+            <li><a href="http://blog.thedigitalcatonline.com/blog/2018/06/14/exploring-the-amiga-4/">Exploring the Amiga - Part 4</a></li>
+            <li><a href="http://blog.thedigitalcatonline.com/blog/2018/06/08/exploring-the-amiga-3/">Exploring the Amiga - Part 3</a></li>
+        </ul>
+    </div>
+</section>
+<section id="series">
+    <h2>Part 7 of the Exploring the Amiga series</h2>
+    <div class="box">
+        <h5>Previous articles</h5>
+        <ul>
+            <li><a href="http://blog.thedigitalcatonline.com/blog/2018/05/28/exploring-the-amiga-1/">Exploring the Amiga - Part 1</a></li>
+            <li><a href="http://blog.thedigitalcatonline.com/blog/2018/05/28/exploring-the-amiga-2/">Exploring the Amiga - Part 2</a></li>
+            <li><a href="http://blog.thedigitalcatonline.com/blog/2018/06/08/exploring-the-amiga-3/">Exploring the Amiga - Part 3</a></li>
+            <li><a href="http://blog.thedigitalcatonline.com/blog/2018/06/14/exploring-the-amiga-4/">Exploring the Amiga - Part 4</a></li>
+            <li><a href="http://blog.thedigitalcatonline.com/blog/2018/06/25/exploring-the-amiga-5/">Exploring the Amiga - Part 5</a></li>
+            <li><a href="http://blog.thedigitalcatonline.com/blog/2018/06/25/exploring-the-amiga-6/">Exploring the Amiga - Part 6</a></li>
+        </ul>
+    
+        <h5>Next articles</h5>
+        <ul>
+            <li><a href="http://blog.thedigitalcatonline.com/blog/2019/02/19/exploring-the-amiga-8/">Exploring the Amiga - Part 8</a></li>
+        </ul>
+    </div>
+</section>
+    </article>
+
+
+                        </div>
+                    </div>
+
+                <!-- Sidebar -->
+                    <div id="sidebar">
+<div class="inner">
+    <!-- Menu -->
+    <nav id="menu">
+        <header class="major">
+            <h2>Menu</h2>
+        </header>
+        <ul>
+            <li><a href="http://blog.thedigitalcatonline.com/">Homepage</a></li>
+            <li><a href="http://blog.thedigitalcatonline.com/pages/about.html">About</a></li>
+            <li><a href="http://blog.thedigitalcatonline.com/archives/">Archives</a></li>
+        </ul>
+    </nav>
+
+    <!-- Feeds -->
+<section>
+    <header class="major">
+        <h2>Feeds</h2>
+    </header>
+    <ul class="list-clean">
+        <li><a href="http://blog.thedigitalcatonline.com/atom.xml"><i class="fa fa-rss"></i> All posts</a></li>
+
+
+        <li><a href="http://blog.thedigitalcatonline.com/category/{slug}/atom.xml"><i class="fa fa-rss"></i> All posts in category: Retro</a></li>
+    </ul>
+</section>
+    <!-- Recent posts -->
+<section>
+    <header class="major">
+        <h2>Recent posts</h2>
+    </header>
+    <div class="mini-posts">
+        <article>
+            Exploring the Amiga - Part 8
+            <a href="http://blog.thedigitalcatonline.com/blog/2019/02/19/exploring-the-amiga-8/"> Read</a>
+        </article>
+        <article>
+            Exploring the Amiga - Part 7
+            <a href="http://blog.thedigitalcatonline.com/blog/2019/02/19/exploring-the-amiga-7/"> Read</a>
+        </article>
+        <article>
+            Clean Architectures in Python: the book
+            <a href="http://blog.thedigitalcatonline.com/blog/2018/12/20/cabook/"> Read</a>
+        </article>
+        <article>
+            Useful pytest command line options
+            <a href="http://blog.thedigitalcatonline.com/blog/2018/07/05/useful-pytest-command-line-options/"> Read</a>
+        </article>
+        <article>
+            Exploring the Amiga - Part 6
+            <a href="http://blog.thedigitalcatonline.com/blog/2018/06/25/exploring-the-amiga-6/"> Read</a>
+        </article>
+    </div>
+</section>
+    <!-- Tags -->
+<section>
+    <header class="major">
+        <h2>Tags</h2>
+    </header>
+    <ul class="list-inline list-clean" id="tags-side">
+        <li class="tag-3">
+            <a href="http://blog.thedigitalcatonline.com/categories/algorithms/">algorithms</a>
+        </li>
+        <li class="tag-2">
+            <a href="http://blog.thedigitalcatonline.com/categories/amiga/">amiga</a>
+        </li>
+        <li class="tag-4">
+            <a href="http://blog.thedigitalcatonline.com/categories/amqp/">AMQP</a>
+        </li>
+        <li class="tag-3">
+            <a href="http://blog.thedigitalcatonline.com/categories/architectures/">architectures</a>
+        </li>
+        <li class="tag-2">
+            <a href="http://blog.thedigitalcatonline.com/categories/assembly/">assembly</a>
+        </li>
+        <li class="tag-2">
+            <a href="http://blog.thedigitalcatonline.com/categories/c/">C</a>
+        </li>
+        <li class="tag-4">
+            <a href="http://blog.thedigitalcatonline.com/categories/clojure/">Clojure</a>
+        </li>
+        <li class="tag-2">
+            <a href="http://blog.thedigitalcatonline.com/categories/compilers/">compilers</a>
+        </li>
+        <li class="tag-2">
+            <a href="http://blog.thedigitalcatonline.com/categories/concurrent-programming/">concurrent programming</a>
+        </li>
+        <li class="tag-4">
+            <a href="http://blog.thedigitalcatonline.com/categories/cryptography/">cryptography</a>
+        </li>
+        <li class="tag-2">
+            <a href="http://blog.thedigitalcatonline.com/categories/decorators/">decorators</a>
+        </li>
+        <li class="tag-3">
+            <a href="http://blog.thedigitalcatonline.com/categories/django/">Django</a>
+        </li>
+        <li class="tag-3">
+            <a href="http://blog.thedigitalcatonline.com/categories/erlang/">Erlang</a>
+        </li>
+        <li class="tag-1">
+            <a href="http://blog.thedigitalcatonline.com/categories/functional-programming/">functional programming</a>
+        </li>
+        <li class="tag-3">
+            <a href="http://blog.thedigitalcatonline.com/categories/generators/">generators</a>
+        </li>
+        <li class="tag-3">
+            <a href="http://blog.thedigitalcatonline.com/categories/git/">Git</a>
+        </li>
+        <li class="tag-2">
+            <a href="http://blog.thedigitalcatonline.com/categories/metaclasses/">metaclasses</a>
+        </li>
+        <li class="tag-2">
+            <a href="http://blog.thedigitalcatonline.com/categories/metaprogramming/">metaprogramming</a>
+        </li>
+        <li class="tag-3">
+            <a href="http://blog.thedigitalcatonline.com/categories/notebook/">Notebook</a>
+        </li>
+        <li class="tag-1">
+            <a href="http://blog.thedigitalcatonline.com/categories/oop/">OOP</a>
+        </li>
+        <li class="tag-2">
+            <a href="http://blog.thedigitalcatonline.com/categories/operating-systems/">operating systems</a>
+        </li>
+        <li class="tag-4">
+            <a href="http://blog.thedigitalcatonline.com/categories/pika/">Pika</a>
+        </li>
+        <li class="tag-4">
+            <a href="http://blog.thedigitalcatonline.com/categories/postage/">Postage</a>
+        </li>
+        <li class="tag-1">
+            <a href="http://blog.thedigitalcatonline.com/categories/python/">Python</a>
+        </li>
+        <li class="tag-2">
+            <a href="http://blog.thedigitalcatonline.com/categories/python2/">Python2</a>
+        </li>
+        <li class="tag-1">
+            <a href="http://blog.thedigitalcatonline.com/categories/python3/">Python3</a>
+        </li>
+        <li class="tag-3">
+            <a href="http://blog.thedigitalcatonline.com/categories/rabbitmq/">RabbitMQ</a>
+        </li>
+        <li class="tag-4">
+            <a href="http://blog.thedigitalcatonline.com/categories/refactoring/">refactoring</a>
+        </li>
+        <li class="tag-2">
+            <a href="http://blog.thedigitalcatonline.com/categories/retroprogramming/">retroprogramming</a>
+        </li>
+        <li class="tag-4">
+            <a href="http://blog.thedigitalcatonline.com/categories/rsa/">RSA</a>
+        </li>
+        <li class="tag-1">
+            <a href="http://blog.thedigitalcatonline.com/categories/scala/">Scala</a>
+        </li>
+        <li class="tag-4">
+            <a href="http://blog.thedigitalcatonline.com/categories/ssh/">SSH</a>
+        </li>
+        <li class="tag-4">
+            <a href="http://blog.thedigitalcatonline.com/categories/ssl/">SSL</a>
+        </li>
+        <li class="tag-1">
+            <a href="http://blog.thedigitalcatonline.com/categories/tdd/">TDD</a>
+        </li>
+        <li class="tag-1">
+            <a href="http://blog.thedigitalcatonline.com/categories/testing/">testing</a>
+        </li>
+        <li class="tag-3">
+            <a href="http://blog.thedigitalcatonline.com/categories/versioning/">versioning</a>
+        </li>
+    </ul>
+</section>
+    <!-- Section -->
+<section>
+    <header class="major">
+        <h2>Get in touch</h2>
+    </header>
+    <ul class="list-clean" id="social">
+        
+        
+        
+        <li class="list-item-spaced"><a href="https://twitter.com/thedigicat"><i class="fa fa-twitter-square fa-lg"></i> Twitter</a></li>
+        
+        
+        
+        
+        <li class="list-item-spaced"><a href="https://plus.google.com/u/0/111444750762335924049"><i class="fa fa-google-plus-square fa-lg"></i> Google+</a></li>
+        
+        
+        
+        
+        <li class="list-item-spaced"><a href="https://github.com/TheDigitalCatOnline"><i class="fa fa-github-square fa-lg"></i> GitHub</a></li>
+        
+    </ul>
+</section>
+    <!-- Footer -->
+    <footer id="footer">
+        <p class="copyright">Editorial theme by: <a href="https://html5up.net">HTML5 UP</a>.</p>
+    </footer>
+
+</div>                    </div>
+
+            </div>
+
+        <!-- Scripts -->
+            <script src="http://blog.thedigitalcatonline.com/theme/js/jquery.min.js"></script>
+            <script src="http://blog.thedigitalcatonline.com/theme/js/skel.min.js"></script>
+            <script src="http://blog.thedigitalcatonline.com/theme/js/util.js"></script>
+            <!--[if lte IE 8]><script src="http://blog.thedigitalcatonline.com/theme/js/ie/respond.min.js"></script><![endif]-->
+            <script src="http://blog.thedigitalcatonline.com/theme/js/main.js"></script>
+
+    </body>
+</html>

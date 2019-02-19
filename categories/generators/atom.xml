@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>The Digital Cat - generators</title><link href="http://blog.thedigitalcatonline.com/" rel="alternate"></link><link href="http://blog.thedigitalcatonline.com/categories/generators/atom.xml" rel="self"></link><id>http://blog.thedigitalcatonline.com/</id><updated>2013-03-29T13:25:00+01:00</updated><entry><title>Python Generators - From Iterators to Cooperative Multitasking - 3</title><link href="http://blog.thedigitalcatonline.com/blog/2013/03/29/python-generators-from-iterators-to-cooperative-multitasking-3/" rel="alternate"></link><published>2013-03-29T13:25:00+01:00</published><updated>2013-03-29T13:25:00+01:00</updated><author><name>Leonardo Giordani</name></author><id>tag:blog.thedigitalcatonline.com,2013-03-29:/blog/2013/03/29/python-generators-from-iterators-to-cooperative-multitasking-3/</id><summary type="html"></summary><content type="html">&lt;h2 id="introduction"&gt;Introduction&lt;a class="headerlink" href="#introduction" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>The Digital Cat - generators</title><link href="http://blog.thedigitalcatonline.com/" rel="alternate"></link><link href="http://blog.thedigitalcatonline.com/categories/generators/atom.xml" rel="self"></link><id>http://blog.thedigitalcatonline.com/</id><updated>2013-03-29T13:25:00+01:00</updated><subtitle>Adventures of a curious cat in the land of programming</subtitle><entry><title>Python Generators - From Iterators to Cooperative Multitasking - 3</title><link href="http://blog.thedigitalcatonline.com/blog/2013/03/29/python-generators-from-iterators-to-cooperative-multitasking-3/" rel="alternate"></link><published>2013-03-29T13:25:00+01:00</published><updated>2013-03-29T13:25:00+01:00</updated><author><name>Leonardo Giordani</name></author><id>tag:blog.thedigitalcatonline.com,2013-03-29:/blog/2013/03/29/python-generators-from-iterators-to-cooperative-multitasking-3/</id><summary type="html"></summary><content type="html">&lt;h2 id="introduction"&gt;Introduction&lt;a class="headerlink" href="#introduction" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;In this third issue we move on uncovering how generators can be the foundation of a cooperative multitasking system and show some code that implements it. Before we face this topic we will talk shortly about another interesting use of generators, namely generator expressions chains.&lt;/p&gt;
 &lt;h2 id="chaining-generator-expressions"&gt;Chaining generator expressions&lt;a class="headerlink" href="#chaining-generator-expressions" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;At PyCon 2008 David M. Beazley, author of “Python Essential Reference”, made a very interesting speech about the use of generators in system administration, in other words where usually more or less complex bash scripts are involved and in particular where long pipe sequences are used.&lt;/p&gt;
@@ -20,7 +20,7 @@
 &lt;/pre&gt;&lt;/div&gt;
 
 
-&lt;p&gt;An instance of this object exposes a &lt;code&gt;main()&lt;/code&gt; method that, when called, returns a generator. This latter, at each call of its &lt;code&gt;next()&lt;/code&gt; method simply returns &lt;code&gt;1&lt;/code&gt;, freezing at the same time its execution just after the &lt;code&gt;yield&lt;/code&gt; statement, still inside the infinite while loop.&lt;/p&gt;
+&lt;p&gt;An instance of this object exposes a &lt;code&gt;main()&lt;/code&gt; method that, when called, returns a generator. The latter, at each call of its &lt;code&gt;next()&lt;/code&gt; method simply returns &lt;code&gt;1&lt;/code&gt;, freezing at the same time its execution just after the &lt;code&gt;yield&lt;/code&gt; statement, still inside the infinite while loop.&lt;/p&gt;
 &lt;p&gt;The object can be directly tested&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&amp;gt;&amp;gt;&amp;gt; &lt;span class="nv"&gt;mt&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; MicroThread&lt;span class="o"&gt;()&lt;/span&gt;
 &amp;gt;&amp;gt;&amp;gt; &lt;span class="nv"&gt;g&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; mt.main&lt;span class="o"&gt;()&lt;/span&gt;
@@ -109,7 +109,7 @@
 
 
 &lt;p&gt;&lt;a href="/code/python-generators/scheduler.py"&gt;source code&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;The &lt;code&gt;__init__()&lt;/code&gt; method initializes the two internal lists we talked about above. The &lt;code&gt;add_microthread()&lt;/code&gt; method allows us to add a microthread to the scheduler; the method calls &lt;code&gt;main()&lt;/code&gt; on each microthread we add to obtain its generator, then calls &lt;code&gt;next()&lt;/code&gt; once on this latter to initialize it and finally adds it to the list of scheduled tasks.&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;__init__()&lt;/code&gt; method initializes the two internal lists we talked about above. The &lt;code&gt;add_microthread()&lt;/code&gt; method allows us to add a microthread to the scheduler; the method calls &lt;code&gt;main()&lt;/code&gt; on each microthread we add to obtain its generator, then calls &lt;code&gt;next()&lt;/code&gt; once on the latter to initialize it and finally adds it to the list of scheduled tasks.&lt;/p&gt;
 &lt;p&gt;The scheduler logic is then implemented in the &lt;code&gt;run()&lt;/code&gt; method, which executes the above core code in an infinite while loop.&lt;/p&gt;
 &lt;p&gt;We can test the microthreads and the scheduler with this simple code&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;mthread&lt;/span&gt;
@@ -258,7 +258,7 @@ Number: &lt;span class="m"&gt;3&lt;/span&gt;
 
 
 &lt;p&gt;When executed, the &lt;code&gt;dec()&lt;/code&gt; function returns a &lt;strong&gt;generator object&lt;/strong&gt; and no lines of code have been executed (i.e. &lt;code&gt;x&lt;/code&gt; has not yet been initialized).&lt;/p&gt;
-&lt;p&gt;As soon as &lt;code&gt;next()&lt;/code&gt; is called for the first time &lt;code&gt;x&lt;/code&gt; will be initialized with the value passed to the function (8 in the example above) and the infinite loop will start. Inside it the local variable &lt;code&gt;x&lt;/code&gt; will be decremented and returned to the caller by &lt;code&gt;yield&lt;/code&gt;. This latter will also freeze again the code, holding the internal state, in this case the value of the variable &lt;code&gt;x&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;As soon as &lt;code&gt;next()&lt;/code&gt; is called for the first time &lt;code&gt;x&lt;/code&gt; will be initialized with the value passed to the function (8 in the example above) and the infinite loop will start. Inside it the local variable &lt;code&gt;x&lt;/code&gt; will be decremented and returned to the caller by &lt;code&gt;yield&lt;/code&gt;. The latter will also freeze again the code, holding the internal state, in this case the value of the variable &lt;code&gt;x&lt;/code&gt;.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="n"&gt;g&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;next&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
 &lt;span class="go"&gt;7&lt;/span&gt;
 &lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="n"&gt;g&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;next&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
@@ -348,7 +348,7 @@ Number: &lt;span class="m"&gt;3&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
 
-&lt;p&gt;where &lt;code&gt;object_generator&lt;/code&gt; is a generator like one of those returned by a generator function. This latter form of the code would be&lt;/p&gt;
+&lt;p&gt;where &lt;code&gt;object_generator&lt;/code&gt; is a generator like one of those returned by a generator function. The latter form of the code would be&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;object_generator_function&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
     &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="nb"&gt;range&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;100&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
         &lt;span class="k"&gt;yield&lt;/span&gt; &lt;span class="n"&gt;MyObject&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
@@ -467,7 +467,7 @@ Number: &lt;span class="m"&gt;3&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
 
-&lt;p&gt;The for construct receives here an &lt;strong&gt;iterable&lt;/strong&gt; object and calls its &lt;code&gt;__iter__()&lt;/code&gt; method, obtaining an &lt;strong&gt;iterator&lt;/strong&gt; object; then it calls the &lt;code&gt;next()&lt;/code&gt; method of this latter until the &lt;code&gt;StopIteration&lt;/code&gt; exception is raised. The actual code is a little different, here simplified for clarity’s sake; if you want to learn more about it check the following addresses&lt;/p&gt;
+&lt;p&gt;The for construct receives here an &lt;strong&gt;iterable&lt;/strong&gt; object and calls its &lt;code&gt;__iter__()&lt;/code&gt; method, obtaining an &lt;strong&gt;iterator&lt;/strong&gt; object; then it calls the &lt;code&gt;next()&lt;/code&gt; method of the latter until the &lt;code&gt;StopIteration&lt;/code&gt; exception is raised. The actual code is a little different, here simplified for clarity’s sake; if you want to learn more about it check the following addresses&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="http://docs.python.org/2/glossary.html"&gt;Python Glossary&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="http://docs.python.org/2/library/functions.html#iter"&gt;Built-in iter()&lt;/a&gt;&lt;/li&gt;
