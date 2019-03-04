@@ -77,20 +77,32 @@
 <p>Let us consider queues at a deeper level. They are two sided components, messages enter from one side and exit from the other one. Thus each queue can establish connections on both sides: on the input side a queue fetches messages from <strong>one or more exchanges</strong> while on the output side the queue can be connected to <strong>one or more consumers</strong>. From the single queue point of view being connected to more than one exchange with the same routing key is transparent, since the only thing that concerns the queue itself are the incoming messages; being connected to more than one exchange with different routing keys leads to complex scenarios, so in this article I will consider a single direct exchange delivering messages to queues.</p>
 <h2 id="three-configurations">Three configurations<a class="headerlink" href="#three-configurations" title="Permanent link">&para;</a></h2>
 <p>As you can easily see, the most general case with direct exchanges is that of multiple queues connected to the same exchange, with multiple consumers connected to each queue.</p>
-<p><img alt="Image 01" src="/images/amqp_direct_exchanges/image01.jpg"></p>
+<div class="big-image">
+<img src="/images/amqp_direct_exchanges/image01.jpg" alt="Image 01" />
+</div>
+
 <p>The edge cases of this configuration can be obtained decreasing the number of queues, the number of consumers, or both, to a single unit. This leads to three different configurations:</p>
 <ul>
 <li>The "direct" case (see <a href="http://www.rabbitmq.com/tutorials/tutorial-one-python.html">tutorial number 1</a>). Here, only a queue is configured with a given routing key and only a consumer is connected to that queue. Every message sent to the exchange with that routing key will be delivered to the consumer.</li>
 </ul>
-<p><img alt="Image 02" src="/images/amqp_direct_exchanges/image02.jpg"></p>
+<div class="big-image">
+<img src="/images/amqp_direct_exchanges/image02.jpg" alt="Image 02" />
+</div>
+
 <ul>
 <li>The "round robin" case (see <a href="http://www.rabbitmq.com/tutorials/tutorial-two-python.html">tutorial number 2</a>). Here, two or more consumers are connected to the same queue (pay attention, not two queues configured with the same key), and the messages in the queue are dispatched in a round robin way, i.e. each consumer receives one of the messages until there are no more consumers, then the procedure starts again.</li>
 </ul>
-<p><img alt="Image 03" src="/images/amqp_direct_exchanges/image03.jpg"></p>
+<div class="big-image">
+<img src="/images/amqp_direct_exchanges/image03.jpg" alt="Image 03" />
+</div>
+
 <ul>
 <li>The "fanout" case (see "Multiple bindings" in <a href="http://www.rabbitmq.com/tutorials/tutorial-four-python.html">tutorial number 4</a>). Here, two or more different queues configured with the same key connect to the same exchange, and each of them dispatches messages to only one consumer. Since the queues pick messages with the same routing key, messages are duplicated and dispatched simultaneously to each of them. This makes the direct exchange behave like a fanout one, <strong>but only for the queues bound with that routing key</strong>.</li>
 </ul>
-<p><img alt="Image 04" src="/images/amqp_direct_exchanges/image04.jpg"></p>
+<div class="big-image">
+<img src="/images/amqp_direct_exchanges/image04.jpg" alt="Image 04" />
+</div>
+
 <p>The last consideration about the fanout case is important. A pure fanout exchange is somehow limited since it can only blindly dispatch messages to everyone connects. A direct exchange can behave like a fanout only for certain keys while acting as a direct or round robin dispatcher with other keys, at the same time.</p>
 <h2 id="a-real-use-case">A real use case<a class="headerlink" href="#a-real-use-case" title="Permanent link">&para;</a></h2>
 <p>Let us look at a concrete example to better understand why direct exchanges can be used to solve the most part of routing issues we face. Remember that in AMQP queues are named objects and that names are primary keys, i.e. there cannot be two queues with the same name under the same virtual host.</p>
@@ -104,24 +116,42 @@
 </ul>
 <p>All these requirements can be fulfilled by a single direct exchange and multiple queues with suitable routing keys.</p>
 <p>Take as an instance the first requirement: reaching all programs on a single host. You only need each program to declare a queue which is unique and to bind it to the exchange with the routing key <code>@host</code>, where host is the actual name of the host (<code>@yoda</code> in the previous example). Declaring a unique queue is simple, in that you can use the unique process name <code>pid@host</code>. The following picture shows the resulting setup: as you can see each queue has a unique name (its owner's unique key) and is bound to the exchange with a routing key that depends on the host.</p>
-<p><img alt="Image 05" src="/images/amqp_direct_exchanges/image05.jpg"></p>
+<div class="big-image">
+<img src="/images/amqp_direct_exchanges/image05.jpg" alt="Image 05" />
+</div>
+
 <p>Now some little magic. The second requirement can be fulfilled by connecting <strong>the same queue to the same exchange</strong> but with a different routing key, this time made by the program's name. The resulting setup is represented in the following picture.</p>
-<p><img alt="Image 06" src="/images/amqp_direct_exchanges/image06.jpg"></p>
+<div class="big-image">
+<img src="/images/amqp_direct_exchanges/image06.jpg" alt="Image 06" />
+</div>
+
 <p>The third requirement makes us connect the same queue with the same exchange with a routing key which is the unique name of the queue.</p>
 <p>I hear you scream "Why do you call this <em>magic</em>?"</p>
 <p>Indeed it is something very simple and straightforward, but take a look at the complete setup, where, for simplicity's sake, the three connections between a queue and the exchange have been collapsed to one line.</p>
-<p><img alt="Image 07" src="/images/amqp_direct_exchanges/image07.jpg"></p>
+<div class="big-image">
+<img src="/images/amqp_direct_exchanges/image07.jpg" alt="Image 07" />
+</div>
+
 <p>Here, we have a "selective fanout" behaviour, in that the actual "active" connections change depending on the routing key. If an incoming message is routed with the key "@host1", for example, we obtain the following connections</p>
-<p><img alt="Image 08" src="/images/amqp_direct_exchanges/image08.jpg"></p>
+<div class="big-image">
+<img src="/images/amqp_direct_exchanges/image08.jpg" alt="Image 08" />
+</div>
+
 <p>If the routing key changes to "program1" the connections become the following</p>
-<p><img alt="Image 09" src="/images/amqp_direct_exchanges/image09.jpg"></p>
+<div class="big-image">
+<img src="/images/amqp_direct_exchanges/image09.jpg" alt="Image 09" />
+</div>
+
 <h2 id="direct-exchanges-and-load-balance">Direct exchanges and load balance<a class="headerlink" href="#direct-exchanges-and-load-balance" title="Permanent link">&para;</a></h2>
 <p>In the previous section we looked at a smart use of the third of the three configurations explained at the beginning of the post. We can profitably leverage the second one (the "round robin" case) to selectively reach cluster programs while balancing the load. Remember that the main use of a round robin message delivery is indeed to avoid overloading a single component or machine.</p>
 <p>To balance the load among a set of programs we need each of them to declare a queue and share it with others: in other words we need to declare a queue with a shared name. This is very easy: for each of the properties of our programs a shared queue can be declared simply by naming it with the value of the property itself.</p>
 <p>For example, declaring a queue named "@host1" creates a queue shared by each program running on host1, while a queue named "program1" is shared among all the programs running the same executable. Even PIDs can be used in this way, but since it is usually not interesting to get the set of all programs on the cluster running with the same pid, there is also no point in defining queues based on them.</p>
 <p>In defining such queues you need to define a syntax (just like for the previous "fanout" case) to avoid name clashes; this is the reason why host routing keys have been prepended the <code>@</code> sign. Otherwise, a process named as one of the hosts would break the routing scheme.</p>
 <p>The resulting setup is portrayed in the following picture</p>
-<p><img alt="Image 10" src="/images/amqp_direct_exchanges/image10.jpg"></p>
+<div class="big-image">
+<img src="/images/amqp_direct_exchanges/image10.jpg" alt="Image 10" />
+</div>
+
 <p>Here you can see, for example, that sending a message with the routing key "@host1/rr" makes the message flow into the queue called "@host1", which is shared by all the processes running on that host. Since the queue is shared, messages are not duplicated but delivered in a balanced way. The "/rr" suffix stands for Round Robin and usefully tells apart fanout routing keys from load balance ones.</p>
 <h2 id="conclusions">Conclusions<a class="headerlink" href="#conclusions" title="Permanent link">&para;</a></h2>
 <p>Well, after all I just explained again and more verbosely the basic RabbitMQ examples, didn't I?</p>
