@@ -31,7 +31,7 @@
 
 <script type="application/ld+json">
 {
-  "@context" : "http://schema.org",
+  "@context" : "https://schema.org",
   "@type" : "Article",
   "name" : "Exploring the Amiga - Part 7",
   "author" : {
@@ -874,13 +874,13 @@
 <p>This means that we can access the memory list with <code>lea 0x142(a6),a0</code>, as <code>0x142</code> is the relative address, i.e. assuming ExecBase is 0. Once the absolute address is in one of the address registers we can access the first node through <code>(a0)</code>, which is the Motorola Assembly version of the C pointer dereference operation (Address Register Indirect Mode). With <code>(a0)</code> we do not use the content of <code>a0</code>, but the content of the memory location which address is contained in <code>a0</code>.</p>
 <p>So if <code>a0</code> is <code>0x142</code> in the previous figure, <code>(a0)</code> is <code>0x0</code> (<code>0x142</code> contains <code>0x146</code>, <code>0x146</code> contains <code>0x0</code>). It's thus convenient to think of <code>a0</code> as the pointer, and of <code>(a0)</code> as the value.</p>
 <p>It is also interesting to note that the structure at <code>0x146</code> is very similar to the <code>LN</code> structure. Recall that the latter is defined in <code>include_i/exec/nodes.i</code> as</p>
-<div class="highlight"><pre><span></span> <span class="nv">STRUCTURE</span>    <span class="s">LN</span><span class="p">,</span><span class="mi">0</span><span class="s">    </span><span class="c">; List Node</span>
-    <span class="nv">APTR</span>    <span class="s">LN_SUCC </span><span class="c">; Pointer to next (successor)</span>
-    <span class="nv">APTR</span>    <span class="s">LN_PRED </span><span class="c">; Pointer to previous (predecessor)</span>
-    <span class="nv">UBYTE</span>   <span class="s">LN_TYPE</span>
-    <span class="nv">BYTE</span>    <span class="s">LN_PRI  </span><span class="c">; Priority, for sorting</span>
-    <span class="nv">APTR</span>    <span class="s">LN_NAME </span><span class="c">; ID string, null terminated</span>
-    <span class="nv">LABEL</span>   <span class="s">LN_SIZE </span><span class="c">; Note: word aligned</span>
+<div class="highlight"><pre><span></span> <span class="nv">STRUCTURE</span>    <span class="nv">LN</span>,<span class="mi">0</span>    <span class="c1">; List Node</span>
+    <span class="nv">APTR</span>    <span class="nv">LN_SUCC</span> <span class="c1">; Pointer to next (successor)</span>
+    <span class="nv">APTR</span>    <span class="nv">LN_PRED</span> <span class="c1">; Pointer to previous (predecessor)</span>
+    <span class="nv">UBYTE</span>   <span class="nv">LN_TYPE</span>
+    <span class="nv">BYTE</span>    <span class="nv">LN_PRI</span>  <span class="c1">; Priority, for sorting</span>
+    <span class="nv">APTR</span>    <span class="nv">LN_NAME</span> <span class="c1">; ID string, null terminated</span>
+    <span class="nv">LABEL</span>   <span class="nv">LN_SIZE</span> <span class="c1">; Note: word aligned</span>
 </pre></div>
 
 
@@ -888,8 +888,8 @@
 <h1 id="adding-free-memory-to-the-system-list">Adding free memory to the system list<a class="headerlink" href="#adding-free-memory-to-the-system-list" title="Permanent link">&para;</a></h1>
 <p>At the end of the <a href="https://www.thedigitalcatonline.com/blog/2018/06/25/exploring-the-amiga-6/">previous post</a> we left Exec just after its code prepared the parameters of the free memory that was available on the system. As we saw in that post, this operation is always executed for the chip memory, and optionally for the fast memory if the hardware expansion is installed.</p>
 <p>The <code>AddMemList</code> function at <code>0x1a26</code> is called with the following prototype</p>
-<div class="highlight"><pre><span></span>size = AddMemList(size, attributes, pri, base, name)
-D0                D0    D1          D2   A0    A1
+<div class="highlight"><pre><span></span><span class="k">size</span> <span class="o">=</span> <span class="n">AddMemList</span><span class="p">(</span><span class="k">size</span><span class="p">,</span> <span class="n">attributes</span><span class="p">,</span> <span class="n">pri</span><span class="p">,</span> <span class="n">base</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+<span class="n">D0</span>                <span class="n">D0</span>    <span class="n">D1</span>          <span class="n">D2</span>   <span class="n">A0</span>    <span class="n">A1</span>
 </pre></div>
 
 
@@ -966,84 +966,84 @@ D0                D0    D1          D2   A0    A1
 
 <h1 id="addmemlist-internals"><code>AddMemList</code> internals<a class="headerlink" href="#addmemlist-internals" title="Permanent link">&para;</a></h1>
 <p>According to the Exec vectors table, <code>AddMemList</code> can be found at <code>00001a26</code>, and ends at <code>00001a78</code>. It is immediately followed by a padding word <code>0000</code> and the vectors table itself</p>
-<div class="highlight"><pre><span></span><span class="m">00001a26: 2149 000a</span>                 <span class="k">move.l</span>  <span class="nv">a1</span><span class="p">,</span><span class="mi">0xa</span><span class="p">(</span><span class="nv">a0</span><span class="p">)</span>
-<span class="m">00001a2a: 43e8 0020</span>                 <span class="k">lea</span>     <span class="mi">0x20</span><span class="p">(</span><span class="nv">a0</span><span class="p">),</span><span class="nv">a1</span>
-<span class="m">00001a2e: 117c 000a 0008</span>            <span class="k">move.b</span>  <span class="p">#</span><span class="mi">0xa</span><span class="p">,</span><span class="mi">0x8</span><span class="p">(</span><span class="nv">a0</span><span class="p">)</span>
-<span class="m">00001a34: 1142 0009</span>                 <span class="k">move.b</span>  <span class="nv">d2</span><span class="p">,</span><span class="mi">0x9</span><span class="p">(</span><span class="nv">a0</span><span class="p">)</span>
-<span class="m">00001a38: 3141 000e</span>                 <span class="k">move.w</span>  <span class="nv">d1</span><span class="p">,</span><span class="mi">0xe</span><span class="p">(</span><span class="nv">a0</span><span class="p">)</span>
-<span class="m">00001a3c: 2209</span>                      <span class="k">move.l</span>  <span class="nv">a1</span><span class="p">,</span><span class="nv">d1</span>
-<span class="m">00001a3e: 5e81</span>                      <span class="k">addq.l</span>  <span class="p">#</span><span class="mi">0x7</span><span class="p">,</span><span class="nv">d1</span>
-<span class="m">00001a40: 0201 00f8</span>                 <span class="k">andi.b</span>  <span class="p">#-</span><span class="mi">0x8</span><span class="p">,</span><span class="nv">d1</span>
-<span class="m">00001a44: c389</span>                      <span class="k">exg</span>     <span class="nv">d1</span><span class="p">,</span><span class="nv">a1</span>
-<span class="m">00001a46: 9289</span>                      <span class="k">sub.l</span>   <span class="nv">a1</span><span class="p">,</span><span class="nv">d1</span>
-<span class="m">00001a48: d081</span>                      <span class="k">add.l</span>   <span class="nv">d1</span><span class="p">,</span><span class="nv">d0</span>
-<span class="m">00001a4a: 0200 00f8</span>                 <span class="k">andi.b</span>  <span class="p">#-</span><span class="mi">0x8</span><span class="p">,</span><span class="nv">d0</span>
-<span class="m">00001a4e: 0480 0000 0020</span>            <span class="k">subi.l</span>  <span class="p">#</span><span class="mi">0x20</span><span class="p">,</span><span class="nv">d0</span>
-<span class="m">00001a54: 2149 0010</span>                 <span class="k">move.l</span>  <span class="nv">a1</span><span class="p">,</span><span class="mi">0x10</span><span class="p">(</span><span class="nv">a0</span><span class="p">)</span>
-<span class="m">00001a58: 2149 0014</span>                 <span class="k">move.l</span>  <span class="nv">a1</span><span class="p">,</span><span class="mi">0x14</span><span class="p">(</span><span class="nv">a0</span><span class="p">)</span>
-<span class="m">00001a5c: 2209</span>                      <span class="k">move.l</span>  <span class="nv">a1</span><span class="p">,</span><span class="nv">d1</span>
-<span class="m">00001a5e: d280</span>                      <span class="k">add.l</span>   <span class="nv">d0</span><span class="p">,</span><span class="nv">d1</span>
-<span class="m">00001a60: 2141 0018</span>                 <span class="k">move.l</span>  <span class="nv">d1</span><span class="p">,</span><span class="mi">0x18</span><span class="p">(</span><span class="nv">a0</span><span class="p">)</span>
-<span class="m">00001a64: 2140 001c</span>                 <span class="k">move.l</span>  <span class="nv">d0</span><span class="p">,</span><span class="mi">0x1c</span><span class="p">(</span><span class="nv">a0</span><span class="p">)</span>
-<span class="m">00001a68: 2340 0004</span>                 <span class="k">move.l</span>  <span class="nv">d0</span><span class="p">,</span><span class="mi">0x4</span><span class="p">(</span><span class="nv">a1</span><span class="p">)</span>
-<span class="m">00001a6c: 4291</span>                      <span class="k">clr.l</span>   <span class="p">(</span><span class="nv">a1</span><span class="p">)</span>
-<span class="m">00001a6e: 2248</span>                      <span class="k">movea.l</span> <span class="nv">a0</span><span class="p">,</span><span class="nv">a1</span>
-<span class="m">00001a70: 41ee 0142</span>                 <span class="k">lea</span>     <span class="mi">0x142</span><span class="p">(</span><span class="nv">a6</span><span class="p">),</span><span class="nv">a0</span>
-<span class="m">00001a74: 6100 fc48</span>                 <span class="k">bsr.w</span>   <span class="mi">0x16be</span>
-<span class="m">00001a78: 4e75</span>                      <span class="k">rts</span>     
+<div class="highlight"><pre><span></span><span class="mi">00001</span><span class="n">a26</span><span class="o">:</span> <span class="mi">2149</span> <span class="mi">000</span><span class="n">a</span>                 <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">a1</span><span class="o">,</span><span class="mh">0xa</span><span class="o">(</span><span class="n">a0</span><span class="o">)</span>
+<span class="mi">00001</span><span class="n">a2a</span><span class="o">:</span> <span class="mi">43</span><span class="n">e8</span> <span class="mi">0020</span>                 <span class="n">lea</span>     <span class="mh">0x20</span><span class="o">(</span><span class="n">a0</span><span class="o">),</span><span class="n">a1</span>
+<span class="mi">00001</span><span class="n">a2e</span><span class="o">:</span> <span class="mi">117</span><span class="n">c</span> <span class="mi">000</span><span class="n">a</span> <span class="mi">0008</span>            <span class="n">move</span><span class="o">.</span><span class="na">b</span>  <span class="err">#</span><span class="mh">0xa</span><span class="o">,</span><span class="mh">0x8</span><span class="o">(</span><span class="n">a0</span><span class="o">)</span>
+<span class="mi">00001</span><span class="n">a34</span><span class="o">:</span> <span class="mi">1142</span> <span class="mi">0009</span>                 <span class="n">move</span><span class="o">.</span><span class="na">b</span>  <span class="n">d2</span><span class="o">,</span><span class="mh">0x9</span><span class="o">(</span><span class="n">a0</span><span class="o">)</span>
+<span class="mi">00001</span><span class="n">a38</span><span class="o">:</span> <span class="mi">3141</span> <span class="mi">000</span><span class="n">e</span>                 <span class="n">move</span><span class="o">.</span><span class="na">w</span>  <span class="n">d1</span><span class="o">,</span><span class="mh">0xe</span><span class="o">(</span><span class="n">a0</span><span class="o">)</span>
+<span class="mi">00001</span><span class="n">a3c</span><span class="o">:</span> <span class="mi">2209</span>                      <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">a1</span><span class="o">,</span><span class="n">d1</span>
+<span class="mi">00001</span><span class="n">a3e</span><span class="o">:</span> <span class="mi">5</span><span class="n">e81</span>                      <span class="n">addq</span><span class="o">.</span><span class="na">l</span>  <span class="err">#</span><span class="mh">0x7</span><span class="o">,</span><span class="n">d1</span>
+<span class="mi">00001</span><span class="n">a40</span><span class="o">:</span> <span class="mi">0201</span> <span class="mi">00</span><span class="n">f8</span>                 <span class="n">andi</span><span class="o">.</span><span class="na">b</span>  <span class="err">#</span><span class="o">-</span><span class="mh">0x8</span><span class="o">,</span><span class="n">d1</span>
+<span class="mi">00001</span><span class="n">a44</span><span class="o">:</span> <span class="n">c389</span>                      <span class="n">exg</span>     <span class="n">d1</span><span class="o">,</span><span class="n">a1</span>
+<span class="mi">00001</span><span class="n">a46</span><span class="o">:</span> <span class="mi">9289</span>                      <span class="n">sub</span><span class="o">.</span><span class="na">l</span>   <span class="n">a1</span><span class="o">,</span><span class="n">d1</span>
+<span class="mi">00001</span><span class="n">a48</span><span class="o">:</span> <span class="n">d081</span>                      <span class="n">add</span><span class="o">.</span><span class="na">l</span>   <span class="n">d1</span><span class="o">,</span><span class="n">d0</span>
+<span class="mi">00001</span><span class="n">a4a</span><span class="o">:</span> <span class="mi">0200</span> <span class="mi">00</span><span class="n">f8</span>                 <span class="n">andi</span><span class="o">.</span><span class="na">b</span>  <span class="err">#</span><span class="o">-</span><span class="mh">0x8</span><span class="o">,</span><span class="n">d0</span>
+<span class="mi">00001</span><span class="n">a4e</span><span class="o">:</span> <span class="mi">0480</span> <span class="mi">0000</span> <span class="mi">0020</span>            <span class="n">subi</span><span class="o">.</span><span class="na">l</span>  <span class="err">#</span><span class="mh">0x20</span><span class="o">,</span><span class="n">d0</span>
+<span class="mi">00001</span><span class="n">a54</span><span class="o">:</span> <span class="mi">2149</span> <span class="mi">0010</span>                 <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">a1</span><span class="o">,</span><span class="mh">0x10</span><span class="o">(</span><span class="n">a0</span><span class="o">)</span>
+<span class="mi">00001</span><span class="n">a58</span><span class="o">:</span> <span class="mi">2149</span> <span class="mi">0014</span>                 <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">a1</span><span class="o">,</span><span class="mh">0x14</span><span class="o">(</span><span class="n">a0</span><span class="o">)</span>
+<span class="mi">00001</span><span class="n">a5c</span><span class="o">:</span> <span class="mi">2209</span>                      <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">a1</span><span class="o">,</span><span class="n">d1</span>
+<span class="mi">00001</span><span class="n">a5e</span><span class="o">:</span> <span class="n">d280</span>                      <span class="n">add</span><span class="o">.</span><span class="na">l</span>   <span class="n">d0</span><span class="o">,</span><span class="n">d1</span>
+<span class="mi">00001</span><span class="n">a60</span><span class="o">:</span> <span class="mi">2141</span> <span class="mi">0018</span>                 <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">d1</span><span class="o">,</span><span class="mh">0x18</span><span class="o">(</span><span class="n">a0</span><span class="o">)</span>
+<span class="mi">00001</span><span class="n">a64</span><span class="o">:</span> <span class="mi">2140</span> <span class="mi">001</span><span class="n">c</span>                 <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">d0</span><span class="o">,</span><span class="mh">0x1c</span><span class="o">(</span><span class="n">a0</span><span class="o">)</span>
+<span class="mi">00001</span><span class="n">a68</span><span class="o">:</span> <span class="mi">2340</span> <span class="mi">0004</span>                 <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">d0</span><span class="o">,</span><span class="mh">0x4</span><span class="o">(</span><span class="n">a1</span><span class="o">)</span>
+<span class="mi">00001</span><span class="n">a6c</span><span class="o">:</span> <span class="mi">4291</span>                      <span class="n">clr</span><span class="o">.</span><span class="na">l</span>   <span class="o">(</span><span class="n">a1</span><span class="o">)</span>
+<span class="mi">00001</span><span class="n">a6e</span><span class="o">:</span> <span class="mi">2248</span>                      <span class="n">movea</span><span class="o">.</span><span class="na">l</span> <span class="n">a0</span><span class="o">,</span><span class="n">a1</span>
+<span class="mi">00001</span><span class="n">a70</span><span class="o">:</span> <span class="mi">41</span><span class="n">ee</span> <span class="mi">0142</span>                 <span class="n">lea</span>     <span class="mh">0x142</span><span class="o">(</span><span class="n">a6</span><span class="o">),</span><span class="n">a0</span>
+<span class="mi">00001</span><span class="n">a74</span><span class="o">:</span> <span class="mi">6100</span> <span class="n">fc48</span>                 <span class="n">bsr</span><span class="o">.</span><span class="na">w</span>   <span class="mh">0x16be</span>
+<span class="mi">00001</span><span class="n">a78</span><span class="o">:</span> <span class="mi">4</span><span class="n">e75</span>                      <span class="n">rts</span>     
 </pre></div>
 
 
 <p>Let's comment the function line by line. I will refer to the fields shown in the picture above by name, mentioning the offsets for clarity.</p>
-<div class="highlight"><pre><span></span><span class="m">00001a26: 2149 000a</span>                 <span class="k">move.l</span>  <span class="nv">a1</span><span class="p">,</span><span class="mi">0xa</span><span class="p">(</span><span class="nv">a0</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><span class="mi">00001</span><span class="n">a26</span><span class="o">:</span> <span class="mi">2149</span> <span class="mi">000</span><span class="n">a</span>                 <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">a1</span><span class="o">,</span><span class="mh">0xa</span><span class="o">(</span><span class="n">a0</span><span class="o">)</span>
 </pre></div>
 
 
 <p>This code stores the address of the memory area name in <code>LN_NAME</code> (<code>0xa(a0)</code>).</p>
-<div class="highlight"><pre><span></span><span class="m">00001a2a: 43e8 0020</span>                 <span class="k">lea</span>     <span class="mi">0x20</span><span class="p">(</span><span class="nv">a0</span><span class="p">),</span><span class="nv">a1</span>
+<div class="highlight"><pre><span></span><span class="mi">00001</span><span class="n">a2a</span><span class="o">:</span> <span class="mi">43</span><span class="n">e8</span> <span class="mi">0020</span>                 <span class="n">lea</span>     <span class="mh">0x20</span><span class="o">(</span><span class="n">a0</span><span class="o">),</span><span class="n">a1</span>
 </pre></div>
 
 
 <p>This loads the absolute address of the memory chunk (structure <code>MC</code>). The purpose of this is to align the memory chunk to a long word later in the code.</p>
-<div class="highlight"><pre><span></span><span class="m">00001a2e: 117c 000a 0008</span>            <span class="k">move.b</span>  <span class="p">#</span><span class="mi">0xa</span><span class="p">,</span><span class="mi">0x8</span><span class="p">(</span><span class="nv">a0</span><span class="p">)</span>
-<span class="m">00001a34: 1142 0009</span>                 <span class="k">move.b</span>  <span class="nv">d2</span><span class="p">,</span><span class="mi">0x9</span><span class="p">(</span><span class="nv">a0</span><span class="p">)</span>
-<span class="m">00001a38: 3141 000e</span>                 <span class="k">move.w</span>  <span class="nv">d1</span><span class="p">,</span><span class="mi">0xe</span><span class="p">(</span><span class="nv">a0</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><span class="mi">00001</span><span class="n">a2e</span><span class="o">:</span> <span class="mi">117</span><span class="n">c</span> <span class="mi">000</span><span class="n">a</span> <span class="mi">0008</span>            <span class="n">move</span><span class="o">.</span><span class="na">b</span>  <span class="err">#</span><span class="mh">0xa</span><span class="o">,</span><span class="mh">0x8</span><span class="o">(</span><span class="n">a0</span><span class="o">)</span>
+<span class="mi">00001</span><span class="n">a34</span><span class="o">:</span> <span class="mi">1142</span> <span class="mi">0009</span>                 <span class="n">move</span><span class="o">.</span><span class="na">b</span>  <span class="n">d2</span><span class="o">,</span><span class="mh">0x9</span><span class="o">(</span><span class="n">a0</span><span class="o">)</span>
+<span class="mi">00001</span><span class="n">a38</span><span class="o">:</span> <span class="mi">3141</span> <span class="mi">000</span><span class="n">e</span>                 <span class="n">move</span><span class="o">.</span><span class="na">w</span>  <span class="n">d1</span><span class="o">,</span><span class="mh">0xe</span><span class="o">(</span><span class="n">a0</span><span class="o">)</span>
 </pre></div>
 
 
 <p>This stores <code>0xa</code> in the <code>LN_TYPE</code> field (<code>0x8(a0)</code>). This corresponds to <code>NT_MEMORY</code> (see <code>include_i/exec/nodes.i</code>). It then copies the list priority into the <code>LN_PRI</code> field (<code>0x9(a0)</code>), and the memory attributes in the <code>MH_ATTRIBUTES</code> field (<code>0xe(a0)</code>).</p>
-<div class="highlight"><pre><span></span><span class="m">00001a3c: 2209</span>                      <span class="k">move.l</span>  <span class="nv">a1</span><span class="p">,</span><span class="nv">d1</span>
-<span class="m">00001a3e: 5e81</span>                      <span class="k">addq.l</span>  <span class="p">#</span><span class="mi">0x7</span><span class="p">,</span><span class="nv">d1</span>
-<span class="m">00001a40: 0201 00f8</span>                 <span class="k">andi.b</span>  <span class="p">#-</span><span class="mi">0x8</span><span class="p">,</span><span class="nv">d1</span>
-<span class="m">00001a4e: 0480 0000 0020</span>            <span class="k">subi.l</span>  <span class="p">#</span><span class="mi">0x20</span><span class="p">,</span><span class="nv">d0</span>
+<div class="highlight"><pre><span></span><span class="mi">00001</span><span class="n">a3c</span><span class="o">:</span> <span class="mi">2209</span>                      <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">a1</span><span class="o">,</span><span class="n">d1</span>
+<span class="mi">00001</span><span class="n">a3e</span><span class="o">:</span> <span class="mi">5</span><span class="n">e81</span>                      <span class="n">addq</span><span class="o">.</span><span class="na">l</span>  <span class="err">#</span><span class="mh">0x7</span><span class="o">,</span><span class="n">d1</span>
+<span class="mi">00001</span><span class="n">a40</span><span class="o">:</span> <span class="mi">0201</span> <span class="mi">00</span><span class="n">f8</span>                 <span class="n">andi</span><span class="o">.</span><span class="na">b</span>  <span class="err">#</span><span class="o">-</span><span class="mh">0x8</span><span class="o">,</span><span class="n">d1</span>
+<span class="mi">00001</span><span class="n">a4e</span><span class="o">:</span> <span class="mi">0480</span> <span class="mi">0000</span> <span class="mi">0020</span>            <span class="n">subi</span><span class="o">.</span><span class="na">l</span>  <span class="err">#</span><span class="mh">0x20</span><span class="o">,</span><span class="n">d0</span>
 </pre></div>
 
 
 <p>These three lines of code align the address of <code>MC</code> (<code>a1</code>) to a long word, adding 7 and removing the least significant 3 bits. Then the size of the headers (<code>0x20</code>) is removed from the total size of the memory region that was passed as an argument.</p>
-<div class="highlight"><pre><span></span><span class="m">00001a54: 2149 0010</span>                 <span class="k">move.l</span>  <span class="nv">a1</span><span class="p">,</span><span class="mi">0x10</span><span class="p">(</span><span class="nv">a0</span><span class="p">)</span>
-<span class="m">00001a58: 2149 0014</span>                 <span class="k">move.l</span>  <span class="nv">a1</span><span class="p">,</span><span class="mi">0x14</span><span class="p">(</span><span class="nv">a0</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><span class="mi">00001</span><span class="n">a54</span><span class="o">:</span> <span class="mi">2149</span> <span class="mi">0010</span>                 <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">a1</span><span class="o">,</span><span class="mh">0x10</span><span class="o">(</span><span class="n">a0</span><span class="o">)</span>
+<span class="mi">00001</span><span class="n">a58</span><span class="o">:</span> <span class="mi">2149</span> <span class="mi">0014</span>                 <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">a1</span><span class="o">,</span><span class="mh">0x14</span><span class="o">(</span><span class="n">a0</span><span class="o">)</span>
 </pre></div>
 
 
 <p>Store the first free memory location (<code>a1</code>) in <code>MH_FIRST</code> (<code>0x10(a0)</code>) and in <code>MH_LOWER</code> (<code>0x14(a0)</code>).</p>
-<div class="highlight"><pre><span></span><span class="m">00001a5c: 2209</span>                      <span class="k">move.l</span>  <span class="nv">a1</span><span class="p">,</span><span class="nv">d1</span>
-<span class="m">00001a5e: d280</span>                      <span class="k">add.l</span>   <span class="nv">d0</span><span class="p">,</span><span class="nv">d1</span>
-<span class="m">00001a60: 2141 0018</span>                 <span class="k">move.l</span>  <span class="nv">d1</span><span class="p">,</span><span class="mi">0x18</span><span class="p">(</span><span class="nv">a0</span><span class="p">)</span>
-<span class="m">00001a64: 2140 001c</span>                 <span class="k">move.l</span>  <span class="nv">d0</span><span class="p">,</span><span class="mi">0x1c</span><span class="p">(</span><span class="nv">a0</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><span class="mi">00001</span><span class="n">a5c</span><span class="o">:</span> <span class="mi">2209</span>                      <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">a1</span><span class="o">,</span><span class="n">d1</span>
+<span class="mi">00001</span><span class="n">a5e</span><span class="o">:</span> <span class="n">d280</span>                      <span class="n">add</span><span class="o">.</span><span class="na">l</span>   <span class="n">d0</span><span class="o">,</span><span class="n">d1</span>
+<span class="mi">00001</span><span class="n">a60</span><span class="o">:</span> <span class="mi">2141</span> <span class="mi">0018</span>                 <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">d1</span><span class="o">,</span><span class="mh">0x18</span><span class="o">(</span><span class="n">a0</span><span class="o">)</span>
+<span class="mi">00001</span><span class="n">a64</span><span class="o">:</span> <span class="mi">2140</span> <span class="mi">001</span><span class="n">c</span>                 <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">d0</span><span class="o">,</span><span class="mh">0x1c</span><span class="o">(</span><span class="n">a0</span><span class="o">)</span>
 </pre></div>
 
 
 <p>The size of the free memory is then added to the first free address and stored in <code>MH_UPPER</code> (<code>0x18(a0)</code>). The size of the free memory is stored in <code>MH_FREE</code> (<code>0x1c(a0)</code>).</p>
-<div class="highlight"><pre><span></span><span class="m">00001a68: 2340 0004</span>                 <span class="k">move.l</span>  <span class="nv">d0</span><span class="p">,</span><span class="mi">0x4</span><span class="p">(</span><span class="nv">a1</span><span class="p">)</span>
-<span class="m">00001a6c: 4291</span>                      <span class="k">clr.l</span>   <span class="p">(</span><span class="nv">a1</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><span class="mi">00001</span><span class="n">a68</span><span class="o">:</span> <span class="mi">2340</span> <span class="mi">0004</span>                 <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">d0</span><span class="o">,</span><span class="mh">0x4</span><span class="o">(</span><span class="n">a1</span><span class="o">)</span>
+<span class="mi">00001</span><span class="n">a6c</span><span class="o">:</span> <span class="mi">4291</span>                      <span class="n">clr</span><span class="o">.</span><span class="na">l</span>   <span class="o">(</span><span class="n">a1</span><span class="o">)</span>
 </pre></div>
 
 
 <p>This code creates the memory chunk in the free memory area. The size of the chunk is stored in the <code>MC_BYTES</code> field (<code>0x4(a1)</code>), and the <code>MC_NEXT</code> field is cleared.</p>
-<div class="highlight"><pre><span></span><span class="m">00001a6e: 2248</span>                      <span class="k">movea.l</span> <span class="nv">a0</span><span class="p">,</span><span class="nv">a1</span>
-<span class="m">00001a70: 41ee 0142</span>                 <span class="k">lea</span>     <span class="mi">0x142</span><span class="p">(</span><span class="nv">a6</span><span class="p">),</span><span class="nv">a0</span>
-<span class="m">00001a74: 6100 fc48</span>                 <span class="k">bsr.w</span>   <span class="mi">0x16be</span>
-<span class="m">00001a78: 4e75</span>                      <span class="k">rts</span>     
+<div class="highlight"><pre><span></span><span class="mi">00001</span><span class="n">a6e</span><span class="o">:</span> <span class="mi">2248</span>                      <span class="n">movea</span><span class="o">.</span><span class="na">l</span> <span class="n">a0</span><span class="o">,</span><span class="n">a1</span>
+<span class="mi">00001</span><span class="n">a70</span><span class="o">:</span> <span class="mi">41</span><span class="n">ee</span> <span class="mi">0142</span>                 <span class="n">lea</span>     <span class="mh">0x142</span><span class="o">(</span><span class="n">a6</span><span class="o">),</span><span class="n">a0</span>
+<span class="mi">00001</span><span class="n">a74</span><span class="o">:</span> <span class="mi">6100</span> <span class="n">fc48</span>                 <span class="n">bsr</span><span class="o">.</span><span class="na">w</span>   <span class="mh">0x16be</span>
+<span class="mi">00001</span><span class="n">a78</span><span class="o">:</span> <span class="mi">4</span><span class="n">e75</span>                      <span class="n">rts</span>     
 </pre></div>
 
 

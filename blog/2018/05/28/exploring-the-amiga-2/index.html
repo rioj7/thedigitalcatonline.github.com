@@ -31,7 +31,7 @@
 
 <script type="application/ld+json">
 {
-  "@context" : "http://schema.org",
+  "@context" : "https://schema.org",
   "@type" : "Article",
   "name" : "Exploring the Amiga - Part 2",
   "author" : {
@@ -132,12 +132,12 @@
 
 <p>Please note that the name of the function has been replaced by another string prepending <code>_LVO</code> to avoid clashes with the actual function definition (LVO stands for Library Vector Offset).</p>
 <p>The above figures come from the "Special Constants" section contained in the <code>include_i/exec/libraries.i</code> file</p>
-<div class="highlight"><pre><span></span><span class="c">*------ Special Constants ---------------------------------------</span>
-<span class="nv">LIB_VECTSIZE</span>    <span class="k">EQU</span> <span class="mi">6</span><span class="s">       </span><span class="c">;Each library entry takes 6 bytes</span>
-<span class="nv">LIB_RESERVED</span>    <span class="k">EQU</span> <span class="mi">4</span><span class="s">       </span><span class="c">;Exec reserves the first 4 vectors</span>
-<span class="nv">LIB_BASE</span>        <span class="k">EQU</span> <span class="s">-LIB_VECTSIZE</span>
-<span class="nv">LIB_USERDEF</span>     <span class="k">EQU</span> <span class="s">LIB_BASE-(LIB_RESERVED*LIB_VECTSIZE) </span><span class="c">;First user func</span>
-<span class="nv">LIB_NONSTD</span>      <span class="k">EQU</span> <span class="s">LIB_USERDEF</span>
+<div class="highlight"><pre><span></span><span class="o">*------</span> <span class="nv">Special</span> <span class="nv">Constants</span> <span class="o">---------------------------------------</span>
+<span class="nv">LIB_VECTSIZE</span>    <span class="nv">EQU</span> <span class="mi">6</span>       <span class="c1">;Each library entry takes 6 bytes</span>
+<span class="nv">LIB_RESERVED</span>    <span class="nv">EQU</span> <span class="mi">4</span>       <span class="c1">;Exec reserves the first 4 vectors</span>
+<span class="nv">LIB_BASE</span>        <span class="nv">EQU</span> <span class="o">-</span><span class="nv">LIB_VECTSIZE</span>
+<span class="nv">LIB_USERDEF</span>     <span class="nv">EQU</span> <span class="nv">LIB_BASE</span><span class="o">-</span><span class="ss">(</span><span class="nv">LIB_RESERVED</span><span class="o">*</span><span class="nv">LIB_VECTSIZE</span><span class="ss">)</span> <span class="c1">;First user func</span>
+<span class="nv">LIB_NONSTD</span>      <span class="nv">EQU</span> <span class="nv">LIB_USERDEF</span>
 </pre></div>
 
 
@@ -176,20 +176,20 @@
 <p>As you can see the library is loaded as expected from the base address towards the higher memory addresses, but at the same time the jump table is prefixed <em>in reverse order</em>. This is done to allow you to find the address of a function with a simple (negative) indexing instead of a more complex algorithm. Function number 1 is at address <code>-1 * address_size</code>, function number 2 at address <code>-2 * address_size</code>, etc.</p>
 <p>This is why we use negative offsets to call library functions but positive ones to access the library data and structures.</p>
 <p>You can also see from the figure where the Special Constants <code>LIB_BASE</code> and <code>LIB_USERDEF</code> are located. The actual values are</p>
-<div class="highlight"><pre><span></span><span class="nv">LIB_BASE</span>    <span class="k">EQU</span> <span class="mi">-6</span>
-<span class="nv">LIB_USERDEF</span> <span class="k">EQU</span> <span class="mi">-30</span>
+<div class="highlight"><pre><span></span><span class="n">LIB_BASE</span>    <span class="n">EQU</span> <span class="o">-</span><span class="mi">6</span>
+<span class="n">LIB_USERDEF</span> <span class="n">EQU</span> <span class="o">-</span><span class="mi">30</span>
 </pre></div>
 
 
 <p>A good definition of the <code>FUNCDEF</code> macro, thus, is the following</p>
-<div class="highlight"><pre><span></span>    <span class="k">INCLUDE</span> <span class="s">&quot;exec/libraries.i&quot;</span>
+<div class="highlight"><pre><span></span>    <span class="k">INCLUDE</span> <span class="s2">&quot;</span><span class="s">exec/libraries.i</span><span class="s2">&quot;</span>
 
-    <span class="k">MACRO</span>   <span class="nv">FUNCDEF</span>
-<span class="nv">_LVO\1</span>      <span class="k">EQU</span>      <span class="s">FUNC_CNT</span>
-<span class="nv">FUNC_CNT</span>    <span class="k">SET</span>      <span class="s">FUNC_CNT-LIB_VECTSIZE</span>
-    <span class="k">ENDM</span>
+    <span class="nv">MACRO</span>   <span class="nv">FUNCDEF</span>
+<span class="nv">_LVO</span>\<span class="mi">1</span>      <span class="nv">EQU</span>      <span class="nv">FUNC_CNT</span>
+<span class="nv">FUNC_CNT</span>    <span class="nv">SET</span>      <span class="nv">FUNC_CNT</span><span class="o">-</span><span class="nv">LIB_VECTSIZE</span>
+    <span class="nv">ENDM</span>
 
-<span class="nv">FUNC_CNT</span>    <span class="k">SET</span>      <span class="s">LIB_USERDEF</span>
+<span class="nv">FUNC_CNT</span>    <span class="nv">SET</span>      <span class="nv">LIB_USERDEF</span>
 </pre></div>
 
 
@@ -199,70 +199,70 @@
 <li>Decrements the <code>FUNC_CNT</code> symbol by <code>LIB_VECTSIZE</code></li>
 </ol>
 <p>Please note that the example <code>FUNCDEF</code> that you can find (commented) in <code>libraries.i</code> won't work out of the box as <code>FUNC_CNT</code> is defined inside the macro itself, while it has to be already defined before the first use of the macro.</p>
-<div class="highlight"><pre><span></span><span class="c">*------ FUNCDEF is used to parse library offset tables.  Many applications</span>
-<span class="c">*------ need a special version of FUNCDEF - you provide your own macro</span>
-<span class="c">*------ to match your needs.  Here is an example:</span>
-<span class="c">*</span>
-<span class="c">*    FUNCDEF     MACRO</span>
-<span class="c">*    _LVO\1      EQU    FUNC_CNT</span>
-<span class="c">*    FUNC_CNT    SET    FUNC_CNT-6  * Standard offset-6 bytes each</span>
-<span class="c">*    FUNC_CNT    EQU    LIB_USERDEF * Skip 4 standard vectors</span>
-<span class="c">*                ENDM</span>
+<div class="highlight"><pre><span></span><span class="o">*</span><span class="c1">------ FUNCDEF is used to parse library offset tables.  Many applications</span>
+<span class="o">*</span><span class="c1">------ need a special version of FUNCDEF - you provide your own macro</span>
+<span class="o">*</span><span class="c1">------ to match your needs.  Here is an example:</span>
+<span class="o">*</span>
+<span class="o">*</span>    <span class="n">FUNCDEF</span>     <span class="n">MACRO</span>
+<span class="o">*</span>    <span class="n">_LVO</span><span class="err">\</span><span class="mi">1</span>      <span class="n">EQU</span>    <span class="n">FUNC_CNT</span>
+<span class="o">*</span>    <span class="n">FUNC_CNT</span>    <span class="k">SET</span>    <span class="n">FUNC_CNT</span><span class="o">-</span><span class="mi">6</span>  <span class="o">*</span> <span class="n">Standard</span> <span class="k">offset</span><span class="o">-</span><span class="mi">6</span> <span class="n">bytes</span> <span class="k">each</span>
+<span class="o">*</span>    <span class="n">FUNC_CNT</span>    <span class="n">EQU</span>    <span class="n">LIB_USERDEF</span> <span class="o">*</span> <span class="n">Skip</span> <span class="mi">4</span> <span class="n">standard</span> <span class="n">vectors</span>
+<span class="o">*</span>                <span class="n">ENDM</span>
 </pre></div>
 
 
 <p>You can put the <code>FUNCDEF</code> macro code in a local include file like <code>funcdef.i</code>. Including it your code allows you to use <code>_LVO</code> prefixed labels for the functions that you want to load</p>
-<div class="highlight"><pre><span></span>    <span class="k">INCLUDE</span> <span class="s">&quot;funcdef.i&quot;</span>
-    <span class="k">INCLUDE</span> <span class="s">&quot;exec/exec_lib.i&quot;</span>
+<div class="highlight"><pre><span></span>    <span class="k">INCLUDE</span> <span class="s2">&quot;</span><span class="s">funcdef.i</span><span class="s2">&quot;</span>
+    <span class="k">INCLUDE</span> <span class="s2">&quot;</span><span class="s">exec/exec_lib.i</span><span class="s2">&quot;</span>
 
-    <span class="k">move.l</span>  <span class="mi">4</span><span class="p">.</span><span class="nl">w</span><span class="p">,</span><span class="nv">a6</span>
-    <span class="k">clr.l</span>   <span class="nv">d0</span>
-    <span class="k">move.l</span>  <span class="p">#</span><span class="nl">libname</span><span class="p">,</span><span class="nv">a1</span>
-    <span class="k">jsr</span>     <span class="nl">_LVOOpenLibrary</span><span class="p">(</span><span class="nv">a6</span><span class="p">)</span>
+    <span class="nv">move</span>.<span class="nv">l</span>  <span class="mi">4</span>.<span class="nv">w</span>,<span class="nv">a6</span>
+    <span class="nv">clr</span>.<span class="nv">l</span>   <span class="nv">d0</span>
+    <span class="nv">move</span>.<span class="nv">l</span>  #<span class="nv">libname</span>,<span class="nv">a1</span>
+    <span class="nv">jsr</span>     <span class="nv">_LVOOpenLibrary</span><span class="ss">(</span><span class="nv">a6</span><span class="ss">)</span>
 
-<span class="nl">libname:</span>
-    <span class="k">dc.b</span> <span class="s">&quot;somename.library&quot;,0</span>
+<span class="nv">libname</span>:
+    <span class="nv">dc</span>.<span class="nv">b</span> <span class="s2">&quot;</span><span class="s">somename.library</span><span class="s2">&quot;</span>,<span class="mi">0</span>
 </pre></div>
 
 
 <p>Finally, if you want to be even more explicit you can use the <code>CALLLIB</code> macro defined in <code>libraries.i</code> and write</p>
-<div class="highlight"><pre><span></span>    <span class="k">INCLUDE</span> <span class="s">&quot;funcdef.i&quot;</span>
-    <span class="k">INCLUDE</span> <span class="s">&quot;exec/exec_lib.i&quot;</span>
-    <span class="k">INCLUDE</span> <span class="s">&quot;exec/libraries.i&quot;</span>
+<div class="highlight"><pre><span></span>    <span class="k">INCLUDE</span> <span class="s2">&quot;</span><span class="s">funcdef.i</span><span class="s2">&quot;</span>
+    <span class="k">INCLUDE</span> <span class="s2">&quot;</span><span class="s">exec/exec_lib.i</span><span class="s2">&quot;</span>
+    <span class="k">INCLUDE</span> <span class="s2">&quot;</span><span class="s">exec/libraries.i</span><span class="s2">&quot;</span>
 
-    <span class="k">move.l</span>  <span class="mi">4</span><span class="p">.</span><span class="nl">w</span><span class="p">,</span><span class="nv">a6</span>
-    <span class="k">clr.l</span>   <span class="nv">d0</span>
-    <span class="k">move.l</span>  <span class="p">#</span><span class="nl">libname</span><span class="p">,</span><span class="nv">a1</span>
-    <span class="nv">CALLLIB</span> <span class="s">_LVOOpenLibrary</span>
+    <span class="nv">move</span>.<span class="nv">l</span>  <span class="mi">4</span>.<span class="nv">w</span>,<span class="nv">a6</span>
+    <span class="nv">clr</span>.<span class="nv">l</span>   <span class="nv">d0</span>
+    <span class="nv">move</span>.<span class="nv">l</span>  #<span class="nv">libname</span>,<span class="nv">a1</span>
+    <span class="nv">CALLLIB</span> <span class="nv">_LVOOpenLibrary</span>
 
-<span class="nl">libname:</span>
-    <span class="k">dc.b</span> <span class="s">&quot;somename.library&quot;,0</span>
+<span class="nv">libname</span>:
+    <span class="nv">dc</span>.<span class="nv">b</span> <span class="s2">&quot;</span><span class="s">somename.library</span><span class="s2">&quot;</span>,<span class="mi">0</span>
 </pre></div>
 
 
 <h1 id="the-four-reserved-vectors">The four reserved vectors<a class="headerlink" href="#the-four-reserved-vectors" title="Permanent link">&para;</a></h1>
 <p>As we saw, the Amiga system reserves 4 vectors at the beginning of the jump table of a library. These 4 spaces host 3 standard functions that shall be provided by any library, <code>Open()</code>, <code>Close()</code>, and <code>Expunge()</code>. The fourth slot is kept for possible future expansions and must contain a function that returns 0.</p>
 <p>The offsets of these functions are contained in the <code>include_i/exec/libraries.i</code> file</p>
-<div class="highlight"><pre><span></span><span class="c">*----------------------------------------------------------------</span>
-<span class="c">*</span>
-<span class="c">*   Standard Library Functions</span>
-<span class="c">*</span>
-<span class="c">*----------------------------------------------------------------</span>
+<div class="highlight"><pre><span></span><span class="o">*----------------------------------------------------------------</span>
+<span class="o">*</span>
+<span class="o">*</span>   <span class="nv">Standard</span> <span class="nv">Library</span> <span class="nv">Functions</span>
+<span class="o">*</span>
+<span class="o">*----------------------------------------------------------------</span>
 
-    <span class="nv">LIBINIT</span> <span class="s">LIB_BASE</span>
+    <span class="nv">LIBINIT</span> <span class="nv">LIB_BASE</span>
 
-    <span class="nv">LIBDEF</span>  <span class="s">LIB_OPEN</span>
-    <span class="nv">LIBDEF</span>  <span class="s">LIB_CLOSE</span>
-    <span class="nv">LIBDEF</span>  <span class="s">LIB_EXPUNGE </span><span class="c">; must exist in all libraries</span>
-    <span class="nv">LIBDEF</span>  <span class="s">LIB_EXTFUNC </span><span class="c">; for future expansion - must return zero.</span>
+    <span class="nv">LIBDEF</span>  <span class="nv">LIB_OPEN</span>
+    <span class="nv">LIBDEF</span>  <span class="nv">LIB_CLOSE</span>
+    <span class="nv">LIBDEF</span>  <span class="nv">LIB_EXPUNGE</span> <span class="c1">; must exist in all libraries</span>
+    <span class="nv">LIBDEF</span>  <span class="nv">LIB_EXTFUNC</span> <span class="c1">; for future expansion - must return zero.</span>
 </pre></div>
 
 
 <p>the effect of the above macros with the previous constants is</p>
-<div class="highlight"><pre><span></span><span class="nv">LIB_OPEN</span>        <span class="k">EQU</span>     <span class="mi">-6</span>
-<span class="nv">LIB_CLOSE</span>       <span class="k">EQU</span>     <span class="mi">-12</span>
-<span class="nv">LIB_EXPUNGE</span>     <span class="k">EQU</span>     <span class="mi">-18</span>
-<span class="nv">LIB_EXTFUNC</span>     <span class="k">EQU</span>     <span class="mi">-24</span>
+<div class="highlight"><pre><span></span><span class="n">LIB_OPEN</span>        <span class="n">EQU</span>     <span class="o">-</span><span class="mi">6</span>
+<span class="n">LIB_CLOSE</span>       <span class="n">EQU</span>     <span class="o">-</span><span class="mi">12</span>
+<span class="n">LIB_EXPUNGE</span>     <span class="n">EQU</span>     <span class="o">-</span><span class="mi">18</span>
+<span class="n">LIB_EXTFUNC</span>     <span class="n">EQU</span>     <span class="o">-</span><span class="mi">24</span>
 </pre></div>
 
 
@@ -270,71 +270,71 @@
 <h1 id="types-and-structures">Types and structures<a class="headerlink" href="#types-and-structures" title="Permanent link">&para;</a></h1>
 <p>Let's see how the Exec library defines its types, which are the base components of the Amiga system. The main entry point for this investigation is the <code>include_i/exec/types.i</code> file.</p>
 <p>When working with data structures in Assembly, everything is expressed in terms of offsets. The main idea behind structures is to create something like this</p>
-<div class="highlight"><pre><span></span><span class="nv">STRUCT1</span>         <span class="k">EQU</span>     <span class="mi">0</span>
-<span class="nv">OFFS</span>            <span class="k">SET</span>     <span class="mi">0</span>
-<span class="nv">FIELD1</span>          <span class="k">EQU</span>     <span class="s">OFFS</span>
-<span class="nv">OFFS</span>            <span class="k">EQU</span>     <span class="s">OFFS+SIZE_OF_FIELD1</span>
-<span class="nv">FIELD2</span>          <span class="k">EQU</span>     <span class="s">OFFS</span>
-<span class="nv">OFFS</span>            <span class="k">EQU</span>     <span class="s">OFFS+SIZE_OF_FIELD2</span><span class="c"></span>
-<span class="c">; ...</span>
-<span class="nv">STRUCT1_SIZE</span>    <span class="k">EQU</span>     <span class="s">OFFS</span>
+<div class="highlight"><pre><span></span><span class="n">STRUCT1</span>         <span class="n">EQU</span>     <span class="mi">0</span>
+<span class="n">OFFS</span>            <span class="k">SET</span>     <span class="mi">0</span>
+<span class="n">FIELD1</span>          <span class="n">EQU</span>     <span class="n">OFFS</span>
+<span class="n">OFFS</span>            <span class="n">EQU</span>     <span class="n">OFFS</span><span class="o">+</span><span class="n">SIZE_OF_FIELD1</span>
+<span class="n">FIELD2</span>          <span class="n">EQU</span>     <span class="n">OFFS</span>
+<span class="n">OFFS</span>            <span class="n">EQU</span>     <span class="n">OFFS</span><span class="o">+</span><span class="n">SIZE_OF_FIELD2</span>
+<span class="p">;</span> <span class="p">...</span>
+<span class="n">STRUCT1_SIZE</span>    <span class="n">EQU</span>     <span class="n">OFFS</span>
 </pre></div>
 
 
 <p>which, once run through the macro expansion, creates the following code</p>
-<div class="highlight"><pre><span></span><span class="nv">STRUCT1</span>         <span class="k">EQU</span>     <span class="mi">0</span>
-<span class="nv">FIELD1</span>          <span class="k">EQU</span>     <span class="mi">0</span>
-<span class="nv">FIELD2</span>          <span class="k">EQU</span>     <span class="s">SIZE_OF_FIELD1</span>
-<span class="nv">FIIELD3</span>         <span class="k">EQU</span>     <span class="s">SIZE_OF_FIELD1+SIZE_OF_FIELD2</span><span class="c"></span>
-<span class="c">; ...</span>
-<span class="nv">STRUCT1_SIZE</span>    <span class="k">EQU</span>     <span class="s">SIZE_OF_FIELD1+</span><span class="p">...</span><span class="s">+SIZE_OF_FIELDn</span>
+<div class="highlight"><pre><span></span><span class="n">STRUCT1</span>         <span class="n">EQU</span>     <span class="mi">0</span>
+<span class="n">FIELD1</span>          <span class="n">EQU</span>     <span class="mi">0</span>
+<span class="n">FIELD2</span>          <span class="n">EQU</span>     <span class="n">SIZE_OF_FIELD1</span>
+<span class="n">FIIELD3</span>         <span class="n">EQU</span>     <span class="n">SIZE_OF_FIELD1</span><span class="o">+</span><span class="n">SIZE_OF_FIELD2</span>
+<span class="p">;</span> <span class="p">...</span>
+<span class="n">STRUCT1_SIZE</span>    <span class="n">EQU</span>     <span class="n">SIZE_OF_FIELD1</span><span class="o">+</span><span class="p">...</span><span class="o">+</span><span class="n">SIZE_OF_FIELDn</span>
 </pre></div>
 
 
 <p>So, the type macros are all defined with code like this</p>
-<div class="highlight"><pre><span></span><span class="nv">TYPENAME</span>    <span class="k">MACRO</span>
-<span class="nv">\1</span>          <span class="k">EQU</span>     <span class="s">SOFFSET</span>
-<span class="nv">SOFFSET</span>     <span class="k">SET</span>     <span class="s">SOFFSET+SIZE_OF_TYPE</span>
-            <span class="k">ENDM</span>
+<div class="highlight"><pre><span></span><span class="n">TYPENAME</span>    <span class="n">MACRO</span>
+<span class="err">\</span><span class="mi">1</span>          <span class="n">EQU</span>     <span class="n">SOFFSET</span>
+<span class="n">SOFFSET</span>     <span class="k">SET</span>     <span class="n">SOFFSET</span><span class="o">+</span><span class="n">SIZE_OF_TYPE</span>
+            <span class="n">ENDM</span>
 </pre></div>
 
 
 <p>For example the <code>BYTE</code> macro is</p>
-<div class="highlight"><pre><span></span><span class="nv">BYTE</span>        <span class="k">MACRO</span>       <span class="c">; byte (8 bits)</span>
-<span class="nv">\1</span>          <span class="k">EQU</span>     <span class="s">SOFFSET</span>
-<span class="nv">SOFFSET</span>     <span class="k">SET</span>     <span class="s">SOFFSET+1</span>
-            <span class="k">ENDM</span>
+<div class="highlight"><pre><span></span><span class="n">BYTE</span>        <span class="n">MACRO</span>       <span class="p">;</span> <span class="n">byte</span> <span class="p">(</span><span class="mi">8</span> <span class="n">bits</span><span class="p">)</span>
+<span class="err">\</span><span class="mi">1</span>          <span class="n">EQU</span>     <span class="n">SOFFSET</span>
+<span class="n">SOFFSET</span>     <span class="k">SET</span>     <span class="n">SOFFSET</span><span class="o">+</span><span class="mi">1</span>
+            <span class="n">ENDM</span>
 </pre></div>
 
 
 <p>Note that the field is defined with <code>EQU</code> to avoid unwanted overwrites, while <code>SOFFSET</code> uses <code>SET</code> that allows to redefine the symbol.</p>
 <p>Let's see now how a real structure is defined. A good example is <code>LN</code> defined in <code>include_i/exec/nodes.i</code> which represents a node of a linked list.</p>
-<div class="highlight"><pre><span></span>   <span class="nv">STRUCTURE</span>    <span class="s">LN</span><span class="p">,</span><span class="mi">0</span><span class="s">    </span><span class="c">; List Node</span>
-    <span class="nv">APTR</span>    <span class="s">LN_SUCC </span><span class="c">; Pointer to next (successor)</span>
-    <span class="nv">APTR</span>    <span class="s">LN_PRED </span><span class="c">; Pointer to previous (predecessor)</span>
-    <span class="nv">UBYTE</span>   <span class="s">LN_TYPE</span>
-    <span class="nv">BYTE</span>    <span class="s">LN_PRI  </span><span class="c">; Priority, for sorting</span>
-    <span class="nv">APTR</span>    <span class="s">LN_NAME </span><span class="c">; ID string, null terminated</span>
-    <span class="nv">LABEL</span>   <span class="s">LN_SIZE </span><span class="c">; Note: word aligned</span>
+<div class="highlight"><pre><span></span>   <span class="nv">STRUCTURE</span>    <span class="nv">LN</span>,<span class="mi">0</span>    <span class="c1">; List Node</span>
+    <span class="nv">APTR</span>    <span class="nv">LN_SUCC</span> <span class="c1">; Pointer to next (successor)</span>
+    <span class="nv">APTR</span>    <span class="nv">LN_PRED</span> <span class="c1">; Pointer to previous (predecessor)</span>
+    <span class="nv">UBYTE</span>   <span class="nv">LN_TYPE</span>
+    <span class="nv">BYTE</span>    <span class="nv">LN_PRI</span>  <span class="c1">; Priority, for sorting</span>
+    <span class="nv">APTR</span>    <span class="nv">LN_NAME</span> <span class="c1">; ID string, null terminated</span>
+    <span class="nv">LABEL</span>   <span class="nv">LN_SIZE</span> <span class="c1">; Note: word aligned</span>
 </pre></div>
 
 
 <p>The <code>STRUCTURE</code> macro is defined in <code>types.i</code> as</p>
-<div class="highlight"><pre><span></span><span class="nv">STRUCTURE</span>   <span class="k">MACRO</span>       <span class="c">; structure name, initial offset</span>
-<span class="nv">\1</span>          <span class="k">EQU</span>     <span class="mi">0</span>
-<span class="nv">SOFFSET</span>     <span class="k">SET</span>     <span class="nv">\2</span>
-            <span class="k">ENDM</span>
+<div class="highlight"><pre><span></span><span class="k">STRUCTURE</span>   <span class="n">MACRO</span>       <span class="p">;</span> <span class="k">structure</span> <span class="n">name</span><span class="p">,</span> <span class="n">initial</span> <span class="k">offset</span>
+<span class="err">\</span><span class="mi">1</span>          <span class="n">EQU</span>     <span class="mi">0</span>
+<span class="n">SOFFSET</span>     <span class="k">SET</span>     <span class="err">\</span><span class="mi">2</span>
+            <span class="n">ENDM</span>
 </pre></div>
 
 
 <p>And the resulting declarations, once the macros have been expanded, are the following</p>
-<div class="highlight"><pre><span></span><span class="nv">LN</span>          <span class="k">EQU</span>     <span class="mi">0</span>
-<span class="nv">LN_SUCC</span>     <span class="k">EQU</span>     <span class="mi">0</span>
-<span class="nv">LN_PRED</span>     <span class="k">EQU</span>     <span class="mi">4</span>
-<span class="nv">LN_TYPE</span>     <span class="k">EQU</span>     <span class="mi">8</span>
-<span class="nv">LN_PRI</span>      <span class="k">EQU</span>     <span class="mi">9</span>
-<span class="nv">LN_NAME</span>     <span class="k">EQU</span>     <span class="mi">10</span>
-<span class="nv">LN_SIZE</span>     <span class="k">EQU</span>     <span class="mi">14</span>
+<div class="highlight"><pre><span></span><span class="n">LN</span>          <span class="n">EQU</span>     <span class="mi">0</span>
+<span class="n">LN_SUCC</span>     <span class="n">EQU</span>     <span class="mi">0</span>
+<span class="n">LN_PRED</span>     <span class="n">EQU</span>     <span class="mi">4</span>
+<span class="n">LN_TYPE</span>     <span class="n">EQU</span>     <span class="mi">8</span>
+<span class="n">LN_PRI</span>      <span class="n">EQU</span>     <span class="mi">9</span>
+<span class="n">LN_NAME</span>     <span class="n">EQU</span>     <span class="mi">10</span>
+<span class="n">LN_SIZE</span>     <span class="n">EQU</span>     <span class="mi">14</span>
 </pre></div>
 
 
@@ -357,9 +357,9 @@
 
 
 <p>So if we get the current offset, we increase it by one and round down to the nearest integer we are aligning the offset to multiples of a word (2 bytes). The <code>ALIGNWORD</code> macro in the <code>include_i/exec/types.i</code> file implements exactly this algorithm</p>
-<div class="highlight"><pre><span></span><span class="nv">ALIGNWORD</span>   <span class="k">MACRO</span>       <span class="c">; Align structure offset to nearest word</span>
-<span class="nv">SOFFSET</span>     <span class="k">SET</span>     <span class="s">(SOFFSET+1)&amp;</span><span class="mi">$fffffffe</span>
-            <span class="k">ENDM</span>
+<div class="highlight"><pre><span></span><span class="n">ALIGNWORD</span>   <span class="n">MACRO</span>       <span class="p">;</span> <span class="n">Align</span> <span class="k">structure</span> <span class="k">offset</span> <span class="k">to</span> <span class="n">nearest</span> <span class="n">word</span>
+<span class="n">SOFFSET</span>     <span class="k">SET</span>     <span class="p">(</span><span class="n">SOFFSET</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">&amp;</span><span class="err">$</span><span class="n">fffffffe</span>
+            <span class="n">ENDM</span>
 </pre></div>
 
 

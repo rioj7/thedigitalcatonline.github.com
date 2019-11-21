@@ -31,7 +31,7 @@
 
 <script type="application/ld+json">
 {
-  "@context" : "http://schema.org",
+  "@context" : "https://schema.org",
   "@type" : "Article",
   "name" : "Exploring the Amiga - Part 8",
   "author" : {
@@ -224,8 +224,8 @@
 </table>
 <p>The reason why the <code>T</code> and <code>F</code> conditions are not available for <code>Bcc</code> instructions is simple: <code>bt</code> would mean "branch always", and the <code>bra</code> instruction does exactly this, while <code>bf</code> would mean "never branch" and it's arguably useless.</p>
 <p>Let's see an example of use with a standard comparison instruction: <code>cmp</code></p>
-<div class="highlight"><pre><span></span><span class="k">cmp.w</span>   <span class="nv">d0</span><span class="p">,</span><span class="nv">d1</span>
-<span class="k">beq.b</span>   <span class="mi">0x1522</span>
+<div class="highlight"><pre><span></span><span class="n">cmp</span><span class="p">.</span><span class="n">w</span>   <span class="n">d0</span><span class="p">,</span><span class="n">d1</span>
+<span class="n">beq</span><span class="p">.</span><span class="n">b</span>   <span class="mi">0</span><span class="n">x1522</span>
 </pre></div>
 
 
@@ -239,8 +239,8 @@
 </ul>
 <p>The <code>beq</code> instruction on the second line checks only the <code>Z</code> flag, however, so what we are checking here is if <code>d0</code> and <code>d1</code> have the same value.</p>
 <p>A less straightforward example involves <code>move</code></p>
-<div class="highlight"><pre><span></span><span class="k">move.w</span>  <span class="mi">0x1c</span><span class="p">(</span><span class="nv">a1</span><span class="p">),</span><span class="nv">d0</span>
-<span class="k">beq.b</span>   <span class="mi">0x151e</span>
+<div class="highlight"><pre><span></span><span class="k">move</span><span class="p">.</span><span class="n">w</span>  <span class="mi">0</span><span class="n">x1c</span><span class="p">(</span><span class="n">a1</span><span class="p">),</span><span class="n">d0</span>
+<span class="n">beq</span><span class="p">.</span><span class="n">b</span>   <span class="mi">0</span><span class="n">x151e</span>
 </pre></div>
 
 
@@ -297,52 +297,52 @@
 
 
 <p>With this structure in mind, let's dive into the source code of <code>Enqueue</code>. The function is defined at <code>0xfc1670</code></p>
-<div class="highlight"><pre><span></span><span class="m">00001670: 1229 0009</span>                 <span class="k">move.b</span>  <span class="mi">0x9</span><span class="p">(</span><span class="nv">a1</span><span class="p">),</span><span class="nv">d1</span>
-<span class="m">00001674: 2010</span>                      <span class="k">move.l</span>  <span class="p">(</span><span class="nv">a0</span><span class="p">),</span><span class="nv">d0</span>
-<span class="m">00001676: 2040</span>                      <span class="k">movea.l</span> <span class="nv">d0</span><span class="p">,</span><span class="nv">a0</span>
-<span class="m">00001678: 2010</span>                      <span class="k">move.l</span>  <span class="p">(</span><span class="nv">a0</span><span class="p">),</span><span class="nv">d0</span>
-<span class="m">0000167a: 6706</span>                      <span class="k">beq.b</span>   <span class="mi">0x1682</span>
-<span class="m">0000167c: b228 0009</span>                 <span class="k">cmp.b</span>   <span class="mi">0x9</span><span class="p">(</span><span class="nv">a0</span><span class="p">),</span><span class="nv">d1</span>
-<span class="m">00001680: 6ff4</span>                      <span class="k">ble.b</span>   <span class="mi">0x1676</span>
-<span class="m">00001682: 2028 0004</span>                 <span class="k">move.l</span>  <span class="mi">0x4</span><span class="p">(</span><span class="nv">a0</span><span class="p">),</span><span class="nv">d0</span>
-<span class="m">00001686: 2149 0004</span>                 <span class="k">move.l</span>  <span class="nv">a1</span><span class="p">,</span><span class="mi">0x4</span><span class="p">(</span><span class="nv">a0</span><span class="p">)</span>
-<span class="m">0000168a: 2288</span>                      <span class="k">move.l</span>  <span class="nv">a0</span><span class="p">,(</span><span class="nv">a1</span><span class="p">)</span>
-<span class="m">0000168c: 2340 0004</span>                 <span class="k">move.l</span>  <span class="nv">d0</span><span class="p">,</span><span class="mi">0x4</span><span class="p">(</span><span class="nv">a1</span><span class="p">)</span>
-<span class="m">00001690: 2040</span>                      <span class="k">movea.l</span> <span class="nv">d0</span><span class="p">,</span><span class="nv">a0</span>
-<span class="m">00001692: 2089</span>                      <span class="k">move.l</span>  <span class="nv">a1</span><span class="p">,(</span><span class="nv">a0</span><span class="p">)</span>
-<span class="m">00001694: 4e75</span>                      <span class="k">rts</span>     
+<div class="highlight"><pre><span></span><span class="mi">00001670</span><span class="o">:</span> <span class="mi">1229</span> <span class="mi">0009</span>                 <span class="n">move</span><span class="o">.</span><span class="na">b</span>  <span class="mh">0x9</span><span class="o">(</span><span class="n">a1</span><span class="o">),</span><span class="n">d1</span>
+<span class="mi">00001674</span><span class="o">:</span> <span class="mi">2010</span>                      <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="o">(</span><span class="n">a0</span><span class="o">),</span><span class="n">d0</span>
+<span class="mi">00001676</span><span class="o">:</span> <span class="mi">2040</span>                      <span class="n">movea</span><span class="o">.</span><span class="na">l</span> <span class="n">d0</span><span class="o">,</span><span class="n">a0</span>
+<span class="mi">00001678</span><span class="o">:</span> <span class="mi">2010</span>                      <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="o">(</span><span class="n">a0</span><span class="o">),</span><span class="n">d0</span>
+<span class="mi">0000167</span><span class="n">a</span><span class="o">:</span> <span class="mi">6706</span>                      <span class="n">beq</span><span class="o">.</span><span class="na">b</span>   <span class="mh">0x1682</span>
+<span class="mi">0000167</span><span class="n">c</span><span class="o">:</span> <span class="n">b228</span> <span class="mi">0009</span>                 <span class="n">cmp</span><span class="o">.</span><span class="na">b</span>   <span class="mh">0x9</span><span class="o">(</span><span class="n">a0</span><span class="o">),</span><span class="n">d1</span>
+<span class="mi">00001680</span><span class="o">:</span> <span class="mi">6</span><span class="n">ff4</span>                      <span class="n">ble</span><span class="o">.</span><span class="na">b</span>   <span class="mh">0x1676</span>
+<span class="mi">00001682</span><span class="o">:</span> <span class="mi">2028</span> <span class="mi">0004</span>                 <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="mh">0x4</span><span class="o">(</span><span class="n">a0</span><span class="o">),</span><span class="n">d0</span>
+<span class="mi">00001686</span><span class="o">:</span> <span class="mi">2149</span> <span class="mi">0004</span>                 <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">a1</span><span class="o">,</span><span class="mh">0x4</span><span class="o">(</span><span class="n">a0</span><span class="o">)</span>
+<span class="mi">0000168</span><span class="n">a</span><span class="o">:</span> <span class="mi">2288</span>                      <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">a0</span><span class="o">,(</span><span class="n">a1</span><span class="o">)</span>
+<span class="mi">0000168</span><span class="n">c</span><span class="o">:</span> <span class="mi">2340</span> <span class="mi">0004</span>                 <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">d0</span><span class="o">,</span><span class="mh">0x4</span><span class="o">(</span><span class="n">a1</span><span class="o">)</span>
+<span class="mi">00001690</span><span class="o">:</span> <span class="mi">2040</span>                      <span class="n">movea</span><span class="o">.</span><span class="na">l</span> <span class="n">d0</span><span class="o">,</span><span class="n">a0</span>
+<span class="mi">00001692</span><span class="o">:</span> <span class="mi">2089</span>                      <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">a1</span><span class="o">,(</span><span class="n">a0</span><span class="o">)</span>
+<span class="mi">00001694</span><span class="o">:</span> <span class="mi">4</span><span class="n">e75</span>                      <span class="n">rts</span>     
 </pre></div>
 
 
 <p>And it can be roughly divided into three sections, according to the internal jumps.</p>
-<div class="highlight"><pre><span></span><span class="nl">Init:</span>
-<span class="m">00001670: 1229 0009</span>                 <span class="k">move.b</span>  <span class="mi">0x9</span><span class="p">(</span><span class="nv">a1</span><span class="p">),</span><span class="nv">d1</span>
-<span class="m">00001674: 2010</span>                      <span class="k">move.l</span>  <span class="p">(</span><span class="nv">a0</span><span class="p">),</span><span class="nv">d0</span>
+<div class="highlight"><pre><span></span><span class="n">Init</span><span class="o">:</span>
+<span class="mi">00001670</span><span class="o">:</span> <span class="mi">1229</span> <span class="mi">0009</span>                 <span class="n">move</span><span class="o">.</span><span class="na">b</span>  <span class="mh">0x9</span><span class="o">(</span><span class="n">a1</span><span class="o">),</span><span class="n">d1</span>
+<span class="mi">00001674</span><span class="o">:</span> <span class="mi">2010</span>                      <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="o">(</span><span class="n">a0</span><span class="o">),</span><span class="n">d0</span>
 
-<span class="nl">FindPos:</span>
-<span class="m">00001676: 2040</span>                      <span class="k">movea.l</span> <span class="nv">d0</span><span class="p">,</span><span class="nv">a0</span>
-<span class="m">00001678: 2010</span>                      <span class="k">move.l</span>  <span class="p">(</span><span class="nv">a0</span><span class="p">),</span><span class="nv">d0</span>
-<span class="m">0000167a: 6706</span>                      <span class="k">beq.b</span>   <span class="nl">InsertNode</span>
-<span class="m">0000167c: b228 0009</span>                 <span class="k">cmp.b</span>   <span class="mi">0x9</span><span class="p">(</span><span class="nv">a0</span><span class="p">),</span><span class="nv">d1</span>
-<span class="m">00001680: 6ff4</span>                      <span class="k">ble.b</span>   <span class="nl">FindPos</span>
+<span class="n">FindPos</span><span class="o">:</span>
+<span class="mi">00001676</span><span class="o">:</span> <span class="mi">2040</span>                      <span class="n">movea</span><span class="o">.</span><span class="na">l</span> <span class="n">d0</span><span class="o">,</span><span class="n">a0</span>
+<span class="mi">00001678</span><span class="o">:</span> <span class="mi">2010</span>                      <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="o">(</span><span class="n">a0</span><span class="o">),</span><span class="n">d0</span>
+<span class="mi">0000167</span><span class="n">a</span><span class="o">:</span> <span class="mi">6706</span>                      <span class="n">beq</span><span class="o">.</span><span class="na">b</span>   <span class="n">InsertNode</span>
+<span class="mi">0000167</span><span class="n">c</span><span class="o">:</span> <span class="n">b228</span> <span class="mi">0009</span>                 <span class="n">cmp</span><span class="o">.</span><span class="na">b</span>   <span class="mh">0x9</span><span class="o">(</span><span class="n">a0</span><span class="o">),</span><span class="n">d1</span>
+<span class="mi">00001680</span><span class="o">:</span> <span class="mi">6</span><span class="n">ff4</span>                      <span class="n">ble</span><span class="o">.</span><span class="na">b</span>   <span class="n">FindPos</span>
 
-<span class="nl">InsertNode:</span>
-<span class="m">00001682: 2028 0004</span>                 <span class="k">move.l</span>  <span class="mi">0x4</span><span class="p">(</span><span class="nv">a0</span><span class="p">),</span><span class="nv">d0</span>
-<span class="m">00001686: 2149 0004</span>                 <span class="k">move.l</span>  <span class="nv">a1</span><span class="p">,</span><span class="mi">0x4</span><span class="p">(</span><span class="nv">a0</span><span class="p">)</span>
-<span class="m">0000168a: 2288</span>                      <span class="k">move.l</span>  <span class="nv">a0</span><span class="p">,(</span><span class="nv">a1</span><span class="p">)</span>
-<span class="m">0000168c: 2340 0004</span>                 <span class="k">move.l</span>  <span class="nv">d0</span><span class="p">,</span><span class="mi">0x4</span><span class="p">(</span><span class="nv">a1</span><span class="p">)</span>
-<span class="m">00001690: 2040</span>                      <span class="k">movea.l</span> <span class="nv">d0</span><span class="p">,</span><span class="nv">a0</span>
-<span class="m">00001692: 2089</span>                      <span class="k">move.l</span>  <span class="nv">a1</span><span class="p">,(</span><span class="nv">a0</span><span class="p">)</span>
-<span class="m">00001694: 4e75</span>                      <span class="k">rts</span>     
+<span class="n">InsertNode</span><span class="o">:</span>
+<span class="mi">00001682</span><span class="o">:</span> <span class="mi">2028</span> <span class="mi">0004</span>                 <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="mh">0x4</span><span class="o">(</span><span class="n">a0</span><span class="o">),</span><span class="n">d0</span>
+<span class="mi">00001686</span><span class="o">:</span> <span class="mi">2149</span> <span class="mi">0004</span>                 <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">a1</span><span class="o">,</span><span class="mh">0x4</span><span class="o">(</span><span class="n">a0</span><span class="o">)</span>
+<span class="mi">0000168</span><span class="n">a</span><span class="o">:</span> <span class="mi">2288</span>                      <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">a0</span><span class="o">,(</span><span class="n">a1</span><span class="o">)</span>
+<span class="mi">0000168</span><span class="n">c</span><span class="o">:</span> <span class="mi">2340</span> <span class="mi">0004</span>                 <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">d0</span><span class="o">,</span><span class="mh">0x4</span><span class="o">(</span><span class="n">a1</span><span class="o">)</span>
+<span class="mi">00001690</span><span class="o">:</span> <span class="mi">2040</span>                      <span class="n">movea</span><span class="o">.</span><span class="na">l</span> <span class="n">d0</span><span class="o">,</span><span class="n">a0</span>
+<span class="mi">00001692</span><span class="o">:</span> <span class="mi">2089</span>                      <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">a1</span><span class="o">,(</span><span class="n">a0</span><span class="o">)</span>
+<span class="mi">00001694</span><span class="o">:</span> <span class="mi">4</span><span class="n">e75</span>                      <span class="n">rts</span>     
 </pre></div>
 
 
 <p>The first section, <code>Init</code>, prepares the execution of the rest of the function. The rest bla</p>
 <p>As I did for other functions in the previous articles, I'm going to dissect this line by line. Let's start from the <code>Init</code> part.</p>
 <h2 id="init">Init<a class="headerlink" href="#init" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><span class="nl">Init:</span>
-<span class="m">00001670: 1229 0009</span>                 <span class="k">move.b</span>  <span class="mi">0x9</span><span class="p">(</span><span class="nv">a1</span><span class="p">),</span><span class="nv">d1</span>
-<span class="m">00001674: 2010</span>                      <span class="k">move.l</span>  <span class="p">(</span><span class="nv">a0</span><span class="p">),</span><span class="nv">d0</span>
+<div class="highlight"><pre><span></span><span class="n">Init</span><span class="o">:</span>
+<span class="mi">00001670</span><span class="o">:</span> <span class="mi">1229</span> <span class="mi">0009</span>                 <span class="n">move</span><span class="o">.</span><span class="na">b</span>  <span class="mh">0x9</span><span class="o">(</span><span class="n">a1</span><span class="o">),</span><span class="n">d1</span>
+<span class="mi">00001674</span><span class="o">:</span> <span class="mi">2010</span>                      <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="o">(</span><span class="n">a0</span><span class="o">),</span><span class="n">d0</span>
 </pre></div>
 
 
@@ -350,45 +350,45 @@
 <p>The second line is the core or the node traversal algorithm. Since <code>a0</code> points to a <code>LH</code> structure, it is also the address of the first field <code>LH_HEAD</code>. <code>(a0)</code>, thus, is the dereferencing of that address, which means the address of the first node in the list. Given the figures I showed before for <code>MemList</code>, <code>a0</code> is <code>0x142</code> so a <code>move a0,d0</code> would store <code>0x142</code> (the value of <code>a0</code>) in <code>d0</code>. <code>(a0)</code>, instead, is the content of that address in memory, namely <code>0x146</code>, so <code>move (a0),d0</code> stores <code>0x146</code> (the content of <code>0x142</code>) in <code>d0</code>.</p>
 <p>Putting aside the intricacies of the addressing modes, the second line stores the address of the first node in the list, which is the part of the header that starts with <code>LH_TAIL</code>. The header thus acts as the first node of the list.</p>
 <h2 id="findpos">FindPos<a class="headerlink" href="#findpos" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><span class="nl">FindPos:</span>
-<span class="m">00001676: 2040</span>                      <span class="k">movea.l</span> <span class="nv">d0</span><span class="p">,</span><span class="nv">a0</span>
-<span class="m">00001678: 2010</span>                      <span class="k">move.l</span>  <span class="p">(</span><span class="nv">a0</span><span class="p">),</span><span class="nv">d0</span>
-<span class="m">0000167a: 6706</span>                      <span class="k">beq.b</span>   <span class="nl">InsertNode</span>
-<span class="m">0000167c: b228 0009</span>                 <span class="k">cmp.b</span>   <span class="mi">0x9</span><span class="p">(</span><span class="nv">a0</span><span class="p">),</span><span class="nv">d1</span>
-<span class="m">00001680: 6ff4</span>                      <span class="k">ble.b</span>   <span class="nl">FindPos</span>
+<div class="highlight"><pre><span></span><span class="n">FindPos</span><span class="o">:</span>
+<span class="mi">00001676</span><span class="o">:</span> <span class="mi">2040</span>                      <span class="n">movea</span><span class="o">.</span><span class="na">l</span> <span class="n">d0</span><span class="o">,</span><span class="n">a0</span>
+<span class="mi">00001678</span><span class="o">:</span> <span class="mi">2010</span>                      <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="o">(</span><span class="n">a0</span><span class="o">),</span><span class="n">d0</span>
+<span class="mi">0000167</span><span class="n">a</span><span class="o">:</span> <span class="mi">6706</span>                      <span class="n">beq</span><span class="o">.</span><span class="na">b</span>   <span class="n">InsertNode</span>
+<span class="mi">0000167</span><span class="n">c</span><span class="o">:</span> <span class="n">b228</span> <span class="mi">0009</span>                 <span class="n">cmp</span><span class="o">.</span><span class="na">b</span>   <span class="mh">0x9</span><span class="o">(</span><span class="n">a0</span><span class="o">),</span><span class="n">d1</span>
+<span class="mi">00001680</span><span class="o">:</span> <span class="mi">6</span><span class="n">ff4</span>                      <span class="n">ble</span><span class="o">.</span><span class="na">b</span>   <span class="n">FindPos</span>
 </pre></div>
 
 
 <p>The first two lines repeat the same algorithm. The address of the current node (<code>d0</code>) is moved to <code>a0</code> and the dereferencing operation <code>(a0)</code> puts in <code>d0</code> the address of the following node. The reason why we do it in two lines is that the Address Register Indirect Mode can be used only with <code>An</code> registers. At this point <code>d0</code> contains the address of the second node, the successor of the header.</p>
 <p>If the list contains at least one node, <code>d0</code> contains its address. But if the list is empty at this point <code>d0</code> contains <code>0x0</code>, and this is the condition tested by the <code>beq.b</code> instruction. If <code>d0</code> is empty we reached the end of the list, which means that there was no better place to insert the node, and we jump to the actual node insertion code, <code>InsertNode</code>. If the value is not zero, the current node has a proper successor, so let's check it's priority to see if we need to go on or if we can stop here. The code compares the priorities of the current node and of the <code>Ins</code> node, and if the latter is less than the former we can loop back to <code>FindPos</code> and move to the next node. Remember that priorities are expressed with negative numbers only, so "less than" actually means "higher priority".</p>
 <h2 id="insertnode">InsertNode<a class="headerlink" href="#insertnode" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><span class="nl">InsertNode:</span>
-<span class="m">00001682: 2028 0004</span>                 <span class="k">move.l</span>  <span class="mi">0x4</span><span class="p">(</span><span class="nv">a0</span><span class="p">),</span><span class="nv">d0</span>
-<span class="m">00001686: 2149 0004</span>                 <span class="k">move.l</span>  <span class="nv">a1</span><span class="p">,</span><span class="mi">0x4</span><span class="p">(</span><span class="nv">a0</span><span class="p">)</span>
-<span class="m">0000168a: 2288</span>                      <span class="k">move.l</span>  <span class="nv">a0</span><span class="p">,(</span><span class="nv">a1</span><span class="p">)</span>
-<span class="m">0000168c: 2340 0004</span>                 <span class="k">move.l</span>  <span class="nv">d0</span><span class="p">,</span><span class="mi">0x4</span><span class="p">(</span><span class="nv">a1</span><span class="p">)</span>
-<span class="m">00001690: 2040</span>                      <span class="k">movea.l</span> <span class="nv">d0</span><span class="p">,</span><span class="nv">a0</span>
-<span class="m">00001692: 2089</span>                      <span class="k">move.l</span>  <span class="nv">a1</span><span class="p">,(</span><span class="nv">a0</span><span class="p">)</span>
-<span class="m">00001694: 4e75</span>                      <span class="k">rts</span>     
+<div class="highlight"><pre><span></span><span class="n">InsertNode</span><span class="o">:</span>
+<span class="mi">00001682</span><span class="o">:</span> <span class="mi">2028</span> <span class="mi">0004</span>                 <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="mh">0x4</span><span class="o">(</span><span class="n">a0</span><span class="o">),</span><span class="n">d0</span>
+<span class="mi">00001686</span><span class="o">:</span> <span class="mi">2149</span> <span class="mi">0004</span>                 <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">a1</span><span class="o">,</span><span class="mh">0x4</span><span class="o">(</span><span class="n">a0</span><span class="o">)</span>
+<span class="mi">0000168</span><span class="n">a</span><span class="o">:</span> <span class="mi">2288</span>                      <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">a0</span><span class="o">,(</span><span class="n">a1</span><span class="o">)</span>
+<span class="mi">0000168</span><span class="n">c</span><span class="o">:</span> <span class="mi">2340</span> <span class="mi">0004</span>                 <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">d0</span><span class="o">,</span><span class="mh">0x4</span><span class="o">(</span><span class="n">a1</span><span class="o">)</span>
+<span class="mi">00001690</span><span class="o">:</span> <span class="mi">2040</span>                      <span class="n">movea</span><span class="o">.</span><span class="na">l</span> <span class="n">d0</span><span class="o">,</span><span class="n">a0</span>
+<span class="mi">00001692</span><span class="o">:</span> <span class="mi">2089</span>                      <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">a1</span><span class="o">,(</span><span class="n">a0</span><span class="o">)</span>
+<span class="mi">00001694</span><span class="o">:</span> <span class="mi">4</span><span class="n">e75</span>                      <span class="n">rts</span>     
 </pre></div>
 
 
 <p>In either case, when we reach the tail or when the priority of the next node is lower than the one of the new node, we reach <code>InsertNode</code>. At this point <code>a0</code> points to <code>Next</code> and we can access <code>Pred</code> through <code>0x4(a0)</code> (that is <code>LN_SUCC</code> of <code>Next</code>).</p>
-<div class="highlight"><pre><span></span><span class="m">00001682: 2028 0004</span>                 <span class="k">move.l</span>  <span class="mi">0x4</span><span class="p">(</span><span class="nv">a0</span><span class="p">),</span><span class="nv">d0</span>
-<span class="m">00001686: 2149 0004</span>                 <span class="k">move.l</span>  <span class="nv">a1</span><span class="p">,</span><span class="mi">0x4</span><span class="p">(</span><span class="nv">a0</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><span class="mi">00001682</span><span class="o">:</span> <span class="mi">2028</span> <span class="mi">0004</span>                 <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="mh">0x4</span><span class="o">(</span><span class="n">a0</span><span class="o">),</span><span class="n">d0</span>
+<span class="mi">00001686</span><span class="o">:</span> <span class="mi">2149</span> <span class="mi">0004</span>                 <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">a1</span><span class="o">,</span><span class="mh">0x4</span><span class="o">(</span><span class="n">a0</span><span class="o">)</span>
 </pre></div>
 
 
 <p>This first stores the aforementioned address of <code>Pred</code> in <code>d0</code>, then replaces it with the value of <code>a1</code>. The result is that the predecessor of <code>Next</code> becomes <code>Ins</code>.</p>
-<div class="highlight"><pre><span></span><span class="m">0000168a: 2288</span>                      <span class="k">move.l</span>  <span class="nv">a0</span><span class="p">,(</span><span class="nv">a1</span><span class="p">)</span>
-<span class="m">0000168c: 2340 0004</span>                 <span class="k">move.l</span>  <span class="nv">d0</span><span class="p">,</span><span class="mi">0x4</span><span class="p">(</span><span class="nv">a1</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><span class="mi">0000168</span><span class="n">a</span><span class="o">:</span> <span class="mi">2288</span>                      <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">a0</span><span class="o">,(</span><span class="n">a1</span><span class="o">)</span>
+<span class="mi">0000168</span><span class="n">c</span><span class="o">:</span> <span class="mi">2340</span> <span class="mi">0004</span>                 <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">d0</span><span class="o">,</span><span class="mh">0x4</span><span class="o">(</span><span class="n">a1</span><span class="o">)</span>
 </pre></div>
 
 
 <p>This moves <code>a0</code>, the address of <code>Next</code>, into the first field of <code>Ins</code>, that is <code>Next</code> becomes the successor of <code>Ins</code>. The second line moves <code>d0</code> (the address of <code>Pred</code>) into the <code>LN_PRED</code> of <code>Ins</code>.</p>
-<div class="highlight"><pre><span></span><span class="m">00001690: 2040</span>                      <span class="k">movea.l</span> <span class="nv">d0</span><span class="p">,</span><span class="nv">a0</span>
-<span class="m">00001692: 2089</span>                      <span class="k">move.l</span>  <span class="nv">a1</span><span class="p">,(</span><span class="nv">a0</span><span class="p">)</span>
-<span class="m">00001694: 4e75</span>                      <span class="k">rts</span>     
+<div class="highlight"><pre><span></span><span class="mi">00001690</span><span class="o">:</span> <span class="mi">2040</span>                      <span class="n">movea</span><span class="o">.</span><span class="na">l</span> <span class="n">d0</span><span class="o">,</span><span class="n">a0</span>
+<span class="mi">00001692</span><span class="o">:</span> <span class="mi">2089</span>                      <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">a1</span><span class="o">,(</span><span class="n">a0</span><span class="o">)</span>
+<span class="mi">00001694</span><span class="o">:</span> <span class="mi">4</span><span class="n">e75</span>                      <span class="n">rts</span>     
 </pre></div>
 
 
@@ -396,11 +396,11 @@
 <h1 id="remove"><code>Remove</code><a class="headerlink" href="#remove" title="Permanent link">&para;</a></h1>
 <p>Since we reviewed the code of <code>Enqueue</code> it makes sense to have a look at the opposite function, <code>Remove</code>. A protected version of this exists as well, but here I will just show the code of the pure function without the wrapper.</p>
 <p>Removing a node is simpler than adding it, as all we have to do is to make <code>Pred</code> point to <code>Next</code> and vice versa, so the function is much shorter. It's worth noting that while the function accepts the address of the node in <code>a1</code> the value in this register is eventually overwritten, so the address has to be kept elsewhere when the function is called.</p>
-<div class="highlight"><pre><span></span><span class="m">0000163c: 2051</span>                      <span class="k">movea.l</span> <span class="p">(</span><span class="nv">a1</span><span class="p">),</span><span class="nv">a0</span>
-<span class="m">0000163e: 2269 0004</span>                 <span class="k">movea.l</span> <span class="mi">0x4</span><span class="p">(</span><span class="nv">a1</span><span class="p">),</span><span class="nv">a1</span>
-<span class="m">00001642: 2288</span>                      <span class="k">move.l</span>  <span class="nv">a0</span><span class="p">,(</span><span class="nv">a1</span><span class="p">)</span>
-<span class="m">00001644: 2149 0004</span>                 <span class="k">move.l</span>  <span class="nv">a1</span><span class="p">,</span><span class="mi">0x4</span><span class="p">(</span><span class="nv">a0</span><span class="p">)</span>
-<span class="m">00001648: 4e75</span> 
+<div class="highlight"><pre><span></span><span class="mi">0000163</span><span class="n">c</span><span class="o">:</span> <span class="mi">2051</span>                      <span class="n">movea</span><span class="o">.</span><span class="na">l</span> <span class="o">(</span><span class="n">a1</span><span class="o">),</span><span class="n">a0</span>
+<span class="mi">0000163</span><span class="n">e</span><span class="o">:</span> <span class="mi">2269</span> <span class="mi">0004</span>                 <span class="n">movea</span><span class="o">.</span><span class="na">l</span> <span class="mh">0x4</span><span class="o">(</span><span class="n">a1</span><span class="o">),</span><span class="n">a1</span>
+<span class="mi">00001642</span><span class="o">:</span> <span class="mi">2288</span>                      <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">a0</span><span class="o">,(</span><span class="n">a1</span><span class="o">)</span>
+<span class="mi">00001644</span><span class="o">:</span> <span class="mi">2149</span> <span class="mi">0004</span>                 <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">a1</span><span class="o">,</span><span class="mh">0x4</span><span class="o">(</span><span class="n">a0</span><span class="o">)</span>
+<span class="mi">00001648</span><span class="o">:</span> <span class="mi">4</span><span class="n">e75</span> 
 </pre></div>
 
 
@@ -408,10 +408,10 @@
 <h1 id="addlibrary"><code>AddLibrary</code><a class="headerlink" href="#addlibrary" title="Permanent link">&para;</a></h1>
 <p>In the <a href="https://www.thedigitalcatonline.com/blog/2018/06/25/exploring-the-amiga-6/">6th post</a> of this series we left Kickstart just after it finished adding the physical memory to the system pool. The last instruction we mentioned was a call to <code>AddLibrary</code>, and this is then the next function I will explore.</p>
 <p>The code of the function is at <code>fc1448</code>, and required some work before I was able to read it (see the section "Manual decompilation").</p>
-<div class="highlight"><pre><span></span><span class="m">00001448: 41ee 017a</span>                 <span class="k">lea</span> <span class="mi">0x17a</span><span class="p">(</span><span class="nv">a6</span><span class="p">),</span><span class="nv">a0</span>
-<span class="m">0000144c: 6100 0270</span>                 <span class="k">bsr.w</span> <span class="mi">0x16be</span>
-<span class="m">00001450: 6100 0082</span>                 <span class="k">bsr.w</span> <span class="mi">0x14d4</span>
-<span class="m">00001454: 4e75</span>                      <span class="k">rts</span>     
+<div class="highlight"><pre><span></span><span class="mi">00001448</span><span class="o">:</span> <span class="mi">41</span><span class="n">ee</span> <span class="mi">017</span><span class="n">a</span>                 <span class="n">lea</span> <span class="mh">0x17a</span><span class="o">(</span><span class="n">a6</span><span class="o">),</span><span class="n">a0</span>
+<span class="mi">0000144</span><span class="n">c</span><span class="o">:</span> <span class="mi">6100</span> <span class="mi">0270</span>                 <span class="n">bsr</span><span class="o">.</span><span class="na">w</span> <span class="mh">0x16be</span>
+<span class="mi">00001450</span><span class="o">:</span> <span class="mi">6100</span> <span class="mi">0082</span>                 <span class="n">bsr</span><span class="o">.</span><span class="na">w</span> <span class="mh">0x14d4</span>
+<span class="mi">00001454</span><span class="o">:</span> <span class="mi">4</span><span class="n">e75</span>                      <span class="n">rts</span>     
 </pre></div>
 
 
@@ -420,33 +420,33 @@
 <p><code>SumLibrary</code>, as the name suggests, computes the checksum of a library, or checks the existing one.</p>
 <h1 id="manual-decompilation">Manual decompilation<a class="headerlink" href="#manual-decompilation" title="Permanent link">&para;</a></h1>
 <p>When I was following the call to <code>AddLibrary</code> from the main body of Kickstart I was surprised to find this code</p>
-<div class="highlight"><pre><span></span><span class="m">00001446: 0000 41ee</span>                 <span class="k">ori.b</span>   <span class="p">#-</span><span class="mi">0x12</span><span class="p">,</span><span class="nv">d0</span>
-<span class="m">0000144a: 017a 6100</span>                 <span class="k">bchg</span>    <span class="nv">d0</span><span class="p">,</span><span class="mi">0x754c</span><span class="p">(</span><span class="nv">pc</span><span class="p">)</span>
-<span class="m">0000144e: 0270 6100 0082</span>            <span class="k">andi.w</span>  <span class="p">#</span><span class="mi">0x6100</span><span class="p">,(-</span><span class="mi">0x7e</span><span class="p">,</span><span class="nv">a0</span><span class="p">,</span><span class="nv">d0</span><span class="p">.</span><span class="nl">w</span><span class="p">)</span>
-<span class="m">00001454: 4e75</span>                      <span class="k">rts</span>     
+<div class="highlight"><pre><span></span><span class="mi">00001446</span><span class="o">:</span> <span class="mi">0000</span> <span class="mi">41</span><span class="n">ee</span>                 <span class="n">ori</span><span class="o">.</span><span class="na">b</span>   <span class="err">#</span><span class="o">-</span><span class="mh">0x12</span><span class="o">,</span><span class="n">d0</span>
+<span class="mi">0000144</span><span class="n">a</span><span class="o">:</span> <span class="mi">017</span><span class="n">a</span> <span class="mi">6100</span>                 <span class="n">bchg</span>    <span class="n">d0</span><span class="o">,</span><span class="mh">0x754c</span><span class="o">(</span><span class="n">pc</span><span class="o">)</span>
+<span class="mi">0000144</span><span class="n">e</span><span class="o">:</span> <span class="mi">0270</span> <span class="mi">6100</span> <span class="mi">0082</span>            <span class="n">andi</span><span class="o">.</span><span class="na">w</span>  <span class="err">#</span><span class="mh">0x6100</span><span class="o">,(-</span><span class="mh">0x7e</span><span class="o">,</span><span class="n">a0</span><span class="o">,</span><span class="n">d0</span><span class="o">.</span><span class="na">w</span><span class="o">)</span>
+<span class="mi">00001454</span><span class="o">:</span> <span class="mi">4</span><span class="n">e75</span>                      <span class="n">rts</span>     
 </pre></div>
 
 
 <p>which at first glance doesn't look like a basic function, as the instructions are too convoluted. Furthermore, the branch uses the address <code>0x1448</code>, which is thus supposed to be the beginning of the function. A quick look at the hexadecimal values reveals the truth: at <code>0x1446</code> Kickstart contains a padding word <code>0000</code> that confused the decompiler. To see the code of the function I had to manually decompile the machine code, and since the process is very interesting I decided to show it in detail here.</p>
 <p>When you try to manually decompile some machine code you need a cheat sheet and the processor manual (see the resources section), which can help you to quickly track down the meaning of the single bits. The values we are interested in are</p>
-<div class="highlight"><pre><span></span><span class="m">00001448: 41ee</span>
-<span class="m">0000144a: 017a</span>
-<span class="m">0000144c: 6100</span>
-<span class="m">0000144e: 0270</span>
-<span class="m">00001450: 6100</span>
-<span class="m">00001452: 0082</span>
-<span class="m">00001454: 4e75</span>
+<div class="highlight"><pre><span></span><span class="mi">00001448</span><span class="o">:</span> <span class="mi">41</span><span class="n">ee</span>
+<span class="mi">0000144</span><span class="n">a</span><span class="o">:</span> <span class="mi">017</span><span class="n">a</span>
+<span class="mi">0000144</span><span class="n">c</span><span class="o">:</span> <span class="mi">6100</span>
+<span class="mi">0000144</span><span class="n">e</span><span class="o">:</span> <span class="mi">0270</span>
+<span class="mi">00001450</span><span class="o">:</span> <span class="mi">6100</span>
+<span class="mi">00001452</span><span class="o">:</span> <span class="mi">0082</span>
+<span class="mi">00001454</span><span class="o">:</span> <span class="mi">4</span><span class="n">e75</span>
 </pre></div>
 
 
 <p>since <code>fc1456</code> is listed as the address of the <code>RemLibrary</code> function. THe binary representation of these values is</p>
-<div class="highlight"><pre><span></span><span class="m">00001448: 0100 0001 1110 1110</span>
-<span class="m">0000144a: 0000 0001 0111 1010</span>
-<span class="m">0000144c: 0110 0001 0000 0000</span>
-<span class="m">0000144e: 0000 0010 0111 0000</span>
-<span class="m">00001450: 0110 0001 0000 0000</span>
-<span class="m">00001452: 0000 0000 1000 0010</span>
-<span class="m">00001454: 0100 1110 0111 0101</span>
+<div class="highlight"><pre><span></span><span class="mi">00001448</span><span class="o">:</span> <span class="mi">0100</span> <span class="mi">0001</span> <span class="mi">1110</span> <span class="mi">1110</span>
+<span class="mi">0000144</span><span class="n">a</span><span class="o">:</span> <span class="mi">0000</span> <span class="mi">0001</span> <span class="mi">0111</span> <span class="mi">1010</span>
+<span class="mi">0000144</span><span class="n">c</span><span class="o">:</span> <span class="mi">0110</span> <span class="mi">0001</span> <span class="mi">0000</span> <span class="mi">0000</span>
+<span class="mi">0000144</span><span class="n">e</span><span class="o">:</span> <span class="mi">0000</span> <span class="mi">0010</span> <span class="mi">0111</span> <span class="mi">0000</span>
+<span class="mi">00001450</span><span class="o">:</span> <span class="mi">0110</span> <span class="mi">0001</span> <span class="mi">0000</span> <span class="mi">0000</span>
+<span class="mi">00001452</span><span class="o">:</span> <span class="mi">0000</span> <span class="mi">0000</span> <span class="mi">1000</span> <span class="mi">0010</span>
+<span class="mi">00001454</span><span class="o">:</span> <span class="mi">0100</span> <span class="mi">1110</span> <span class="mi">0111</span> <span class="mi">0101</span>
 </pre></div>
 
 

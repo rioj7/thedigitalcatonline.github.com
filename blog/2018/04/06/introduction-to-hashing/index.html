@@ -30,7 +30,7 @@
 
 <script type="application/ld+json">
 {
-  "@context" : "http://schema.org",
+  "@context" : "https://schema.org",
   "@type" : "Article",
   "name" : "Introduction to hashing",
   "author" : {
@@ -124,10 +124,10 @@
 <p>The result of a hash function is not unique, which means that two different inputs may give the same output. This is pretty easy to understand in the dictionary example, where multiple words can give as a result the same letter, as multiple words begin with that letter.</p>
 <p>It is also evident both from the dictionary example and from the definition that hash functions cannot produce unique results by design. The goal of a hash function is to map an infinite set with a finite set, so it is obvious that multiple elements of the infinite set will map to the same element in the finite one.</p>
 <p>Let me give you a very simple example. Let's create a hash function that returns the first 32 bits (4 bytes) of the input, padding them with zeros if the input is shorter that 32 bits. I will use the ASCII standard to convert strings of characters into hexadecimal numbers, so every letter is represented by 1 byte.</p>
-<div class="highlight"><pre><span></span>&quot;This is a string&quot; == 54 68 69 73 20 69 73 20 61 20 73 74 72 69 6e 67 =&gt; 54 68 69 73
-&quot;One&quot; == 4f 6e 65 =&gt;  4f 6e 65 00
-&quot;The quick brown fox&quot; == 54 68 65 20 71 75 69 63 6b 20 62 72 6f 77 6e 20 66 6f 78 =&gt; 54 68 65 20
-&quot;The lazy dog&quot; == 54 68 65 20 6c 61 7a 79 20 64 6f 67 =&gt; 54 68 65 20
+<div class="highlight"><pre><span></span><span class="ss">&quot;This is a string&quot;</span> <span class="o">==</span> <span class="mi">54</span> <span class="mi">68</span> <span class="mi">69</span> <span class="mi">73</span> <span class="mi">20</span> <span class="mi">69</span> <span class="mi">73</span> <span class="mi">20</span> <span class="mi">61</span> <span class="mi">20</span> <span class="mi">73</span> <span class="mi">74</span> <span class="mi">72</span> <span class="mi">69</span> <span class="mi">6</span><span class="n">e</span> <span class="mi">67</span> <span class="o">=&gt;</span> <span class="mi">54</span> <span class="mi">68</span> <span class="mi">69</span> <span class="mi">73</span>
+<span class="ss">&quot;One&quot;</span> <span class="o">==</span> <span class="mi">4</span><span class="n">f</span> <span class="mi">6</span><span class="n">e</span> <span class="mi">65</span> <span class="o">=&gt;</span>  <span class="mi">4</span><span class="n">f</span> <span class="mi">6</span><span class="n">e</span> <span class="mi">65</span> <span class="mi">00</span>
+<span class="ss">&quot;The quick brown fox&quot;</span> <span class="o">==</span> <span class="mi">54</span> <span class="mi">68</span> <span class="mi">65</span> <span class="mi">20</span> <span class="mi">71</span> <span class="mi">75</span> <span class="mi">69</span> <span class="mi">63</span> <span class="mi">6</span><span class="n">b</span> <span class="mi">20</span> <span class="mi">62</span> <span class="mi">72</span> <span class="mi">6</span><span class="n">f</span> <span class="mi">77</span> <span class="mi">6</span><span class="n">e</span> <span class="mi">20</span> <span class="mi">66</span> <span class="mi">6</span><span class="n">f</span> <span class="mi">78</span> <span class="o">=&gt;</span> <span class="mi">54</span> <span class="mi">68</span> <span class="mi">65</span> <span class="mi">20</span>
+<span class="ss">&quot;The lazy dog&quot;</span> <span class="o">==</span> <span class="mi">54</span> <span class="mi">68</span> <span class="mi">65</span> <span class="mi">20</span> <span class="mi">6</span><span class="k">c</span> <span class="mi">61</span> <span class="mi">7</span><span class="n">a</span> <span class="mi">79</span> <span class="mi">20</span> <span class="mi">64</span> <span class="mi">6</span><span class="n">f</span> <span class="mi">67</span> <span class="o">=&gt;</span> <span class="mi">54</span> <span class="mi">68</span> <span class="mi">65</span> <span class="mi">20</span>
 </pre></div>
 
 
@@ -151,8 +151,8 @@
 <p>Let's consider a system that uses a hash to speed up searches in some arrays. For several reasons the hashing algorithm employs an initial random seed that is derived from the boot time. As long as the system is running (i.e. it is not rebooted), the algorithm is consistent, and we may consider the random seed as a constant parameter. We may also persist the hashes on a storage, because when we load them they are still perfectly valid. As soon as the system is rebooted, however, the whole set of hashes created during the previous execution becomes invalid and meaningless. This is not the case, though, if the hashing function bases its computation on the actual data only.</p>
 <h2 id="diffusion">Diffusion<a class="headerlink" href="#diffusion" title="Permanent link">&para;</a></h2>
 <p>Changing one single bit of the source data shall results in a <strong>complete change</strong> of the hash number. Compare for example the MD5 hash values of two similar strings</p>
-<div class="highlight"><pre><span></span>The quick brown fox jumps over the lazy dog =&gt; 37c4b87edffc5d198ff5a185cee7ee09
-The quick brown fox jumps over the lazy cog =&gt; 15546a0bcace46fd5e12ec29adca5e70
+<div class="highlight"><pre><span></span><span class="n">The</span> <span class="n">quick</span> <span class="n">brown</span> <span class="n">fox</span> <span class="n">jumps</span> <span class="n">over</span> <span class="n">the</span> <span class="n">lazy</span> <span class="n">dog</span> <span class="o">=&gt;</span> <span class="mi">37</span><span class="n">c4b87edffc5d198ff5a185cee7ee09</span>
+<span class="n">The</span> <span class="n">quick</span> <span class="n">brown</span> <span class="n">fox</span> <span class="n">jumps</span> <span class="n">over</span> <span class="n">the</span> <span class="n">lazy</span> <span class="n">cog</span> <span class="o">=&gt;</span> <span class="mi">15546</span><span class="n">a0bcace46fd5e12ec29adca5e70</span>
 </pre></div>
 
 
@@ -177,12 +177,12 @@ The quick brown fox jumps over the lazy cog =&gt; 15546a0bcace46fd5e12ec29adca5e
 <p>Obviously, a hash function that provides interesting properties when dealing with theoretical inputs will show the same properties when applied to practical inputs, but often such functions are complex and slow. Not to mention that it is very difficult to create them.</p>
 <p>Let me show you an example. As we saw above, a hash function that returns the first letter of a string is not a very good one. It lacks the diffusion property, for instance, an its uniformity is questionable, as all the strings that begin with the same letter will produce the same hash, leading to a large number of collisions. This is bad for data structures, so such a function is in theory not optimal.</p>
 <p>However, if we are working on a set of strings like</p>
-<div class="highlight"><pre><span></span>A poor workman blames his tool
-Barking dogs seldom bite
-Common sense ain&#39;t common
-Doctors make the worst patients
-...
-You can&#39;t teach an old dog new tricks
+<div class="highlight"><pre><span></span><span class="n">A</span> <span class="n">poor</span> <span class="n">workman</span> <span class="n">blames</span> <span class="n">his</span> <span class="n">tool</span>
+<span class="n">Barking</span> <span class="n">dogs</span> <span class="n">seldom</span> <span class="n">bite</span>
+<span class="n">Common</span> <span class="n">sense</span> <span class="n">ain</span><span class="s1">&#39;t common</span>
+<span class="s1">Doctors make the worst patients</span>
+<span class="s1">...</span>
+<span class="s1">You can&#39;</span><span class="n">t</span> <span class="n">teach</span> <span class="n">an</span> <span class="k">old</span> <span class="n">dog</span> <span class="k">new</span> <span class="n">tricks</span>
 </pre></div>
 
 
