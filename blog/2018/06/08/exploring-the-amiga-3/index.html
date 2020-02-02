@@ -12,9 +12,9 @@
 		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,400italic,600italic|Roboto+Slab:400,700">
 
-        <link rel="stylesheet" href="/theme/css/main.min.css?04100d07">
+        <link rel="stylesheet" href="/theme/css/main.min.css?868c6525">
 
-<link rel="stylesheet" href="/theme/css/retro.min.css?41d7a3f1">
+<link rel="stylesheet" href="/theme/css/retro.min.css?d93687f1">
         
         <link href="/images/global/favicon.jpg" rel="icon">
 
@@ -91,7 +91,7 @@
 
     <section id="post-info">
         <div class="align-center">
-            <a class="button special small" href="/categories/assembly/">assembly</a>            <a class="button special small" href="/categories/amiga/">amiga</a>            <a class="button special small" href="/categories/retroprogramming/">retroprogramming</a>        </div>
+            <a class="button small" href="/categories/assembly/">assembly</a>            <a class="button small" href="/categories/amiga/">amiga</a>            <a class="button small" href="/categories/retroprogramming/">retroprogramming</a>        </div>
 
         <div class="align-center">
             By Leonardo Giordani
@@ -213,18 +213,18 @@ vectors:
 <p>In the Amiga system all libraries have a specific structure when loaded in memory. Apart from the prefixed jump table, the library code itself has a fixed structure that allows us to read and use it.</p>
 <p>First of all all libraries in memory are nodes of a linked list, so we expect to find the structure of the node itself. Then, inside the node, we expect to find the actual library structure.</p>
 <p>The include file <code>include_i/exec/nodes.i</code> tells us that a standard linked list node has the following structure</p>
-<div class="highlight"><pre><span></span>   <span class="nv">STRUCTURE</span>    <span class="nv">LN</span>,<span class="mi">0</span>    <span class="c1">; List Node</span>
-    <span class="nv">APTR</span>    <span class="nv">LN_SUCC</span> <span class="c1">; Pointer to next (successor)</span>
-    <span class="nv">APTR</span>    <span class="nv">LN_PRED</span> <span class="c1">; Pointer to previous (predecessor)</span>
-    <span class="nv">UBYTE</span>   <span class="nv">LN_TYPE</span>
-    <span class="nv">BYTE</span>    <span class="nv">LN_PRI</span>  <span class="c1">; Priority, for sorting</span>
-    <span class="nv">APTR</span>    <span class="nv">LN_NAME</span> <span class="c1">; ID string, null terminated</span>
-    <span class="nv">LABEL</span>   <span class="nv">LN_SIZE</span> <span class="c1">; Note: word aligned</span>
+<div class="highlight"><pre><span></span><span class="err">   STRUCTURE    LN,0    ; List Node</span>
+<span class="err">    APTR    LN_SUCC ; Pointer to next (successor)</span>
+<span class="err">    APTR    LN_PRED ; Pointer to previous (predecessor)</span>
+<span class="err">    UBYTE   LN_TYPE</span>
+<span class="err">    BYTE    LN_PRI  ; Priority, for sorting</span>
+<span class="err">    APTR    LN_NAME ; ID string, null terminated</span>
+<span class="err">    LABEL   LN_SIZE ; Note: word aligned</span>
 </pre></div>
 
 
 <p>The two 32-bit pointers <code>LN_SUCC</code> and <code>LN_PRED</code> are created when the node is loaded in memory, so we need to look for the rest of the structure, namely 1 byte with <code>LN_TYPE</code>, 1 byte with <code>LN_PRI</code> and 4 bytes with <code>LN_NAME</code>. From the same file <code>include_i/exec/nodes.i</code> we know that the note type for a library is <code>09</code></p>
-<div class="highlight"><pre><span></span><span class="n">NT_LIBRARY</span>  <span class="n">EQU</span> <span class="mi">9</span>
+<div class="highlight"><pre><span></span><span class="err">NT_LIBRARY  EQU 9</span>
 </pre></div>
 
 
@@ -232,17 +232,17 @@ vectors:
 <p>In the Kickstart 1.3 code this pattern can be found at offset <code>0x030c</code>.</p>
 <p><img alt="Search library pattern" src="/images/exploring-the-amiga-3/search-library-pattern.png"></p>
 <p>If this is the correct position of the node structure, we expect to find just after it the structure of the library as described in the include file <code>include_i/exec/libraries.i</code></p>
-<div class="highlight"><pre><span></span> <span class="k">STRUCTURE</span> <span class="n">LIB</span><span class="p">,</span><span class="n">LN_SIZE</span>     
-    <span class="n">UBYTE</span>   <span class="n">LIB_FLAGS</span>       <span class="p">;</span> <span class="n">see</span> <span class="n">below</span>
-    <span class="n">UBYTE</span>   <span class="n">LIB_pad</span>         <span class="p">;</span> <span class="n">must</span> <span class="n">be</span> <span class="n">zero</span>
-    <span class="n">UWORD</span>   <span class="n">LIB_NEGSIZE</span>     <span class="p">;</span> <span class="nb">number</span> <span class="k">of</span> <span class="n">bytes</span> <span class="k">before</span> <span class="n">LIB</span>
-    <span class="n">UWORD</span>   <span class="n">LIB_POSSIZE</span>     <span class="p">;</span> <span class="nb">number</span> <span class="k">of</span> <span class="n">bytes</span> <span class="k">after</span> <span class="n">LIB</span>
-    <span class="n">UWORD</span>   <span class="n">LIB_VERSION</span>     <span class="p">;</span> <span class="n">major</span>
-    <span class="n">UWORD</span>   <span class="n">LIB_REVISION</span>    <span class="p">;</span> <span class="n">minor</span>
-    <span class="n">APTR</span>    <span class="n">LIB_IDSTRING</span>    <span class="p">;</span> <span class="n">ASCII</span> <span class="n">identification</span>
-    <span class="n">ULONG</span>   <span class="n">LIB_SUM</span>         <span class="p">;</span> <span class="n">the</span> <span class="k">system</span><span class="o">-</span><span class="n">calculated</span> <span class="n">checksum</span>
-    <span class="n">UWORD</span>   <span class="n">LIB_OPENCNT</span>     <span class="p">;</span> <span class="nb">number</span> <span class="k">of</span> <span class="k">current</span> <span class="n">opens</span>
-    <span class="n">LABEL</span>   <span class="n">LIB_SIZE</span>        <span class="p">;</span> <span class="n">Warning</span><span class="p">:</span> <span class="k">Size</span> <span class="k">is</span> <span class="k">not</span> <span class="n">a</span> <span class="n">longword</span> <span class="n">multiple</span><span class="o">!</span>
+<div class="highlight"><pre><span></span><span class="err"> STRUCTURE LIB,LN_SIZE     </span>
+<span class="err">    UBYTE   LIB_FLAGS       ; see below</span>
+<span class="err">    UBYTE   LIB_pad         ; must be zero</span>
+<span class="err">    UWORD   LIB_NEGSIZE     ; number of bytes before LIB</span>
+<span class="err">    UWORD   LIB_POSSIZE     ; number of bytes after LIB</span>
+<span class="err">    UWORD   LIB_VERSION     ; major</span>
+<span class="err">    UWORD   LIB_REVISION    ; minor</span>
+<span class="err">    APTR    LIB_IDSTRING    ; ASCII identification</span>
+<span class="err">    ULONG   LIB_SUM         ; the system-calculated checksum</span>
+<span class="err">    UWORD   LIB_OPENCNT     ; number of current opens</span>
+<span class="err">    LABEL   LIB_SIZE        ; Warning: Size is not a longword multiple!</span>
 </pre></div>
 
 

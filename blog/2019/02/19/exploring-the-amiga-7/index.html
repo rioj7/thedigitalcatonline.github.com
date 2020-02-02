@@ -12,9 +12,9 @@
 		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,400italic,600italic|Roboto+Slab:400,700">
 
-        <link rel="stylesheet" href="/theme/css/main.min.css?04100d07">
+        <link rel="stylesheet" href="/theme/css/main.min.css?868c6525">
 
-<link rel="stylesheet" href="/theme/css/retro.min.css?41d7a3f1">
+<link rel="stylesheet" href="/theme/css/retro.min.css?d93687f1">
         
         <link href="/images/global/favicon.jpg" rel="icon">
 
@@ -91,7 +91,7 @@
 
     <section id="post-info">
         <div class="align-center">
-            <a class="button special small" href="/categories/assembly/">assembly</a>            <a class="button special small" href="/categories/amiga/">amiga</a>            <a class="button special small" href="/categories/retroprogramming/">retroprogramming</a>        </div>
+            <a class="button small" href="/categories/assembly/">assembly</a>            <a class="button small" href="/categories/amiga/">amiga</a>            <a class="button small" href="/categories/retroprogramming/">retroprogramming</a>        </div>
 
         <div class="align-center">
             By Leonardo Giordani
@@ -874,13 +874,13 @@
 <p>This means that we can access the memory list with <code>lea 0x142(a6),a0</code>, as <code>0x142</code> is the relative address, i.e. assuming ExecBase is 0. Once the absolute address is in one of the address registers we can access the first node through <code>(a0)</code>, which is the Motorola Assembly version of the C pointer dereference operation (Address Register Indirect Mode). With <code>(a0)</code> we do not use the content of <code>a0</code>, but the content of the memory location which address is contained in <code>a0</code>.</p>
 <p>So if <code>a0</code> is <code>0x142</code> in the previous figure, <code>(a0)</code> is <code>0x0</code> (<code>0x142</code> contains <code>0x146</code>, <code>0x146</code> contains <code>0x0</code>). It's thus convenient to think of <code>a0</code> as the pointer, and of <code>(a0)</code> as the value.</p>
 <p>It is also interesting to note that the structure at <code>0x146</code> is very similar to the <code>LN</code> structure. Recall that the latter is defined in <code>include_i/exec/nodes.i</code> as</p>
-<div class="highlight"><pre><span></span> <span class="nv">STRUCTURE</span>    <span class="nv">LN</span>,<span class="mi">0</span>    <span class="c1">; List Node</span>
-    <span class="nv">APTR</span>    <span class="nv">LN_SUCC</span> <span class="c1">; Pointer to next (successor)</span>
-    <span class="nv">APTR</span>    <span class="nv">LN_PRED</span> <span class="c1">; Pointer to previous (predecessor)</span>
-    <span class="nv">UBYTE</span>   <span class="nv">LN_TYPE</span>
-    <span class="nv">BYTE</span>    <span class="nv">LN_PRI</span>  <span class="c1">; Priority, for sorting</span>
-    <span class="nv">APTR</span>    <span class="nv">LN_NAME</span> <span class="c1">; ID string, null terminated</span>
-    <span class="nv">LABEL</span>   <span class="nv">LN_SIZE</span> <span class="c1">; Note: word aligned</span>
+<div class="highlight"><pre><span></span><span class="err"> STRUCTURE    LN,0    ; List Node</span>
+<span class="err">    APTR    LN_SUCC ; Pointer to next (successor)</span>
+<span class="err">    APTR    LN_PRED ; Pointer to previous (predecessor)</span>
+<span class="err">    UBYTE   LN_TYPE</span>
+<span class="err">    BYTE    LN_PRI  ; Priority, for sorting</span>
+<span class="err">    APTR    LN_NAME ; ID string, null terminated</span>
+<span class="err">    LABEL   LN_SIZE ; Note: word aligned</span>
 </pre></div>
 
 
@@ -888,8 +888,8 @@
 <h1 id="adding-free-memory-to-the-system-list">Adding free memory to the system list<a class="headerlink" href="#adding-free-memory-to-the-system-list" title="Permanent link">&para;</a></h1>
 <p>At the end of the <a href="https://www.thedigitalcatonline.com/blog/2018/06/25/exploring-the-amiga-6/">previous post</a> we left Exec just after its code prepared the parameters of the free memory that was available on the system. As we saw in that post, this operation is always executed for the chip memory, and optionally for the fast memory if the hardware expansion is installed.</p>
 <p>The <code>AddMemList</code> function at <code>0x1a26</code> is called with the following prototype</p>
-<div class="highlight"><pre><span></span><span class="k">size</span> <span class="o">=</span> <span class="n">AddMemList</span><span class="p">(</span><span class="k">size</span><span class="p">,</span> <span class="n">attributes</span><span class="p">,</span> <span class="n">pri</span><span class="p">,</span> <span class="n">base</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-<span class="n">D0</span>                <span class="n">D0</span>    <span class="n">D1</span>          <span class="n">D2</span>   <span class="n">A0</span>    <span class="n">A1</span>
+<div class="highlight"><pre><span></span><span class="err">size = AddMemList(size, attributes, pri, base, name)</span>
+<span class="err">D0                D0    D1          D2   A0    A1</span>
 </pre></div>
 
 

@@ -1530,21 +1530,21 @@ and grant access to the owner and group users). The returned integer is called q
 &lt;p&gt;As briefly shown in the last article synchronization problems are not only among the most complex issues to solve in computer science, but can also lead to severe malfunctions of our software.&lt;/p&gt;
 &lt;p&gt;Let's reconsider and formalize the example given in the last post. Say we create two different processes working on the same data. If the two processes just read the same data from memory (or disk) no problems can arise: data are static, and accessing does not change them. So the execution of the two processes is called &lt;strong&gt;consistent&lt;/strong&gt;, which highlights that repeated executions or executions spanning a long time will always result in the same system behaviour.&lt;/p&gt;
 &lt;p&gt;If now one of the processes wants to modify data different situations can come up, depending on the actual timing of the operations. Say we have two processes &lt;code&gt;A&lt;/code&gt; and &lt;code&gt;B&lt;/code&gt; and an element &lt;code&gt;d&lt;/code&gt;; process &lt;code&gt;A&lt;/code&gt; increases element &lt;code&gt;d&lt;/code&gt; by 1 while process &lt;code&gt;B&lt;/code&gt; prints the element value on the screen. In a sort of metalanguage, we could express this situation with the following syntax&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;A&lt;/span&gt; &lt;span class="err"&gt;{&lt;/span&gt; &lt;span class="n"&gt;d&lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;&lt;span class="n"&gt;d&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="err"&gt;}&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt; &lt;span class="n"&gt;B&lt;/span&gt; &lt;span class="err"&gt;{&lt;/span&gt; &lt;span class="n"&gt;d&lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;&lt;span class="k"&gt;output&lt;/span&gt; &lt;span class="err"&gt;}&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="err"&gt;A { d-&amp;gt;d+1 } &amp;amp; B { d-&amp;gt;output }&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;where &lt;code&gt;&amp;amp;&lt;/code&gt; stands for a concurrent execution; in other words the two processes are not synchronized. One of the possible resulting executions is&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;d&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;5&lt;/span&gt;
-&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;A&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;d&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;6&lt;/span&gt;
-&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;B&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;output&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;6&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="err"&gt;(-) d = 5&lt;/span&gt;
+&lt;span class="err"&gt;(A) d = 6&lt;/span&gt;
+&lt;span class="err"&gt;(B) output = 6&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;while the other is&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;d&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;5&lt;/span&gt;
-&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;B&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;output&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;5&lt;/span&gt;
-&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;A&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;d&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;6&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="err"&gt;(-) d = 5&lt;/span&gt;
+&lt;span class="err"&gt;(B) output = 5&lt;/span&gt;
+&lt;span class="err"&gt;(A) d = 6&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
 

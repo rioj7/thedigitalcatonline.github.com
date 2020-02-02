@@ -12,7 +12,7 @@
 		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,400italic,600italic|Roboto+Slab:400,700">
 
-        <link rel="stylesheet" href="/theme/css/main.min.css?04100d07">
+        <link rel="stylesheet" href="/theme/css/main.min.css?868c6525">
 
         
         <link href="/images/global/favicon.jpg" rel="icon">
@@ -83,7 +83,7 @@
 
     <section id="post-info">
         <div class="align-center">
-            <a class="button special small" href="/categories/python/">Python</a>            <a class="button special small" href="/categories/pika/">Pika</a>            <a class="button special small" href="/categories/rabbitmq/">RabbitMQ</a>            <a class="button special small" href="/categories/postage/">Postage</a>        </div>
+            <a class="button small" href="/categories/python/">Python</a>            <a class="button small" href="/categories/pika/">Pika</a>            <a class="button small" href="/categories/rabbitmq/">RabbitMQ</a>            <a class="button small" href="/categories/postage/">Postage</a>        </div>
 
         <div class="align-center">
             By Leonardo Giordani
@@ -110,9 +110,9 @@
     <span class="sd">&quot;&quot;&quot;This is the exchange that receives ping messages.&quot;&quot;&quot;</span>
     <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;ping-exchange&quot;</span>
     <span class="n">exchange_type</span> <span class="o">=</span> <span class="s2">&quot;direct&quot;</span>
-    <span class="n">passive</span> <span class="o">=</span> <span class="bp">False</span>
-    <span class="n">durable</span> <span class="o">=</span> <span class="bp">True</span>
-    <span class="n">auto_delete</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">passive</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">durable</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">auto_delete</span> <span class="o">=</span> <span class="kc">False</span>
 </pre></div>
 
 
@@ -160,16 +160,16 @@ If you review the above paragraph you will notice that you never defined a <code
 
 <p>that loads the modules we need and builds the fingerprint of this application. Creating a receiver means declaring a class that inherits from <code>MessageProcessor</code> and implements a method for each incoming message we want to process.</p>
 <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">PingReceiver</span><span class="p">(</span><span class="n">messaging</span><span class="o">.</span><span class="n">MessageProcessor</span><span class="p">):</span>
-    <span class="nd">@messaging.MessageHandler</span><span class="p">(</span><span class="s1">&#39;command&#39;</span><span class="p">,</span> <span class="s1">&#39;ping&#39;</span><span class="p">)</span>
+    <span class="nd">@messaging</span><span class="o">.</span><span class="n">MessageHandler</span><span class="p">(</span><span class="s1">&#39;command&#39;</span><span class="p">,</span> <span class="s1">&#39;ping&#39;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">msg_ping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">content</span><span class="p">):</span>
-        <span class="k">print</span> <span class="s2">&quot;Got a ping!&quot;</span>
+        <span class="nb">print</span> <span class="s2">&quot;Got a ping!&quot;</span>
 </pre></div>
 
 
 <p>As you can see here the <code>msg_ping()</code> method is declared as a handler for the command message <code>ping</code>; the name of the method is arbitrary, but it has to accept one parameter, namely the content of the incoming message (more on this later). In this case, when the object receives a ping message it just prints out a string.</p>
 <div class="highlight"><pre><span></span><span class="n">eqks</span> <span class="o">=</span> <span class="p">[(</span><span class="n">facilities</span><span class="o">.</span><span class="n">PingExchange</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;ping_queue&#39;</span><span class="p">,</span> <span class="s1">&#39;ping_rk&#39;</span><span class="p">)])]</span>
 <span class="n">receiver</span> <span class="o">=</span> <span class="n">PingReceiver</span><span class="p">(</span><span class="n">fingerprint</span><span class="o">.</span><span class="n">as_dict</span><span class="p">(),</span> <span class="n">eqks</span><span class="p">,</span>
-                        <span class="bp">None</span><span class="p">,</span> <span class="n">messaging</span><span class="o">.</span><span class="n">global_vhost</span><span class="p">)</span>
+                        <span class="kc">None</span><span class="p">,</span> <span class="n">messaging</span><span class="o">.</span><span class="n">global_vhost</span><span class="p">)</span>
 </pre></div>
 
 
@@ -228,13 +228,13 @@ Got a ping!
 <p>As you can see I just added the <code>build_message_timed_ping()</code> method, which sends a <code>timed_ping</code> command, but this time I added a <code>parameters</code> dictionary that encompasses all the parameters of the command. Remember that all the structures you put in a message are serialized in JSON by default so they must be processable by <code>json.dumps()</code>; if you need to send very complex structures you can customize Postage to use another encoder, either a customized JSON or a completely different one; see <a href="https://github.com/lgiordani/postage#encoder">the documentation</a>.</p>
 <p>The receiver has to be modified accordingly:</p>
 <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">PingReceiver</span><span class="p">(</span><span class="n">messaging</span><span class="o">.</span><span class="n">MessageProcessor</span><span class="p">):</span>
-    <span class="nd">@messaging.MessageHandler</span><span class="p">(</span><span class="s1">&#39;command&#39;</span><span class="p">,</span> <span class="s1">&#39;ping&#39;</span><span class="p">)</span>
+    <span class="nd">@messaging</span><span class="o">.</span><span class="n">MessageHandler</span><span class="p">(</span><span class="s1">&#39;command&#39;</span><span class="p">,</span> <span class="s1">&#39;ping&#39;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">msg_ping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">content</span><span class="p">):</span>
-        <span class="k">print</span> <span class="s2">&quot;Got a ping!&quot;</span>
+        <span class="nb">print</span> <span class="s2">&quot;Got a ping!&quot;</span>
 
-    <span class="nd">@messaging.MessageHandler</span><span class="p">(</span><span class="s1">&#39;command&#39;</span><span class="p">,</span> <span class="s1">&#39;timed_ping&#39;</span><span class="p">)</span>
+    <span class="nd">@messaging</span><span class="o">.</span><span class="n">MessageHandler</span><span class="p">(</span><span class="s1">&#39;command&#39;</span><span class="p">,</span> <span class="s1">&#39;timed_ping&#39;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">msg_timed_ping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">content</span><span class="p">):</span>
-        <span class="k">print</span> <span class="s2">&quot;Got a timed ping! Time is </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span><span class="p">(</span><span class="n">content</span><span class="p">[</span><span class="s1">&#39;parameters&#39;</span><span class="p">][</span><span class="s1">&#39;time&#39;</span><span class="p">])</span>
+        <span class="nb">print</span> <span class="s2">&quot;Got a timed ping! Time is </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span><span class="p">(</span><span class="n">content</span><span class="p">[</span><span class="s1">&#39;parameters&#39;</span><span class="p">][</span><span class="s1">&#39;time&#39;</span><span class="p">])</span>
 </pre></div>
 
 
@@ -267,9 +267,9 @@ Got a timed ping! Time is 1374826309.06
 <p>Add a handler in the receiver (<code>receive_ping.py</code>):</p>
 <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">PingReceiver</span><span class="p">(</span><span class="n">messaging</span><span class="o">.</span><span class="n">MessageProcessor</span><span class="p">):</span>
     <span class="p">[</span><span class="o">...</span><span class="p">]</span>
-    <span class="nd">@messaging.MessageHandler</span><span class="p">(</span><span class="s1">&#39;command&#39;</span><span class="p">,</span> <span class="s1">&#39;custom_ping&#39;</span><span class="p">)</span>
+    <span class="nd">@messaging</span><span class="o">.</span><span class="n">MessageHandler</span><span class="p">(</span><span class="s1">&#39;command&#39;</span><span class="p">,</span> <span class="s1">&#39;custom_ping&#39;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">msg_custom_ping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">content</span><span class="p">):</span>
-        <span class="k">print</span> <span class="s2">&quot;Got a custom ping! The custom value is </span><span class="si">%s</span><span class="s2">&quot;</span>\
+        <span class="nb">print</span> <span class="s2">&quot;Got a custom ping! The custom value is </span><span class="si">%s</span><span class="s2">&quot;</span>\
               <span class="o">%</span><span class="p">(</span><span class="n">content</span><span class="p">[</span><span class="s1">&#39;parameters&#39;</span><span class="p">][</span><span class="s1">&#39;custom_value&#39;</span><span class="p">])</span>
 </pre></div>
 
@@ -304,9 +304,9 @@ Got a custom ping! The custom value is [u&#39;Just ping me&#39;, 1]
 <p>The receiver needs a new handler to process the incoming RPC <code>ping</code> message:</p>
 <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">PingReceiver</span><span class="p">(</span><span class="n">messaging</span><span class="o">.</span><span class="n">MessageProcessor</span><span class="p">):</span>
     <span class="p">[</span><span class="o">...</span><span class="p">]</span>
-    <span class="nd">@messaging.RpcHandler</span><span class="p">(</span><span class="s1">&#39;command&#39;</span><span class="p">,</span> <span class="s1">&#39;ping&#39;</span><span class="p">)</span>
+    <span class="nd">@messaging</span><span class="o">.</span><span class="n">RpcHandler</span><span class="p">(</span><span class="s1">&#39;command&#39;</span><span class="p">,</span> <span class="s1">&#39;ping&#39;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">msg_rpc_ping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">content</span><span class="p">,</span> <span class="n">reply_func</span><span class="p">):</span>
-        <span class="k">print</span> <span class="s2">&quot;Got a ping! Answering...&quot;</span>
+        <span class="nb">print</span> <span class="s2">&quot;Got a ping! Answering...&quot;</span>
         <span class="n">reply_func</span><span class="p">(</span><span class="n">messaging</span><span class="o">.</span><span class="n">MessageResult</span><span class="p">(</span><span class="s1">&#39;Pong&#39;</span><span class="p">))</span>
 </pre></div>
 
@@ -316,9 +316,9 @@ Got a custom ping! The custom value is [u&#39;Just ping me&#39;, 1]
 <div class="highlight"><pre><span></span><span class="n">answer</span> <span class="o">=</span> <span class="n">producer</span><span class="o">.</span><span class="n">rpc_ping</span><span class="p">()</span>
 
 <span class="k">if</span> <span class="n">answer</span><span class="o">.</span><span class="n">body</span><span class="p">[</span><span class="s1">&#39;content&#39;</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;success&#39;</span><span class="p">:</span>
-    <span class="k">print</span> <span class="s2">&quot;Answer: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span><span class="p">(</span><span class="n">answer</span><span class="o">.</span><span class="n">body</span><span class="p">[</span><span class="s1">&#39;content&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">])</span>
+    <span class="nb">print</span> <span class="s2">&quot;Answer: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span><span class="p">(</span><span class="n">answer</span><span class="o">.</span><span class="n">body</span><span class="p">[</span><span class="s1">&#39;content&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">])</span>
 <span class="k">elif</span> <span class="n">answer</span><span class="o">.</span><span class="n">body</span><span class="p">[</span><span class="s1">&#39;content&#39;</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;exception&#39;</span><span class="p">:</span>
-    <span class="k">print</span> <span class="s2">&quot;An exception occoured! (</span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span><span class="p">(</span><span class="n">answer</span><span class="o">.</span><span class="n">body</span><span class="p">[</span><span class="s1">&#39;content&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">])</span>
+    <span class="nb">print</span> <span class="s2">&quot;An exception occoured! (</span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span><span class="p">(</span><span class="n">answer</span><span class="o">.</span><span class="n">body</span><span class="p">[</span><span class="s1">&#39;content&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">])</span>
 </pre></div>
 
 
@@ -329,10 +329,10 @@ Got a custom ping! The custom value is [u&#39;Just ping me&#39;, 1]
 <p>Message handlers are powerful, but there is a couple of tricks more in Postage. The first one is <code>MessageHandlerFullBody</code> that you can use exactly like <code>MessageHandler</code>; the difference is that the decorated method does not receive the message content (the <code>content</code> key of the body) but the full body. You can leverage this to access the underlying message structure: this allows you to access the fingerprint included in the message, which contains precious information about the process that sent the message. Let's show how it works; add a new handler to the receiver:</p>
 <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">PingReceiver</span><span class="p">(</span><span class="n">messaging</span><span class="o">.</span><span class="n">MessageProcessor</span><span class="p">):</span>
     <span class="p">[</span><span class="o">...</span><span class="p">]</span>
-    <span class="nd">@messaging.MessageHandlerFullBody</span><span class="p">(</span><span class="s1">&#39;command&#39;</span><span class="p">,</span> <span class="s1">&#39;ping&#39;</span><span class="p">)</span>
+    <span class="nd">@messaging</span><span class="o">.</span><span class="n">MessageHandlerFullBody</span><span class="p">(</span><span class="s1">&#39;command&#39;</span><span class="p">,</span> <span class="s1">&#39;ping&#39;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">msg_ping_full</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">body</span><span class="p">):</span>
         <span class="n">fingerprint</span> <span class="o">=</span> <span class="n">body</span><span class="p">[</span><span class="s1">&#39;fingerprint&#39;</span><span class="p">]</span>
-        <span class="k">print</span> <span class="s2">&quot;Got a ping from </span><span class="si">%s</span><span class="s2"> running on </span><span class="si">%s</span><span class="s2"> with pid </span><span class="si">%s</span><span class="s2">&quot;</span>\
+        <span class="nb">print</span> <span class="s2">&quot;Got a ping from </span><span class="si">%s</span><span class="s2"> running on </span><span class="si">%s</span><span class="s2"> with pid </span><span class="si">%s</span><span class="s2">&quot;</span>\
               <span class="o">%</span><span class="p">(</span><span class="n">fingerprint</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="n">fingerprint</span><span class="p">[</span><span class="s1">&#39;host&#39;</span><span class="p">],</span> <span class="n">fingerprint</span><span class="p">[</span><span class="s1">&#39;pid&#39;</span><span class="p">])</span>
 </pre></div>
 
@@ -351,10 +351,10 @@ Got a ping!
 <p>To show how it works let's add another handler to the receiver:</p>
 <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">PingReceiver</span><span class="p">(</span><span class="n">messaging</span><span class="o">.</span><span class="n">MessageProcessor</span><span class="p">):</span>
     <span class="p">[</span><span class="o">...</span><span class="p">]</span>
-    <span class="nd">@messaging.MessageHandler</span><span class="p">(</span><span class="s1">&#39;command&#39;</span><span class="p">,</span> <span class="s1">&#39;ping&#39;</span><span class="p">)</span>
+    <span class="nd">@messaging</span><span class="o">.</span><span class="n">MessageHandler</span><span class="p">(</span><span class="s1">&#39;command&#39;</span><span class="p">,</span> <span class="s1">&#39;ping&#39;</span><span class="p">)</span>
     <span class="k">class</span> <span class="nc">MsgPing</span><span class="p">(</span><span class="n">messaging</span><span class="o">.</span><span class="n">Handler</span><span class="p">):</span>
         <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-            <span class="k">print</span> <span class="s2">&quot;Got a ping - processed by </span><span class="si">%s</span><span class="s2"> hosted by </span><span class="si">%s</span><span class="s2">&quot;</span>\
+            <span class="nb">print</span> <span class="s2">&quot;Got a ping - processed by </span><span class="si">%s</span><span class="s2"> hosted by </span><span class="si">%s</span><span class="s2">&quot;</span>\
                   <span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">processor</span><span class="o">.</span><span class="vm">__class__</span><span class="p">)</span>
 </pre></div>
 
@@ -379,9 +379,9 @@ Got a ping!
     <span class="sd">&quot;&quot;&quot;This is the exchange that receives ping messages.&quot;&quot;&quot;</span>
     <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;ping-exchange&quot;</span>
     <span class="n">exchange_type</span> <span class="o">=</span> <span class="s2">&quot;direct&quot;</span>
-    <span class="n">passive</span> <span class="o">=</span> <span class="bp">False</span>
-    <span class="n">durable</span> <span class="o">=</span> <span class="bp">True</span>
-    <span class="n">auto_delete</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">passive</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">durable</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">auto_delete</span> <span class="o">=</span> <span class="kc">False</span>
 
 <span class="k">class</span> <span class="nc">PingProducer</span><span class="p">(</span><span class="n">messaging</span><span class="o">.</span><span class="n">GenericProducer</span><span class="p">):</span>
     <span class="c1"># Send messages to this exchange with this routing key</span>
@@ -431,9 +431,9 @@ Got a ping!
 <span class="c1"># Send a &#39;ping&#39; RPC call</span>
 <span class="n">answer</span> <span class="o">=</span> <span class="n">producer</span><span class="o">.</span><span class="n">rpc_ping</span><span class="p">()</span>
 <span class="k">if</span> <span class="n">answer</span><span class="o">.</span><span class="n">body</span><span class="p">[</span><span class="s1">&#39;content&#39;</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;success&#39;</span><span class="p">:</span>
-    <span class="k">print</span> <span class="s2">&quot;Answer: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span><span class="p">(</span><span class="n">answer</span><span class="o">.</span><span class="n">body</span><span class="p">[</span><span class="s1">&#39;content&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">])</span>
+    <span class="nb">print</span> <span class="s2">&quot;Answer: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span><span class="p">(</span><span class="n">answer</span><span class="o">.</span><span class="n">body</span><span class="p">[</span><span class="s1">&#39;content&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">])</span>
 <span class="k">elif</span> <span class="n">answer</span><span class="o">.</span><span class="n">body</span><span class="p">[</span><span class="s1">&#39;content&#39;</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;exception&#39;</span><span class="p">:</span>
-    <span class="k">print</span> <span class="s2">&quot;An exception occoured! (</span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span><span class="p">(</span><span class="n">answer</span><span class="o">.</span><span class="n">body</span><span class="p">[</span><span class="s1">&#39;content&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">])</span>
+    <span class="nb">print</span> <span class="s2">&quot;An exception occoured! (</span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span><span class="p">(</span><span class="n">answer</span><span class="o">.</span><span class="n">body</span><span class="p">[</span><span class="s1">&#39;content&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">])</span>
 </pre></div>
 
 
@@ -448,39 +448,39 @@ Got a ping!
 
 <span class="k">class</span> <span class="nc">PingReceiver</span><span class="p">(</span><span class="n">messaging</span><span class="o">.</span><span class="n">MessageProcessor</span><span class="p">):</span>
     <span class="c1"># Process an incoming &#39;ping&#39; command</span>
-    <span class="nd">@messaging.MessageHandler</span><span class="p">(</span><span class="s1">&#39;command&#39;</span><span class="p">,</span> <span class="s1">&#39;ping&#39;</span><span class="p">)</span>
+    <span class="nd">@messaging</span><span class="o">.</span><span class="n">MessageHandler</span><span class="p">(</span><span class="s1">&#39;command&#39;</span><span class="p">,</span> <span class="s1">&#39;ping&#39;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">msg_ping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">content</span><span class="p">):</span>
-        <span class="k">print</span> <span class="s2">&quot;Got a ping!&quot;</span>
+        <span class="nb">print</span> <span class="s2">&quot;Got a ping!&quot;</span>
 
     <span class="c1"># Process an incoming &#39;timed_ping&#39; command</span>
-    <span class="nd">@messaging.MessageHandler</span><span class="p">(</span><span class="s1">&#39;command&#39;</span><span class="p">,</span> <span class="s1">&#39;timed_ping&#39;</span><span class="p">)</span>
+    <span class="nd">@messaging</span><span class="o">.</span><span class="n">MessageHandler</span><span class="p">(</span><span class="s1">&#39;command&#39;</span><span class="p">,</span> <span class="s1">&#39;timed_ping&#39;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">msg_timed_ping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">content</span><span class="p">):</span>
-        <span class="k">print</span> <span class="s2">&quot;Got a timed ping! Time is </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span><span class="p">(</span><span class="n">content</span><span class="p">[</span><span class="s1">&#39;parameters&#39;</span><span class="p">][</span><span class="s1">&#39;time&#39;</span><span class="p">])</span>
+        <span class="nb">print</span> <span class="s2">&quot;Got a timed ping! Time is </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span><span class="p">(</span><span class="n">content</span><span class="p">[</span><span class="s1">&#39;parameters&#39;</span><span class="p">][</span><span class="s1">&#39;time&#39;</span><span class="p">])</span>
 
     <span class="c1"># Process an incoming &#39;custom_ping&#39; command</span>
-    <span class="nd">@messaging.MessageHandler</span><span class="p">(</span><span class="s1">&#39;command&#39;</span><span class="p">,</span> <span class="s1">&#39;custom_ping&#39;</span><span class="p">)</span>
+    <span class="nd">@messaging</span><span class="o">.</span><span class="n">MessageHandler</span><span class="p">(</span><span class="s1">&#39;command&#39;</span><span class="p">,</span> <span class="s1">&#39;custom_ping&#39;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">msg_custom_ping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">content</span><span class="p">):</span>
-        <span class="k">print</span> <span class="s2">&quot;Got a custom ping! The custom value is </span><span class="si">%s</span><span class="s2">&quot;</span>\
+        <span class="nb">print</span> <span class="s2">&quot;Got a custom ping! The custom value is </span><span class="si">%s</span><span class="s2">&quot;</span>\
         <span class="o">%</span><span class="p">(</span><span class="n">content</span><span class="p">[</span><span class="s1">&#39;parameters&#39;</span><span class="p">][</span><span class="s1">&#39;custom_value&#39;</span><span class="p">])</span>
 
     <span class="c1"># Process an incoming &#39;ping&#39; RPC command</span>
-    <span class="nd">@messaging.RpcHandler</span><span class="p">(</span><span class="s1">&#39;command&#39;</span><span class="p">,</span> <span class="s1">&#39;ping&#39;</span><span class="p">)</span>
+    <span class="nd">@messaging</span><span class="o">.</span><span class="n">RpcHandler</span><span class="p">(</span><span class="s1">&#39;command&#39;</span><span class="p">,</span> <span class="s1">&#39;ping&#39;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">msg_rpc_ping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">content</span><span class="p">,</span> <span class="n">reply_func</span><span class="p">):</span>
-        <span class="k">print</span> <span class="s2">&quot;Got a ping! Answering...&quot;</span>
+        <span class="nb">print</span> <span class="s2">&quot;Got a ping! Answering...&quot;</span>
         <span class="n">reply_func</span><span class="p">(</span><span class="n">messaging</span><span class="o">.</span><span class="n">MessageResult</span><span class="p">(</span><span class="s1">&#39;Pong&#39;</span><span class="p">))</span>
 
     <span class="c1"># Process the full body of an incoming &#39;ping&#39; command</span>
-    <span class="nd">@messaging.MessageHandlerFullBody</span><span class="p">(</span><span class="s1">&#39;command&#39;</span><span class="p">,</span> <span class="s1">&#39;ping&#39;</span><span class="p">)</span>
+    <span class="nd">@messaging</span><span class="o">.</span><span class="n">MessageHandlerFullBody</span><span class="p">(</span><span class="s1">&#39;command&#39;</span><span class="p">,</span> <span class="s1">&#39;ping&#39;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">msg_ping_full</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">body</span><span class="p">):</span>
         <span class="n">fingerprint</span> <span class="o">=</span> <span class="n">body</span><span class="p">[</span><span class="s1">&#39;fingerprint&#39;</span><span class="p">]</span>
-        <span class="k">print</span> <span class="s2">&quot;Got a ping from </span><span class="si">%s</span><span class="s2"> running on </span><span class="si">%s</span><span class="s2"> with pid </span><span class="si">%s</span><span class="s2">&quot;</span>\
+        <span class="nb">print</span> <span class="s2">&quot;Got a ping from </span><span class="si">%s</span><span class="s2"> running on </span><span class="si">%s</span><span class="s2"> with pid </span><span class="si">%s</span><span class="s2">&quot;</span>\
         <span class="o">%</span><span class="p">(</span><span class="n">fingerprint</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="n">fingerprint</span><span class="p">[</span><span class="s1">&#39;host&#39;</span><span class="p">],</span> <span class="n">fingerprint</span><span class="p">[</span><span class="s1">&#39;pid&#39;</span><span class="p">])</span>
 
     <span class="c1"># Process an incoming &#39;ping&#39; command with a class handler</span>
-    <span class="nd">@messaging.MessageHandler</span><span class="p">(</span><span class="s1">&#39;command&#39;</span><span class="p">,</span> <span class="s1">&#39;ping&#39;</span><span class="p">)</span>
+    <span class="nd">@messaging</span><span class="o">.</span><span class="n">MessageHandler</span><span class="p">(</span><span class="s1">&#39;command&#39;</span><span class="p">,</span> <span class="s1">&#39;ping&#39;</span><span class="p">)</span>
     <span class="k">class</span> <span class="nc">MsgPing</span><span class="p">(</span><span class="n">messaging</span><span class="o">.</span><span class="n">Handler</span><span class="p">):</span>
         <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-            <span class="k">print</span> <span class="s2">&quot;Got a ping - processed by </span><span class="si">%s</span><span class="s2"> hosted by </span><span class="si">%s</span><span class="s2">&quot;</span>\
+            <span class="nb">print</span> <span class="s2">&quot;Got a ping - processed by </span><span class="si">%s</span><span class="s2"> hosted by </span><span class="si">%s</span><span class="s2">&quot;</span>\
         <span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">processor</span><span class="o">.</span><span class="vm">__class__</span><span class="p">)</span>
 
 <span class="c1"># Exchange/Queue/Key</span>
@@ -488,7 +488,7 @@ Got a ping!
 
 <span class="c1"># Instance the receiver</span>
 <span class="n">receiver</span> <span class="o">=</span> <span class="n">PingReceiver</span><span class="p">(</span><span class="n">fingerprint</span><span class="o">.</span><span class="n">as_dict</span><span class="p">(),</span> <span class="n">eqks</span><span class="p">,</span> 
-            <span class="bp">None</span><span class="p">,</span> <span class="n">messaging</span><span class="o">.</span><span class="n">global_vhost</span><span class="p">)</span>
+            <span class="kc">None</span><span class="p">,</span> <span class="n">messaging</span><span class="o">.</span><span class="n">global_vhost</span><span class="p">)</span>
 
 <span class="c1"># Instance the scheduler and run the receiver</span>
 <span class="n">scheduler</span> <span class="o">=</span> <span class="n">microthreads</span><span class="o">.</span><span class="n">MicroScheduler</span><span class="p">()</span>

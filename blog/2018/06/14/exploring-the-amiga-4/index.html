@@ -12,9 +12,9 @@
 		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,400italic,600italic|Roboto+Slab:400,700">
 
-        <link rel="stylesheet" href="/theme/css/main.min.css?04100d07">
+        <link rel="stylesheet" href="/theme/css/main.min.css?868c6525">
 
-<link rel="stylesheet" href="/theme/css/retro.min.css?41d7a3f1">
+<link rel="stylesheet" href="/theme/css/retro.min.css?d93687f1">
         
         <link href="/images/global/favicon.jpg" rel="icon">
 
@@ -91,7 +91,7 @@
 
     <section id="post-info">
         <div class="align-center">
-            <a class="button special small" href="/categories/assembly/">assembly</a>            <a class="button special small" href="/categories/amiga/">amiga</a>            <a class="button special small" href="/categories/retroprogramming/">retroprogramming</a>        </div>
+            <a class="button small" href="/categories/assembly/">assembly</a>            <a class="button small" href="/categories/amiga/">amiga</a>            <a class="button small" href="/categories/retroprogramming/">retroprogramming</a>        </div>
 
         <div class="align-center">
             By Leonardo Giordani
@@ -128,28 +128,28 @@
 <p>The <code>Open</code> routine expects the address of the library to be in the <code>a6</code> register, and returns the same value in <code>d0</code>. It then adds 1 to the number contained 32 bytes (<code>0x20</code>) after the address of the library itself and then returns. To find out what this number is we can go back again to the NDK and its include files.</p>
 <p>From a previous investigation we know that, once the library has been installed in memory, there are two structures defined one after the other. The first is the <code>LN</code> structure that represents a linked list node, and the second is the <code>LIB</code> structure that represents the library.</p>
 <p>We find the definition of <code>LN</code> in <code>include_i/exec/nodes.i</code></p>
-<div class="highlight"><pre><span></span> <span class="nv">STRUCTURE</span>    <span class="nv">LN</span>,<span class="mi">0</span>    <span class="c1">; List Node</span>
-    <span class="nv">APTR</span>    <span class="nv">LN_SUCC</span> <span class="c1">; Pointer to next (successor)</span>
-    <span class="nv">APTR</span>    <span class="nv">LN_PRED</span> <span class="c1">; Pointer to previous (predecessor)</span>
-    <span class="nv">UBYTE</span>   <span class="nv">LN_TYPE</span>
-    <span class="nv">BYTE</span>    <span class="nv">LN_PRI</span>  <span class="c1">; Priority, for sorting</span>
-    <span class="nv">APTR</span>    <span class="nv">LN_NAME</span> <span class="c1">; ID string, null terminated</span>
-    <span class="nv">LABEL</span>   <span class="nv">LN_SIZE</span> <span class="c1">; Note: word aligned</span>
+<div class="highlight"><pre><span></span><span class="err"> STRUCTURE    LN,0    ; List Node</span>
+<span class="err">    APTR    LN_SUCC ; Pointer to next (successor)</span>
+<span class="err">    APTR    LN_PRED ; Pointer to previous (predecessor)</span>
+<span class="err">    UBYTE   LN_TYPE</span>
+<span class="err">    BYTE    LN_PRI  ; Priority, for sorting</span>
+<span class="err">    APTR    LN_NAME ; ID string, null terminated</span>
+<span class="err">    LABEL   LN_SIZE ; Note: word aligned</span>
 </pre></div>
 
 
 <p>and the definition of <code>LIB</code> in <code>include_i/exewc/libraries.i</code></p>
-<div class="highlight"><pre><span></span> <span class="k">STRUCTURE</span> <span class="n">LIB</span><span class="p">,</span><span class="n">LN_SIZE</span>
-    <span class="n">UBYTE</span>   <span class="n">LIB_FLAGS</span>       <span class="p">;</span> <span class="n">see</span> <span class="n">below</span>
-    <span class="n">UBYTE</span>   <span class="n">LIB_pad</span>         <span class="p">;</span> <span class="n">must</span> <span class="n">be</span> <span class="n">zero</span>
-    <span class="n">UWORD</span>   <span class="n">LIB_NEGSIZE</span>     <span class="p">;</span> <span class="nb">number</span> <span class="k">of</span> <span class="n">bytes</span> <span class="k">before</span> <span class="n">LIB</span>
-    <span class="n">UWORD</span>   <span class="n">LIB_POSSIZE</span>     <span class="p">;</span> <span class="nb">number</span> <span class="k">of</span> <span class="n">bytes</span> <span class="k">after</span> <span class="n">LIB</span>
-    <span class="n">UWORD</span>   <span class="n">LIB_VERSION</span>     <span class="p">;</span> <span class="n">major</span>
-    <span class="n">UWORD</span>   <span class="n">LIB_REVISION</span>    <span class="p">;</span> <span class="n">minor</span>
-    <span class="n">APTR</span>    <span class="n">LIB_IDSTRING</span>    <span class="p">;</span> <span class="n">ASCII</span> <span class="n">identification</span>
-    <span class="n">ULONG</span>   <span class="n">LIB_SUM</span>         <span class="p">;</span> <span class="n">the</span> <span class="k">system</span><span class="o">-</span><span class="n">calculated</span> <span class="n">checksum</span>
-    <span class="n">UWORD</span>   <span class="n">LIB_OPENCNT</span>     <span class="p">;</span> <span class="nb">number</span> <span class="k">of</span> <span class="k">current</span> <span class="n">opens</span>
-    <span class="n">LABEL</span>   <span class="n">LIB_SIZE</span>        <span class="p">;</span> <span class="n">Warning</span><span class="p">:</span> <span class="k">Size</span> <span class="k">is</span> <span class="k">not</span> <span class="n">a</span> <span class="n">longword</span> <span class="n">multiple</span><span class="o">!</span>
+<div class="highlight"><pre><span></span><span class="err"> STRUCTURE LIB,LN_SIZE</span>
+<span class="err">    UBYTE   LIB_FLAGS       ; see below</span>
+<span class="err">    UBYTE   LIB_pad         ; must be zero</span>
+<span class="err">    UWORD   LIB_NEGSIZE     ; number of bytes before LIB</span>
+<span class="err">    UWORD   LIB_POSSIZE     ; number of bytes after LIB</span>
+<span class="err">    UWORD   LIB_VERSION     ; major</span>
+<span class="err">    UWORD   LIB_REVISION    ; minor</span>
+<span class="err">    APTR    LIB_IDSTRING    ; ASCII identification</span>
+<span class="err">    ULONG   LIB_SUM         ; the system-calculated checksum</span>
+<span class="err">    UWORD   LIB_OPENCNT     ; number of current opens</span>
+<span class="err">    LABEL   LIB_SIZE        ; Warning: Size is not a longword multiple!</span>
 </pre></div>
 
 
@@ -341,7 +341,7 @@ d0                   a0      a1       a2
 <p>This decrements the address contained in <code>a0</code> by 2 bytes, then stores at the resulting address the hexadecimal number <code>0x4ef9</code>.</p>
 <p>The interesting part is that the number <code>0x4ef9</code> has a specific meaning for the Motorola 68000 processor, and namely that of the <code>jmp</code> instruction. This is clearly shown by the tables in the Programmer's Reference Manual (Section 8, Instruction Format Summary, 8-15).</p>
 <p>First we have to convert the number in binary, and we get</p>
-<div class="highlight"><pre><span></span><span class="mi">0</span><span class="n">x4ef9</span> <span class="o">-&gt;</span> <span class="mi">0100</span> <span class="mi">1110</span> <span class="mi">1111</span> <span class="mi">1001</span>
+<div class="highlight"><pre><span></span><span class="err">0x4ef9 -&gt; 0100 1110 1111 1001</span>
 </pre></div>
 
 

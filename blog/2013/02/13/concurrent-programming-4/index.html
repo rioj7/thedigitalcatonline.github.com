@@ -12,7 +12,7 @@
 		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,400italic,600italic|Roboto+Slab:400,700">
 
-        <link rel="stylesheet" href="/theme/css/main.min.css?04100d07">
+        <link rel="stylesheet" href="/theme/css/main.min.css?868c6525">
 
         
         <link href="/images/global/favicon.jpg" rel="icon">
@@ -90,7 +90,7 @@
 
     <section id="post-info">
         <div class="align-center">
-            <a class="button special small" href="/categories/c/">C</a>            <a class="button special small" href="/categories/operating-systems/">operating systems</a>            <a class="button special small" href="/categories/concurrent-programming/">concurrent programming</a>        </div>
+            <a class="button small" href="/categories/c/">C</a>            <a class="button small" href="/categories/operating-systems/">operating systems</a>            <a class="button small" href="/categories/concurrent-programming/">concurrent programming</a>        </div>
 
         <div class="align-center">
             By Leonardo Giordani
@@ -111,21 +111,21 @@
 <p>As briefly shown in the last article synchronization problems are not only among the most complex issues to solve in computer science, but can also lead to severe malfunctions of our software.</p>
 <p>Let's reconsider and formalize the example given in the last post. Say we create two different processes working on the same data. If the two processes just read the same data from memory (or disk) no problems can arise: data are static, and accessing does not change them. So the execution of the two processes is called <strong>consistent</strong>, which highlights that repeated executions or executions spanning a long time will always result in the same system behaviour.</p>
 <p>If now one of the processes wants to modify data different situations can come up, depending on the actual timing of the operations. Say we have two processes <code>A</code> and <code>B</code> and an element <code>d</code>; process <code>A</code> increases element <code>d</code> by 1 while process <code>B</code> prints the element value on the screen. In a sort of metalanguage, we could express this situation with the following syntax</p>
-<div class="highlight"><pre><span></span><span class="n">A</span> <span class="err">{</span> <span class="n">d</span><span class="o">-&gt;</span><span class="n">d</span><span class="o">+</span><span class="mi">1</span> <span class="err">}</span> <span class="o">&amp;</span> <span class="n">B</span> <span class="err">{</span> <span class="n">d</span><span class="o">-&gt;</span><span class="k">output</span> <span class="err">}</span>
+<div class="highlight"><pre><span></span><span class="err">A { d-&gt;d+1 } &amp; B { d-&gt;output }</span>
 </pre></div>
 
 
 <p>where <code>&amp;</code> stands for a concurrent execution; in other words the two processes are not synchronized. One of the possible resulting executions is</p>
-<div class="highlight"><pre><span></span><span class="p">(</span><span class="o">-</span><span class="p">)</span> <span class="n">d</span> <span class="o">=</span> <span class="mi">5</span>
-<span class="p">(</span><span class="n">A</span><span class="p">)</span> <span class="n">d</span> <span class="o">=</span> <span class="mi">6</span>
-<span class="p">(</span><span class="n">B</span><span class="p">)</span> <span class="k">output</span> <span class="o">=</span> <span class="mi">6</span>
+<div class="highlight"><pre><span></span><span class="err">(-) d = 5</span>
+<span class="err">(A) d = 6</span>
+<span class="err">(B) output = 6</span>
 </pre></div>
 
 
 <p>while the other is</p>
-<div class="highlight"><pre><span></span><span class="p">(</span><span class="o">-</span><span class="p">)</span> <span class="n">d</span> <span class="o">=</span> <span class="mi">5</span>
-<span class="p">(</span><span class="n">B</span><span class="p">)</span> <span class="k">output</span> <span class="o">=</span> <span class="mi">5</span>
-<span class="p">(</span><span class="n">A</span><span class="p">)</span> <span class="n">d</span> <span class="o">=</span> <span class="mi">6</span>
+<div class="highlight"><pre><span></span><span class="err">(-) d = 5</span>
+<span class="err">(B) output = 5</span>
+<span class="err">(A) d = 6</span>
 </pre></div>
 
 

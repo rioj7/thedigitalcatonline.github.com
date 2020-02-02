@@ -12,9 +12,9 @@
 		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,400italic,600italic|Roboto+Slab:400,700">
 
-        <link rel="stylesheet" href="/theme/css/main.min.css?04100d07">
+        <link rel="stylesheet" href="/theme/css/main.min.css?868c6525">
 
-<link rel="stylesheet" href="/theme/css/retro.min.css?41d7a3f1">
+<link rel="stylesheet" href="/theme/css/retro.min.css?d93687f1">
         
         <link href="/images/global/favicon.jpg" rel="icon">
 
@@ -90,7 +90,7 @@
 
     <section id="post-info">
         <div class="align-center">
-            <a class="button special small" href="/categories/assembly/">assembly</a>            <a class="button special small" href="/categories/amiga/">amiga</a>            <a class="button special small" href="/categories/retroprogramming/">retroprogramming</a>        </div>
+            <a class="button small" href="/categories/assembly/">assembly</a>            <a class="button small" href="/categories/amiga/">amiga</a>            <a class="button small" href="/categories/retroprogramming/">retroprogramming</a>        </div>
 
         <div class="align-center">
             By Leonardo Giordani
@@ -189,14 +189,14 @@ test: AmigaOS loadseg<span class="o">()</span>ble executable/binary
 <h2 id="relative-offset-encoding">Relative offset encoding<a class="headerlink" href="#relative-offset-encoding" title="Permanent link">&para;</a></h2>
 <p>A question may arise, then: why does the code show the address <code>0x30</code> if the displacement is relative?</p>
 <p>In the example, the syntax <code>0x30c(pc)</code> doesn't mean "the line at <code>0x30c</code> from the current line", but "the line at <code>0x30c</code> <em>considering that</em> the current line is <code>0x0364</code>". Let's dig into the binary representation of the instruction to see how the processor receives it. The value <code>0x41faffa6</code> in binary form is </p>
-<div class="highlight"><pre><span></span><span class="mi">01000001111110101111111110100110</span>
+<div class="highlight"><pre><span></span><span class="err">01000001111110101111111110100110</span>
 </pre></div>
 
 
 <p>If we split it according to the Motorola 68k opcodes scheme (Programmer's Reference Manual, Section 8) we get</p>
-<div class="highlight"><pre><span></span><span class="mi">0100</span> <span class="mi">000</span> <span class="mi">111</span> <span class="mi">111010</span> <span class="mi">1111111110100110</span>
-<span class="o">^</span>    <span class="o">^</span>       <span class="o">^</span>
-<span class="n">lea</span>  <span class="n">a0</span>      <span class="p">(</span><span class="n">d16</span><span class="p">,</span><span class="n">PC</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><span class="err">0100 000 111 111010 1111111110100110</span>
+<span class="err">^    ^       ^</span>
+<span class="err">lea  a0      (d16,PC)</span>
 </pre></div>
 
 
@@ -214,8 +214,8 @@ The value is the two's complement representation of the decimal <code>-90</code>
 <p>When the Amiga OS loads a library in memory the Exec master library analyses its structure and creates the so-called <em>jump table</em>. This is nothing more than an array that lists the addresses of the functions exposed by the library. This is a very simple and effective way to let the OS free to load the library anywhere in memory (relocation).</p>
 <p>The Exec master library is not different, but this library is loaded as part of the bootstrap process, and the base address is always stored in memory location <code>0x4</code>. To use one of Exec's functions, then, we just need to issue a <code>jsr &lt;address&gt;</code> (Jump to SubRoutine), where <code>&lt;address&gt;</code> is the current position in memory of the function we want to call. Since we don't know the absolute address, being the library dynamically loaded, we use the library's jump table to retrieve the base address and get the function address as a fixed offset from the former.</p>
 <p>Many Amiga programmers knew (and know) the addresses by heart, which is fine since the Amiga OS promises not to change them among different versions. So, for example, the <code>OpenLibrary</code> function can be found at address <code>-552</code> relative to the library base, while <code>CloseLibrary</code> is at <code>-414</code>. To call the <code>OpenLibrary</code> function, then, you need the following code</p>
-<div class="highlight"><pre><span></span>    <span class="nv">move</span>.<span class="nv">l</span> <span class="mi">4</span>.<span class="nv">w</span>,<span class="nv">a6</span>   <span class="c1">; a6 = base address of Exec</span>
-    <span class="nv">jsr</span> <span class="o">-</span><span class="mi">552</span><span class="ss">(</span><span class="nv">a6</span><span class="ss">)</span>    <span class="c1">; OpenLibrary()</span>
+<div class="highlight"><pre><span></span><span class="err">    move.l 4.w,a6   ; a6 = base address of Exec</span>
+<span class="err">    jsr -552(a6)    ; OpenLibrary()</span>
 </pre></div>
 
 
@@ -227,13 +227,13 @@ D0                    A1       D0
 
 
 <p>The pointer to the library name has to be in the register <code>a1</code> and the minimum accepted version in <code>d0</code>. The code becomes</p>
-<div class="highlight"><pre><span></span>    <span class="nv">move</span>.<span class="nv">l</span> <span class="mi">4</span>.<span class="nv">w</span>,<span class="nv">a6</span>        <span class="c1">; a6 = base address of Exec</span>
-    <span class="nv">clr</span>.<span class="nv">l</span> <span class="nv">d0</span>             <span class="c1">; 0 = accept all versions</span>
-    <span class="nv">move</span>.<span class="nv">l</span> #<span class="nv">libname</span>,<span class="nv">a1</span>   <span class="c1">; a1 = address of the libname string</span>
-    <span class="nv">jsr</span> <span class="o">-</span><span class="mi">552</span><span class="ss">(</span><span class="nv">a6</span><span class="ss">)</span>         <span class="c1">; OpenLibrary()</span>
+<div class="highlight"><pre><span></span>    <span class="k">move</span><span class="p">.</span><span class="n">l</span> <span class="mi">4</span><span class="p">.</span><span class="n">w</span><span class="p">,</span><span class="n">a6</span>        <span class="p">;</span> <span class="n">a6</span> <span class="o">=</span> <span class="n">base</span> <span class="n">address</span> <span class="k">of</span> <span class="k">Exec</span>
+    <span class="n">clr</span><span class="p">.</span><span class="n">l</span> <span class="n">d0</span>             <span class="p">;</span> <span class="mi">0</span> <span class="o">=</span> <span class="n">accept</span> <span class="k">all</span> <span class="n">versions</span>
+    <span class="k">move</span><span class="p">.</span><span class="n">l</span> <span class="o">#</span><span class="n">libname</span><span class="p">,</span><span class="n">a1</span>   <span class="p">;</span> <span class="n">a1</span> <span class="o">=</span> <span class="n">address</span> <span class="k">of</span> <span class="n">the</span> <span class="n">libname</span> <span class="n">string</span>
+    <span class="n">jsr</span> <span class="o">-</span><span class="mi">552</span><span class="p">(</span><span class="n">a6</span><span class="p">)</span>         <span class="p">;</span> <span class="n">OpenLibrary</span><span class="p">()</span>
 
-<span class="nv">libname</span>:
-    <span class="nv">dc</span>.<span class="nv">b</span> <span class="s2">&quot;</span><span class="s">somename.library</span><span class="s2">&quot;</span>,<span class="mi">0</span>
+<span class="n">libname</span><span class="p">:</span>
+    <span class="n">dc</span><span class="p">.</span><span class="n">b</span> <span class="ss">&quot;somename.library&quot;</span><span class="p">,</span><span class="mi">0</span>
 </pre></div>
 
 
