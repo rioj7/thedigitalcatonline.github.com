@@ -12,7 +12,7 @@
 		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,400italic,600italic|Roboto+Slab:400,700">
 
-        <link rel="stylesheet" href="/theme/css/main.min.css?868c6525">
+        <link rel="stylesheet" href="/theme/css/main.min.css?95cd4e15">
 
         
         <link href="/images/global/favicon.jpg" rel="icon">
@@ -181,7 +181,7 @@
 </pre></div>
 
 
-<p>This test tries to assign the value <code>5</code> to the variable <code>x</code>, but in general we want to support assignment with expressions, so we should test this behaviour as well</p>
+<p>This test tries to assign the value <code>5</code> to the variable <code>x</code>, but in general we want to support assignment with expressions, so we should test this behaviour as well, including the presence of variables</p>
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">test_parse_assignment_with_expression</span><span class="p">():</span>
     <span class="n">p</span> <span class="o">=</span> <span class="n">cpar</span><span class="o">.</span><span class="n">CalcParser</span><span class="p">()</span>
     <span class="n">p</span><span class="o">.</span><span class="n">lexer</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;x = 4 * (3 + 5)&quot;</span><span class="p">)</span>
@@ -216,6 +216,33 @@
                     <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="mi">5</span>
                 <span class="p">}</span>
             <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+
+<span class="k">def</span> <span class="nf">test_parse_assignment_expression_with_variables</span><span class="p">():</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">cpar</span><span class="o">.</span><span class="n">CalcParser</span><span class="p">()</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">lexer</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;x = y + 4&quot;</span><span class="p">)</span>
+
+    <span class="n">node</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">parse_assignment</span><span class="p">()</span>
+
+    <span class="k">assert</span> <span class="n">node</span><span class="o">.</span><span class="n">asdict</span><span class="p">()</span> <span class="o">==</span> <span class="p">{</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;assignment&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;variable&quot;</span><span class="p">:</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span>
+        <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;binary&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;operator&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;literal&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="s1">&#39;+&#39;</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;left&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;variable&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="s1">&#39;y&#39;</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;right&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;integer&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="mi">4</span>
+            <span class="p">},</span>
         <span class="p">}</span>
     <span class="p">}</span>
 </pre></div>
@@ -271,7 +298,7 @@
 <p>We are missing a final step. The CLI uses <code>parse_expression()</code> as its default entry point, which means that it doesn't understand variable assignments for the time being. We need then to introduce a new entry point <code>parse_line()</code> that we will use to process general language statements. The test for this goes in <code>tests/test_calc_parser.py</code></p>
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">test_parse_line_supports_expression</span><span class="p">():</span>
     <span class="n">p</span> <span class="o">=</span> <span class="n">cpar</span><span class="o">.</span><span class="n">CalcParser</span><span class="p">()</span>
-    <span class="n">p</span><span class="o">.</span><span class="n">lexer</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;2 * 3 + 4&quot;</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">lexer</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;2 * x + 4&quot;</span><span class="p">)</span>
 
     <span class="n">node</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">parse_line</span><span class="p">()</span>
 
@@ -284,8 +311,8 @@
                 <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="mi">2</span>
             <span class="p">},</span>
             <span class="s1">&#39;right&#39;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;integer&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="mi">3</span>
+                <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;variable&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="s1">&#39;x&#39;</span>
             <span class="p">},</span>
             <span class="s1">&#39;operator&#39;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;literal&#39;</span><span class="p">,</span>
