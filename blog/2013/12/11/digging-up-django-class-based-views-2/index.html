@@ -9,10 +9,11 @@
         <title>Digging up Django class-based views - 2 - The Digital Cat</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+<meta name="description" content="A detailed explanation of the nature of class-based views in Django - detail views, base views, and date-based views">
 <meta name="twitter:card" content="summary" />
 <meta name="twitter:site" content="@thedigicat" />
 <meta name="twitter:title" content="Digging up Django class-based views - 2" />
-<meta name="twitter:description" content="Read the full post on The Digital Cat" />
+<meta name="twitter:description" content="A detailed explanation of the nature of class-based views in Django - detail views, base views, and date-based views" />
 <meta name="twitter:image" content="https://www.thedigitalcatonline.com/images/digging-up-django-class-based-views.jpg" />
 		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,400italic,600italic|Roboto+Slab:400,700">
@@ -57,8 +58,10 @@
     "@id": "https://www.thedigitalcatonline.com/blog/2013/12/11/digging-up-django-class-based-views-2/"
   },
   "datePublished" : "11/12/2013",
-  "dateModified" : "11/12/2013",
+  "dateModified" : "16/03/2020",
   "image" : "https://www.thedigitalcatonline.com/images/digging-up-django-class-based-views.jpg",
+  "description" : "A detailed explanation of the nature of class-based views in Django - detail views, base views, and date-based views",
+  "headline" : "A detailed explanation of the nature of class-based views in Django - detail views, base views, and",
   "url" : "https://www.thedigitalcatonline.com/blog/2013/12/11/digging-up-django-class-based-views-2/"
 }
 </script>
@@ -95,7 +98,7 @@
 
     <section id="post-info">
         <div class="align-center">
-            <a class="button small" href="/categories/python/">Python</a>            <a class="button small" href="/categories/django/">Django</a>        </div>
+            <a class="button small" href="/categories/django/">Django</a>            <a class="button small" href="/categories/oop/">OOP</a>            <a class="button small" href="/categories/python/">Python</a>            <a class="button small" href="/categories/python3/">Python3</a>        </div>
 
         <div class="align-center">
             By Leonardo Giordani
@@ -103,19 +106,20 @@
 
             Published on <time datetime="2013-12-11T09:00:00+02:00"> 11/12/2013</time>
 
+            <span class="separator">•</span>
+            Last update on
+            <time datetime="2020-03-16T07:00:00+00:00"> 16/03/2020</time>
         </div>
     </section>
 
     <section id="content">
-        <h2 id="abstract">Abstract<a class="headerlink" href="#abstract" title="Permanent link">&para;</a></h2>
-<p><em>This post refers to Django 1.5. Please be warned that some of the matters discussed here, some solutions or the given code can be outdated by more recent Django versions</em></p>
-<p>In the first installment of this short series, I introduced the theory behind Django class-based views and the reason why in this context classes are more powerful than pure functions. I also introduced one of the generic views Django provides out-of-the-box, which is <code>ListView</code>.</p>
+        <p>In the first installment of this short series, I introduced the theory behind Django class-based views and the reason why in this context classes are more powerful than pure functions. I also introduced one of the generic views Django provides out of the box, which is <code>ListView</code>.</p>
 <p>In this second post I want to talk about the second most used generic view, <code>DetailView</code>, and about custom querysets and arguments. Last, I'm going to introduce unspecialized class-based views that allow you to build more complex Web pages. To fully understand <code>DetailView</code>, however, you need to grasp two essential concepts, namely <strong>querysets</strong> and <strong>view parameters</strong>. So I'm sorry for the learn-by-doing readers, but this time too I'm going to start with some pure programming topics.</p>
-<h2 id="querysets-or-the-art-of-extracting-information">QuerySets or the art of extracting information<a class="headerlink" href="#querysets-or-the-art-of-extracting-information" title="Permanent link">&para;</a></h2>
-<p>One of the most important parts of Django is the ORM (Object Relational Mapper), which allows you to access the underlying database just like a collection of Python objects. As you know, Django provides you tools to simplify the construction of DB queries; they are <strong>managers</strong> (the <code>.objects</code> attribute of any models, for example) and <strong>query methods</strong> (<code>get()</code>, <code>filter()</code>, and friends). Pay attention because things here are slightly more magical than you can think at a first glance.</p>
-<p>When you use one of the methods of a manager you get as a result a <code>QuerySet</code>, which most of the time is used as a list, but is more than this. You can find <a href="https://docs.djangoproject.com/en/1.5/topics/db/queries/">here</a> and <a href="https://docs.djangoproject.com/en/1.5/ref/models/querysets/">here</a> the official documentation about queries and QuerySets, a very recommended reading.</p>
-<p>What I want to stress here is that QuesySets are not evaluated until you perform an action that access the content like slicing or iterating on it. This means that we can build QuerySets, pass them to functions, store them, and even build them programmatically or metaprogramming them without the DB being hit. If you think at QuerySets as recipes you are not far from the truth: they are objects that store how you want to retrieve the data of your interest. Actually retriving them is another part of the game. This separation between the definition of something and its execution is called <strong>lazy evaluation</strong>.</p>
-<p>Let me give you a very trivial example to show why the lazy evaluation of QuerySets is important.</p>
+<h1 id="querysets-or-the-art-of-extracting-information">QuerySets or the art of extracting information<a class="headerlink" href="#querysets-or-the-art-of-extracting-information" title="Permanent link">&para;</a></h1>
+<p>One of the most important parts of Django is the ORM (Object Relational Mapper), which allows you to access the underlying database just like a collection of Python objects. As you know, Django provides tools to simplify the construction of DB queries; they are <strong>managers</strong> (the <code>.objects</code> attribute of any models, for example) and <strong>query methods</strong> (<code>get</code>, <code>filter</code>, and so on). Pay attention because things here are slightly more complicated than you can think at a first glance.</p>
+<p>When you use one of the methods of a manager you get as a result a <code>QuerySet</code>, which most of the time is used as a list, but is more than this. You can find the documentation about queries <a href="https://docs.djangoproject.com/en/3.0/topics/db/queries/">here</a> and the documentation about <code>QuerySet</code> <a href="https://docs.djangoproject.com/en/3.0/ref/models/querysets/">here</a>. Both are  very recommended readings.</p>
+<p>What I want to stress here is that quesysets are not evaluated until you perform an action that access the content like slicing or iterating on it. This means that we can build querysets, pass them to functions, store them, and even build them programmatically or metaprogramming them without the DB being hit. If you think at querysets as recipes you are not far from the truth: they are objects that store how you want to retrieve the data of your interest. Actually retriving them is another part of the game. This separation between the definition of something and its execution is called <strong>lazy evaluation</strong>.</p>
+<p>Let me give you a very trivial example to show why the lazy evaluation of querysets is important.</p>
 <div class="highlight"><pre><span></span><span class="p">[</span><span class="o">...</span><span class="p">]</span>
 
 <span class="k">def</span> <span class="nf">get_oldest_three</span><span class="p">(</span><span class="n">queryset</span><span class="p">):</span>
@@ -127,16 +131,15 @@
 </pre></div>
 
 
-<p>As you can see the <code>get_oldest_three()</code> method is just filtering an incoming QuerySet (which can be of any type); it simply orders the objects and gets the first three inserted in the DB. The important thing here is that we are using QuerySets like pure 'algorithms', or descriptions of a procedure. When creating the <code>old_books</code> variable we are just telling the <code>get_oldest_three()</code> method "Hey, this is the way I extract the data I'm interested in. May you please refine it and return the actual data?"</p>
-<p>Being such flexible objects, QuerySets are an important part of generic views, so keep them warm for the upcoming banquet.</p>
-<h2 id="being-flexible-parametric-views">Being flexible: parametric views<a class="headerlink" href="#being-flexible-parametric-views" title="Permanent link">&para;</a></h2>
-<p>URLs are the API of our Web site or service. This can be more or less evident for the user that browses through the pages, but from the programmer's point of view URLs are the entry points of a computer system. As such, they are not very different from the API of a library: here, static pages are just like constants, or functions that always return that same value (such as a configuration parameter), while dynamic pages are like functions that process incoming data (parameters) and return a result.</p>
-<p>So Web URLs can accept parameters, and our underlying view shall do the same. You basically have three methods to convey parameters from the user's browser to your server using HTTP. The first method is named <a href="https://en.wikipedia.org/wiki/Query_string">query string</a> and lists parameters directly in the URL through a universal syntax. The second method is storing parameters in the HTTP request body, which is what POST requests do. We will discuss this method in a later post about forms.</p>
+<p>As you can see the <code>get_oldest_three</code> method is just filtering an incoming <code>QuerySet</code> (which can be of any type); it simply orders the objects and gets the first three inserted in the DB. The important thing here is that we are using querysets like pure algorithms, or descriptions of a procedure. When creating the <code>old_books</code> variable we are just telling the <code>get_oldest_three</code> method "Hey, this is the way I extract the data I'm interested in. May you please refine it and return the actual data?"</p>
+<p>Being such flexible objects, querysets are an important part of generic views, so keep them warm for the upcoming banquet.</p>
+<h1 id="being-flexible-parametric-views">Being flexible: parametric views<a class="headerlink" href="#being-flexible-parametric-views" title="Permanent link">&para;</a></h1>
+<p>URLs are the API of our Web site or service. This can be more or less evident for the user that browses through the pages, but from the programmer's point of view, URLs are the entry points of a Web-based service. As such, they are not very different from the API of a library: here, static pages are just like constants, or functions that always return that same value (such as a configuration parameter), while dynamic pages are like functions that process incoming data (parameters) and return a result.</p>
+<p>So URLs can accept parameters, and our underlying view shall do the same. You basically have two methods to convey parameters from the browser to your server using HTTP. The first method is named <a href="https://en.wikipedia.org/wiki/Query_string">query string</a> and lists parameters directly in the URL through a universal syntax. The second method is storing parameters in the HTTP request body, which is what POST requests do. We will discuss this method in a later post about forms.</p>
 <p>The first method has one big drawback: most of the time URLs are long (and sometimes <em>too</em> long), and difficult to use as a real API. To soften this effect the concept of <a href="https://en.wikipedia.org/wiki/Clean_URL">clean URL</a> arose, and this is the way Django follows natively (though, if you want, you can also stick to the query string method).</p>
-<p>Now, <a href="https://docs.djangoproject.com/en/1.5/topics/http/urls/">you know</a> that you can collect parameters contained in the URL parsing it with a regular expression; what we need to discover is how class-based views receive and process them.</p>
-<p>In the previous post we already discussed the <code>as_view()</code> method that shall instance the class and return the result of <code>dispatch()</code> (<a href="https://github.com/django/django/blob/stable/1.5.x/django/views/generic/base.py#L46">views/generic/base.py#L46</a>).</p>
-<div class="highlight"><pre><span></span>    <span class="nd">@classonlymethod</span>
-    <span class="k">def</span> <span class="nf">as_view</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">initkwargs</span><span class="p">):</span>
+<p>Now, the Django official documentation on <a href="https://docs.djangoproject.com/en/3.0/topics/http/urls/">URL dispatcher</a> tells you how you can collect parameters contained in the URL parsing it with a regular expression; what we need to discover is how class-based views receive and process them.</p>
+<p>In the previous post we already discussed the <code>as_view</code> method that shall instance the class and return the result of <code>dispatch</code> (<a href="https://github.com/django/django/blob/stable/1.5.x/django/views/generic/base.py#L46">CODE</a>).</p>
+<div class="highlight"><pre><span></span>    <span class="k">def</span> <span class="nf">as_view</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">initkwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Main entry point for a request-response process.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -170,40 +173,51 @@
 </pre></div>
 
 
-<p>Now look at what the <code>view()</code> wrapper function actually does with the instanced class (here line 21, <a href="https://github.com/django/django/blob/stable/1.5.x/django/views/generic/base.py#L65">views/generic/base.py#L65</a>); not surprisingly it takes the <code>request</code>, <code>args</code> and <code>kwargs</code> passed by the URLconf passes and converts them into as many class attributes with the same names.</p>
-<p>This means that <em>everywhere in our CBVs</em> we can access the original call parameters simply reading <code>self.request</code>, <code>self.args</code> and <code>self.kwargs</code>, where <code>*args</code> and <code>**kwargs</code> are the unnamed and named values extracted by the URLconf regular expression.</p>
-<h2 id="details">Details<a class="headerlink" href="#details" title="Permanent link">&para;</a></h2>
+<p>Now look at what the <code>view</code> wrapper function actually does with the instanced class (<a href="https://github.com/django/django/blob/stable/1.5.x/django/views/generic/base.py#L46">CODE</a>); not surprisingly it takes the <code>request</code>, <code>args</code> and <code>kwargs</code> passed by the URLconf and converts them into as many class attributes with the same names. Remember that URLconf is given this function itself, not the result of the call, which is the result of <code>dispatch</code>.</p>
+<p>This means that <em>anywhere in our CBVs</em> we can access the original call parameters simply reading <code>request</code>, <code>args</code> and <code>kwargs</code>, where <code>*args</code> and <code>**kwargs</code> are the unnamed and named values extracted by the URLconf regular expression.</p>
+<h1 id="getting-details">Getting details<a class="headerlink" href="#getting-details" title="Permanent link">&para;</a></h1>
 <p>Just after listing things, one of the most useful things a Web site does is giving details about objects. Obviously any e-commerce site is made for the most part by pages that list products and show product details, but also a blog is made of one or more pages with a list of posts and a page for each of them. So building a detailed view of the content of our database is worth learning.</p>
 <p>To help us in this task Django provides <code>DetailView</code>, which indeed deals, as the name suggests, with the details of what we get from the DB. While <code>ListView</code>'s basic behaviour is to extract the list of all objects with a given model, <code>DetailView</code> extracts a single object. How does it know what object shall be extracted?</p>
-<p>When <code>dispatch()</code> is called on an incoming HTTP request the only thing it does is to look at the <code>method</code> attribute, which for <code>HttpRequest</code> objects contains the name of the HTTP verb used (e.g. <code>'GET'</code>); then <code>dispatch()</code> looks for a method of the class with the lowercase name of the verb (e.g. <code>'GET'</code> --&gt; <code>get()</code>) (<a href="https://github.com/django/django/blob/stable/1.5.x/django/views/generic/base.py#L78">views/generic/base.py#L78</a>). This handler is then called with the same parameters of <code>dispatch()</code>, namely the <code>request</code> itself, <code>*args</code> and <code>**kwargs</code>.</p>
-<p><code>DetailView</code> has no body and inherits everything from two classes; the second one, <code>BaseDetailView</code>, implements the <code>get()</code> method (<a href="https://github.com/django/django/blob/stable/1.5.x/django/views/generic/detail.py#L107">views/generic/detail.py#L107</a>).</p>
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">object</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_object</span><span class="p">()</span>
-    <span class="n">context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_context_data</span><span class="p">(</span><span class="nb">object</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="p">)</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">render_to_response</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+<p>When <code>dispatch</code> is called on an incoming HTTP request the only thing it does is to look at the <code>method</code> attribute, which for <code>HttpRequest</code> objects contains the name of the HTTP verb used (e.g. <code>'GET'</code>); then <code>dispatch</code> looks for a method of the class with the lowercase name of the verb (e.g. <code>'GET'</code> becomes <code>get</code>) (<a href="https://github.com/django/django/blob/stable/3.0.x/django/views/generic/base.py#L94">CODE</a>). This handler is then called with the same parameters of <code>dispatch</code>, namely the <code>request</code> itself, <code>*args</code> and <code>**kwargs</code> (<a href="https://github.com/django/django/blob/stable/3.0.x/django/views/generic/base.py#L97">CODE</a>).</p>
+<p><code>DetailView</code> has no body and inherits everything from two classes, just like happened for <code>ListView</code>; the first parent class is the template mixin, while the second one, <code>BaseDetailView</code>, implements the <code>get</code> method (<a href="https://github.com/django/django/blob/stable/3.0.x/django/views/generic/detail.py#L105">CODE</a>).</p>
+<div class="highlight"><pre><span></span>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">object</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_object</span><span class="p">()</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_context_data</span><span class="p">(</span><span class="nb">object</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">render_to_response</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
 </pre></div>
 
 
-<p>As you can see this method extracts the single object it shall represent calling <code>self.get_object()</code>, then calls <code>self.get_context_data()</code> (that we met in the previous post) and last the familiar <code>self.render_to_response()</code> that is the class equivalent of the well know Django function. The method <code>self.get_object()</code> is provided by <code>BaseDetailView</code>'s ancestor <code>SingleObjectMixin</code> (<a href="https://github.com/django/django/blob/stable/1.5.x/django/views/generic/detail.py#L10">generic/detail.py#L10</a>): the most important parts of its code, for the sake of our present topic are</p>
+<p>As you can see, this method extracts the single object that it shall represent calling <code>get_object</code>, then calls <code>get_context_data</code> (that we already met in the previous post) and last the familiar <code>render_to_response</code>. The method <code>get_object</code> is provided by <code>BaseDetailView</code>'s ancestor <code>SingleObjectMixin</code> (<a href="https://github.com/django/django/blob/stable/3.0.x/django/views/generic/detail.py#L8">CODE</a>): the most important parts of its code, for the sake of our present topic are</p>
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">get_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queryset</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+    <span class="p">[</span><span class="o">...</span><span class="p">]</span>
+
     <span class="k">if</span> <span class="n">queryset</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">queryset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_queryset</span><span class="p">()</span>
 
     <span class="n">pk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pk_url_kwarg</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="p">[</span><span class="o">...</span><span class="p">]</span>
+
     <span class="k">if</span> <span class="n">pk</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">queryset</span> <span class="o">=</span> <span class="n">queryset</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">pk</span><span class="o">=</span><span class="n">pk</span><span class="p">)</span>
 
-    <span class="n">obj</span> <span class="o">=</span> <span class="n">queryset</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+    <span class="p">[</span><span class="o">...</span><span class="p">]</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">queryset</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+
+    <span class="p">[</span><span class="o">...</span><span class="p">]</span>
 
     <span class="k">return</span> <span class="n">obj</span>
 </pre></div>
 
 
 <p><strong>Warning</strong>: I removed many lines from the previous function to improve readability; please check the original source code for the complete implementation.</p>
-<p>The code shows where <code>DetailView</code> gets the queryset from; the <code>get_queryset()</code> method is provided by <code>SingleObjectMixin</code> itself and basically returns <code>self.queryset</code> if present, otherwise returns all objects of the given model (acting just like <code>ListView</code> does). This <code>queryset</code> is then refined by a <code>filter()</code> and last by a <code>get()</code>. Here <code>get()</code> is not used directly (I think) to manage the different error cases and raise the correct exceptions.</p>
-<p>The parameter <code>pk</code> used in <code>filter()</code> comes directly from <code>self.kwargs</code>, so it is taken directly from the URL. Since this is a core concept of views in general I want to look at this part carefully.</p>
-<p>Our <code>DetailView</code> is called by an URLconf that provides a regular expression to parse the URL, for example <code>url(r'^(?P&lt;pk&gt;\d+)/$',</code>. This regex extracts a parameter and gives it the name <code>pk</code>, so <code>kwargs</code> of the view will contain <code>pk</code> as key and the actual number in the URL as value. For example the URL <code>123/</code> will result in <code>{'pk': 123}</code>. The default behaviour of <code>DetailView</code> is to look for a <code>pk</code> key and use it to perform the filtering of the queryset, since <code>self.pk_url_kwarg</code> is <code>'pk'</code>.</p>
-<p>So if we want to change the name of the parameter we can simply define the <code>pk_url_kwarg</code> of our class and provide a regex that extract the primary key with the new name. For example <code>url(r'^(?P&lt;key&gt;\d+)/$',</code> extracts it with the name <code>key</code>, so we will define <code>pk_url_kwarg = 'key'</code> in our class.</p>
+<p>The code shows where <code>DetailView</code> gets the queryset from; the <code>get_queryset</code> method is provided by <code>SingleObjectMixin</code> itself and basically returns <code>queryset</code> if present, otherwise returns all objects of the given model (acting just like <code>ListView</code> does). This <code>queryset</code> is then refined by a <code>filter</code> and last by a <code>get</code>. Here <code>get</code> is not used directly (I think) to manage the different error cases and raise the correct exceptions.</p>
+<p>The parameter <code>pk</code> used in <code>filter</code> comes directly from <code>kwargs</code>, so it is taken directly from the URL. Since this is a core concept of views in general I want to look at this part with some extra care.</p>
+<p>The <code>DetailView</code> class is called by an URLconf that provides a regular expression to parse the URL, for example <code>url(r'^(?P&lt;pk&gt;\d+)/$',</code>. This regex extracts a parameter and gives it the name <code>pk</code>, so <code>kwargs</code> of the view will contain <code>pk</code> as key and the actual number in the URL as value. For example the URL <code>123/</code> will result in <code>{'pk': 123}</code>. The default behaviour of <code>DetailView</code> is to look for a <code>pk</code> key and use it to perform the filtering of the queryset, since <code>pk_url_kwarg</code> is <code>'pk'</code> (<a href="https://github.com/django/django/blob/stable/3.0.x/django/views/generic/detail.py#L17">CODE</a>).</p>
+<p>So if we want to change the name of the parameter we can simply define the <code>pk_url_kwarg</code> of our class and provide a regex that extract the primary key with the new name. For example <code>url(r'^(?P&lt;key&gt;\d+)/$',</code> extracts it with the name <code>key</code>, so we should define <code>pk_url_kwarg = 'key'</code> in our class.</p>
 <p>From this quick exploration we learned that a class inheriting from <code>DetailView</code>:</p>
 <ul>
 <li>provides a context with the <code>object</code> key initialized to a single object</li>
@@ -212,7 +226,7 @@
 <li><strong>must</strong> be called from a URL that includes a regexp that extracts the primary key of the searched object as <code>pk</code></li>
 <li><strong>can</strong> be configured to use a different name for the primary key through the <code>pk_url_kwarg</code> class attribute</li>
 </ul>
-<p>The basic use of <code>DetailView</code> is thus exemplified by the following code.</p>
+<p>The basic use of <code>DetailView</code> is exemplified by the following code.</p>
 <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">BookDetail</span><span class="p">(</span><span class="n">DetailView</span><span class="p">):</span>
     <span class="n">model</span> <span class="o">=</span> <span class="n">Book</span>
 
@@ -225,7 +239,7 @@
 
 
 <p>The view extracts a single object with the <code>Book</code> model; the regex is configured with the standard <code>pk</code> name.</p>
-<p>As shown for <code>ListView</code> in the previous post, any CBV uses <code>get_context_data()</code> to return the context dictionary to the rendering engine. So views that inherit from <code>DetailView</code> can add data to the context following the same pattern</p>
+<p>As shown for <code>ListView</code> in the previous post, any CBV uses <code>get_context_data</code> to return the context dictionary to the rendering engine. So views that inherit from <code>DetailView</code> can add data to the context following the same pattern. Suppose we have a function <code>get_similar_books</code> that given a book, returns similar ones according to some criteria.</p>
 <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">BookDetail</span><span class="p">(</span><span class="n">DetailView</span><span class="p">):</span>
     <span class="n">model</span> <span class="o">=</span> <span class="n">Book</span>
 
@@ -242,19 +256,19 @@
 </pre></div>
 
 
-<p>As explained before, you can access the object being shown through <code>self.object</code>, which in the above example is passed to a service function we implemented somewhere in our code.</p>
-<h2 id="using-the-base-views">Using the base views<a class="headerlink" href="#using-the-base-views" title="Permanent link">&para;</a></h2>
-<p>Sometimes, when dealing with complex pages, the generic display CBVs that Django provides are not the right choice. This usually becomes evident when you start overriding method to prevent the view to perform its standard behaviour. As an instance say that you want to show detailed information of more than one object: probably DetailView will soon show its limits, being built to show only one object.</p>
-<p>In all those cases that cannot be easily solved by one of the generic display CBVs, your way goes through other classes: <code>RedirectView</code>, <code>TemplateView</code>, and <code>View</code>. The documentation for these base views is <a href="https://docs.djangoproject.com/en/1.5/ref/class-based-views/base/">here</a>, while the source code is in <a href="https://github.com/django/django/blob/stable/1.5.x/django/views/generic/base.py">views/generic/base.py</a>.</p>
+<p>As explained before, you can access the object being shown through <code>object</code>, which in the above example is passed to a service function we implemented somewhere in our code.</p>
+<h1 id="using-the-base-views">Using the base views<a class="headerlink" href="#using-the-base-views" title="Permanent link">&para;</a></h1>
+<p>Sometimes, when dealing with complex pages, the generic display CBVs that Django provides are not the right choice. This usually becomes evident when you start overriding method to prevent the view to perform its standard behaviour. As an instance say that you want to show detailed information of more than one object: probably DetailView will soon show its limits, having been built to show only one object.</p>
+<p>In all those cases that cannot be easily solved by one of the generic display CBVs, your have to build your own starting from one of the base views: <code>RedirectView</code>, <code>TemplateView</code>, or <code>View</code> (<a href="https://docs.djangoproject.com/en/3.0/ref/class-based-views/base/">DOCS</a>, <a href="https://github.com/django/django/blob/stable/3.0.x/django/views/generic/base.py">CODE</a>).</p>
 <p>I'm not going to fully describe those views; I want however to briefly point out some peculiarities.</p>
-<p><code>View</code> is by now an old friend of us; we met it when we discussed the <code>as_view()</code> and <code>dispatch()</code> method. It is the most generic view class and can be leveraged to perform very specialized tasks such as rendering pages without templates (for example when returning JSON data in AJAX techniques).</p>
-<p><code>TemplateView</code> is the best choice to render pages from a template keeping in the meanwhile freedom as regards the context content. Chances are that this is going to be the view you will use the most after <code>ListView</code> and <code>DetailView</code>. Basically you just need to inherit from it and define the <code>get_context_data()</code> method. As you can see from the <a href="https://github.com/django/django/blob/stable/1.5.x/django/views/generic/base.py#L147">source code</a> <code>TemplateView</code> answers to GET requests only.</p>
-<p><code>RedirectView</code>, as the name implies, is used to redirect a request. The redirection mechanism is very simple: its <code>get()</code> method returns a <code>HttpResponseRedirect</code> to the URL defined by the <code>url</code> class attribute. The class exhibits a very interesting behaviour (<a href="https://github.com/django/django/blob/stable/1.5.x/django/views/generic/base.py#L195">views/generic/base.py#L195</a>) when called through HTTP methods other than GET (namely HEAD, POST, OPTIONS, DELETE, and PUT): it "converts" the method to GET simply calling <code>get()</code> from the respective method (<code>head()</code>, <code>post()</code>, and so on). In the next post I'll show how to leverage this simple technique to show the user a prefilled form.</p>
-<h2 id="date-based-views">Date-based views<a class="headerlink" href="#date-based-views" title="Permanent link">&para;</a></h2>
-<p>Django provides other class-based views that simplify dealing with objects extracted or ordered by date. As a programmer, you know that dealing with dates is sometimes at least awkward; the views in <a href="https://github.com/django/django/blob/stable/1.5.x/django/views/generic/dates.py">views/generic/dates.py</a> aims to help you to tame your date-based objects; any object that contains a date (e.g. post date for articles, birth date for people, log date for messages, etc) can be processed by these views. You can find the official documentation <a href="https://docs.djangoproject.com/en/1.5/ref/class-based-views/generic-date-based/">here</a>.</p>
-<p>Remember that date-based views are CBVs, so they are based on <code>View</code>, just like <code>ListView</code> or <code>TemplateView</code>. So, apart from their specialization on date processing, they behave the same (<code>get_context_data()</code>, <code>get()</code>, <code>dispatch()</code>, and so on).</p>
-<h2 id="conclusion">Conclusion<a class="headerlink" href="#conclusion" title="Permanent link">&para;</a></h2>
-<p>In this post we covered <code>DetailView</code> in deep and, more quickly, all the remaining base and data-based views. In the next post we will step into the rich (and strange) world of forms.</p>
+<p><code>View</code> is by now an old friend of us; we met it when we discussed the <code>as_view</code> and <code>dispatch</code> methods. It is the most generic view class and can be leveraged to perform very specialized tasks such as rendering pages without templates (for example when returning JSON data).</p>
+<p><code>TemplateView</code> is the best choice to render pages from a template, maintaining a great level of freedom when it comes to the content of the context dictionary. Chances are that this is going to be the view you will use the most after <code>ListView</code> and <code>DetailView</code>. Basically you just need to inherit from it and define the <code>get_context_data</code> method. As you can see from the <a href="https://github.com/django/django/blob/stable/3.0.x/django/views/generic/base.py#L157">CODE</a> <code>TemplateView</code> answers to GET requests only.</p>
+<p><code>RedirectView</code>, as the name implies, is used to redirect a request. The redirection mechanism is very simple: its <code>get</code> method returns a <code>HttpResponseRedirect</code> to the URL defined by the <code>url</code> class attribute. The class exhibits a very interesting behaviour (<a href="https://github.com/django/django/blob/stable/3.0.x/django/views/generic/base.py#L201">CODE</a>) when called with HTTP methods other than GET (namely HEAD, POST, OPTIONS, DELETE, PUT, or PATCH): it "converts" the method to GET simply calling <code>get</code> from the respective method (<code>head</code>, <code>post</code>, and so on). In the next post I'll show how to leverage this simple technique to show the user a prefilled form.</p>
+<h1 id="date-based-views">Date-based views<a class="headerlink" href="#date-based-views" title="Permanent link">&para;</a></h1>
+<p>Django provides other class-based views that simplify dealing with objects extracted or ordered by date. As a programmer, you know that sometimes dealing with dates is awkward, to say the least; views such as <code>YearArchiveView</code> or <code>DayArchiveView</code> (<a href="https://github.com/django/django/blob/stable/3.0.x/django/views/generic/dates.py">CODE</a>) aim to help you to tame your date-based objects; any object that contains a date (e.g. post date for articles, birth date for people, log date for messages, etc) can be processed by these views. You can find the official documentation <a href="https://docs.djangoproject.com/en/3.0/ref/class-based-views/generic-date-based/">here</a>.</p>
+<p>Remember that date-based views are CBVs, so they are based on <code>View</code>, just like <code>ListView</code> or <code>TemplateView</code>. So, apart from their specialization on date processing, they behave the same (using <code>get_context_data</code>, <code>get</code>, <code>dispatch</code>, and so on).</p>
+<h1 id="final-words">Final words<a class="headerlink" href="#final-words" title="Permanent link">&para;</a></h1>
+<p>In this post we covered <code>DetailView</code> in deep and, more superficially, all the remaining base and data-based views. I showed you how <code>DetailView</code> uses the given model and the querystring parameters to find the requested object, and how you can change its default behaviour. In the next post we will step into the rich (and strange) world of forms.</p>
 <h1 id="feedback">Feedback<a class="headerlink" href="#feedback" title="Permanent link">&para;</a></h1>
 <p>Feel free to reach me on <a href="https://twitter.com/thedigicat">Twitter</a> if you have questions. The <a href="https://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues">GitHub issues</a> page is the best place to submit corrections.</p>
     </section>
@@ -278,18 +292,6 @@
         <h1>Related Posts</h1>
         <div class="posts mini">
             <article class="card">
-                <a href="/blog/2020/02/16/dissecting-a-web-stack/" class="image">
-                    <img src="/images/dissecting-a-web-stack.jpg" alt="dissecting-a-web-stack" />
-                </a>
-                <div class="card-body">
-                    <a href="/blog/2020/02/16/dissecting-a-web-stack/"><h2 class="card-title">Dissecting a Web stack</h2></a>
-                    <p class="card-text">
-                        <time datetime="2020-02-16T15:00:00+00:00">Feb 16, 2020</time>
-                        <span class="fa fa-tags"></span>
-                        <a href="/categories/architectures/" class="tag">architectures</a>                        <a href="/categories/concurrent-programming/" class="tag">concurrent programming</a>                        <a href="/categories/cryptography/" class="tag">cryptography</a>                        <a href="/categories/infrastructure/" class="tag">infrastructure</a>                        <a href="/categories/flask/" class="tag">Flask</a>                        <a href="/categories/django/" class="tag">Django</a>                        <a href="/categories/python/" class="tag">Python</a>                        <a href="/categories/ssl/" class="tag">SSL</a>                        <a href="/categories/http/" class="tag">HTTP</a>                        <a href="/categories/www/" class="tag">WWW</a>                        <a href="/categories/aws/" class="tag">AWS</a>                    </p>
-                </div>
-            </article>
-            <article class="card">
                 <a href="/blog/2014/02/14/digging-up-django-class-based-views-3/" class="image">
                     <img src="/images/digging-up-django-class-based-views.jpg" alt="digging-up-django-class-based-views" />
                 </a>
@@ -298,7 +300,7 @@
                     <p class="card-text">
                         <time datetime="2014-02-14T16:13:41+01:00">Feb 14, 2014</time>
                         <span class="fa fa-tags"></span>
-                        <a href="/categories/python/" class="tag">Python</a>                        <a href="/categories/django/" class="tag">Django</a>                    </p>
+                        <a href="/categories/django/" class="tag">Django</a>                        <a href="/categories/oop/" class="tag">OOP</a>                        <a href="/categories/python/" class="tag">Python</a>                        <a href="/categories/python3/" class="tag">Python3</a>                    </p>
                 </div>
             </article>
             <article class="card">
@@ -310,43 +312,7 @@
                     <p class="card-text">
                         <time datetime="2013-10-28T08:43:00+02:00">Oct 28, 2013</time>
                         <span class="fa fa-tags"></span>
-                        <a href="/categories/python/" class="tag">Python</a>                        <a href="/categories/django/" class="tag">Django</a>                    </p>
-                </div>
-            </article>
-            <article class="card">
-                <a href="/blog/2019/11/21/punch-2-0-0/" class="image">
-                    <img src="/images/punch_2_0_0.jpg" alt="punch_2_0_0" />
-                </a>
-                <div class="card-body">
-                    <a href="/blog/2019/11/21/punch-2-0-0/"><h2 class="card-title">Punch 2.0.0 is out</h2></a>
-                    <p class="card-text">
-                        <time datetime="2019-11-21T16:00:00+01:00">Nov 21, 2019</time>
-                        <span class="fa fa-tags"></span>
-                        <a href="/categories/git/" class="tag">Git</a>                        <a href="/categories/python/" class="tag">Python</a>                        <a href="/categories/python3/" class="tag">Python3</a>                        <a href="/categories/versioning/" class="tag">versioning</a>                    </p>
-                </div>
-            </article>
-            <article class="card">
-                <a href="/blog/2019/06/07/run-a-pelican-blog/" class="image">
-                    <img src="/images/run-a-pelican-blog.jpg" alt="run-a-pelican-blog" />
-                </a>
-                <div class="card-body">
-                    <a href="/blog/2019/06/07/run-a-pelican-blog/"><h2 class="card-title">Run a blog with pelican</h2></a>
-                    <p class="card-text">
-                        <time datetime="2019-06-07T15:30:00+01:00">Jun 7, 2019</time>
-                        <span class="fa fa-tags"></span>
-                        <a href="/categories/python/" class="tag">Python</a>                        <a href="/categories/python3/" class="tag">Python3</a>                        <a href="/categories/pelican/" class="tag">pelican</a>                    </p>
-                </div>
-            </article>
-            <article class="card">
-                <a href="/blog/2019/05/27/youtube-channel/" class="image">
-                    <img src="/images/youtube-channel.jpg" alt="youtube-channel" />
-                </a>
-                <div class="card-body">
-                    <a href="/blog/2019/05/27/youtube-channel/"><h2 class="card-title">The Digital Cat Youtube Channel</h2></a>
-                    <p class="card-text">
-                        <time datetime="2019-05-27T12:00:00+01:00">May 27, 2019</time>
-                        <span class="fa fa-tags"></span>
-                        <a href="/categories/python/" class="tag">Python</a>                        <a href="/categories/python2/" class="tag">Python2</a>                        <a href="/categories/python3/" class="tag">Python3</a>                        <a href="/categories/tdd/" class="tag">TDD</a>                        <a href="/categories/testing/" class="tag">testing</a>                        <a href="/categories/video/" class="tag">video</a>                    </p>
+                        <a href="/categories/django/" class="tag">Django</a>                        <a href="/categories/oop/" class="tag">OOP</a>                        <a href="/categories/python/" class="tag">Python</a>                        <a href="/categories/python3/" class="tag">Python3</a>                    </p>
                 </div>
             </article>
             <article class="card">
@@ -362,39 +328,87 @@
                 </div>
             </article>
             <article class="card">
-                <a href="/blog/2018/07/05/useful-pytest-command-line-options/" class="image">
-                    <img src="/images/useful-pytest-command-line-options.jpg" alt="useful-pytest-command-line-options" />
+                <a href="/blog/2017/07/21/refactoring-with-test-in-python-a-practical-example/" class="image">
+                    <img src="/images/refactoring-with-tests-in-python.jpg" alt="refactoring-with-tests-in-python" />
                 </a>
                 <div class="card-body">
-                    <a href="/blog/2018/07/05/useful-pytest-command-line-options/"><h2 class="card-title">Useful pytest command line options</h2></a>
+                    <a href="/blog/2017/07/21/refactoring-with-test-in-python-a-practical-example/"><h2 class="card-title">Refactoring with tests in Python: a practical example</h2></a>
                     <p class="card-text">
-                        <time datetime="2018-07-05T11:00:00+01:00">Jul 5, 2018</time>
+                        <time datetime="2017-07-21T09:30:00+01:00">Jul 21, 2017</time>
                         <span class="fa fa-tags"></span>
-                        <a href="/categories/python/" class="tag">Python</a>                        <a href="/categories/python2/" class="tag">Python2</a>                        <a href="/categories/python3/" class="tag">Python3</a>                        <a href="/categories/tdd/" class="tag">TDD</a>                        <a href="/categories/testing/" class="tag">testing</a>                    </p>
+                        <a href="/categories/oop/" class="tag">OOP</a>                        <a href="/categories/python/" class="tag">Python</a>                        <a href="/categories/python3/" class="tag">Python3</a>                        <a href="/categories/refactoring/" class="tag">refactoring</a>                        <a href="/categories/tdd/" class="tag">TDD</a>                        <a href="/categories/testing/" class="tag">testing</a>                    </p>
                 </div>
             </article>
             <article class="card">
-                <a href="/blog/2018/06/02/a-game-of-tokens-solution-part-4/" class="image">
-                    <img src="/images/a-game-of-tokens-solutions.jpg" alt="a-game-of-tokens-solutions" />
+                <a href="/blog/2016/11/14/clean-architectures-in-python-a-step-by-step-example/" class="image">
+                    <img src="/images/clean-architectures.jpg" alt="clean-architectures" />
                 </a>
                 <div class="card-body">
-                    <a href="/blog/2018/06/02/a-game-of-tokens-solution-part-4/"><h2 class="card-title">A game of tokens: solution - Part 4</h2></a>
+                    <a href="/blog/2016/11/14/clean-architectures-in-python-a-step-by-step-example/"><h2 class="card-title">Clean architectures in Python: a step-by-step example</h2></a>
                     <p class="card-text">
-                        <time datetime="2018-06-02T13:30:00+00:00">Jun 2, 2018</time>
+                        <time datetime="2016-11-14T19:00:00+00:00">Nov 14, 2016</time>
                         <span class="fa fa-tags"></span>
-                        <a href="/categories/python/" class="tag">Python</a>                        <a href="/categories/python3/" class="tag">Python3</a>                        <a href="/categories/tdd/" class="tag">TDD</a>                        <a href="/categories/testing/" class="tag">testing</a>                        <a href="/categories/compilers/" class="tag">compilers</a>                    </p>
+                        <a href="/categories/oop/" class="tag">OOP</a>                        <a href="/categories/python/" class="tag">Python</a>                        <a href="/categories/python2/" class="tag">Python2</a>                        <a href="/categories/python3/" class="tag">Python3</a>                        <a href="/categories/tdd/" class="tag">TDD</a>                        <a href="/categories/architectures/" class="tag">architectures</a>                    </p>
                 </div>
             </article>
             <article class="card">
-                <a href="/blog/2018/06/02/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-4/" class="image">
-                    <img src="/images/a-game-of-tokens.jpg" alt="a-game-of-tokens" />
+                <a href="/blog/2016/09/27/python-mocks-a-gentle-introduction-part-2/" class="image">
+                    <img src="/images/python-mocks.jpg" alt="python-mocks" />
                 </a>
                 <div class="card-body">
-                    <a href="/blog/2018/06/02/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-4/"><h2 class="card-title">A game of tokens: write an interpreter in Python with TDD - Part 4</h2></a>
+                    <a href="/blog/2016/09/27/python-mocks-a-gentle-introduction-part-2/"><h2 class="card-title">Python Mocks: a gentle introduction - Part 2</h2></a>
                     <p class="card-text">
-                        <time datetime="2018-06-02T13:00:00+00:00">Jun 2, 2018</time>
+                        <time datetime="2016-09-27T09:00:00+00:00">Sep 27, 2016</time>
                         <span class="fa fa-tags"></span>
-                        <a href="/categories/python/" class="tag">Python</a>                        <a href="/categories/python3/" class="tag">Python3</a>                        <a href="/categories/tdd/" class="tag">TDD</a>                        <a href="/categories/testing/" class="tag">testing</a>                        <a href="/categories/compilers/" class="tag">compilers</a>                    </p>
+                        <a href="/categories/decorators/" class="tag">decorators</a>                        <a href="/categories/oop/" class="tag">OOP</a>                        <a href="/categories/python/" class="tag">Python</a>                        <a href="/categories/python2/" class="tag">Python2</a>                        <a href="/categories/python3/" class="tag">Python3</a>                        <a href="/categories/tdd/" class="tag">TDD</a>                        <a href="/categories/testing/" class="tag">testing</a>                    </p>
+                </div>
+            </article>
+            <article class="card">
+                <a href="/blog/2016/04/03/abstract-base-classes-in-python/" class="image">
+                    <img src="/images/abstract-base-classes.jpg" alt="abstract-base-classes" />
+                </a>
+                <div class="card-body">
+                    <a href="/blog/2016/04/03/abstract-base-classes-in-python/"><h2 class="card-title">Abstract Base Classes in Python</h2></a>
+                    <p class="card-text">
+                        <time datetime="2016-04-03T11:00:00+01:00">Apr 3, 2016</time>
+                        <span class="fa fa-tags"></span>
+                        <a href="/categories/decorators/" class="tag">decorators</a>                        <a href="/categories/metaclasses/" class="tag">metaclasses</a>                        <a href="/categories/metaprogramming/" class="tag">metaprogramming</a>                        <a href="/categories/notebook/" class="tag">Notebook</a>                        <a href="/categories/oop/" class="tag">OOP</a>                        <a href="/categories/python/" class="tag">Python</a>                        <a href="/categories/python2/" class="tag">Python2</a>                        <a href="/categories/python3/" class="tag">Python3</a>                    </p>
+                </div>
+            </article>
+            <article class="card">
+                <a href="/blog/2016/03/06/python-mocks-a-gentle-introduction-part-1/" class="image">
+                    <img src="/images/python-mocks.jpg" alt="python-mocks" />
+                </a>
+                <div class="card-body">
+                    <a href="/blog/2016/03/06/python-mocks-a-gentle-introduction-part-1/"><h2 class="card-title">Python Mocks: a gentle introduction - Part 1</h2></a>
+                    <p class="card-text">
+                        <time datetime="2016-03-06T18:00:00+01:00">Mar 6, 2016</time>
+                        <span class="fa fa-tags"></span>
+                        <a href="/categories/decorators/" class="tag">decorators</a>                        <a href="/categories/oop/" class="tag">OOP</a>                        <a href="/categories/python/" class="tag">Python</a>                        <a href="/categories/python2/" class="tag">Python2</a>                        <a href="/categories/python3/" class="tag">Python3</a>                        <a href="/categories/tdd/" class="tag">TDD</a>                        <a href="/categories/testing/" class="tag">testing</a>                    </p>
+                </div>
+            </article>
+            <article class="card">
+                <a href="/blog/2015/09/10/python-oop-tdd-example-part2/" class="image">
+                    <img src="/images/python-oop-tdd.jpg" alt="python-oop-tdd" />
+                </a>
+                <div class="card-body">
+                    <a href="/blog/2015/09/10/python-oop-tdd-example-part2/"><h2 class="card-title">A simple example of Python OOP development (with TDD) - Part 2</h2></a>
+                    <p class="card-text">
+                        <time datetime="2015-09-10T20:00:00+01:00">Sep 10, 2015</time>
+                        <span class="fa fa-tags"></span>
+                        <a href="/categories/oop/" class="tag">OOP</a>                        <a href="/categories/python/" class="tag">Python</a>                        <a href="/categories/python3/" class="tag">Python3</a>                        <a href="/categories/tdd/" class="tag">TDD</a>                        <a href="/categories/testing/" class="tag">testing</a>                    </p>
+                </div>
+            </article>
+            <article class="card">
+                <a href="/blog/2015/05/13/python-oop-tdd-example-part1/" class="image">
+                    <img src="/images/python-oop-tdd.jpg" alt="python-oop-tdd" />
+                </a>
+                <div class="card-body">
+                    <a href="/blog/2015/05/13/python-oop-tdd-example-part1/"><h2 class="card-title">A simple example of Python OOP development (with TDD) - Part 1</h2></a>
+                    <p class="card-text">
+                        <time datetime="2015-05-13T17:00:00+01:00">May 13, 2015</time>
+                        <span class="fa fa-tags"></span>
+                        <a href="/categories/oop/" class="tag">OOP</a>                        <a href="/categories/python/" class="tag">Python</a>                        <a href="/categories/python3/" class="tag">Python3</a>                        <a href="/categories/tdd/" class="tag">TDD</a>                        <a href="/categories/testing/" class="tag">testing</a>                    </p>
                 </div>
             </article>
         </div>
@@ -452,136 +466,136 @@
             </header>
 <ul class="list-inline list-clean" id="tags-side">
     <li class="tag font-size-3">
-        <a href="/categories/algorithms/">algorithms</a>
+        <a title="Posts about algorithms" href="/categories/algorithms/">algorithms</a>
     </li>
     <li class="tag font-size-2">
-        <a href="/categories/amiga/">amiga</a>
+        <a title="Posts about amiga" href="/categories/amiga/">amiga</a>
     </li>
     <li class="tag font-size-4">
-        <a href="/categories/amqp/">AMQP</a>
+        <a title="Posts about AMQP" href="/categories/amqp/">AMQP</a>
     </li>
     <li class="tag font-size-3">
-        <a href="/categories/architectures/">architectures</a>
+        <a title="Posts about architectures" href="/categories/architectures/">architectures</a>
     </li>
     <li class="tag font-size-2">
-        <a href="/categories/assembly/">assembly</a>
+        <a title="Posts about assembly" href="/categories/assembly/">assembly</a>
     </li>
     <li class="tag font-size-4">
-        <a href="/categories/aws/">AWS</a>
+        <a title="Posts about AWS" href="/categories/aws/">AWS</a>
     </li>
     <li class="tag font-size-2">
-        <a href="/categories/c/">C</a>
+        <a title="Posts about C" href="/categories/c/">C</a>
     </li>
     <li class="tag font-size-4">
-        <a href="/categories/clojure/">Clojure</a>
+        <a title="Posts about Clojure" href="/categories/clojure/">Clojure</a>
     </li>
     <li class="tag font-size-2">
-        <a href="/categories/compilers/">compilers</a>
+        <a title="Posts about compilers" href="/categories/compilers/">compilers</a>
     </li>
     <li class="tag font-size-2">
-        <a href="/categories/concurrent-programming/">concurrent programming</a>
+        <a title="Posts about concurrent programming" href="/categories/concurrent-programming/">concurrent programming</a>
     </li>
     <li class="tag font-size-3">
-        <a href="/categories/cryptography/">cryptography</a>
+        <a title="Posts about cryptography" href="/categories/cryptography/">cryptography</a>
     </li>
     <li class="tag font-size-2">
-        <a href="/categories/decorators/">decorators</a>
+        <a title="Posts about decorators" href="/categories/decorators/">decorators</a>
     </li>
     <li class="tag font-size-2">
-        <a href="/categories/django/">Django</a>
+        <a title="Posts about Django" href="/categories/django/">Django</a>
     </li>
     <li class="tag font-size-3">
-        <a href="/categories/erlang/">Erlang</a>
+        <a title="Posts about Erlang" href="/categories/erlang/">Erlang</a>
     </li>
     <li class="tag font-size-4">
-        <a href="/categories/flask/">Flask</a>
+        <a title="Posts about Flask" href="/categories/flask/">Flask</a>
     </li>
     <li class="tag font-size-1">
-        <a href="/categories/functional-programming/">functional programming</a>
+        <a title="Posts about functional programming" href="/categories/functional-programming/">functional programming</a>
     </li>
     <li class="tag font-size-3">
-        <a href="/categories/generators/">generators</a>
+        <a title="Posts about generators" href="/categories/generators/">generators</a>
     </li>
     <li class="tag font-size-3">
-        <a href="/categories/git/">Git</a>
+        <a title="Posts about Git" href="/categories/git/">Git</a>
     </li>
     <li class="tag font-size-4">
-        <a href="/categories/http/">HTTP</a>
+        <a title="Posts about HTTP" href="/categories/http/">HTTP</a>
     </li>
     <li class="tag font-size-4">
-        <a href="/categories/infrastructure/">infrastructure</a>
+        <a title="Posts about infrastructure" href="/categories/infrastructure/">infrastructure</a>
     </li>
     <li class="tag font-size-4">
-        <a href="/categories/m68000/">M68000</a>
+        <a title="Posts about M68000" href="/categories/m68000/">M68000</a>
     </li>
     <li class="tag font-size-2">
-        <a href="/categories/metaclasses/">metaclasses</a>
+        <a title="Posts about metaclasses" href="/categories/metaclasses/">metaclasses</a>
     </li>
     <li class="tag font-size-2">
-        <a href="/categories/metaprogramming/">metaprogramming</a>
+        <a title="Posts about metaprogramming" href="/categories/metaprogramming/">metaprogramming</a>
     </li>
     <li class="tag font-size-3">
-        <a href="/categories/notebook/">Notebook</a>
+        <a title="Posts about Notebook" href="/categories/notebook/">Notebook</a>
     </li>
     <li class="tag font-size-1">
-        <a href="/categories/oop/">OOP</a>
+        <a title="Posts about OOP" href="/categories/oop/">OOP</a>
     </li>
     <li class="tag font-size-2">
-        <a href="/categories/operating-systems/">operating systems</a>
+        <a title="Posts about operating systems" href="/categories/operating-systems/">operating systems</a>
     </li>
     <li class="tag font-size-4">
-        <a href="/categories/pelican/">pelican</a>
+        <a title="Posts about pelican" href="/categories/pelican/">pelican</a>
     </li>
     <li class="tag font-size-4">
-        <a href="/categories/pika/">Pika</a>
+        <a title="Posts about Pika" href="/categories/pika/">Pika</a>
     </li>
     <li class="tag font-size-4">
-        <a href="/categories/postage/">Postage</a>
+        <a title="Posts about Postage" href="/categories/postage/">Postage</a>
     </li>
     <li class="tag font-size-1">
-        <a href="/categories/python/">Python</a>
+        <a title="Posts about Python" href="/categories/python/">Python</a>
     </li>
     <li class="tag font-size-2">
-        <a href="/categories/python2/">Python2</a>
+        <a title="Posts about Python2" href="/categories/python2/">Python2</a>
     </li>
     <li class="tag font-size-1">
-        <a href="/categories/python3/">Python3</a>
+        <a title="Posts about Python3" href="/categories/python3/">Python3</a>
     </li>
     <li class="tag font-size-3">
-        <a href="/categories/rabbitmq/">RabbitMQ</a>
+        <a title="Posts about RabbitMQ" href="/categories/rabbitmq/">RabbitMQ</a>
     </li>
     <li class="tag font-size-4">
-        <a href="/categories/refactoring/">refactoring</a>
+        <a title="Posts about refactoring" href="/categories/refactoring/">refactoring</a>
     </li>
     <li class="tag font-size-2">
-        <a href="/categories/retroprogramming/">retroprogramming</a>
+        <a title="Posts about retroprogramming" href="/categories/retroprogramming/">retroprogramming</a>
     </li>
     <li class="tag font-size-4">
-        <a href="/categories/rsa/">RSA</a>
+        <a title="Posts about RSA" href="/categories/rsa/">RSA</a>
     </li>
     <li class="tag font-size-1">
-        <a href="/categories/scala/">Scala</a>
+        <a title="Posts about Scala" href="/categories/scala/">Scala</a>
     </li>
     <li class="tag font-size-4">
-        <a href="/categories/ssh/">SSH</a>
+        <a title="Posts about SSH" href="/categories/ssh/">SSH</a>
     </li>
     <li class="tag font-size-3">
-        <a href="/categories/ssl/">SSL</a>
+        <a title="Posts about SSL" href="/categories/ssl/">SSL</a>
     </li>
     <li class="tag font-size-1">
-        <a href="/categories/tdd/">TDD</a>
+        <a title="Posts about TDD" href="/categories/tdd/">TDD</a>
     </li>
     <li class="tag font-size-1">
-        <a href="/categories/testing/">testing</a>
+        <a title="Posts about testing" href="/categories/testing/">testing</a>
     </li>
     <li class="tag font-size-3">
-        <a href="/categories/versioning/">versioning</a>
+        <a title="Posts about versioning" href="/categories/versioning/">versioning</a>
     </li>
     <li class="tag font-size-4">
-        <a href="/categories/video/">video</a>
+        <a title="Posts about video" href="/categories/video/">video</a>
     </li>
     <li class="tag font-size-4">
-        <a href="/categories/www/">WWW</a>
+        <a title="Posts about WWW" href="/categories/www/">WWW</a>
     </li>
 </ul>        </section>
 
