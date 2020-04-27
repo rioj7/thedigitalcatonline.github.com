@@ -41,16 +41,16 @@
 &lt;p&gt;It is important to understand that WebSocket is not HTTP, and can exist without it. It is also true that this new protocol was designed to be used on top of an existing HTTP connection, so a WebSocket communication is often found in parts of a Web page, which was originally retrieved using HTTP in the first place.&lt;/p&gt;
 &lt;h1 id="implementing-a-service-over-http"&gt;Implementing a service over HTTP&lt;a class="headerlink" href="#implementing-a-service-over-http" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;Let's finally start discussing bits and bytes. The starting point for our journey is a service over HTTP, which means there is an HTTP request-response exchange. As an example, let us consider a GET request, the simplest of the HTTP methods.&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nf"&gt;GET&lt;/span&gt; &lt;span class="nn"&gt;/&lt;/span&gt; &lt;span class="kr"&gt;HTTP&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="m"&gt;1.1&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nf"&gt;GET&lt;/span&gt; &lt;span class="nn"&gt;/&lt;/span&gt; &lt;span class="kr"&gt;HTTP&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="m"&gt;1.1&lt;/span&gt;
 &lt;span class="na"&gt;Host&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="l"&gt;localhost&lt;/span&gt;
 &lt;span class="na"&gt;User-Agent&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="l"&gt;curl/7.65.3&lt;/span&gt;
 &lt;span class="na"&gt;Accept&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="l"&gt;*/*&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;As you can see, the client is sending a pure text message to the server, with the format specified by the HTTP protocol. The first line contains the method name (&lt;code&gt;GET&lt;/code&gt;), the URL (&lt;code&gt;/&lt;/code&gt;) and the protocol we are using, including its version (&lt;code&gt;HTTP/1.1&lt;/code&gt;). The remaining lines are called &lt;em&gt;headers&lt;/em&gt; and contain metadata that can help the server to manage the request. The complete value of the &lt;code&gt;Host&lt;/code&gt; header is in this case &lt;code&gt;localhost:80&lt;/code&gt;, but as the standard port for HTTP services is 80, we don't need to specify it.&lt;/p&gt;
 &lt;p&gt;If the server &lt;code&gt;localhost&lt;/code&gt; is &lt;em&gt;serving&lt;/em&gt; HTTP (i.e. running some software that understands HTTP) on port 80 the response we might get is something similar to&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;HTTP/1.0 200 OK
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;HTTP/1.0 200 OK
 Date: Mon, 10 Feb 2020 08:41:33 GMT
 Content-type: text/html
 Content-Length: 26889
@@ -60,7 +60,7 @@ Last-Modified: Mon, 10 Feb 2020 08:41:27 GMT
 &lt;span class="nt"&gt;&amp;lt;html&amp;gt;&lt;/span&gt;
 ...
 &lt;span class="nt"&gt;&amp;lt;/html&amp;gt;&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;As happened for the request, the response is a text message, formatted according to the standard. The first line mentions the protocol and the status of the request (&lt;code&gt;200&lt;/code&gt; in this case, that means success), while the following lines contain metadata in various headers. Finally, after an empty line, the message contains the resource the client asked for, the source code of the base URL of the website in this case. Since this HTML page probably contains references to other resources like CSS, JS, images, and so on, the browser will send several other requests to gather all the data it needs to properly show the page to the user.&lt;/p&gt;
@@ -71,7 +71,7 @@ Last-Modified: Mon, 10 Feb 2020 08:41:27 GMT
 &lt;p&gt;Since we are building things from the ground up, let's implement a small Python program that opens a socket connection, receives an HTTP request, and sends an HTTP response. As port 80 is a "low port" (a number smaller than 1024), we usually don't have permissions to open sockets there, so I will use port 8080. This is not a problem for now, as HTTP can be served on any port.&lt;/p&gt;
 &lt;h2 id="12-implementation"&gt;1.2 Implementation&lt;a class="headerlink" href="#12-implementation" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;Create the file &lt;code&gt;server.py&lt;/code&gt; and type this code. Yes, &lt;strong&gt;type it&lt;/strong&gt;, don't just copy and paste, you will not learn anything otherwise.&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;socket&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;socket&lt;/span&gt;
 
 &lt;span class="c1"&gt;# Create a socket instance&lt;/span&gt;
 &lt;span class="c1"&gt;# AF_INET: use IP protocol version 4&lt;/span&gt;
@@ -98,28 +98,28 @@ Last-Modified: Mon, 10 Feb 2020 08:41:27 GMT
 
     &lt;span class="c1"&gt;# Close the connection&lt;/span&gt;
     &lt;span class="n"&gt;conn&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;close&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;This little program accepts a connection on port 8080 and prints the received data on the terminal. You can test it executing it and then running &lt;code&gt;curl localhost:8080&lt;/code&gt; in another terminal. You should see something like&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ python3 server.py 
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ python3 server.py 
 GET / HTTP/1.1
 Host: localhost:8080
 User-Agent: curl/7.65.3
 Accept: */*
-&lt;/pre&gt;&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;The server keeps running the code in the &lt;code&gt;while&lt;/code&gt; loop, so if you want to terminate it you have to do it with Ctrl+C. So far so good, but this is not an HTTP server yet, as it sends no response; you should actually receive an error message from curl that says &lt;code&gt;curl: (52) Empty reply from server&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;Sending back a standard response is very simple, we just need to call &lt;code&gt;conn.sendall&lt;/code&gt; passing the raw bytes. A minimal HTTP response contains the protocol and the status, an empty line, and the actual content, for example&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;HTTP&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="mi"&gt;200&lt;/span&gt; &lt;span class="n"&gt;OK&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;HTTP&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="mi"&gt;200&lt;/span&gt; &lt;span class="n"&gt;OK&lt;/span&gt;
 
 &lt;span class="n"&gt;Hi&lt;/span&gt; &lt;span class="n"&gt;there&lt;/span&gt;&lt;span class="o"&gt;!&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;Our server becomes then&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;socket&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;socket&lt;/span&gt;
 
 &lt;span class="c1"&gt;# Create a socket instance&lt;/span&gt;
 &lt;span class="c1"&gt;# AF_INET: use IP protocol version 4&lt;/span&gt;
@@ -148,12 +148,12 @@ Accept: */*
 
     &lt;span class="c1"&gt;# Close the connection&lt;/span&gt;
     &lt;span class="n"&gt;conn&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;close&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;At this point, we are not really responding to the user's request, however. Try different curl command lines like &lt;code&gt;curl localhost:8080/index.html&lt;/code&gt; or &lt;code&gt;curl localhost:8080/main.css&lt;/code&gt; and you will always receive the same response. We should try to find the resource the user is asking for and send that back in the response content.&lt;/p&gt;
 &lt;p&gt;This version of the HTTP server properly extracts the resource and tries to load it from the current directory, returning either a success of a failure&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;socket&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;socket&lt;/span&gt;
 &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;re&lt;/span&gt;
 
 &lt;span class="c1"&gt;# Create a socket instance&lt;/span&gt;
@@ -199,23 +199,23 @@ Accept: */*
 
     &lt;span class="c1"&gt;# Close the connection&lt;/span&gt;
     &lt;span class="n"&gt;conn&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;close&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;As you can see this implementation is extremely simple. If you create a simple local file named &lt;code&gt;index.html&lt;/code&gt; with this content&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;head&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;head&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
     &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;title&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;This is my page&lt;span class="p"&gt;&amp;lt;/&lt;/span&gt;&lt;span class="nt"&gt;title&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
     &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;link&lt;/span&gt; &lt;span class="na"&gt;rel&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;stylesheet&amp;quot;&lt;/span&gt; &lt;span class="na"&gt;href&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;main.css&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
 &lt;span class="p"&gt;&amp;lt;/&lt;/span&gt;&lt;span class="nt"&gt;head&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
 &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;html&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
     &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;p&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;Some random content&lt;span class="p"&gt;&amp;lt;/&lt;/span&gt;&lt;span class="nt"&gt;p&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
 &lt;span class="p"&gt;&amp;lt;/&lt;/span&gt;&lt;span class="nt"&gt;html&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;and run &lt;code&gt;curl localhost:8080/index.html&lt;/code&gt; you will see the content of the file. At this point, you can even use your browser to open &lt;code&gt;http://localhost:8080/index.html&lt;/code&gt; and you will see the title of the page and the content. A Web browser is a software capable of sending HTTP requests and of interpreting the content of the responses if this is HTML (and many other file types like images or videos), so it can &lt;em&gt;render&lt;/em&gt; the content of the message. The browser is also responsible of retrieving the missing resources needed for the rendering, so when you provide links to style sheets or JS scripts with the &lt;code&gt;&amp;lt;link&amp;gt;&lt;/code&gt; or the &lt;code&gt;&amp;lt;script&amp;gt;&lt;/code&gt; tags in the HTML code of a page, you are instructing the browser to send an HTTP GET request for those files as well.&lt;/p&gt;
 &lt;p&gt;The output of &lt;code&gt;server.py&lt;/code&gt; when I access &lt;code&gt;http://localhost:8080/index.html&lt;/code&gt; is&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nf"&gt;GET&lt;/span&gt; &lt;span class="nn"&gt;/index.html&lt;/span&gt; &lt;span class="kr"&gt;HTTP&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="m"&gt;1.1&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nf"&gt;GET&lt;/span&gt; &lt;span class="nn"&gt;/index.html&lt;/span&gt; &lt;span class="kr"&gt;HTTP&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="m"&gt;1.1&lt;/span&gt;
 &lt;span class="na"&gt;Host&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="l"&gt;localhost:8080&lt;/span&gt;
 &lt;span class="na"&gt;User-Agent&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="l"&gt;Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:72.0) Gecko/20100101 Firefox/72.0&lt;/span&gt;
 &lt;span class="na"&gt;Accept&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="l"&gt;text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8&lt;/span&gt;
@@ -256,7 +256,7 @@ Cache-Control: no-cache
 
 Resource favicon.ico cannot be loaded
 --------------------
-&lt;/pre&gt;&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;As you can see the browser sends rich HTTP requests, with a lot of headers, automatically requesting the CSS file mentioned in the HTML code and automatically trying to retrieve a favicon image.&lt;/p&gt;
@@ -283,46 +283,46 @@ Resource favicon.ico cannot be loaded
 &lt;p&gt;Thanks to Miguel Gringberg and his &lt;a href="https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-i-hello-world"&gt;amazing Flask mega-tutorial&lt;/a&gt; I can set up Flask in seconds. I will not run through the tutorial here, as you can follow it on Miguel's website. I will only use the content of the first article (out of 23!) to create an extremely simple "Hello, world" application.&lt;/p&gt;
 &lt;p&gt;To run the following example you will need a virtual environment and you will have to &lt;code&gt;pip install flask&lt;/code&gt;. Follow Miguel's tutorial if you need more details on this.&lt;/p&gt;
 &lt;p&gt;The &lt;code&gt;app/__init__.py&lt;/code&gt; file is&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;flask&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;Flask&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;flask&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;Flask&lt;/span&gt;
 
 &lt;span class="n"&gt;application&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Flask&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="vm"&gt;__name__&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 
 &lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;app&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;routes&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;and the &lt;code&gt;app/routes.py&lt;/code&gt; file is&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;app&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;application&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;app&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;application&lt;/span&gt;
 
 
 &lt;span class="nd"&gt;@application&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;route&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;/&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;span class="nd"&gt;@application&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;route&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;/index&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;index&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
     &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Hello, world!&amp;quot;&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;You can already see here the power of a framework in action. We defined an &lt;code&gt;index&lt;/code&gt; function and connected it with two different URLs (&lt;code&gt;/&lt;/code&gt; and &lt;code&gt;/index&lt;/code&gt;) in 3 lines of Python. This leaves us time and energy to properly work on the business logic, that in this case is a revolutionary "Hello, world!". Nobody ever did this before.&lt;/p&gt;
 &lt;p&gt;Finally, the &lt;code&gt;service.py&lt;/code&gt; file is&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;app&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;application&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;app&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;application&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;Flask comes with a so-called development web server (do these words ring any bell now?) that we can run on a terminal&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ &lt;span class="nv"&gt;FLASK_APP&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;service.py flask run
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ &lt;span class="nv"&gt;FLASK_APP&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;service.py flask run
  * Serving Flask app &lt;span class="s2"&gt;&amp;quot;service.py&amp;quot;&lt;/span&gt;
  * Environment: production
    WARNING: This is a development server. Do not use it in a production deployment.
    Use a production WSGI server instead.
  * Debug mode: off
  * Running on http://127.0.0.1:5000/ &lt;span class="o"&gt;(&lt;/span&gt;Press CTRL+C to quit&lt;span class="o"&gt;)&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;You can now visit the given URL with your browser and see that everything works properly. Remember that 127.0.0.1 is the special IP address that refers to "this computer"; the name &lt;code&gt;localhost&lt;/code&gt; is usually created by the operating system as an alias for that, so the two are interchangeable. As you can see the standard port for Flask's development server is 5000, so you have to mention it explicitly, otherwise your browser would try to access port 80 (the default HTTP one). When you connect with the browser you will see some log messages about the HTTP requests&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="m"&gt;127&lt;/span&gt;.0.0.1 - - &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;14&lt;/span&gt;/Feb/2020 &lt;span class="m"&gt;14&lt;/span&gt;:54:27&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;GET / HTTP/1.1&amp;quot;&lt;/span&gt; &lt;span class="m"&gt;200&lt;/span&gt; -
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="m"&gt;127&lt;/span&gt;.0.0.1 - - &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;14&lt;/span&gt;/Feb/2020 &lt;span class="m"&gt;14&lt;/span&gt;:54:27&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;GET / HTTP/1.1&amp;quot;&lt;/span&gt; &lt;span class="m"&gt;200&lt;/span&gt; -
 &lt;span class="m"&gt;127&lt;/span&gt;.0.0.1 - - &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;14&lt;/span&gt;/Feb/2020 &lt;span class="m"&gt;14&lt;/span&gt;:54:28&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;GET /favicon.ico HTTP/1.1&amp;quot;&lt;/span&gt; &lt;span class="m"&gt;404&lt;/span&gt; -
-&lt;/pre&gt;&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;You can recognise both now, as those are the same request we got with our little server in the previous part of the article.&lt;/p&gt;
@@ -335,9 +335,9 @@ Resource favicon.ico cannot be loaded
 &lt;/ul&gt;
 &lt;h2 id="24-issues"&gt;2.4 Issues&lt;a class="headerlink" href="#24-issues" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;Apparently, we solved all our problems, and many programmers just stop here. They learn how to use the framework (which is a big achievement!), but as we will shortly discover, this is not enough for a production system. Let's have a closer look at the output of the Flask server. It clearly says, among other things&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;   WARNING: This is a development server. Do not use it in a production deployment.
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;   WARNING: This is a development server. Do not use it in a production deployment.
    Use a production WSGI server instead.
-&lt;/pre&gt;&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;The main issue we have when we deal with any production system is represented by performances. Think about what we do with JavaScript when we minimise the code: we consciously obfuscate the code in order to make the file smaller, but this is done for the sole purpose of making the file faster to retrieve.&lt;/p&gt;
@@ -356,32 +356,32 @@ Resource favicon.ico cannot be loaded
 &lt;p&gt;If the framework is compatible with the gateway interface, we can add software that deals with concurrency and uses the framework through the compatibility layer. Such a component is a production-ready HTTP server, and two common choices in the Python world are Gunicorn and uWSGI.&lt;/p&gt;
 &lt;p&gt;Production-ready HTTP server means that the software understands HTTP as the development server already did, but at the same time pushes performances in order to sustain a bigger workload, and as we said before this is done through concurrency.&lt;/p&gt;
 &lt;p&gt;Flask is compatible with WSGI, so we can make it work with Gunicorn. To install it in our virtual environment run &lt;code&gt;pip install gunicorn&lt;/code&gt; and set it up creating a file names &lt;code&gt;wsgi.py&lt;/code&gt; with the following content&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;app&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;application&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;app&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;application&lt;/span&gt;
 
 
 &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="vm"&gt;__name__&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;__main__&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
     &lt;span class="n"&gt;application&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;run&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;To run Gunicorn specify the number of concurrent instances and the external port&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ gunicorn --workers &lt;span class="m"&gt;3&lt;/span&gt; --bind &lt;span class="m"&gt;0&lt;/span&gt;.0.0.0:8000 wsgi
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ gunicorn --workers &lt;span class="m"&gt;3&lt;/span&gt; --bind &lt;span class="m"&gt;0&lt;/span&gt;.0.0.0:8000 wsgi
 &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;2020&lt;/span&gt;-02-12 &lt;span class="m"&gt;18&lt;/span&gt;:39:07 +0000&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;13393&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;INFO&lt;span class="o"&gt;]&lt;/span&gt; Starting gunicorn &lt;span class="m"&gt;20&lt;/span&gt;.0.4
 &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;2020&lt;/span&gt;-02-12 &lt;span class="m"&gt;18&lt;/span&gt;:39:07 +0000&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;13393&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;INFO&lt;span class="o"&gt;]&lt;/span&gt; Listening at: http://0.0.0.0:8000 &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="m"&gt;13393&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
 &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;2020&lt;/span&gt;-02-12 &lt;span class="m"&gt;18&lt;/span&gt;:39:07 +0000&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;13393&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;INFO&lt;span class="o"&gt;]&lt;/span&gt; Using worker: sync
 &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;2020&lt;/span&gt;-02-12 &lt;span class="m"&gt;18&lt;/span&gt;:39:07 +0000&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;13396&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;INFO&lt;span class="o"&gt;]&lt;/span&gt; Booting worker with pid: &lt;span class="m"&gt;13396&lt;/span&gt;
 &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;2020&lt;/span&gt;-02-12 &lt;span class="m"&gt;18&lt;/span&gt;:39:07 +0000&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;13397&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;INFO&lt;span class="o"&gt;]&lt;/span&gt; Booting worker with pid: &lt;span class="m"&gt;13397&lt;/span&gt;
 &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;2020&lt;/span&gt;-02-12 &lt;span class="m"&gt;18&lt;/span&gt;:39:07 +0000&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;13398&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;INFO&lt;span class="o"&gt;]&lt;/span&gt; Booting worker with pid: &lt;span class="m"&gt;13398&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;As you can see, Gunicorn has the concept of &lt;em&gt;workers&lt;/em&gt; which are a generic way to express concurrency. Specifically, Gunicorn implements a pre-fork worker model, which means that it (pre)creates a different Unix process for each worker. You can check this running &lt;code&gt;ps&lt;/code&gt;&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ ps ax &lt;span class="p"&gt;|&lt;/span&gt; grep gunicorn
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ ps ax &lt;span class="p"&gt;|&lt;/span&gt; grep gunicorn
 &lt;span class="m"&gt;14919&lt;/span&gt; pts/1    S+     &lt;span class="m"&gt;0&lt;/span&gt;:00 ~/venv3/bin/python3 ~/venv3/bin/gunicorn --workers &lt;span class="m"&gt;3&lt;/span&gt; --bind &lt;span class="m"&gt;0&lt;/span&gt;.0.0.0:8000 wsgi
 &lt;span class="m"&gt;14922&lt;/span&gt; pts/1    S+     &lt;span class="m"&gt;0&lt;/span&gt;:00 ~/venv3/bin/python3 ~/venv3/bin/gunicorn --workers &lt;span class="m"&gt;3&lt;/span&gt; --bind &lt;span class="m"&gt;0&lt;/span&gt;.0.0.0:8000 wsgi
 &lt;span class="m"&gt;14923&lt;/span&gt; pts/1    S+     &lt;span class="m"&gt;0&lt;/span&gt;:00 ~/venv3/bin/python3 ~/venv3/bin/gunicorn --workers &lt;span class="m"&gt;3&lt;/span&gt; --bind &lt;span class="m"&gt;0&lt;/span&gt;.0.0.0:8000 wsgi
 &lt;span class="m"&gt;14924&lt;/span&gt; pts/1    S+     &lt;span class="m"&gt;0&lt;/span&gt;:00 ~/venv3/bin/python3 ~/venv3/bin/gunicorn --workers &lt;span class="m"&gt;3&lt;/span&gt; --bind &lt;span class="m"&gt;0&lt;/span&gt;.0.0.0:8000 wsgi
-&lt;/pre&gt;&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;Using processes is just one of the two ways to implement concurrency in a Unix system, the other being using threads. The benefits and demerits of each solution are outside the scope of this post, however. For the time being just remember that you are dealing with multiple workers that process incoming requests asynchronously, thus implementing a non-blocking server, ready to accept multiple connections.&lt;/p&gt;
@@ -415,7 +415,7 @@ Resource favicon.ico cannot be loaded
 &lt;p&gt;To test nginx without having to fight with the OS and install too many packages we can use Docker. Docker is useful to simulate a multi-machine environment, but it might also be your technology of choice for the actual production environment (AWS ECS works with Docker containers, for example).&lt;/p&gt;
 &lt;p&gt;The base configuration that we will run is very simple. One container will contain the Flask code and run the framework with Gunicorn, while the other container will run nginx. Gunicorn will serve HTTP on the internal port 8000, not exposed by Docker and thus not reachable from our browser, while nignx will expose port 80, the traditional HTTP port.&lt;/p&gt;
 &lt;p&gt;In the same directory of the file &lt;code&gt;wsgi.py&lt;/code&gt;, create a &lt;code&gt;Dockerfile&lt;/code&gt;&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;FROM&lt;/span&gt; &lt;span class="s"&gt;python:3.6&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;FROM&lt;/span&gt; &lt;span class="s"&gt;python:3.6&lt;/span&gt;
 
 &lt;span class="k"&gt;ADD&lt;/span&gt; app /app
 &lt;span class="k"&gt;ADD&lt;/span&gt; wsgi.py /
@@ -423,11 +423,11 @@ Resource favicon.ico cannot be loaded
 &lt;span class="k"&gt;WORKDIR&lt;/span&gt;&lt;span class="s"&gt; .&lt;/span&gt;
 &lt;span class="k"&gt;RUN&lt;/span&gt; pip install flask gunicorn
 &lt;span class="k"&gt;EXPOSE&lt;/span&gt;&lt;span class="s"&gt; 8000&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;This starts from a Python Docker image, adds the &lt;code&gt;app&lt;/code&gt; directory and the &lt;code&gt;wsgi.py&lt;/code&gt; file, and installs Gunicorn. Now create a configuration for nginx in a file called &lt;code&gt;nginx.conf&lt;/code&gt; in the same directory&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;server&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;server&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
     &lt;span class="kn"&gt;listen&lt;/span&gt; &lt;span class="mi"&gt;80&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
     &lt;span class="kn"&gt;server_name&lt;/span&gt; &lt;span class="s"&gt;localhost&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 
@@ -435,12 +435,12 @@ Resource favicon.ico cannot be loaded
         &lt;span class="kn"&gt;proxy_pass&lt;/span&gt; &lt;span class="s"&gt;http://application:8000/&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
     &lt;span class="p"&gt;}&lt;/span&gt;
 &lt;span class="p"&gt;}&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;This defines a server that listens on port 80 and that connects all the URL starting with &lt;code&gt;/&lt;/code&gt; with a server called &lt;code&gt;application&lt;/code&gt; on port 8000, which is the container running Gunicorn.&lt;/p&gt;
 &lt;p&gt;Last, create a file &lt;code&gt;docker-compose.yml&lt;/code&gt; that will describe the configuration of the containers.&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nt"&gt;version&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;3.7&amp;quot;&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nt"&gt;version&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;3.7&amp;quot;&lt;/span&gt;
 &lt;span class="nt"&gt;services&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
   &lt;span class="nt"&gt;application&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
     &lt;span class="nt"&gt;build&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
@@ -458,26 +458,26 @@ Resource favicon.ico cannot be loaded
       &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;8080:80&lt;/span&gt;
     &lt;span class="nt"&gt;depends_on&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
       &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;application&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;As you can see the name &lt;code&gt;application&lt;/code&gt; that we mentioned in the nginx configuration file is not a magic string, but is the name we assigned to the Gunicorn container in the Docker Compose configuration.&lt;/p&gt;
 &lt;p&gt;To create this infrastructure we need to install Docker Compose in our virtual environment through &lt;code&gt;pip install docker-compose&lt;/code&gt;. I also created a file named &lt;code&gt;.env&lt;/code&gt; with the name of the project&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nv"&gt;COMPOSE_PROJECT_NAME&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;service
-&lt;/pre&gt;&lt;/div&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nv"&gt;COMPOSE_PROJECT_NAME&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;service
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;At this point you can run Docker Compose with &lt;code&gt;docker-compose up -d&lt;/code&gt;&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ docker-compose up -d
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ docker-compose up -d
 Creating network &lt;span class="s2"&gt;&amp;quot;service_default&amp;quot;&lt;/span&gt; with the default driver
 Creating service_application_1 ... &lt;span class="k"&gt;done&lt;/span&gt;
 Creating service_nginx_1       ... &lt;span class="k"&gt;done&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;If everything is working correctly, opening the browser and visiting &lt;code&gt;localhost&lt;/code&gt; should show you the HTML page Flask is serving.&lt;/p&gt;
 &lt;p&gt;Through &lt;code&gt;docker-compose logs&lt;/code&gt; we can check what services are doing. We can recognise the output of Gunicorn in the logs of the service named &lt;code&gt;application&lt;/code&gt;&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ docker-compose logs application
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ docker-compose logs application
 Attaching to service_application_1
 application_1  &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;2020&lt;/span&gt;-02-14 &lt;span class="m"&gt;08&lt;/span&gt;:35:42 +0000&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;INFO&lt;span class="o"&gt;]&lt;/span&gt; Starting gunicorn &lt;span class="m"&gt;20&lt;/span&gt;.0.4
 application_1  &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;2020&lt;/span&gt;-02-14 &lt;span class="m"&gt;08&lt;/span&gt;:35:42 +0000&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;INFO&lt;span class="o"&gt;]&lt;/span&gt; Listening at: http://0.0.0.0:8000 &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
@@ -485,19 +485,19 @@ application_1  &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="o"&gt;[&lt;/
 application_1  &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;2020&lt;/span&gt;-02-14 &lt;span class="m"&gt;08&lt;/span&gt;:35:42 +0000&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;8&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;INFO&lt;span class="o"&gt;]&lt;/span&gt; Booting worker with pid: &lt;span class="m"&gt;8&lt;/span&gt;
 application_1  &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;2020&lt;/span&gt;-02-14 &lt;span class="m"&gt;08&lt;/span&gt;:35:42 +0000&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;9&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;INFO&lt;span class="o"&gt;]&lt;/span&gt; Booting worker with pid: &lt;span class="m"&gt;9&lt;/span&gt;
 application_1  &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;2020&lt;/span&gt;-02-14 &lt;span class="m"&gt;08&lt;/span&gt;:35:42 +0000&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;10&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;INFO&lt;span class="o"&gt;]&lt;/span&gt; Booting worker with pid: &lt;span class="m"&gt;10&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;but the one we are mostly interested with now is the service named &lt;code&gt;nginx&lt;/code&gt;, so let's follow the logs in real-time with &lt;code&gt;docker-compose logs -f nginx&lt;/code&gt;. Refresh the &lt;code&gt;localhost&lt;/code&gt; page you visited with the browser, and the container should output something like&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ docker-compose logs -f nginx
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ docker-compose logs -f nginx
 Attaching to service_nginx_1
 nginx_1        &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="m"&gt;192&lt;/span&gt;.168.192.1 - - &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;14&lt;/span&gt;/Feb/2020:08:42:20 +0000&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;GET / HTTP/1.1&amp;quot;&lt;/span&gt; &lt;span class="m"&gt;200&lt;/span&gt; &lt;span class="m"&gt;13&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;-&amp;quot;&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:72.0) Gecko/20100101 Firefox/72.0&amp;quot;&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;-&amp;quot;&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;which is the standard log format of nginx. It shows the IP address of the client (&lt;code&gt;192.168.192.1&lt;/code&gt;), the connection timestamp, the HTTP request and the response status code (200), plus other information on the client itself.&lt;/p&gt;
 &lt;p&gt;Let's now increase the number of services, to see the load balancing mechanism in action. To do this, first we need to change the log format of nginx to show the IP address of the machine that served the request. Change the &lt;code&gt;nginx.conf&lt;/code&gt; file adding the &lt;code&gt;log_format&lt;/code&gt; and &lt;code&gt;access_log&lt;/code&gt; options&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;log_format&lt;/span&gt; &lt;span class="s"&gt;upstreamlog&lt;/span&gt; &lt;span class="s"&gt;&amp;#39;[&lt;/span&gt;&lt;span class="nv"&gt;$time_local]&lt;/span&gt; &lt;span class="nv"&gt;$host&lt;/span&gt; &lt;span class="s"&gt;to:&lt;/span&gt; &lt;span class="nv"&gt;$upstream_addr:&lt;/span&gt; &lt;span class="nv"&gt;$request&lt;/span&gt; &lt;span class="nv"&gt;$status&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;log_format&lt;/span&gt; &lt;span class="s"&gt;upstreamlog&lt;/span&gt; &lt;span class="s"&gt;&amp;#39;[&lt;/span&gt;&lt;span class="nv"&gt;$time_local]&lt;/span&gt; &lt;span class="nv"&gt;$host&lt;/span&gt; &lt;span class="s"&gt;to:&lt;/span&gt; &lt;span class="nv"&gt;$upstream_addr:&lt;/span&gt; &lt;span class="nv"&gt;$request&lt;/span&gt; &lt;span class="nv"&gt;$status&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 
 &lt;span class="k"&gt;server&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
     &lt;span class="kn"&gt;listen&lt;/span&gt; &lt;span class="mi"&gt;80&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
@@ -509,11 +509,11 @@ nginx_1        &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="m"&gt;192&lt
 
     &lt;span class="kn"&gt;access_log&lt;/span&gt; &lt;span class="s"&gt;/var/log/nginx/access.log&lt;/span&gt; &lt;span class="s"&gt;upstreamlog&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 &lt;span class="p"&gt;}&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;The &lt;code&gt;$upstream_addr&lt;/code&gt; variable is the one that contains the IP address of the server proxied by nginx. Now run &lt;code&gt;docker-compose down&lt;/code&gt; to stop all containers and then &lt;code&gt;docker-compose up -d --scale application=3&lt;/code&gt; to start them again&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ docker-compose down
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ docker-compose down
 Stopping service_nginx_1       ... &lt;span class="k"&gt;done&lt;/span&gt;
 Stopping service_application_1 ... &lt;span class="k"&gt;done&lt;/span&gt;
 Removing service_nginx_1       ... &lt;span class="k"&gt;done&lt;/span&gt;
@@ -525,29 +525,29 @@ Creating service_application_1 ... &lt;span class="k"&gt;done&lt;/span&gt;
 Creating service_application_2 ... &lt;span class="k"&gt;done&lt;/span&gt;
 Creating service_application_3 ... &lt;span class="k"&gt;done&lt;/span&gt;
 Creating service_nginx_1       ... &lt;span class="k"&gt;done&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;As you can see, Docker Compose runs now 3 containers for the &lt;code&gt;application&lt;/code&gt; service. If you open the logs stream and visit the page in the browser you will now see a slightly different output&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ docker-compose logs -f nginx
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ docker-compose logs -f nginx
 Attaching to service_nginx_1
 nginx_1        &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;14&lt;/span&gt;/Feb/2020:09:00:16 +0000&lt;span class="o"&gt;]&lt;/span&gt; localhost to: &lt;span class="m"&gt;192&lt;/span&gt;.168.240.4:8000: GET / HTTP/1.1 &lt;span class="m"&gt;200&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;where you can spot &lt;code&gt;to: 192.168.240.4:8000&lt;/code&gt; which is the IP address of one of the application containers. If you now visit the page again multiple times you should notice a change in the upstream address, something like&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ docker-compose logs -f nginx
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ docker-compose logs -f nginx
 Attaching to service_nginx_1
 nginx_1        &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;14&lt;/span&gt;/Feb/2020:09:00:16 +0000&lt;span class="o"&gt;]&lt;/span&gt; localhost to: &lt;span class="m"&gt;192&lt;/span&gt;.168.240.4:8000: GET / HTTP/1.1 &lt;span class="m"&gt;200&lt;/span&gt;
 nginx_1        &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;14&lt;/span&gt;/Feb/2020:09:00:17 +0000&lt;span class="o"&gt;]&lt;/span&gt; localhost to: &lt;span class="m"&gt;192&lt;/span&gt;.168.240.2:8000: GET / HTTP/1.1 &lt;span class="m"&gt;200&lt;/span&gt;
 nginx_1        &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;14&lt;/span&gt;/Feb/2020:09:00:17 +0000&lt;span class="o"&gt;]&lt;/span&gt; localhost to: &lt;span class="m"&gt;192&lt;/span&gt;.168.240.3:8000: GET / HTTP/1.1 &lt;span class="m"&gt;200&lt;/span&gt;
 nginx_1        &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;14&lt;/span&gt;/Feb/2020:09:00:17 +0000&lt;span class="o"&gt;]&lt;/span&gt; localhost to: &lt;span class="m"&gt;192&lt;/span&gt;.168.240.4:8000: GET / HTTP/1.1 &lt;span class="m"&gt;200&lt;/span&gt;
 nginx_1        &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;14&lt;/span&gt;/Feb/2020:09:00:17 +0000&lt;span class="o"&gt;]&lt;/span&gt; localhost to: &lt;span class="m"&gt;192&lt;/span&gt;.168.240.2:8000: GET / HTTP/1.1 &lt;span class="m"&gt;200&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;This shows that nginx is performing load balancing, but to tell the truth this is happening through Docker's DNS, and not by an explicit action performed by the web server. We can verify this accessing the nginx container and running &lt;code&gt;dig application&lt;/code&gt; (you need to run &lt;code&gt;apt update&lt;/code&gt; and &lt;code&gt;apt install dnsutils&lt;/code&gt; to install &lt;code&gt;dig&lt;/code&gt;)&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;root@99c2f348140e:/# dig application
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@99c2f348140e:/# dig application
 
 &lt;span class="p"&gt;;&lt;/span&gt; &amp;lt;&amp;lt;&amp;gt;&amp;gt; DiG &lt;span class="m"&gt;9&lt;/span&gt;.11.5-P4-5.1-Debian &amp;lt;&amp;lt;&amp;gt;&amp;gt; application
 &lt;span class="p"&gt;;;&lt;/span&gt; global options: +cmd
@@ -567,11 +567,11 @@ application.            &lt;span class="m"&gt;600&lt;/span&gt;     IN      A    
 &lt;span class="p"&gt;;;&lt;/span&gt; SERVER: &lt;span class="m"&gt;127&lt;/span&gt;.0.0.11#53&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="m"&gt;127&lt;/span&gt;.0.0.11&lt;span class="o"&gt;)&lt;/span&gt;
 &lt;span class="p"&gt;;;&lt;/span&gt; WHEN: Fri Feb &lt;span class="m"&gt;14&lt;/span&gt; &lt;span class="m"&gt;09&lt;/span&gt;:57:24 UTC &lt;span class="m"&gt;2020&lt;/span&gt;
 &lt;span class="p"&gt;;;&lt;/span&gt; MSG SIZE  rcvd: &lt;span class="m"&gt;110&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;To see load balancing performed by nginx we can explicitly define two services and assign them different weights. Run &lt;code&gt;docker-compose down&lt;/code&gt; and change the nginx configuration to&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;upstream&lt;/span&gt; &lt;span class="s"&gt;app&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;upstream&lt;/span&gt; &lt;span class="s"&gt;app&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
     &lt;span class="kn"&gt;server&lt;/span&gt; &lt;span class="n"&gt;application1&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;8000&lt;/span&gt; &lt;span class="s"&gt;weight=3&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
     &lt;span class="kn"&gt;server&lt;/span&gt; &lt;span class="n"&gt;application2&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;8000&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 &lt;span class="p"&gt;}&lt;/span&gt;
@@ -588,12 +588,12 @@ application.            &lt;span class="m"&gt;600&lt;/span&gt;     IN      A    
 
     &lt;span class="kn"&gt;access_log&lt;/span&gt; &lt;span class="s"&gt;/var/log/nginx/access.log&lt;/span&gt; &lt;span class="s"&gt;upstreamlog&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 &lt;span class="p"&gt;}&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;We defined here an &lt;code&gt;upstream&lt;/code&gt; structure that lists two different services, &lt;code&gt;application1&lt;/code&gt; and &lt;code&gt;application2&lt;/code&gt;, giving to the first one a weight of 3. This mean that each 4 requests, 3 will be routed to the first service, and one to the second service. Now nginx is not just relying on the DNS, but consciously choosing between two different services.&lt;/p&gt;
 &lt;p&gt;Let's define the services accordingly in the Docker Compose configuration file&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;version&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="ss"&gt;&amp;quot;3&amp;quot;&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;version&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="ss"&gt;&amp;quot;3&amp;quot;&lt;/span&gt;
 &lt;span class="n"&gt;services&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
   &lt;span class="n"&gt;application1&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
     &lt;span class="n"&gt;build&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
@@ -620,11 +620,11 @@ application.            &lt;span class="m"&gt;600&lt;/span&gt;     IN      A    
     &lt;span class="n"&gt;depends_on&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
       &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;application1&lt;/span&gt;
       &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;application2&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;I basically duplicated the definition of &lt;code&gt;application&lt;/code&gt;, but the first service is running now 6 workers, just for the sake of showing a possible difference between the two. Now run &lt;code&gt;docker-compose up -d&lt;/code&gt; and &lt;code&gt;docker-compose logs -f nginx&lt;/code&gt;. If you refresh the page on the browser multiple times you will see something like&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ docker-compose logs -f nginx
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ docker-compose logs -f nginx
 Attaching to service_nginx_1
 nginx_1         &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;14&lt;/span&gt;/Feb/2020:11:03:25 +0000&lt;span class="o"&gt;]&lt;/span&gt; localhost to: &lt;span class="m"&gt;172&lt;/span&gt;.18.0.2:8000: GET / HTTP/1.1 &lt;span class="m"&gt;200&lt;/span&gt;
 nginx_1         &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;14&lt;/span&gt;/Feb/2020:11:03:25 +0000&lt;span class="o"&gt;]&lt;/span&gt; localhost to: &lt;span class="m"&gt;172&lt;/span&gt;.18.0.2:8000: GET /favicon.ico HTTP/1.1 &lt;span class="m"&gt;404&lt;/span&gt;
@@ -637,7 +637,7 @@ nginx_1         &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="o"&gt;[&lt;
 nginx_1         &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;14&lt;/span&gt;/Feb/2020:11:03:34 +0000&lt;span class="o"&gt;]&lt;/span&gt; localhost to: &lt;span class="m"&gt;172&lt;/span&gt;.18.0.2:8000: GET / HTTP/1.1 &lt;span class="m"&gt;200&lt;/span&gt;
 nginx_1         &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;14&lt;/span&gt;/Feb/2020:11:03:35 +0000&lt;span class="o"&gt;]&lt;/span&gt; localhost to: &lt;span class="m"&gt;172&lt;/span&gt;.18.0.2:8000: GET / HTTP/1.1 &lt;span class="m"&gt;200&lt;/span&gt;
 nginx_1         &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;14&lt;/span&gt;/Feb/2020:11:03:35 +0000&lt;span class="o"&gt;]&lt;/span&gt; localhost to: &lt;span class="m"&gt;172&lt;/span&gt;.18.0.3:8000: GET / HTTP/1.1 &lt;span class="m"&gt;200&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 
 &lt;p&gt;where you can clearly notice the load balancing between &lt;code&gt;172.18.0.2&lt;/code&gt; (&lt;code&gt;application1&lt;/code&gt;) and &lt;code&gt;172.18.0.3&lt;/code&gt; (&lt;code&gt;application2&lt;/code&gt;) in action.&lt;/p&gt;
