@@ -301,32 +301,42 @@ Parent1     Parent2
 <p>So, as in the case of standard inheritance, this means that the first class in the list that implements a specific attribute will be the selected provider for that resolution. An example might clarify the matter</p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">Ancestor</span><span class="p">:</span>
     <span class="k">def</span> <span class="nf">rewind</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="p">[</span><span class="o">...</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Ancestor: rewind&quot;</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">Parent1</span><span class="p">(</span><span class="n">Ancestor</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="p">[</span><span class="o">...</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Parent1: open&quot;</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">Parent2</span><span class="p">(</span><span class="n">Ancestor</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="p">[</span><span class="o">...</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Parent2: open&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="p">[</span><span class="o">...</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Parent2: close&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">flush</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="p">[</span><span class="o">...</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Parent2: flush&quot;</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">Child</span><span class="p">(</span><span class="n">Parent1</span><span class="p">,</span> <span class="n">Parent2</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">flush</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="p">[</span><span class="o">...</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Child: flush&quot;</span><span class="p">)</span>
+
+
+<span class="nb">print</span><span class="p">(</span><span class="n">Child</span><span class="o">.</span><span class="vm">__mro__</span><span class="p">)</span>
+
+<span class="n">c</span> <span class="o">=</span> <span class="n">Child</span><span class="p">()</span>
+<span class="n">c</span><span class="o">.</span><span class="n">rewind</span><span class="p">()</span>
+<span class="n">c</span><span class="o">.</span><span class="n">open</span><span class="p">()</span>
+<span class="n">c</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<span class="n">c</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
 </code></pre></div>
 
 
-<p>In this case an instance <code>c</code> of <code>Child</code> would provide <code>rewind</code>, <code>open</code>, <code>close</code>, and <code>flush</code>. When <code>c.rewind</code> is called, the code in <code>Ancestor</code> is executed, as this is the first class in the MRO list that provides that method. The method <code>open</code> is provided by <code>Parent1</code>, while <code>close</code> is provided by <code>Parent2</code>. If the method <code>c.flush</code> is called, the code is provided by the <code>Child</code> class itself, that redefines it overriding the one provided by <code>Parent2</code>.</p>
+<p>As you can see, we can access the MRO of any class reasind its <code>__mro__</code> attribute, and as we expected its value is <code>(&lt;class '__main__.Child'&gt;, &lt;class '__main__.Parent1'&gt;, &lt;class '__main__.Parent2'&gt;, &lt;class '__main__.Ancestor'&gt;, &lt;class 'object'&gt;).</code></p>
+<p>So, in this case an instance <code>c</code> of <code>Child</code> provides <code>rewind</code>, <code>open</code>, <code>close</code>, and <code>flush</code>. When <code>c.rewind</code> is called, the code in <code>Ancestor</code> is executed, as this is the first class in the MRO list that provides that method. The method <code>open</code> is provided by <code>Parent1</code>, while <code>close</code> is provided by <code>Parent2</code>. If the method <code>c.flush</code> is called, the code is provided by the <code>Child</code> class itself, that redefines it overriding the one provided by <code>Parent2</code>.</p>
 <p>As we see with the <code>flush</code> method, Python doesn't change its behaviour when it comes to method overriding with multiple parents. The first implementation of a method with that name is executed, and the parent's implementation is not automatically called. As in the case of standard inheritance, then, it's up to us to design classes with matching method signatures.</p>
 <h3 id="under-the-bonnet">Under the bonnet<a class="headerlink" href="#under-the-bonnet" title="Permanent link">&para;</a></h3>
 <p>How does multiple inheritance work internally? How does Python create the MRO list?</p>
@@ -372,7 +382,7 @@ Parent1     Parent2
 </code></pre></div>
 
 
-<p>We usually accept that an enhanced version of a class accepts more parameters when it is initialized, as we do not expect it to be polymorphic on <code>__init__</code>. Problems arise when we try to leverage polymorphism on other methods, for example resizing all <code>GraphicalEntity</code> objects in a list</p>
+<p>We usually accept that an enhanced version of a class accepts different parameters when it is initialized, as we do not expect it to be polymorphic on <code>__init__</code>. Problems arise when we try to leverage polymorphism on other methods, for example resizing all <code>GraphicalEntity</code> objects in a list</p>
 <div class="highlight"><pre><span></span><code><span class="k">for</span> <span class="n">shape</span> <span class="ow">in</span> <span class="p">[</span><span class="n">r1</span><span class="p">,</span> <span class="n">r2</span><span class="p">,</span> <span class="n">q1</span><span class="p">]:</span>
     <span class="n">size_x</span> <span class="o">=</span> <span class="n">shape</span><span class="o">.</span><span class="n">size_x</span>
     <span class="n">size_y</span> <span class="o">=</span> <span class="n">shape</span><span class="o">.</span><span class="n">size_y</span>
@@ -405,6 +415,9 @@ Parent1     Parent2
 
 <span class="k">class</span> <span class="nc">ResizableGraphicalEntity</span><span class="p">(</span><span class="n">GraphicalEntity</span><span class="p">,</span> <span class="n">ResizableMixin</span><span class="p">):</span>
     <span class="k">pass</span>
+
+<span class="n">rge</span> <span class="o">=</span> <span class="n">ResizableGraphicalEntity</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">300</span><span class="p">)</span>
+<span class="n">rge</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">2000</span><span class="p">)</span>
 </code></pre></div>
 
 
@@ -490,7 +503,14 @@ Parent1     Parent2
 
 
 <p>The second solution gives the same final result, but promotes code reuse, as now the <code>SingleDimensionMixin</code> class can be applied to other classes derived from <code>GraphicalEntity</code> and make them accept only one size, while in the first solution that feature was tightly connected with the <code>Button</code> ancestor class.</p>
-<p>Please note that the position of the mixin is important. As <code>super</code> follows the MRO, the called method is dispatched to the nearest class in the linearisation. If you put <code>SingleDimensionMixin</code> after <code>Button</code> in the definition of <code>SquareButton</code>, Python would complain. In that case the call <code>b = SquareButton(10, 20, 200)</code> and the method signature <code>__init__(self, pos_x, pos_y, size_x, size_y)</code> would not match.</p>
+<p>Please note that the position of the mixin is important as <code>super</code> follows the MRO. As it is, the MRO of <code>SquareButton</code> is <code>(SquareButton, SingleDimensionMixin, Button, GraphicalEntity, object)</code>, so, when we instantiate it the <code>__init__</code> method is provided by <code>SingleDimensionMixin</code>, which in turn calls trhough <code>super</code> the method <code>__init__</code> of <code>Button</code>. The call <code>super().__init__(pos_x, pos_y, size, size)</code> in <code>SingleDimensionMixin</code> and the signature <code>def __init__(self, pos_x, pos_y, size_x, size_y):</code> in <code>Button</code> match, so everything works.</p>
+<p>If we defined <code>SquareButton</code> as</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">SquareButton</span><span class="p">(</span><span class="n">Button</span><span class="p">,</span> <span class="n">SingleDimensionMixin</span><span class="p">):</span>
+    <span class="k">pass</span>
+</code></pre></div>
+
+
+<p>then the <code>__init__</code> method would first be provided by <code>Button</code>, and its <code>super</code> would call the <code>__init__</code> method of <code>SingleDimensionMixin</code>. This would however result in an error, as the call <code>super().__init__(pos_x, pos_y, size_x, size_y)</code> in <code>Button</code> doesn't match the signature <code>def __init__(self, pos_x, pos_y, size):</code> of <code>SingleDimensionMixin</code>.</p>
 <p>Mixins are not used only when you want to change the object's interface, though. Leveraging <code>super</code> we can achieve interesting designs like</p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">GraphicalEntity</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos_x</span><span class="p">,</span> <span class="n">pos_y</span><span class="p">,</span> <span class="n">size_x</span><span class="p">,</span> <span class="n">size_y</span><span class="p">):</span>
@@ -510,20 +530,22 @@ Parent1     Parent2
 
 
 <span class="k">class</span> <span class="nc">LimitSizeMixin</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size_x</span><span class="p">,</span> <span class="n">size_y</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos_x</span><span class="p">,</span> <span class="n">pos_y</span><span class="p">,</span> <span class="n">size_x</span><span class="p">,</span> <span class="n">size_y</span><span class="p">):</span>
         <span class="n">size_x</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">size_x</span><span class="p">,</span> <span class="mi">500</span><span class="p">)</span>
         <span class="n">size_y</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">size_y</span><span class="p">,</span> <span class="mi">400</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">pos_x</span><span class="p">,</span> <span class="n">pos_y</span><span class="p">,</span> <span class="n">size_x</span><span class="p">,</span> <span class="n">size_y</span><span class="p">)</span>
 
 
-<span class="k">class</span> <span class="nc">LimitSizeButton</span><span class="p">(</span><span class="n">Button</span><span class="p">,</span> <span class="n">LimitSizeMixin</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">LimitSizeButton</span><span class="p">(</span><span class="n">LimitSizeMixin</span><span class="p">,</span> <span class="n">Button</span><span class="p">):</span>
     <span class="k">pass</span>
 
-<span class="n">b</span> <span class="o">=</span> <span class="n">LimitSizeButton</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">LimitSizeButton</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">2000</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">size_x</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">size_y</span><span class="p">)</span>
 </code></pre></div>
 
 
-<p>Here, <code>LimitSizeButton</code> calls <code>__init__</code> of its first parent, which is <code>Button</code>. This, however, delegates the call to the next class in the MRO before initialising <code>self.status</code>, so the call is dispatched to <code>LimitSizeMixin</code>, that first operates some changes and eventually dispatches it to the original recipient, <code>GraphicalEntity</code>.</p>
+<p>Here, the MRO or <code>LimitSizeButton</code> is <code>(&lt;class '__main__.LimitSizeButton'&gt;, &lt;class '__main__.LimitSizeMixin'&gt;, &lt;class '__main__.Button'&gt;, &lt;class '__main__.GraphicalEntity'&gt;, &lt;class 'object'&gt;)</code>, which means that when we initialize it the <code>__init__</code> method is first provided by <code>LimitSizeMixin</code>, which then calls through <code>super</code> the <code>__init__</code> method of <code>Button</code>, and through the latter the <code>__init__</code> method of <code>GraphicalEntity</code>.</p>
 <p>Remember that in Python, you are never forced to call the parent's implementation of a method, so the mixin here might also stop the dispatching mechanism if that is the requirement of the business logic of the new object.</p>
 <h1 id="a-real-example-django-class-based-views">A real example: Django class-based views<a class="headerlink" href="#a-real-example-django-class-based-views" title="Permanent link">&para;</a></h1>
 <p>Finally, let's get to the original source of inspiration for this post: the Django codebase. I will show you here how the Django programmers used multiple inheritance and mixin classes to promote code reuse, and you will now hopefully grasp all the reasons behind them.</p>
