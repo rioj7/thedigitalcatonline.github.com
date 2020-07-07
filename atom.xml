@@ -1,5 +1,762 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>The Digital Cat</title><link href="https://www.thedigitalcatonline.com/" rel="alternate"></link><link href="https://www.thedigitalcatonline.com/atom.xml" rel="self"></link><id>https://www.thedigitalcatonline.com/</id><updated>2020-07-06T13:00:00+01:00</updated><subtitle>Adventures of a curious cat in the land of programming</subtitle><entry><title>Flask project setup: TDD, Docker, Postgres and more - Part 2</title><link href="https://www.thedigitalcatonline.com/blog/2020/07/06/flask-project-setup-tdd-docker-postgres-and-more-part-2/" rel="alternate"></link><published>2020-07-06T13:00:00+01:00</published><updated>2020-07-06T13:00:00+01:00</updated><author><name>Leonardo Giordani</name></author><id>tag:www.thedigitalcatonline.com,2020-07-06:/blog/2020/07/06/flask-project-setup-tdd-docker-postgres-and-more-part-2/</id><summary type="html">&lt;p&gt;A step-by-step tutorial on how to setup a Flask project with TDD, Docker and Postgres&lt;/p&gt;</summary><content type="html">&lt;p&gt;In this series of posts I explore the development of a Flask project with a setup that is built with efficiency and tidiness in mind, using TDD, Docker and Postgres.&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>The Digital Cat</title><link href="https://www.thedigitalcatonline.com/" rel="alternate"></link><link href="https://www.thedigitalcatonline.com/atom.xml" rel="self"></link><id>https://www.thedigitalcatonline.com/</id><updated>2020-07-07T13:00:00+01:00</updated><subtitle>Adventures of a curious cat in the land of programming</subtitle><entry><title>Flask project setup: TDD, Docker, Postgres and more - Part 3</title><link href="https://www.thedigitalcatonline.com/blog/2020/07/07/flask-project-setup-tdd-docker-postgres-and-more-part-3/" rel="alternate"></link><published>2020-07-07T13:00:00+01:00</published><updated>2020-07-07T13:00:00+01:00</updated><author><name>Leonardo Giordani</name></author><id>tag:www.thedigitalcatonline.com,2020-07-07:/blog/2020/07/07/flask-project-setup-tdd-docker-postgres-and-more-part-3/</id><summary type="html">&lt;p&gt;A step-by-step tutorial on how to setup a Flask project with TDD, Docker and Postgres&lt;/p&gt;</summary><content type="html">&lt;p&gt;In this series of posts I explore the development of a Flask project with a setup that is built with efficiency and tidiness in mind, using TDD, Docker and Postgres.&lt;/p&gt;
+&lt;h2 id="catch-up"&gt;Catch-up&lt;a class="headerlink" href="#catch-up" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;In the &lt;a href="https://www.thedigitalcatonline.com/blog/2020/07/05/flask-project-setup-tdd-docker-postgres-and-more-part-1/"&gt;first&lt;/a&gt; and &lt;a href="https://www.thedigitalcatonline.com/blog/2020/07/06/flask-project-setup-tdd-docker-postgres-and-more-part-2/"&gt;second&lt;/a&gt; posts I created a Flask project with a tidy setup, using Docker to run the development environment and the tests, and mapping important commands in a management script, so that the configuration can be in a single file and drive the whole system.&lt;/p&gt;
+&lt;p&gt;In this post I will show you how to easily create scenarios, that is databases created on the fly with custom data, so that it is possible to test queries in isolation, either with the Flask application or with the command line. I will also show you how to define a configuration for production and give some hints for the deployment.&lt;/p&gt;
+&lt;h2 id="step-1-creating-scenarios"&gt;Step 1 - Creating scenarios&lt;a class="headerlink" href="#step-1-creating-scenarios" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;The idea of scenarios is simple. Sometimes you need to investigate specific use cases for bugs, or maybe increase the performances of some database queries, and you might need to do this on a customised database. This is a scenario, a Python file that populates the database with a specific set of data and that allows you to run the application or the database shell on it.&lt;/p&gt;
+&lt;p&gt;Often the development database is a copy of the production one, maybe with sensitive data stripped to avoid leaking private information, and while this gives us a realistic case where to test queries (e.g. how does the query perform on 1 million lines?) it might not help during the initial investigations, where you need to have all the data in fron of you to properly understand what happens. Whoever learned how joins work in relational databases understands what I mean here.&lt;/p&gt;
+&lt;p&gt;In principle, to create a scenario we just need to spin up an empty database and to run the scenario code against it. In practice, things are not much more complicated, but there are a couple of minor issues that we need to solve.&lt;/p&gt;
+&lt;p&gt;First, I am already running a database for the development and one for the testing. The second is ephemeral, but I decided to setup the project so that I can run the tests while the development database is up, and the way I did it was using port 5432 (the standard Postgres one) for development and 5433 for testing. Spinning up scenarios adds more databases to the equation. Clearly I do not expect to run 5 scenrios at the same time while running the development and the test databases, but I make myself a rule to make something generic as soon I do it for the third time.&lt;/p&gt;
+&lt;p&gt;This means that I won't create a database for a scenario on port 5434 and will instead look for a more generic solution. This is offered me by the Docker networking model, where I can map a container port to the host but avoid assigning the destination port, and it will be chose randomly by Docker itself among the unprivileged ones. This means that I can create a Postgres container mapping port 5432 (the port in the container) and having Docker connect it to port 32838 in the host (for example). As long as the application knows which port to use this is absolutely the same as using port 5432.&lt;/p&gt;
+&lt;p&gt;Unfortunately the Docker interface is not extremely script-friendly when it comes to providing information and I have to parse the output a bit. Practically speaking, after I spin up the containers, I will run the command &lt;code&gt;docker-compose port db 5432&lt;/code&gt; which will return a string like &lt;code&gt;0.0.0.0:32838&lt;/code&gt;, and I will extract the port from it. Nothing major, but these are the (sometimes many) issues you face when you orchestrate different systems together.&lt;/p&gt;
+&lt;p&gt;The new management script is&lt;/p&gt;
+&lt;p&gt;File: &lt;code&gt;manage.py&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="ch"&gt;#! /usr/bin/env python&lt;/span&gt;
+
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;os&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;json&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;signal&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;subprocess&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;time&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;shutil&lt;/span&gt;
+
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;click&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;psycopg2&lt;/span&gt;
+&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;psycopg2.extensions&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;ISOLATION_LEVEL_AUTOCOMMIT&lt;/span&gt;
+
+
+&lt;span class="c1"&gt;# Ensure an environment variable exists and has a value&lt;/span&gt;
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;setenv&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;variable&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;default&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;environ&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;variable&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getenv&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;variable&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;default&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+
+&lt;span class="n"&gt;setenv&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;APPLICATION_CONFIG&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;development&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="n"&gt;APPLICATION_CONFIG_PATH&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;config&amp;quot;&lt;/span&gt;
+&lt;span class="n"&gt;DOCKER_PATH&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;docker&amp;quot;&lt;/span&gt;
+
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;app_config_file&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;config&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;join&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;APPLICATION_CONFIG_PATH&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="sa"&gt;f&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="si"&gt;{config}&lt;/span&gt;&lt;span class="s2"&gt;.json&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;docker_compose_file&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;config&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;join&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;DOCKER_PATH&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="sa"&gt;f&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="si"&gt;{config}&lt;/span&gt;&lt;span class="s2"&gt;.yml&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;configure_app&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;config&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="c1"&gt;# Read configuration from the relative JSON file&lt;/span&gt;
+    &lt;span class="k"&gt;with&lt;/span&gt; &lt;span class="nb"&gt;open&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;app_config_file&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;config&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;config_data&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;json&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;load&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="c1"&gt;# Convert the config into a usable Python dictionary&lt;/span&gt;
+    &lt;span class="n"&gt;config_data&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;dict&lt;/span&gt;&lt;span class="p"&gt;((&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;name&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;value&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;config_data&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;key&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;value&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;config_data&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;items&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+        &lt;span class="n"&gt;setenv&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;key&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;value&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+
+&lt;span class="nd"&gt;@click&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;group&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;cli&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+    &lt;span class="k"&gt;pass&lt;/span&gt;
+
+
+&lt;span class="nd"&gt;@cli&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;command&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;context_settings&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;ignore_unknown_options&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="kc"&gt;True&lt;/span&gt;&lt;span class="p"&gt;})&lt;/span&gt;
+&lt;span class="nd"&gt;@click&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;argument&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;subcommand&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;nargs&lt;/span&gt;&lt;span class="o"&gt;=-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;type&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;click&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Path&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt;
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;flask&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;subcommand&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="n"&gt;configure_app&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getenv&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;APPLICATION_CONFIG&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+
+    &lt;span class="n"&gt;cmdline&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;flask&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="nb"&gt;list&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;subcommand&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="k"&gt;try&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;p&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;subprocess&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Popen&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cmdline&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;wait&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+    &lt;span class="k"&gt;except&lt;/span&gt; &lt;span class="ne"&gt;KeyboardInterrupt&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;send_signal&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;signal&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;SIGINT&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;wait&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;docker_compose_cmdline&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;commands_string&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="kc"&gt;None&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="n"&gt;config&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getenv&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;APPLICATION_CONFIG&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;configure_app&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;config&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="n"&gt;compose_file&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;docker_compose_file&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;config&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="ow"&gt;not&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;isfile&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;compose_file&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;raise&lt;/span&gt; &lt;span class="ne"&gt;ValueError&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="sa"&gt;f&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;The file &lt;/span&gt;&lt;span class="si"&gt;{compose_file}&lt;/span&gt;&lt;span class="s2"&gt; does not exist&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="n"&gt;command_line&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+        &lt;span class="s2"&gt;&amp;quot;docker-compose&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="s2"&gt;&amp;quot;-p&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="n"&gt;config&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="s2"&gt;&amp;quot;-f&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="n"&gt;compose_file&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="p"&gt;]&lt;/span&gt;
+
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;commands_string&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;command_line&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;extend&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;commands_string&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;split&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot; &amp;quot;&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;command_line&lt;/span&gt;
+
+
+&lt;span class="nd"&gt;@cli&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;command&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;context_settings&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;ignore_unknown_options&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="kc"&gt;True&lt;/span&gt;&lt;span class="p"&gt;})&lt;/span&gt;
+&lt;span class="nd"&gt;@click&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;argument&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;subcommand&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;nargs&lt;/span&gt;&lt;span class="o"&gt;=-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;type&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;click&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Path&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt;
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;compose&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;subcommand&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="n"&gt;cmdline&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;docker_compose_cmdline&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="nb"&gt;list&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;subcommand&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="k"&gt;try&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;p&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;subprocess&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Popen&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cmdline&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;wait&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+    &lt;span class="k"&gt;except&lt;/span&gt; &lt;span class="ne"&gt;KeyboardInterrupt&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;send_signal&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;signal&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;SIGINT&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;wait&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;run_sql&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;statements&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="n"&gt;conn&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;psycopg2&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;connect&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
+        &lt;span class="n"&gt;dbname&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getenv&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;POSTGRES_DB&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;
+        &lt;span class="n"&gt;user&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getenv&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;POSTGRES_USER&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;
+        &lt;span class="n"&gt;password&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getenv&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;POSTGRES_PASSWORD&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;
+        &lt;span class="n"&gt;host&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getenv&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;POSTGRES_HOSTNAME&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;
+        &lt;span class="n"&gt;port&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getenv&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;POSTGRES_PORT&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;
+    &lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="n"&gt;conn&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;set_isolation_level&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;ISOLATION_LEVEL_AUTOCOMMIT&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;cursor&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;conn&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cursor&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+    &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;statement&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;statements&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;cursor&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;execute&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;statement&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="n"&gt;cursor&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;close&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+    &lt;span class="n"&gt;conn&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;close&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;wait_for_logs&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cmdline&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;message&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="n"&gt;logs&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;subprocess&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;check_output&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cmdline&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="k"&gt;while&lt;/span&gt; &lt;span class="n"&gt;message&lt;/span&gt; &lt;span class="ow"&gt;not&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;logs&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;decode&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;utf-8&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="n"&gt;time&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sleep&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mf"&gt;0.1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="n"&gt;logs&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;subprocess&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;check_output&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cmdline&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+
+&lt;span class="nd"&gt;@cli&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;command&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;create_initial_db&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+    &lt;span class="n"&gt;configure_app&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getenv&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;APPLICATION_CONFIG&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+
+    &lt;span class="k"&gt;try&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;run_sql&lt;/span&gt;&lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="sa"&gt;f&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;CREATE DATABASE {os.getenv(&amp;#39;APPLICATION_DB&amp;#39;)}&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
+    &lt;span class="k"&gt;except&lt;/span&gt; &lt;span class="n"&gt;psycopg2&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;errors&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;DuplicateDatabase&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
+            &lt;span class="sa"&gt;f&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;The database {os.getenv(&amp;#39;APPLICATION_DB&amp;#39;)} already exists and will not be recreated&amp;quot;&lt;/span&gt;
+        &lt;span class="p"&gt;)&lt;/span&gt;
+
+
+&lt;span class="nd"&gt;@cli&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;command&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;span class="nd"&gt;@click&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;argument&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;filenames&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;nargs&lt;/span&gt;&lt;span class="o"&gt;=-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;filenames&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;environ&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;APPLICATION_CONFIG&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;testing&amp;quot;&lt;/span&gt;
+    &lt;span class="n"&gt;configure_app&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getenv&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;APPLICATION_CONFIG&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+
+    &lt;span class="n"&gt;cmdline&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;docker_compose_cmdline&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;up -d&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;subprocess&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;call&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cmdline&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="n"&gt;cmdline&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;docker_compose_cmdline&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;logs db&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;wait_for_logs&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cmdline&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;ready to accept connections&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="n"&gt;run_sql&lt;/span&gt;&lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="sa"&gt;f&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;CREATE DATABASE {os.getenv(&amp;#39;APPLICATION_DB&amp;#39;)}&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
+
+    &lt;span class="n"&gt;cmdline&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;pytest&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;-svv&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;--cov=application&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;--cov-report=term-missing&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+    &lt;span class="n"&gt;cmdline&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;extend&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;filenames&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;subprocess&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;call&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cmdline&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="n"&gt;cmdline&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;docker_compose_cmdline&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;down&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;subprocess&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;call&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cmdline&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+
+&lt;span class="nd"&gt;@cli&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;group&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;scenario&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+    &lt;span class="k"&gt;pass&lt;/span&gt;
+
+
+&lt;span class="nd"&gt;@scenario&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;command&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;span class="nd"&gt;@click&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;argument&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;name&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;up&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;name&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;environ&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;APPLICATION_CONFIG&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="sa"&gt;f&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;scenario_&lt;/span&gt;&lt;span class="si"&gt;{name}&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;
+    &lt;span class="n"&gt;config&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getenv&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;APPLICATION_CONFIG&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="n"&gt;scenario_config_source_file&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;app_config_file&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;scenario&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;scenario_config_file&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;app_config_file&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;config&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="ow"&gt;not&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;isfile&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;scenario_config_source_file&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;raise&lt;/span&gt; &lt;span class="ne"&gt;ValueError&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="sa"&gt;f&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;File &lt;/span&gt;&lt;span class="si"&gt;{scenario_config_source_file}&lt;/span&gt;&lt;span class="s2"&gt; doesn&amp;#39;t exist&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;shutil&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;copy&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;scenario_config_source_file&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;scenario_config_file&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="n"&gt;scenario_docker_source_file&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;docker_compose_file&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;scenario&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;scenario_docker_file&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;docker_compose_file&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;config&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="ow"&gt;not&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;isfile&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;scenario_docker_source_file&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;raise&lt;/span&gt; &lt;span class="ne"&gt;ValueError&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="sa"&gt;f&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;File &lt;/span&gt;&lt;span class="si"&gt;{scenario_docker_source_file}&lt;/span&gt;&lt;span class="s2"&gt; doesn&amp;#39;t exist&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;shutil&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;copy&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;docker_compose_file&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;scenario&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="n"&gt;scenario_docker_file&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="n"&gt;configure_app&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="sa"&gt;f&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;scenario_&lt;/span&gt;&lt;span class="si"&gt;{name}&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="n"&gt;cmdline&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;docker_compose_cmdline&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;up -d&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;subprocess&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;call&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cmdline&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="n"&gt;cmdline&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;docker_compose_cmdline&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;logs db&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;wait_for_logs&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cmdline&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;ready to accept connections&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="n"&gt;cmdline&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;docker_compose_cmdline&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;port db 5432&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;out&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;subprocess&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;check_output&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cmdline&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;port&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;out&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;decode&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;utf-8&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;replace&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;split&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;:&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+    &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;environ&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;POSTGRES_PORT&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;port&lt;/span&gt;
+
+    &lt;span class="n"&gt;run_sql&lt;/span&gt;&lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="sa"&gt;f&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;CREATE DATABASE {os.getenv(&amp;#39;APPLICATION_DB&amp;#39;)}&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
+
+    &lt;span class="n"&gt;scenario_module&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="sa"&gt;f&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;scenarios.&lt;/span&gt;&lt;span class="si"&gt;{name}&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;
+    &lt;span class="n"&gt;scenario_file&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;join&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;scenarios&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="sa"&gt;f&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="si"&gt;{name}&lt;/span&gt;&lt;span class="s2"&gt;.py&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;isfile&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;scenario_file&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;importlib&lt;/span&gt;
+
+        &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;environ&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;APPLICATION_SCENARIO_NAME&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;name&lt;/span&gt;
+
+        &lt;span class="n"&gt;scenario&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;importlib&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;import_module&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;scenario_module&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="n"&gt;scenario&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;run&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+    &lt;span class="n"&gt;cmdline&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot; &amp;quot;&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;join&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
+        &lt;span class="n"&gt;docker_compose_cmdline&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
+            &lt;span class="s2"&gt;&amp;quot;exec db psql -U &lt;/span&gt;&lt;span class="si"&gt;{}&lt;/span&gt;&lt;span class="s2"&gt; -d &lt;/span&gt;&lt;span class="si"&gt;{}&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
+                &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getenv&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;POSTGRES_USER&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getenv&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;APPLICATION_DB&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+            &lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Your scenario is ready. If you want to open a SQL shell run&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cmdline&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+
+&lt;span class="nd"&gt;@scenario&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;command&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;span class="nd"&gt;@click&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;argument&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;name&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;down&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;name&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;environ&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;APPLICATION_CONFIG&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="sa"&gt;f&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;scenario_&lt;/span&gt;&lt;span class="si"&gt;{name}&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;
+    &lt;span class="n"&gt;config&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getenv&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;APPLICATION_CONFIG&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="n"&gt;cmdline&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;docker_compose_cmdline&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;down&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;subprocess&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;call&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cmdline&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="n"&gt;scenario_config_file&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;app_config_file&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;config&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;remove&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;scenario_config_file&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="n"&gt;scenario_docker_file&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;docker_compose_file&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;config&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;remove&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;scenario_docker_file&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+
+&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="vm"&gt;__name__&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;__main__&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="n"&gt;cli&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;where I added the &lt;code&gt;scenario up&lt;/code&gt; and &lt;code&gt;scenario down&lt;/code&gt; commands. As you can see the function &lt;code&gt;up&lt;/code&gt; first copies the &lt;code&gt;config/scenario.json&lt;/code&gt; and the &lt;code&gt;docker/scenario.yml&lt;/code&gt; files (that I still have to create) into files named after the scenario.&lt;/p&gt;
+&lt;p&gt;Then I run the &lt;code&gt;up -d&lt;/code&gt; command and wait for the database to be ready, as I already do for tests. After that, it's time to extract the port of the container with some very simple Python string processing and to initialise the correct environment variable.&lt;/p&gt;
+&lt;p&gt;Last, I import and execute the Python file containing the code of the scenario itself and print a friendly message with the command line to run &lt;code&gt;psql&lt;/code&gt; to have a Postgres shell into the newly created database.&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;down&lt;/code&gt; function simply tears down the containers and removes the scenario configuration files.&lt;/p&gt;
+&lt;p&gt;The two missing config files are pretty simple. The docker compose configuration is&lt;/p&gt;
+&lt;p&gt;File: &lt;code&gt;docker/scenario.yml&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nt"&gt;version&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s"&gt;&amp;#39;3.4&amp;#39;&lt;/span&gt;
+
+&lt;span class="nt"&gt;services&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+  &lt;span class="nt"&gt;db&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="nt"&gt;image&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;postgres&lt;/span&gt;
+    &lt;span class="nt"&gt;environment&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+      &lt;span class="nt"&gt;POSTGRES_DB&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${POSTGRES_DB}&lt;/span&gt;
+      &lt;span class="nt"&gt;POSTGRES_USER&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${POSTGRES_USER}&lt;/span&gt;
+      &lt;span class="nt"&gt;POSTGRES_HOSTNAME&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${POSTGRES_HOSTNAME}&lt;/span&gt;
+      &lt;span class="nt"&gt;POSTGRES_PASSWORD&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${POSTGRES_PASSWORD}&lt;/span&gt;
+    &lt;span class="nt"&gt;ports&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+      &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;5432&amp;quot;&lt;/span&gt;
+  &lt;span class="nt"&gt;web&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="nt"&gt;build&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+      &lt;span class="nt"&gt;context&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${PWD}&lt;/span&gt;
+      &lt;span class="nt"&gt;dockerfile&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;docker/web/Dockerfile&lt;/span&gt;
+    &lt;span class="nt"&gt;environment&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+      &lt;span class="nt"&gt;FLASK_ENV&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${FLASK_ENV}&lt;/span&gt;
+      &lt;span class="nt"&gt;FLASK_CONFIG&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${FLASK_CONFIG}&lt;/span&gt;
+      &lt;span class="nt"&gt;APPLICATION_DB&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${APPLICATION_DB}&lt;/span&gt;
+      &lt;span class="nt"&gt;POSTGRES_USER&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${POSTGRES_USER}&lt;/span&gt;
+      &lt;span class="nt"&gt;POSTGRES_HOSTNAME&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${POSTGRES_HOSTNAME}&lt;/span&gt;
+      &lt;span class="nt"&gt;POSTGRES_PASSWORD&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${POSTGRES_PASSWORD}&lt;/span&gt;
+      &lt;span class="nt"&gt;POSTGRES_PORT&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${POSTGRES_PORT}&lt;/span&gt;
+    &lt;span class="nt"&gt;command&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;flask run --host 0.0.0.0&lt;/span&gt;
+    &lt;span class="nt"&gt;volumes&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+      &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${PWD}:/opt/code&lt;/span&gt;
+    &lt;span class="nt"&gt;ports&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+      &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;5000&amp;quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Here you can see that the database is ephemeral, that the port on the host is automatically assigned, and that I also spin up the application (mapping it to a random port as well to avoid clashing with the development one).&lt;/p&gt;
+&lt;p&gt;The configuration file is&lt;/p&gt;
+&lt;p&gt;File: &lt;code&gt;config/scenario.json&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="p"&gt;[&lt;/span&gt;
+  &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;name&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;FLASK_ENV&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;value&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;development&amp;quot;&lt;/span&gt;
+  &lt;span class="p"&gt;},&lt;/span&gt;
+  &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;name&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;FLASK_CONFIG&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;value&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;development&amp;quot;&lt;/span&gt;
+  &lt;span class="p"&gt;},&lt;/span&gt;
+  &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;name&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;POSTGRES_DB&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;value&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;postgres&amp;quot;&lt;/span&gt;
+  &lt;span class="p"&gt;},&lt;/span&gt;
+  &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;name&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;POSTGRES_USER&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;value&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;postgres&amp;quot;&lt;/span&gt;
+  &lt;span class="p"&gt;},&lt;/span&gt;
+  &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;name&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;POSTGRES_HOSTNAME&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;value&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;localhost&amp;quot;&lt;/span&gt;
+  &lt;span class="p"&gt;},&lt;/span&gt;
+  &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;name&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;POSTGRES_PASSWORD&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;value&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;postgres&amp;quot;&lt;/span&gt;
+  &lt;span class="p"&gt;},&lt;/span&gt;
+  &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;name&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;APPLICATION_DB&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;value&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;application&amp;quot;&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;which doesn't add anything new to what I already did for development and testing. &lt;/p&gt;
+&lt;h4 id="resources"&gt;Resources&lt;a class="headerlink" href="#resources" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://docs.docker.com/compose/compose-file/#ports"&gt;Expose ports in docker-compose&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.docker.com/compose/reference/port/"&gt;docker-compose port command&lt;/a&gt; - A command to print the port exposed by a container&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://www.postgresql.org/docs/current/app-psql.html"&gt;psql&lt;/a&gt; - PostgreSQL interactive terminal&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="scenario-example-1"&gt;Scenario example 1&lt;a class="headerlink" href="#scenario-example-1" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;Let's have a look at a very simple scenario that doesn't do anything on the database, just to understand the system. The code for the scenario is&lt;/p&gt;
+&lt;p&gt;File: &lt;code&gt;scenarios/foo.py&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;os&lt;/span&gt;
+
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;run&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+    &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;HEY! This is scenario&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;environ&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;APPLICATION_SCENARIO_NAME&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;When I run the scenario I get the following output&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ ./manage.py scenario up foo
+Creating network &lt;span class="s2"&gt;&amp;quot;scenario_foo_default&amp;quot;&lt;/span&gt; with the default driver
+Creating scenario_foo_db_1  ... &lt;span class="k"&gt;done&lt;/span&gt;
+Creating scenario_foo_web_1 ... &lt;span class="k"&gt;done&lt;/span&gt;
+HEY! This is scenario foo
+Your scenario is ready. If you want to open a SQL shell run
+docker-compose -p scenario_foo -f docker/scenario_foo.yml &lt;span class="nb"&gt;exec&lt;/span&gt; db psql -U postgres -d application
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The command &lt;code&gt;docker ps&lt;/code&gt; shows that my development environment is happily running alongside with the scenario&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ docker ps
+CONTAINER ID  IMAGE             COMMAND                 &lt;span class="o"&gt;[&lt;/span&gt;...&lt;span class="o"&gt;]&lt;/span&gt;  PORTS                    NAMES
+85258892a2df  scenario_foo_web  &lt;span class="s2"&gt;&amp;quot;flask run --host 0.…&amp;quot;&lt;/span&gt;  &lt;span class="o"&gt;[&lt;/span&gt;...&lt;span class="o"&gt;]&lt;/span&gt;  &lt;span class="m"&gt;0&lt;/span&gt;.0.0.0:32826-&amp;gt;5000/tcp  scenario_foo_web_1
+a031b6429e07  postgres          &lt;span class="s2"&gt;&amp;quot;docker-entrypoint.s…&amp;quot;&lt;/span&gt;  &lt;span class="o"&gt;[&lt;/span&gt;...&lt;span class="o"&gt;]&lt;/span&gt;  &lt;span class="m"&gt;0&lt;/span&gt;.0.0.0:32827-&amp;gt;5432/tcp  scenario_foo_db_1
+1a449d23da01  development_web   &lt;span class="s2"&gt;&amp;quot;flask run --host 0.…&amp;quot;&lt;/span&gt;  &lt;span class="o"&gt;[&lt;/span&gt;...&lt;span class="o"&gt;]&lt;/span&gt;  &lt;span class="m"&gt;0&lt;/span&gt;.0.0.0:5000-&amp;gt;5000/tcp   development_web_1
+28aa566321b5  postgres          &lt;span class="s2"&gt;&amp;quot;docker-entrypoint.s…&amp;quot;&lt;/span&gt;  &lt;span class="o"&gt;[&lt;/span&gt;...&lt;span class="o"&gt;]&lt;/span&gt;  &lt;span class="m"&gt;0&lt;/span&gt;.0.0.0:5432-&amp;gt;5432/tcp   development_db_1
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;And the output of the &lt;code&gt;scenario up foo&lt;/code&gt; command contains the string &lt;code&gt;HEY! This is scenario foo&lt;/code&gt; that was printed by the file &lt;code&gt;foo.py&lt;/code&gt;. We can also successfully run the suggested command&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ docker-compose -p scenario_foo -f docker/scenario_foo.yml &lt;span class="nb"&gt;exec&lt;/span&gt; db psql -U postgres -d application
+psql &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="m"&gt;12&lt;/span&gt;.3 &lt;span class="o"&gt;(&lt;/span&gt;Debian &lt;span class="m"&gt;12&lt;/span&gt;.3-1.pgdg100+1&lt;span class="o"&gt;))&lt;/span&gt;
+Type &lt;span class="s2"&gt;&amp;quot;help&amp;quot;&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; help.
+
+&lt;span class="nv"&gt;application&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="c1"&gt;# \l&lt;/span&gt;
+                                  List of databases
+    Name     &lt;span class="p"&gt;|&lt;/span&gt;  Owner   &lt;span class="p"&gt;|&lt;/span&gt; Encoding &lt;span class="p"&gt;|&lt;/span&gt;  Collate   &lt;span class="p"&gt;|&lt;/span&gt;   Ctype    &lt;span class="p"&gt;|&lt;/span&gt;   Access privileges   
+-------------+----------+----------+------------+------------+-----------------------
+ application &lt;span class="p"&gt;|&lt;/span&gt; postgres &lt;span class="p"&gt;|&lt;/span&gt; UTF8     &lt;span class="p"&gt;|&lt;/span&gt; en_US.utf8 &lt;span class="p"&gt;|&lt;/span&gt; en_US.utf8 &lt;span class="p"&gt;|&lt;/span&gt; 
+ postgres    &lt;span class="p"&gt;|&lt;/span&gt; postgres &lt;span class="p"&gt;|&lt;/span&gt; UTF8     &lt;span class="p"&gt;|&lt;/span&gt; en_US.utf8 &lt;span class="p"&gt;|&lt;/span&gt; en_US.utf8 &lt;span class="p"&gt;|&lt;/span&gt; 
+ template0   &lt;span class="p"&gt;|&lt;/span&gt; postgres &lt;span class="p"&gt;|&lt;/span&gt; UTF8     &lt;span class="p"&gt;|&lt;/span&gt; en_US.utf8 &lt;span class="p"&gt;|&lt;/span&gt; en_US.utf8 &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt;c/postgres          +
+             &lt;span class="p"&gt;|&lt;/span&gt;          &lt;span class="p"&gt;|&lt;/span&gt;          &lt;span class="p"&gt;|&lt;/span&gt;            &lt;span class="p"&gt;|&lt;/span&gt;            &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="nv"&gt;postgres&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;CTc/postgres
+ template1   &lt;span class="p"&gt;|&lt;/span&gt; postgres &lt;span class="p"&gt;|&lt;/span&gt; UTF8     &lt;span class="p"&gt;|&lt;/span&gt; en_US.utf8 &lt;span class="p"&gt;|&lt;/span&gt; en_US.utf8 &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt;c/postgres          +
+             &lt;span class="p"&gt;|&lt;/span&gt;          &lt;span class="p"&gt;|&lt;/span&gt;          &lt;span class="p"&gt;|&lt;/span&gt;            &lt;span class="p"&gt;|&lt;/span&gt;            &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="nv"&gt;postgres&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;CTc/postgres
+&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="m"&gt;4&lt;/span&gt; rows&lt;span class="o"&gt;)&lt;/span&gt;
+
+&lt;span class="nv"&gt;application&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="c1"&gt;#&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;And inside the database we find the &lt;code&gt;application&lt;/code&gt; database created explicitly for the scenario (the name is specified in &lt;code&gt;config/scenario.json&lt;/code&gt;). If you don't know &lt;code&gt;psql&lt;/code&gt; you can exit with &lt;code&gt;\q&lt;/code&gt; or &lt;code&gt;Ctrl-d&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Before tearing down the scenario have a look at the two files &lt;code&gt;config/scenario_foo.json&lt;/code&gt; and &lt;code&gt;docker/scenario_foo.yml&lt;/code&gt;. They are just copies of &lt;code&gt;config/scenario.json&lt;/code&gt; and &lt;code&gt;docker/scenario.yml&lt;/code&gt; but I think seeing them there might help to understand how the whole thing works. When you are done run &lt;code&gt;./manage.py scenario down foo&lt;/code&gt;.&lt;/p&gt;
+&lt;h3 id="scenario-example-2"&gt;Scenario example 2&lt;a class="headerlink" href="#scenario-example-2" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;Let's do something a bit more interesting. The new scenario is contained in &lt;code&gt;scenarios/users.py&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;File: &lt;code&gt;scenarios/users.py&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;application.app&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;create_app&lt;/span&gt;
+&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;application.models&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;db&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;User&lt;/span&gt;
+
+
+&lt;span class="n"&gt;app&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;create_app&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;development&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;run&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+    &lt;span class="k"&gt;with&lt;/span&gt; &lt;span class="n"&gt;app&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;app_context&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+        &lt;span class="n"&gt;db&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;drop_all&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+        &lt;span class="n"&gt;db&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;create_all&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+        &lt;span class="c1"&gt;# Administrator&lt;/span&gt;
+        &lt;span class="n"&gt;admin&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;User&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;email&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;admin@server.com&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="n"&gt;db&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;session&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;add&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;admin&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+        &lt;span class="c1"&gt;# First user&lt;/span&gt;
+        &lt;span class="n"&gt;user1&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;User&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;email&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;user1@server.com&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="n"&gt;db&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;session&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;add&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;user1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+        &lt;span class="c1"&gt;# Second user&lt;/span&gt;
+        &lt;span class="n"&gt;user2&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;User&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;email&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;user2@server.com&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="n"&gt;db&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;session&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;add&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;user2&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+        &lt;span class="n"&gt;db&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;session&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;commit&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;I decided to be as agnostic as possible in the scenarios, to avoid creating something too specific that eventually would not give me enough flexibility to test what I need. This means that the scenario has to create the app and to use the database session explicitly, as I do in this example. The application is created with the &lt;code&gt;"development"&lt;/code&gt; configuration. Remember that this is the Flask configuration that you find in &lt;code&gt;application/config.py&lt;/code&gt;, not the one that is in &lt;code&gt;config/development.json&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;I can run the scenario with&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ ./manage.py scenario up users
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;and then connect to the database to find my users&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ docker-compose -p scenario_users -f docker/scenario_users.yml &lt;span class="nb"&gt;exec&lt;/span&gt; db psql -U postgres -d application
+psql &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="m"&gt;12&lt;/span&gt;.3 &lt;span class="o"&gt;(&lt;/span&gt;Debian &lt;span class="m"&gt;12&lt;/span&gt;.3-1.pgdg100+1&lt;span class="o"&gt;))&lt;/span&gt;
+Type &lt;span class="s2"&gt;&amp;quot;help&amp;quot;&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; help.
+
+&lt;span class="nv"&gt;application&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="c1"&gt;# \dt&lt;/span&gt;
+         List of relations
+ Schema &lt;span class="p"&gt;|&lt;/span&gt; Name  &lt;span class="p"&gt;|&lt;/span&gt; Type  &lt;span class="p"&gt;|&lt;/span&gt;  Owner
+--------+-------+-------+----------
+ public &lt;span class="p"&gt;|&lt;/span&gt; users &lt;span class="p"&gt;|&lt;/span&gt; table &lt;span class="p"&gt;|&lt;/span&gt; postgres
+&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt; row&lt;span class="o"&gt;)&lt;/span&gt;
+
+&lt;span class="nv"&gt;application&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="c1"&gt;# select * from users;&lt;/span&gt;
+ id &lt;span class="p"&gt;|&lt;/span&gt;      email
+----+------------------
+  &lt;span class="m"&gt;1&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt; admin@server.com
+  &lt;span class="m"&gt;2&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt; user1@server.com
+  &lt;span class="m"&gt;3&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt; user2@server.com
+&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="m"&gt;3&lt;/span&gt; rows&lt;span class="o"&gt;)&lt;/span&gt;
+
+&lt;span class="nv"&gt;application&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="c1"&gt;# \q&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h2 id="step-2-simulating-the-production-environment"&gt;Step 2 - Simulating the production environment&lt;a class="headerlink" href="#step-2-simulating-the-production-environment" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;As I stated at the very beginning of this mini series of posts, one of my goals was to run in development the same database that I run in production, and for this reason I went through the configuration steps that allowed me to have a Postgres container running both in development and during tests. In a real production scenario Postgres would probably run in a separate instance, for example on the RDS service in AWS, but as long as you have the connection parameters nothing changes in the configuration.&lt;/p&gt;
+&lt;p&gt;Docker actually allows us to easily simulate the production environment as well. Well, if our notebook was connected 24/7 we might as well host the production there directly. Not that I recommend this nowadays, but this is how many important companies begun many years ago when cloud computing had not been here yet. Instead of installing a LAMP stack we configure containers, but the idea doesn't change.&lt;/p&gt;
+&lt;p&gt;I will then create a configuration that simulates a production environment and then give some hints on how to translate this into a proper production infrastructure. If you want to have a clear picture of the components of a web application in production read my post &lt;a href="https://www.thedigitalcatonline.com/blog/2020/02/16/dissecting-a-web-stack/"&gt;Dissecting a web stack&lt;/a&gt; that analyses them one by one.&lt;/p&gt;
+&lt;p&gt;The first component that we have to change here is the HTTP server. In development we use Flask's development server, and the first message that server prints is &lt;code&gt;WARNING: This is a development server. Do not use it in a production deployment.&lt;/code&gt; Got it, Flask! A good choice to replace it is Gunicorn, so first of all I add it in the requirements&lt;/p&gt;
+&lt;p&gt;File: &lt;code&gt;requirements/production.txt&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;Flask
+flask-sqlalchemy
+psycopg2
+flask-migrate
+gunicorn
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Then I need to create a docker-compose configuration for production&lt;/p&gt;
+&lt;p&gt;File: &lt;code&gt;docker/production.yml&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nt"&gt;version&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s"&gt;&amp;#39;3.4&amp;#39;&lt;/span&gt;
+
+&lt;span class="nt"&gt;services&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+  &lt;span class="nt"&gt;db&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="nt"&gt;image&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;postgres&lt;/span&gt;
+    &lt;span class="nt"&gt;environment&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+      &lt;span class="nt"&gt;POSTGRES_DB&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${POSTGRES_DB}&lt;/span&gt;
+      &lt;span class="nt"&gt;POSTGRES_USER&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${POSTGRES_USER}&lt;/span&gt;
+      &lt;span class="nt"&gt;POSTGRES_HOSTNAME&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${POSTGRES_HOSTNAME}&lt;/span&gt;
+      &lt;span class="nt"&gt;POSTGRES_PASSWORD&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${POSTGRES_PASSWORD}&lt;/span&gt;
+    &lt;span class="nt"&gt;ports&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+      &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;${POSTGRES_PORT}:5432&amp;quot;&lt;/span&gt;
+    &lt;span class="nt"&gt;volumes&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+      &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;pgdata:/var/lib/postgresql/data&lt;/span&gt;
+  &lt;span class="nt"&gt;web&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="nt"&gt;build&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+      &lt;span class="nt"&gt;context&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${PWD}&lt;/span&gt;
+      &lt;span class="nt"&gt;dockerfile&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;docker/web/Dockerfile.production&lt;/span&gt;
+    &lt;span class="nt"&gt;environment&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+      &lt;span class="nt"&gt;FLASK_ENV&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${FLASK_ENV}&lt;/span&gt;
+      &lt;span class="nt"&gt;FLASK_CONFIG&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${FLASK_CONFIG}&lt;/span&gt;
+      &lt;span class="nt"&gt;APPLICATION_DB&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${APPLICATION_DB}&lt;/span&gt;
+      &lt;span class="nt"&gt;POSTGRES_USER&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${POSTGRES_USER}&lt;/span&gt;
+      &lt;span class="nt"&gt;POSTGRES_HOSTNAME&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${POSTGRES_HOSTNAME}&lt;/span&gt;
+      &lt;span class="nt"&gt;POSTGRES_PASSWORD&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${POSTGRES_PASSWORD}&lt;/span&gt;
+      &lt;span class="nt"&gt;POSTGRES_PORT&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${POSTGRES_PORT}&lt;/span&gt;
+    &lt;span class="nt"&gt;command&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;gunicorn -w 4 -b 0.0.0.0 wsgi:app&lt;/span&gt;
+    &lt;span class="nt"&gt;volumes&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+      &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${PWD}:/opt/code&lt;/span&gt;
+    &lt;span class="nt"&gt;ports&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+      &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;8000:8000&amp;quot;&lt;/span&gt;
+
+&lt;span class="nt"&gt;volumes&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+  &lt;span class="nt"&gt;pgdata&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;As you can see here the command that runs the application is slightly different, &lt;code&gt;gunicorn -w 4 -b 0.0.0.0 wsgi:app&lt;/code&gt;. It exposes 4 processes (&lt;code&gt;-w 4&lt;/code&gt;) on the container's address 0.0.0.0 loading the &lt;code&gt;app&lt;/code&gt; object from the &lt;code&gt;wsgi.py&lt;/code&gt; file (&lt;code&gt;wsgi:app&lt;/code&gt;). As by default Gunicorn exposes port 8000 I mapped that to the same port in the host.&lt;/p&gt;
+&lt;p&gt;As the production image need to install the production requirements I also took the opportunity to create the &lt;code&gt;docker/web&lt;/code&gt; subdirectory and move the web &lt;code&gt;Dockerfile&lt;/code&gt; there. Then I created the &lt;code&gt;Dockerfile.production&lt;/code&gt; one&lt;/p&gt;
+&lt;p&gt;File: &lt;code&gt;docker/web/Dockerfile.production&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;FROM python:3
+
+ENV PYTHONUNBUFFERED 1
+
+RUN mkdir /opt/code
+RUN mkdir /opt/requirements
+WORKDIR /opt/code
+
+ADD requirements /opt/requirements
+RUN pip install -r /opt/requirements/production.txt
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Having moved the development &lt;code&gt;Dockerfile&lt;/code&gt; into the subdirectory I also fixed the other docker-compose files to match the new configuration. I can now build the image with&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ &lt;span class="nv"&gt;APPLICATION_CONFIG&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;production&amp;quot;&lt;/span&gt; ./manage.py compose build web
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The last thing I need is a configuration file&lt;/p&gt;
+&lt;p&gt;File: &lt;code&gt;config/production.json&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="p"&gt;[&lt;/span&gt;
+  &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;name&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;FLASK_ENV&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;value&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;production&amp;quot;&lt;/span&gt;
+  &lt;span class="p"&gt;},&lt;/span&gt;
+  &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;name&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;FLASK_CONFIG&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;value&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;production&amp;quot;&lt;/span&gt;
+  &lt;span class="p"&gt;},&lt;/span&gt;
+  &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;name&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;POSTGRES_DB&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;value&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;postgres&amp;quot;&lt;/span&gt;
+  &lt;span class="p"&gt;},&lt;/span&gt;
+  &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;name&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;POSTGRES_USER&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;value&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;postgres&amp;quot;&lt;/span&gt;
+  &lt;span class="p"&gt;},&lt;/span&gt;
+  &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;name&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;POSTGRES_HOSTNAME&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;value&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;localhost&amp;quot;&lt;/span&gt;
+  &lt;span class="p"&gt;},&lt;/span&gt;
+  &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;name&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;POSTGRES_PORT&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;value&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;5432&amp;quot;&lt;/span&gt;
+  &lt;span class="p"&gt;},&lt;/span&gt;
+  &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;name&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;POSTGRES_PASSWORD&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;value&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;postgres&amp;quot;&lt;/span&gt;
+  &lt;span class="p"&gt;},&lt;/span&gt;
+  &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;name&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;APPLICATION_DB&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;value&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;application&amp;quot;&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;as you can notice this is not very different from the development one, as I just changed the values of &lt;code&gt;FLASK_ENV&lt;/code&gt; and &lt;code&gt;FLASK_CONFIG&lt;/code&gt;. Clearly this contains a secret that shouldn't be written in plain text, &lt;code&gt;POSTGRES_PASSWORD&lt;/code&gt;, but after all this is a simulation of production. In a real environment secrets should be kept in an encrypted manager such as AWS Secret Manager.&lt;/p&gt;
+&lt;p&gt;Remember that &lt;code&gt;FLASK_ENV&lt;/code&gt; changes the internal settings of Flask, most notably disabling the debugger, and the &lt;code&gt;FLASK_CONFIG=production&lt;/code&gt; loads the &lt;code&gt;ProductionConfig&lt;/code&gt; object from &lt;code&gt;application/config.py&lt;/code&gt;. That object is empty for the moment, but it might contain public configuration for the production server.&lt;/p&gt;
+&lt;h4 id="resources_1"&gt;Resources&lt;a class="headerlink" href="#resources_1" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://gunicorn.org/"&gt;Gunicorn&lt;/a&gt; - A Python WSGI HTTP Server&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="step-3-scale-up"&gt;Step 3 - Scale up&lt;a class="headerlink" href="#step-3-scale-up" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Mapping the container port to the host is not a great idea, though, as it makes it impossible to scale up and down to serve more load, which is the main point of running containers in production. This might be solved in many ways in the cloud, for example in AWS you might run the container in AWS Fargate and register them in an Application Load Balancer. Another way to do it on a sinlge host is to run a Web Server in front of your HTTP server, and this might be easily implemented  with docker-compose&lt;/p&gt;
+&lt;p&gt;I will add nginx and serve HTTP from there, reverse proxying the application containers through docker-compose networking. First of all the new configuration for docker-compose&lt;/p&gt;
+&lt;p&gt;File: &lt;code&gt;docker/production.yml&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nt"&gt;version&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s"&gt;&amp;#39;3.4&amp;#39;&lt;/span&gt;
+
+&lt;span class="nt"&gt;services&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+  &lt;span class="nt"&gt;db&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="nt"&gt;image&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;postgres&lt;/span&gt;
+    &lt;span class="nt"&gt;environment&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+      &lt;span class="nt"&gt;POSTGRES_DB&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${POSTGRES_DB}&lt;/span&gt;
+      &lt;span class="nt"&gt;POSTGRES_USER&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${POSTGRES_USER}&lt;/span&gt;
+      &lt;span class="nt"&gt;POSTGRES_HOSTNAME&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${POSTGRES_HOSTNAME}&lt;/span&gt;
+      &lt;span class="nt"&gt;POSTGRES_PASSWORD&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${POSTGRES_PASSWORD}&lt;/span&gt;
+    &lt;span class="nt"&gt;ports&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+      &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;${POSTGRES_PORT}:5432&amp;quot;&lt;/span&gt;
+    &lt;span class="nt"&gt;volumes&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+      &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;pgdata:/var/lib/postgresql/data&lt;/span&gt;
+  &lt;span class="nt"&gt;web&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="nt"&gt;build&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+      &lt;span class="nt"&gt;context&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${PWD}&lt;/span&gt;
+      &lt;span class="nt"&gt;dockerfile&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;docker/web/Dockerfile.production&lt;/span&gt;
+    &lt;span class="nt"&gt;environment&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+      &lt;span class="nt"&gt;FLASK_ENV&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${FLASK_ENV}&lt;/span&gt;
+      &lt;span class="nt"&gt;FLASK_CONFIG&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${FLASK_CONFIG}&lt;/span&gt;
+      &lt;span class="nt"&gt;APPLICATION_DB&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${APPLICATION_DB}&lt;/span&gt;
+      &lt;span class="nt"&gt;POSTGRES_USER&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${POSTGRES_USER}&lt;/span&gt;
+      &lt;span class="nt"&gt;POSTGRES_HOSTNAME&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${POSTGRES_HOSTNAME}&lt;/span&gt;
+      &lt;span class="nt"&gt;POSTGRES_PASSWORD&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${POSTGRES_PASSWORD}&lt;/span&gt;
+      &lt;span class="nt"&gt;POSTGRES_PORT&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${POSTGRES_PORT}&lt;/span&gt;
+    &lt;span class="nt"&gt;command&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;gunicorn -w 4 -b 0.0.0.0 wsgi:app&lt;/span&gt;
+    &lt;span class="nt"&gt;volumes&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+      &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${PWD}:/opt/code&lt;/span&gt;
+  &lt;span class="nt"&gt;nginx&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="nt"&gt;image&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;nginx&lt;/span&gt;
+    &lt;span class="nt"&gt;volumes&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+      &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;./nginx/nginx.conf:/etc/nginx/nginx.conf:ro&lt;/span&gt;
+    &lt;span class="nt"&gt;ports&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+      &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;8080:8080&lt;/span&gt;
+
+&lt;span class="nt"&gt;volumes&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+  &lt;span class="nt"&gt;pgdata&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;As you can see I added a service &lt;code&gt;nginx&lt;/code&gt; that runs the default Nginx image, mapping a custom configuration file that I will create in a minute. The application container doesn't need any port mapping, as I won't access it directly from the host anymore. The Nginx configuration file is&lt;/p&gt;
+&lt;p&gt;File: &lt;code&gt;docker/nginx/nginx.conf&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;worker_processes&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+&lt;span class="k"&gt;events&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="kn"&gt;worker_connections&lt;/span&gt; &lt;span class="mi"&gt;1024&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="k"&gt;http&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+
+    &lt;span class="kn"&gt;sendfile&lt;/span&gt; &lt;span class="no"&gt;on&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+    &lt;span class="kn"&gt;upstream&lt;/span&gt; &lt;span class="s"&gt;app&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="kn"&gt;server&lt;/span&gt; &lt;span class="n"&gt;web&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;8000&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+
+    &lt;span class="kn"&gt;server&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="kn"&gt;listen&lt;/span&gt; &lt;span class="mi"&gt;8080&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+        &lt;span class="kn"&gt;location&lt;/span&gt; &lt;span class="s"&gt;/&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="kn"&gt;proxy_pass&lt;/span&gt;         &lt;span class="s"&gt;http://app&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+            &lt;span class="kn"&gt;proxy_redirect&lt;/span&gt;     &lt;span class="no"&gt;off&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+            &lt;span class="kn"&gt;proxy_set_header&lt;/span&gt;   &lt;span class="s"&gt;Host&lt;/span&gt; &lt;span class="nv"&gt;$host&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+            &lt;span class="kn"&gt;proxy_set_header&lt;/span&gt;   &lt;span class="s"&gt;X-Real-IP&lt;/span&gt; &lt;span class="nv"&gt;$remote_addr&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+            &lt;span class="kn"&gt;proxy_set_header&lt;/span&gt;   &lt;span class="s"&gt;X-Forwarded-For&lt;/span&gt; &lt;span class="nv"&gt;$proxy_add_x_forwarded_for&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+            &lt;span class="kn"&gt;proxy_set_header&lt;/span&gt;   &lt;span class="s"&gt;X-Forwarded-Host&lt;/span&gt; &lt;span class="nv"&gt;$server_name&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;This is a pretty standard configuration, and in a real production environment I would add many other configuration values (most notably serving HTTPS instead of HTTP). The &lt;code&gt;upstream&lt;/code&gt; section leverages docker-compose networking referring to &lt;code&gt;web&lt;/code&gt;, which in the internal DNS directly maps to the IPs of the service with the same name. The port 8000 comes from the default Gunicorn port that I already mentioned before. I won't run the nginx container as root on my notebook, so I will expose port 8080 instead of the traditional 80 for HTTP, and this is also something that would be different in a real production environment.&lt;/p&gt;
+&lt;p&gt;I can at this point run&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ &lt;span class="nv"&gt;APPLICATION_CONFIG&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;production&amp;quot;&lt;/span&gt; ./manage.py compose up -d
+Starting production_db_1    ... &lt;span class="k"&gt;done&lt;/span&gt;
+Starting production_nginx_1 ... &lt;span class="k"&gt;done&lt;/span&gt;
+Starting production_web_1   ... &lt;span class="k"&gt;done&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;It's interesting to have a look at the logs of the nginx container, as Nginx by default prints all the incoming requests&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ &lt;span class="nv"&gt;APPLICATION_CONFIG&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;production&amp;quot;&lt;/span&gt; ./manage.py compose logs -f nginx
+Attaching to production_nginx_1
+&lt;span class="o"&gt;[&lt;/span&gt;...&lt;span class="o"&gt;]&lt;/span&gt;
+nginx_1  &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="m"&gt;172&lt;/span&gt;.30.0.1 - - &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;05&lt;/span&gt;/Jul/2020:10:40:44 +0000&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;GET / HTTP/1.1&amp;quot;&lt;/span&gt; &lt;span class="m"&gt;200&lt;/span&gt; &lt;span class="m"&gt;13&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;-&amp;quot;&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0&amp;quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The last line is what I get when I visit &lt;a href="http://localhost:8080"&gt;localhost:8080&lt;/a&gt; while the production setup is up and running.&lt;/p&gt;
+&lt;p&gt;Scaling up and down the service is now a breeze&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ &lt;span class="nv"&gt;APPLICATION_CONFIG&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;production&amp;quot;&lt;/span&gt; ./manage.py compose up -d --scale &lt;span class="nv"&gt;web&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;3&lt;/span&gt;
+production_db_1 is up-to-date
+Starting production_web_1 ... 
+Starting production_web_1 ... &lt;span class="k"&gt;done&lt;/span&gt;
+Creating production_web_2 ... &lt;span class="k"&gt;done&lt;/span&gt;
+Creating production_web_3 ... &lt;span class="k"&gt;done&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h4 id="resources_2"&gt;Resources&lt;a class="headerlink" href="#resources_2" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://nginx.org/en/"&gt;Nginx&lt;/a&gt; - An HTTP and reverse proxy server (and more)&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://hub.docker.com/_/nginx"&gt;Docker nginx&lt;/a&gt; - the official nginx Docker image&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.docker.com/compose/reference/logs/"&gt;docker-compose logs command&lt;/a&gt; - A command to print container logs&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.docker.com/compose/reference/up/"&gt;docker compose up command&lt;/a&gt; - The new way to scale containers in docker-compose&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="bonus-step-a-closer-look-at-docker-networking"&gt;Bonus step - A closer look at Docker networking&lt;a class="headerlink" href="#bonus-step-a-closer-look-at-docker-networking" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;I mentioned that docker-compose creates a connection between services, and used that in the configuration of the nginx container, but I understand that this might look like black magic to some people. While I believe that this is actually black magic, I also think that we can investigate it a bit, so let's open the grimoire and reveal (some of) the dark secrets of Docker networking.&lt;/p&gt;
+&lt;p&gt;While the production setup is running we can connect to the nginx container and see what is happening in real time, so first of all I run a bash shell on it&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ &lt;span class="nv"&gt;APPLICATION_CONFIG&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;production&amp;quot;&lt;/span&gt; ./manage.py compose &lt;span class="nb"&gt;exec&lt;/span&gt; nginx bash
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Once inside I can see my configuration file at &lt;code&gt;/etc/nginx/nginx.conf&lt;/code&gt;, but this has not changed. Remember that Docker networking doesn't work as a templating engine, but with a local DNS. This means that if we try to resolve &lt;code&gt;web&lt;/code&gt; from inside the container we should see multiple IPs. The command &lt;code&gt;dig&lt;/code&gt; is a good tool to investigate the DNS, but it doesn't come preinstalled in the nginx container, so I need to run&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@33cbaea369be:/# apt update &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; apt install dnsutils
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;and at this point I can run it&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@33cbaea369be:/# dig web
+
+&lt;span class="p"&gt;;&lt;/span&gt; &amp;lt;&amp;lt;&amp;gt;&amp;gt; DiG &lt;span class="m"&gt;9&lt;/span&gt;.11.5-P4-5.1+deb10u1-Debian &amp;lt;&amp;lt;&amp;gt;&amp;gt; web
+&lt;span class="p"&gt;;;&lt;/span&gt; global options: +cmd
+&lt;span class="p"&gt;;;&lt;/span&gt; Got answer:
+&lt;span class="p"&gt;;;&lt;/span&gt; -&amp;gt;&amp;gt;HEADER&lt;span class="s"&gt;&amp;lt;&amp;lt;- opco&lt;/span&gt;de: QUERY, status: NOERROR, id: &lt;span class="m"&gt;30539&lt;/span&gt;
+&lt;span class="p"&gt;;;&lt;/span&gt; flags: qr rd ra&lt;span class="p"&gt;;&lt;/span&gt; QUERY: &lt;span class="m"&gt;1&lt;/span&gt;, ANSWER: &lt;span class="m"&gt;3&lt;/span&gt;, AUTHORITY: &lt;span class="m"&gt;0&lt;/span&gt;, ADDITIONAL: &lt;span class="m"&gt;0&lt;/span&gt;
+
+&lt;span class="p"&gt;;;&lt;/span&gt; QUESTION SECTION:
+&lt;span class="p"&gt;;&lt;/span&gt;web.                           IN      A
+
+&lt;span class="p"&gt;;;&lt;/span&gt; ANSWER SECTION:
+web.                    &lt;span class="m"&gt;600&lt;/span&gt;     IN      A       &lt;span class="m"&gt;172&lt;/span&gt;.30.0.4
+web.                    &lt;span class="m"&gt;600&lt;/span&gt;     IN      A       &lt;span class="m"&gt;172&lt;/span&gt;.30.0.6
+web.                    &lt;span class="m"&gt;600&lt;/span&gt;     IN      A       &lt;span class="m"&gt;172&lt;/span&gt;.30.0.5
+
+&lt;span class="p"&gt;;;&lt;/span&gt; Query time: &lt;span class="m"&gt;0&lt;/span&gt; msec
+&lt;span class="p"&gt;;;&lt;/span&gt; SERVER: &lt;span class="m"&gt;127&lt;/span&gt;.0.0.11#53&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="m"&gt;127&lt;/span&gt;.0.0.11&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;;;&lt;/span&gt; WHEN: Sun Jul &lt;span class="m"&gt;05&lt;/span&gt; &lt;span class="m"&gt;10&lt;/span&gt;:58:18 UTC &lt;span class="m"&gt;2020&lt;/span&gt;
+&lt;span class="p"&gt;;;&lt;/span&gt; MSG SIZE  rcvd: &lt;span class="m"&gt;78&lt;/span&gt;
+
+root@33cbaea369be:/#
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The command outputs 3 IPs, which correspond to the 3 containers of the &lt;code&gt;web&lt;/code&gt; service that I am currently running. If I scale down (from outside the container)&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ &lt;span class="nv"&gt;APPLICATION_CONFIG&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;production&amp;quot;&lt;/span&gt; ./manage.py compose up -d --scale &lt;span class="nv"&gt;web&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;then the output of &lt;code&gt;dig&lt;/code&gt; becomes&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@33cbaea369be:/# dig web
+
+&lt;span class="p"&gt;;&lt;/span&gt; &amp;lt;&amp;lt;&amp;gt;&amp;gt; DiG &lt;span class="m"&gt;9&lt;/span&gt;.11.5-P4-5.1+deb10u1-Debian &amp;lt;&amp;lt;&amp;gt;&amp;gt; web
+&lt;span class="p"&gt;;;&lt;/span&gt; global options: +cmd
+&lt;span class="p"&gt;;;&lt;/span&gt; Got answer:
+&lt;span class="p"&gt;;;&lt;/span&gt; -&amp;gt;&amp;gt;HEADER&lt;span class="s"&gt;&amp;lt;&amp;lt;- opco&lt;/span&gt;de: QUERY, status: NOERROR, id: &lt;span class="m"&gt;13146&lt;/span&gt;
+&lt;span class="p"&gt;;;&lt;/span&gt; flags: qr rd ra&lt;span class="p"&gt;;&lt;/span&gt; QUERY: &lt;span class="m"&gt;1&lt;/span&gt;, ANSWER: &lt;span class="m"&gt;1&lt;/span&gt;, AUTHORITY: &lt;span class="m"&gt;0&lt;/span&gt;, ADDITIONAL: &lt;span class="m"&gt;0&lt;/span&gt;
+
+&lt;span class="p"&gt;;;&lt;/span&gt; QUESTION SECTION:
+&lt;span class="p"&gt;;&lt;/span&gt;web.                           IN      A
+
+&lt;span class="p"&gt;;;&lt;/span&gt; ANSWER SECTION:
+web.                    &lt;span class="m"&gt;600&lt;/span&gt;     IN      A       &lt;span class="m"&gt;172&lt;/span&gt;.30.0.4
+
+&lt;span class="p"&gt;;;&lt;/span&gt; Query time: &lt;span class="m"&gt;0&lt;/span&gt; msec
+&lt;span class="p"&gt;;;&lt;/span&gt; SERVER: &lt;span class="m"&gt;127&lt;/span&gt;.0.0.11#53&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="m"&gt;127&lt;/span&gt;.0.0.11&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;;;&lt;/span&gt; WHEN: Sun Jul &lt;span class="m"&gt;05&lt;/span&gt; &lt;span class="m"&gt;11&lt;/span&gt;:01:46 UTC &lt;span class="m"&gt;2020&lt;/span&gt;
+&lt;span class="p"&gt;;;&lt;/span&gt; MSG SIZE  rcvd: &lt;span class="m"&gt;40&lt;/span&gt;
+
+root@33cbaea369be:/#
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h2 id="how-to-create-the-production-infrastructure"&gt;How to create the production infrastructure&lt;a class="headerlink" href="#how-to-create-the-production-infrastructure" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;This will be a very short section, as creating infrastructure and deploying in production are complex topics, so I want to just give some hints to stimulate your research.&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://aws.amazon.com/ecs/"&gt;AWS ECS&lt;/a&gt; is basically Docker in the cloud, and the whole structure can map almost 1 to 1 to the docker-compose setup, so it is worth learning. ECS can work on explicit EC2 instances that you manage, or in &lt;a href="https://aws.amazon.com/fargate/"&gt;Fargate&lt;/a&gt;, which means that the EC2 instances running the containers are transparently managed by AWS itself.&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://www.terraform.io/"&gt;Terraform&lt;/a&gt; is a good tool to create infrastructure. It has many limitations, mostly coming from its custom HCL language, but it's slowly becoming better (version 0.13 will finally allow us to run for loops on modules, for example). Despite its shortcomings, it's a great tool to create static infrastructure, so I recommend working on it.&lt;/p&gt;
+&lt;p&gt;Terraform is not the right tool to deploy your code, though, as that requires a dynamic interaction with the system, so you need to setup a good Continuous Integration system. &lt;a href="https://www.jenkins.io/"&gt;Jenkins&lt;/a&gt; is a very well known open source CI, but I personally ended up dropping it because it doesn't seem to be designed for large scale systems. For example, it is very complicated to automate the deploy of a Jenkins server, and dynamic large scale systems should require zero manual intervention to be created. Anyway, Jenkins is a good tool to start with, but you might want to have a look at other products like &lt;a href="https://circleci.com/"&gt;CircleCI&lt;/a&gt; or &lt;a href="https://buildkite.com/"&gt;Buildkite&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;When you create your deploy pipeline you need to do much more than just creating the image and running it, at least for real applications. You need to decide when to apply database migrations and if you have a web front-end you will also need to compile and install the JavaScript assets. Since you don't want to have downtime when you deploy you will need to look into blue/green deployments, and in general to strategies that allow you to run different versions of the application at the same time, at least for short periods of time. Or for longer periods, if you want to perform A/B testing or zonal deployments.&lt;/p&gt;
+&lt;h2 id="final-words"&gt;Final words&lt;a class="headerlink" href="#final-words" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;This is the last post of this short series. I hope you learned something useful, and that it encouraged you to properly setup your projects and to investigate technologies like Docker. As always, feel free to send me feedback or questions, and if you find my posts useful please share them with whoever you thing might be interested.&lt;/p&gt;
+&lt;h2 id="feedback"&gt;Feedback&lt;a class="headerlink" href="#feedback" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Feel free to reach me on &lt;a href="https://twitter.com/thedigicat"&gt;Twitter&lt;/a&gt; if you have questions. The &lt;a href="https://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues"&gt;GitHub issues&lt;/a&gt; page is the best place to submit corrections.&lt;/p&gt;</content><category term="Programming"></category><category term="AWS"></category><category term="Docker"></category><category term="Flask"></category><category term="HTTP"></category><category term="Postgres"></category><category term="Python"></category><category term="Python3"></category><category term="TDD"></category><category term="testing"></category><category term="WWW"></category></entry><entry><title>Flask project setup: TDD, Docker, Postgres and more - Part 2</title><link href="https://www.thedigitalcatonline.com/blog/2020/07/06/flask-project-setup-tdd-docker-postgres-and-more-part-2/" rel="alternate"></link><published>2020-07-06T13:00:00+01:00</published><updated>2020-07-06T13:00:00+01:00</updated><author><name>Leonardo Giordani</name></author><id>tag:www.thedigitalcatonline.com,2020-07-06:/blog/2020/07/06/flask-project-setup-tdd-docker-postgres-and-more-part-2/</id><summary type="html">&lt;p&gt;A step-by-step tutorial on how to setup a Flask project with TDD, Docker and Postgres&lt;/p&gt;</summary><content type="html">&lt;p&gt;In this series of posts I explore the development of a Flask project with a setup that is built with efficiency and tidiness in mind, using TDD, Docker and Postgres.&lt;/p&gt;
 &lt;h2 id="catch-up"&gt;Catch-up&lt;a class="headerlink" href="#catch-up" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;In the &lt;a href="https://www.thedigitalcatonline.com/blog/2020/07/05/flask-project-setup-tdd-docker-postgres-and-more-part-1/"&gt;previous post&lt;/a&gt; we started from an empty project and learned how to add the minimal code to run a Flask project. Then we created a static configuration file and a management script that wraps the &lt;code&gt;flask&lt;/code&gt; and &lt;code&gt;docker-compose&lt;/code&gt; commands to run the application with a specific configuration&lt;/p&gt;
 &lt;p&gt;In this post I will show you how to run a production-ready database alongside your code in a Docker container, both in your development setup and for the tests.&lt;/p&gt;
@@ -3302,363 +4059,4 @@ pip install -r requirements.txt
 &lt;h1 id="updates"&gt;Updates&lt;a class="headerlink" href="#updates" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;2017-12-24: Reddit user &lt;a href="https://new.reddit.com/user/SpaceShrimp"&gt;SpaceShrimp&lt;/a&gt; pointed out the rage of a signed 16-bit number is &lt;code&gt;(-32768,32767)&lt;/code&gt; and not &lt;code&gt;(-32767,32768)&lt;/code&gt;. Thanks!&lt;/p&gt;
 &lt;h1 id="feedback"&gt;Feedback&lt;a class="headerlink" href="#feedback" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
-&lt;p&gt;Feel free to reach me on &lt;a href="https://twitter.com/thedigicat"&gt;Twitter&lt;/a&gt; if you have questions. The &lt;a href="https://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues"&gt;GitHub issues&lt;/a&gt; page is the best place to submit corrections.&lt;/p&gt;</content><category term="Retro"></category><category term="assembly"></category><category term="M68000"></category></entry><entry><title>Exploring the Amiga - Part 8</title><link href="https://www.thedigitalcatonline.com/blog/2019/02/19/exploring-the-amiga-8/" rel="alternate"></link><published>2019-02-19T14:00:00+01:00</published><updated>2019-02-19T14:00:00+01:00</updated><author><name>Leonardo Giordani</name></author><id>tag:www.thedigitalcatonline.com,2019-02-19:/blog/2019/02/19/exploring-the-amiga-8/</id><summary type="html">&lt;p&gt;Branching in the M68k Assembly, memory list management in Kickstart 1.3&lt;/p&gt;</summary><content type="html">&lt;h1 id="branching"&gt;Branching&lt;a class="headerlink" href="#branching" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
-&lt;p&gt;As branching is one of the most important ways to control the program flow it is worth discussing how it works in the Motorola 68000 processor, and review what options we have.&lt;/p&gt;
-&lt;p&gt;Contrary to what happens in higher level languages, in Assembly we do not have a way to represent logical expressions. In a language like C we can compare two integers with something like &lt;code&gt;a &amp;gt; b&lt;/code&gt; which tells us if the first number is greater than the second. But in Assembly there is no such syntax, so we have to rely on processor flags; these are bits that the processor sets according to the result of some operation, be it a direct comparison of two values or another instruction that manages integer numbers.&lt;/p&gt;
-&lt;p&gt;The Motorola 68000 flags are kept in the 5 least significant bits of the Status Register (SR). The latter is not available during the normal operations in user mode, but these 5 bits, called Condition Code Register (CCR) are always accessible. The 5 bits are named &lt;code&gt;X&lt;/code&gt;, &lt;code&gt;N&lt;/code&gt;, &lt;code&gt;Z&lt;/code&gt;, &lt;code&gt;V&lt;/code&gt;, and &lt;code&gt;C&lt;/code&gt;. Of these, the ones we need to take into consideration for branching are the rightmost 4.&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;N&lt;/code&gt; (Negative) is set to the value of the most significant bit of the result of an instruction, to show that a negative number was produced.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;Z&lt;/code&gt; (Zero) is set if the result is zero.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;V&lt;/code&gt; (Overflow) is set when an arithmetic operation results in a number that cannot be represented with the size of the operand.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;C&lt;/code&gt; (Carry) is set when an addition or a subtraction need to carry a bit (carry out or borrow).&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;To branch according to the value of these flags we can use the &lt;code&gt;Bcc&lt;/code&gt; family of instruction, where &lt;code&gt;cc&lt;/code&gt; is a two-letter mnemonic that represents the condition that is under test. For example the condition &lt;code&gt;MI&lt;/code&gt; stands for &lt;code&gt;MInus&lt;/code&gt; and tests if the &lt;code&gt;N&lt;/code&gt; flag is set. Thus, &lt;code&gt;bmi &amp;lt;address&amp;gt;&lt;/code&gt; will branch to &lt;code&gt;&amp;lt;address&amp;gt;&lt;/code&gt; if the result of the previous instruction was negative, because that instruction set the &lt;code&gt;N&lt;/code&gt; flag.&lt;/p&gt;
-&lt;p&gt;There are multiple families of instructions that use the CCR: &lt;code&gt;Bcc&lt;/code&gt;, &lt;code&gt;DBcc&lt;/code&gt;, &lt;code&gt;Scc&lt;/code&gt;, and &lt;code&gt;TRAPcc&lt;/code&gt;. The following table lists all the possible conditions we can test on the Motorola 68000 and their meaning&lt;/p&gt;
-&lt;table&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th&gt;Instruction&lt;/th&gt;
-&lt;th&gt;Full name&lt;/th&gt;
-&lt;th&gt;Tested condition&lt;/th&gt;
-&lt;th&gt;Notes&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-&lt;tbody&gt;
-&lt;tr&gt;
-&lt;td&gt;CC&lt;/td&gt;
-&lt;td&gt;Carry Clear&lt;/td&gt;
-&lt;td&gt;C == 0&lt;/td&gt;
-&lt;td&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;CS&lt;/td&gt;
-&lt;td&gt;Carry Set&lt;/td&gt;
-&lt;td&gt;C == 1&lt;/td&gt;
-&lt;td&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;EQ&lt;/td&gt;
-&lt;td&gt;EQual&lt;/td&gt;
-&lt;td&gt;Z == 1&lt;/td&gt;
-&lt;td&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;F&lt;/td&gt;
-&lt;td&gt;False&lt;/td&gt;
-&lt;td&gt;Always false&lt;/td&gt;
-&lt;td&gt;Not available for Bcc&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;GE&lt;/td&gt;
-&lt;td&gt;Greater or Equal&lt;/td&gt;
-&lt;td&gt;N == V&lt;/td&gt;
-&lt;td&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;GT&lt;/td&gt;
-&lt;td&gt;Greater Than&lt;/td&gt;
-&lt;td&gt;N == V and Z == 0&lt;/td&gt;
-&lt;td&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;HI&lt;/td&gt;
-&lt;td&gt;HIgher than&lt;/td&gt;
-&lt;td&gt;C == 0 and Z == 0&lt;/td&gt;
-&lt;td&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;LE&lt;/td&gt;
-&lt;td&gt;Less or Equal&lt;/td&gt;
-&lt;td&gt;Z == 1 or N != V&lt;/td&gt;
-&lt;td&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;LS&lt;/td&gt;
-&lt;td&gt;Lower or Same&lt;/td&gt;
-&lt;td&gt;C == 1 or Z == 1&lt;/td&gt;
-&lt;td&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;LT&lt;/td&gt;
-&lt;td&gt;Less Than&lt;/td&gt;
-&lt;td&gt;N != V&lt;/td&gt;
-&lt;td&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;MI&lt;/td&gt;
-&lt;td&gt;MInus&lt;/td&gt;
-&lt;td&gt;N == 1&lt;/td&gt;
-&lt;td&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;NE&lt;/td&gt;
-&lt;td&gt;Not Equal&lt;/td&gt;
-&lt;td&gt;Z == 0&lt;/td&gt;
-&lt;td&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;PL&lt;/td&gt;
-&lt;td&gt;PLus&lt;/td&gt;
-&lt;td&gt;N == 0&lt;/td&gt;
-&lt;td&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;T&lt;/td&gt;
-&lt;td&gt;True&lt;/td&gt;
-&lt;td&gt;Always true&lt;/td&gt;
-&lt;td&gt;Not available for Bcc&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;VC&lt;/td&gt;
-&lt;td&gt;V Clear&lt;/td&gt;
-&lt;td&gt;V == 0&lt;/td&gt;
-&lt;td&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;VS&lt;/td&gt;
-&lt;td&gt;V Set&lt;/td&gt;
-&lt;td&gt;V == 1&lt;/td&gt;
-&lt;td&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
-&lt;p&gt;The reason why the &lt;code&gt;T&lt;/code&gt; and &lt;code&gt;F&lt;/code&gt; conditions are not available for &lt;code&gt;Bcc&lt;/code&gt; instructions is simple: &lt;code&gt;bt&lt;/code&gt; would mean "branch always", and the &lt;code&gt;bra&lt;/code&gt; instruction does exactly this, while &lt;code&gt;bf&lt;/code&gt; would mean "never branch" and it's arguably useless.&lt;/p&gt;
-&lt;p&gt;Let's see an example of use with a standard comparison instruction: &lt;code&gt;cmp&lt;/code&gt;&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;cmp.w   d0,d1&lt;/span&gt;
-&lt;span class="err"&gt;beq.b   0x1522&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;Here, the processor compares &lt;code&gt;d0&lt;/code&gt; and &lt;code&gt;d1&lt;/code&gt; computing the subtraction &lt;code&gt;d1 - d0&lt;/code&gt; and setting the CCR flags according to the nature of the result. The processors manual (Programmer's Reference Manual, section 4-75, page 179) tells us that the flags are affected according to these rules&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;X&lt;/code&gt; — Not affected.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;N&lt;/code&gt; — Set if the result is negative; cleared otherwise.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;Z&lt;/code&gt; — Set if the result is zero; cleared otherwise.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;V&lt;/code&gt; — Set if an overflow occurs; cleared otherwise.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;C&lt;/code&gt; — Set if a borrow occurs; cleared otherwise.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;The &lt;code&gt;beq&lt;/code&gt; instruction on the second line checks only the &lt;code&gt;Z&lt;/code&gt; flag, however, so what we are checking here is if &lt;code&gt;d0&lt;/code&gt; and &lt;code&gt;d1&lt;/code&gt; have the same value.&lt;/p&gt;
-&lt;p&gt;A less straightforward example involves &lt;code&gt;move&lt;/code&gt;&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;move.w  0x1c(a1),d0&lt;/span&gt;
-&lt;span class="err"&gt;beq.b   0x151e&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;The first line moves the value at &lt;code&gt;a1 + 0x1c&lt;/code&gt; into &lt;code&gt;d0&lt;/code&gt;. The &lt;code&gt;move&lt;/code&gt; instruction page (Programmer's Reference Manual, section 4-116, page 220) says that it affects only the &lt;code&gt;N&lt;/code&gt; and &lt;code&gt;Z&lt;/code&gt; flags&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;X&lt;/code&gt; — Not affected.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;N&lt;/code&gt; — Set if the result is negative; cleared otherwise.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;Z&lt;/code&gt; — Set if the result is zero; cleared otherwise.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;V&lt;/code&gt; — Always cleared.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;C&lt;/code&gt; — Always cleared.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;Here, the tested result is the value that has been moved. So, the next line branches only if the address &lt;code&gt;a1 + 0x1c&lt;/code&gt; (and later &lt;code&gt;d0&lt;/code&gt;) contains a zero.&lt;/p&gt;
-&lt;p&gt;Pay attention that &lt;code&gt;GE&lt;/code&gt;, &lt;code&gt;GT&lt;/code&gt;, &lt;code&gt;LE&lt;/code&gt;, and &lt;code&gt;LT&lt;/code&gt; read &lt;code&gt;N&lt;/code&gt;, so they should be used only with signed integers Unsigned integers, instead, should be compared using &lt;code&gt;HI&lt;/code&gt; and &lt;code&gt;LS&lt;/code&gt;.&lt;/p&gt;
-&lt;h1 id="enqueue"&gt;&lt;code&gt;Enqueue&lt;/code&gt;&lt;a class="headerlink" href="#enqueue" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
-&lt;p&gt;In the previous article we discussed the structure of a memory node created by &lt;code&gt;AddMemList&lt;/code&gt; and I briefly mentioned &lt;code&gt;Enqueue&lt;/code&gt; and a protected version of it. &lt;code&gt;Enqueue&lt;/code&gt; is the function that Exec uses to add a node into a linked list, following a simple schema based on priorities, but it turns out &lt;code&gt;AddMemList&lt;/code&gt; does not use it directly, resorting to a version of it wrapped by two other functions, namely &lt;code&gt;Forbid&lt;/code&gt; and &lt;code&gt;Permit&lt;/code&gt; that are connected to task rescheduling. For the time being, however, we may forget the wrappers and jump directly to &lt;code&gt;Enqueue&lt;/code&gt; and learn how the Amiga operating system was managing linked lists.&lt;/p&gt;
-&lt;p&gt;If the list we are managing is a singly linked list, where each node points to the successor only, we are forced to find the node &lt;em&gt;after which&lt;/em&gt; we want to insert the new one. This is mandatory, as we have to change its outgoing pointer, redirecting it to the new inserted node. In a doubly linked list such the ones used by the Amiga system this is not a problem, as from any point in the list we can start traversing it either forward or backward.&lt;/p&gt;
-&lt;p&gt;The following drawing is a simple representation of what happens in the Kickstart code when the &lt;code&gt;Enqueue&lt;/code&gt; function is executed. &lt;code&gt;Ins&lt;/code&gt; is the node we want to insert, &lt;code&gt;Pred&lt;/code&gt; is the node after which we will insert &lt;code&gt;Ins&lt;/code&gt;, and &lt;code&gt;Next&lt;/code&gt; is the node before which we will insert &lt;code&gt;Ins&lt;/code&gt;.&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;                                  &lt;span class="n"&gt;TAILPRED&lt;/span&gt;  &lt;span class="n"&gt;TAIL&lt;/span&gt;
-                                     &lt;span class="o"&gt;|&lt;/span&gt;       &lt;span class="o"&gt;|&lt;/span&gt;
-                                     &lt;span class="n"&gt;v&lt;/span&gt;       &lt;span class="n"&gt;v&lt;/span&gt;
-&lt;span class="nl"&gt;BEFORE&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;       &lt;span class="n"&gt;HEAD&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;Node&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;Pred&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;Next&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;Node&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="mh"&gt;0x0&lt;/span&gt;
-
-
-                                         &lt;span class="n"&gt;TAILPRED&lt;/span&gt;  &lt;span class="n"&gt;TAIL&lt;/span&gt;
-                                            &lt;span class="o"&gt;|&lt;/span&gt;       &lt;span class="o"&gt;|&lt;/span&gt;
-                                            &lt;span class="n"&gt;v&lt;/span&gt;       &lt;span class="n"&gt;v&lt;/span&gt;
-&lt;span class="nl"&gt;AFTER&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;        &lt;span class="n"&gt;HEAD&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;Node&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;Pred&lt;/span&gt;           &lt;span class="n"&gt;Next&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;Node&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="mh"&gt;0x0&lt;/span&gt;
-                                  &lt;span class="o"&gt;|&lt;/span&gt;         &lt;span class="o"&gt;^&lt;/span&gt;
-                                  &lt;span class="o"&gt;|&lt;/span&gt;         &lt;span class="o"&gt;|&lt;/span&gt;
-                                  &lt;span class="o"&gt;+-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;Ins&lt;/span&gt; &lt;span class="o"&gt;--+&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;As you can see there are several pointers that need to be changed. Both the &lt;code&gt;LN_SUCC&lt;/code&gt; of &lt;code&gt;Pred&lt;/code&gt; and &lt;code&gt;Ins&lt;/code&gt;, but also the &lt;code&gt;LN_PRED&lt;/code&gt; of &lt;code&gt;Next&lt;/code&gt; and &lt;code&gt;Ins&lt;/code&gt;.&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;Enqueue&lt;/code&gt; has a very simple prototype&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;Enqueue(list, node)
-        aO    a1
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;where &lt;code&gt;a0&lt;/code&gt; and &lt;code&gt;a1&lt;/code&gt; are pointers respectively to the list header and to the node we are going to insert. It is worth recalling how the list header status is at the time when the first insertion happens, that is when either the chip or expansion memory are added to the system memory pool, managed through &lt;code&gt;MemList&lt;/code&gt;. The latter is a list header &lt;code&gt;LH&lt;/code&gt; structure and the actual values are the following&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="mh"&gt;0xe&lt;/span&gt; &lt;span class="o"&gt;+-------+&lt;/span&gt; &lt;span class="mh"&gt;0x150&lt;/span&gt;
-        &lt;span class="o"&gt;|&lt;/span&gt;       &lt;span class="o"&gt;|&lt;/span&gt;
-    &lt;span class="mh"&gt;0xd&lt;/span&gt; &lt;span class="o"&gt;+-------+&lt;/span&gt; &lt;span class="mh"&gt;0x14f&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;LH_pad&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-        &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="mh"&gt;0xa&lt;/span&gt;   &lt;span class="o"&gt;|&lt;/span&gt;
-    &lt;span class="mh"&gt;0xc&lt;/span&gt; &lt;span class="o"&gt;+-------+&lt;/span&gt; &lt;span class="mh"&gt;0x14e&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;LH_TYPE&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-        &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="mh"&gt;0x142&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt;
-    &lt;span class="mh"&gt;0x8&lt;/span&gt; &lt;span class="o"&gt;+-------+&lt;/span&gt; &lt;span class="mh"&gt;0x14a&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;LH_TAILPRED&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-        &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="mh"&gt;0x0&lt;/span&gt;   &lt;span class="o"&gt;|&lt;/span&gt;
-    &lt;span class="mh"&gt;0x4&lt;/span&gt; &lt;span class="o"&gt;+-------+&lt;/span&gt; &lt;span class="mh"&gt;0x146&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;LH_TAIL&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-        &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="mh"&gt;0x146&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt;
-    &lt;span class="mh"&gt;0x0&lt;/span&gt; &lt;span class="o"&gt;+-------+&lt;/span&gt; &lt;span class="mh"&gt;0x142&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;LH_HEAD&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;With this structure in mind, let's dive into the source code of &lt;code&gt;Enqueue&lt;/code&gt;. The function is defined at &lt;code&gt;0xfc1670&lt;/code&gt;&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="mi"&gt;00001670&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;1229&lt;/span&gt; &lt;span class="mi"&gt;0009&lt;/span&gt;                 &lt;span class="n"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;b&lt;/span&gt;  &lt;span class="mh"&gt;0x9&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a1&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt;&lt;span class="n"&gt;d1&lt;/span&gt;
-&lt;span class="mi"&gt;00001674&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2010&lt;/span&gt;                      &lt;span class="n"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;l&lt;/span&gt;  &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a0&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt;&lt;span class="n"&gt;d0&lt;/span&gt;
-&lt;span class="mi"&gt;00001676&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2040&lt;/span&gt;                      &lt;span class="n"&gt;movea&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;l&lt;/span&gt; &lt;span class="n"&gt;d0&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="n"&gt;a0&lt;/span&gt;
-&lt;span class="mi"&gt;00001678&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2010&lt;/span&gt;                      &lt;span class="n"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;l&lt;/span&gt;  &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a0&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt;&lt;span class="n"&gt;d0&lt;/span&gt;
-&lt;span class="mi"&gt;0000167&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;6706&lt;/span&gt;                      &lt;span class="n"&gt;beq&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;b&lt;/span&gt;   &lt;span class="mh"&gt;0x1682&lt;/span&gt;
-&lt;span class="mi"&gt;0000167&lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;b228&lt;/span&gt; &lt;span class="mi"&gt;0009&lt;/span&gt;                 &lt;span class="n"&gt;cmp&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;b&lt;/span&gt;   &lt;span class="mh"&gt;0x9&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a0&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt;&lt;span class="n"&gt;d1&lt;/span&gt;
-&lt;span class="mi"&gt;00001680&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;6&lt;/span&gt;&lt;span class="n"&gt;ff4&lt;/span&gt;                      &lt;span class="n"&gt;ble&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;b&lt;/span&gt;   &lt;span class="mh"&gt;0x1676&lt;/span&gt;
-&lt;span class="mi"&gt;00001682&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2028&lt;/span&gt; &lt;span class="mi"&gt;0004&lt;/span&gt;                 &lt;span class="n"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;l&lt;/span&gt;  &lt;span class="mh"&gt;0x4&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a0&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt;&lt;span class="n"&gt;d0&lt;/span&gt;
-&lt;span class="mi"&gt;00001686&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2149&lt;/span&gt; &lt;span class="mi"&gt;0004&lt;/span&gt;                 &lt;span class="n"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;l&lt;/span&gt;  &lt;span class="n"&gt;a1&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="mh"&gt;0x4&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a0&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
-&lt;span class="mi"&gt;0000168&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2288&lt;/span&gt;                      &lt;span class="n"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;l&lt;/span&gt;  &lt;span class="n"&gt;a0&lt;/span&gt;&lt;span class="o"&gt;,(&lt;/span&gt;&lt;span class="n"&gt;a1&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
-&lt;span class="mi"&gt;0000168&lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2340&lt;/span&gt; &lt;span class="mi"&gt;0004&lt;/span&gt;                 &lt;span class="n"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;l&lt;/span&gt;  &lt;span class="n"&gt;d0&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="mh"&gt;0x4&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a1&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
-&lt;span class="mi"&gt;00001690&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2040&lt;/span&gt;                      &lt;span class="n"&gt;movea&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;l&lt;/span&gt; &lt;span class="n"&gt;d0&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="n"&gt;a0&lt;/span&gt;
-&lt;span class="mi"&gt;00001692&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2089&lt;/span&gt;                      &lt;span class="n"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;l&lt;/span&gt;  &lt;span class="n"&gt;a1&lt;/span&gt;&lt;span class="o"&gt;,(&lt;/span&gt;&lt;span class="n"&gt;a0&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
-&lt;span class="mi"&gt;00001694&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="n"&gt;e75&lt;/span&gt;                      &lt;span class="n"&gt;rts&lt;/span&gt;     
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;And it can be roughly divided into three sections, according to the internal jumps.&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;Init&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
-&lt;span class="mi"&gt;00001670&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;1229&lt;/span&gt; &lt;span class="mi"&gt;0009&lt;/span&gt;                 &lt;span class="n"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;b&lt;/span&gt;  &lt;span class="mh"&gt;0x9&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a1&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt;&lt;span class="n"&gt;d1&lt;/span&gt;
-&lt;span class="mi"&gt;00001674&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2010&lt;/span&gt;                      &lt;span class="n"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;l&lt;/span&gt;  &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a0&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt;&lt;span class="n"&gt;d0&lt;/span&gt;
-
-&lt;span class="n"&gt;FindPos&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
-&lt;span class="mi"&gt;00001676&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2040&lt;/span&gt;                      &lt;span class="n"&gt;movea&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;l&lt;/span&gt; &lt;span class="n"&gt;d0&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="n"&gt;a0&lt;/span&gt;
-&lt;span class="mi"&gt;00001678&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2010&lt;/span&gt;                      &lt;span class="n"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;l&lt;/span&gt;  &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a0&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt;&lt;span class="n"&gt;d0&lt;/span&gt;
-&lt;span class="mi"&gt;0000167&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;6706&lt;/span&gt;                      &lt;span class="n"&gt;beq&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;b&lt;/span&gt;   &lt;span class="n"&gt;InsertNode&lt;/span&gt;
-&lt;span class="mi"&gt;0000167&lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;b228&lt;/span&gt; &lt;span class="mi"&gt;0009&lt;/span&gt;                 &lt;span class="n"&gt;cmp&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;b&lt;/span&gt;   &lt;span class="mh"&gt;0x9&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a0&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt;&lt;span class="n"&gt;d1&lt;/span&gt;
-&lt;span class="mi"&gt;00001680&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;6&lt;/span&gt;&lt;span class="n"&gt;ff4&lt;/span&gt;                      &lt;span class="n"&gt;ble&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;b&lt;/span&gt;   &lt;span class="n"&gt;FindPos&lt;/span&gt;
-
-&lt;span class="n"&gt;InsertNode&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
-&lt;span class="mi"&gt;00001682&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2028&lt;/span&gt; &lt;span class="mi"&gt;0004&lt;/span&gt;                 &lt;span class="n"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;l&lt;/span&gt;  &lt;span class="mh"&gt;0x4&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a0&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt;&lt;span class="n"&gt;d0&lt;/span&gt;
-&lt;span class="mi"&gt;00001686&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2149&lt;/span&gt; &lt;span class="mi"&gt;0004&lt;/span&gt;                 &lt;span class="n"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;l&lt;/span&gt;  &lt;span class="n"&gt;a1&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="mh"&gt;0x4&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a0&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
-&lt;span class="mi"&gt;0000168&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2288&lt;/span&gt;                      &lt;span class="n"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;l&lt;/span&gt;  &lt;span class="n"&gt;a0&lt;/span&gt;&lt;span class="o"&gt;,(&lt;/span&gt;&lt;span class="n"&gt;a1&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
-&lt;span class="mi"&gt;0000168&lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2340&lt;/span&gt; &lt;span class="mi"&gt;0004&lt;/span&gt;                 &lt;span class="n"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;l&lt;/span&gt;  &lt;span class="n"&gt;d0&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="mh"&gt;0x4&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a1&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
-&lt;span class="mi"&gt;00001690&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2040&lt;/span&gt;                      &lt;span class="n"&gt;movea&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;l&lt;/span&gt; &lt;span class="n"&gt;d0&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="n"&gt;a0&lt;/span&gt;
-&lt;span class="mi"&gt;00001692&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2089&lt;/span&gt;                      &lt;span class="n"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;l&lt;/span&gt;  &lt;span class="n"&gt;a1&lt;/span&gt;&lt;span class="o"&gt;,(&lt;/span&gt;&lt;span class="n"&gt;a0&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
-&lt;span class="mi"&gt;00001694&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="n"&gt;e75&lt;/span&gt;                      &lt;span class="n"&gt;rts&lt;/span&gt;     
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;The first section, &lt;code&gt;Init&lt;/code&gt;, prepares the execution of the rest of the function. The rest bla&lt;/p&gt;
-&lt;p&gt;As I did for other functions in the previous articles, I'm going to dissect this line by line. Let's start from the &lt;code&gt;Init&lt;/code&gt; part.&lt;/p&gt;
-&lt;h2 id="init"&gt;Init&lt;a class="headerlink" href="#init" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;Init&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
-&lt;span class="mi"&gt;00001670&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;1229&lt;/span&gt; &lt;span class="mi"&gt;0009&lt;/span&gt;                 &lt;span class="n"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;b&lt;/span&gt;  &lt;span class="mh"&gt;0x9&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a1&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt;&lt;span class="n"&gt;d1&lt;/span&gt;
-&lt;span class="mi"&gt;00001674&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2010&lt;/span&gt;                      &lt;span class="n"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;l&lt;/span&gt;  &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a0&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt;&lt;span class="n"&gt;d0&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;Since &lt;code&gt;a1&lt;/code&gt; points to the node to be inserted, &lt;code&gt;0x9(a1)&lt;/code&gt; is the &lt;code&gt;LN_PRI&lt;/code&gt; field of that node, that is the priority. The first line thus stores it in &lt;code&gt;d1&lt;/code&gt; because it will be used to search for the insertion point, as the list is maintained in priority order.&lt;/p&gt;
-&lt;p&gt;The second line is the core or the node traversal algorithm. Since &lt;code&gt;a0&lt;/code&gt; points to a &lt;code&gt;LH&lt;/code&gt; structure, it is also the address of the first field &lt;code&gt;LH_HEAD&lt;/code&gt;. &lt;code&gt;(a0)&lt;/code&gt;, thus, is the dereferencing of that address, which means the address of the first node in the list. Given the figures I showed before for &lt;code&gt;MemList&lt;/code&gt;, &lt;code&gt;a0&lt;/code&gt; is &lt;code&gt;0x142&lt;/code&gt; so a &lt;code&gt;move a0,d0&lt;/code&gt; would store &lt;code&gt;0x142&lt;/code&gt; (the value of &lt;code&gt;a0&lt;/code&gt;) in &lt;code&gt;d0&lt;/code&gt;. &lt;code&gt;(a0)&lt;/code&gt;, instead, is the content of that address in memory, namely &lt;code&gt;0x146&lt;/code&gt;, so &lt;code&gt;move (a0),d0&lt;/code&gt; stores &lt;code&gt;0x146&lt;/code&gt; (the content of &lt;code&gt;0x142&lt;/code&gt;) in &lt;code&gt;d0&lt;/code&gt;.&lt;/p&gt;
-&lt;p&gt;Putting aside the intricacies of the addressing modes, the second line stores the address of the first node in the list, which is the part of the header that starts with &lt;code&gt;LH_TAIL&lt;/code&gt;. The header thus acts as the first node of the list.&lt;/p&gt;
-&lt;h2 id="findpos"&gt;FindPos&lt;a class="headerlink" href="#findpos" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;FindPos&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
-&lt;span class="mi"&gt;00001676&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2040&lt;/span&gt;                      &lt;span class="n"&gt;movea&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;l&lt;/span&gt; &lt;span class="n"&gt;d0&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="n"&gt;a0&lt;/span&gt;
-&lt;span class="mi"&gt;00001678&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2010&lt;/span&gt;                      &lt;span class="n"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;l&lt;/span&gt;  &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a0&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt;&lt;span class="n"&gt;d0&lt;/span&gt;
-&lt;span class="mi"&gt;0000167&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;6706&lt;/span&gt;                      &lt;span class="n"&gt;beq&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;b&lt;/span&gt;   &lt;span class="n"&gt;InsertNode&lt;/span&gt;
-&lt;span class="mi"&gt;0000167&lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;b228&lt;/span&gt; &lt;span class="mi"&gt;0009&lt;/span&gt;                 &lt;span class="n"&gt;cmp&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;b&lt;/span&gt;   &lt;span class="mh"&gt;0x9&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a0&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt;&lt;span class="n"&gt;d1&lt;/span&gt;
-&lt;span class="mi"&gt;00001680&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;6&lt;/span&gt;&lt;span class="n"&gt;ff4&lt;/span&gt;                      &lt;span class="n"&gt;ble&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;b&lt;/span&gt;   &lt;span class="n"&gt;FindPos&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;The first two lines repeat the same algorithm. The address of the current node (&lt;code&gt;d0&lt;/code&gt;) is moved to &lt;code&gt;a0&lt;/code&gt; and the dereferencing operation &lt;code&gt;(a0)&lt;/code&gt; puts in &lt;code&gt;d0&lt;/code&gt; the address of the following node. The reason why we do it in two lines is that the Address Register Indirect Mode can be used only with &lt;code&gt;An&lt;/code&gt; registers. At this point &lt;code&gt;d0&lt;/code&gt; contains the address of the second node, the successor of the header.&lt;/p&gt;
-&lt;p&gt;If the list contains at least one node, &lt;code&gt;d0&lt;/code&gt; contains its address. But if the list is empty at this point &lt;code&gt;d0&lt;/code&gt; contains &lt;code&gt;0x0&lt;/code&gt;, and this is the condition tested by the &lt;code&gt;beq.b&lt;/code&gt; instruction. If &lt;code&gt;d0&lt;/code&gt; is empty we reached the end of the list, which means that there was no better place to insert the node, and we jump to the actual node insertion code, &lt;code&gt;InsertNode&lt;/code&gt;. If the value is not zero, the current node has a proper successor, so let's check it's priority to see if we need to go on or if we can stop here. The code compares the priorities of the current node and of the &lt;code&gt;Ins&lt;/code&gt; node, and if the latter is less than the former we can loop back to &lt;code&gt;FindPos&lt;/code&gt; and move to the next node. Remember that priorities are expressed with negative numbers only, so "less than" actually means "higher priority".&lt;/p&gt;
-&lt;h2 id="insertnode"&gt;InsertNode&lt;a class="headerlink" href="#insertnode" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;InsertNode&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
-&lt;span class="mi"&gt;00001682&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2028&lt;/span&gt; &lt;span class="mi"&gt;0004&lt;/span&gt;                 &lt;span class="n"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;l&lt;/span&gt;  &lt;span class="mh"&gt;0x4&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a0&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt;&lt;span class="n"&gt;d0&lt;/span&gt;
-&lt;span class="mi"&gt;00001686&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2149&lt;/span&gt; &lt;span class="mi"&gt;0004&lt;/span&gt;                 &lt;span class="n"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;l&lt;/span&gt;  &lt;span class="n"&gt;a1&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="mh"&gt;0x4&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a0&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
-&lt;span class="mi"&gt;0000168&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2288&lt;/span&gt;                      &lt;span class="n"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;l&lt;/span&gt;  &lt;span class="n"&gt;a0&lt;/span&gt;&lt;span class="o"&gt;,(&lt;/span&gt;&lt;span class="n"&gt;a1&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
-&lt;span class="mi"&gt;0000168&lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2340&lt;/span&gt; &lt;span class="mi"&gt;0004&lt;/span&gt;                 &lt;span class="n"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;l&lt;/span&gt;  &lt;span class="n"&gt;d0&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="mh"&gt;0x4&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a1&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
-&lt;span class="mi"&gt;00001690&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2040&lt;/span&gt;                      &lt;span class="n"&gt;movea&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;l&lt;/span&gt; &lt;span class="n"&gt;d0&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="n"&gt;a0&lt;/span&gt;
-&lt;span class="mi"&gt;00001692&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2089&lt;/span&gt;                      &lt;span class="n"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;l&lt;/span&gt;  &lt;span class="n"&gt;a1&lt;/span&gt;&lt;span class="o"&gt;,(&lt;/span&gt;&lt;span class="n"&gt;a0&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
-&lt;span class="mi"&gt;00001694&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="n"&gt;e75&lt;/span&gt;                      &lt;span class="n"&gt;rts&lt;/span&gt;     
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;In either case, when we reach the tail or when the priority of the next node is lower than the one of the new node, we reach &lt;code&gt;InsertNode&lt;/code&gt;. At this point &lt;code&gt;a0&lt;/code&gt; points to &lt;code&gt;Next&lt;/code&gt; and we can access &lt;code&gt;Pred&lt;/code&gt; through &lt;code&gt;0x4(a0)&lt;/code&gt; (that is &lt;code&gt;LN_SUCC&lt;/code&gt; of &lt;code&gt;Next&lt;/code&gt;).&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="mi"&gt;00001682&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2028&lt;/span&gt; &lt;span class="mi"&gt;0004&lt;/span&gt;                 &lt;span class="n"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;l&lt;/span&gt;  &lt;span class="mh"&gt;0x4&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a0&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt;&lt;span class="n"&gt;d0&lt;/span&gt;
-&lt;span class="mi"&gt;00001686&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2149&lt;/span&gt; &lt;span class="mi"&gt;0004&lt;/span&gt;                 &lt;span class="n"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;l&lt;/span&gt;  &lt;span class="n"&gt;a1&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="mh"&gt;0x4&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a0&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;This first stores the aforementioned address of &lt;code&gt;Pred&lt;/code&gt; in &lt;code&gt;d0&lt;/code&gt;, then replaces it with the value of &lt;code&gt;a1&lt;/code&gt;. The result is that the predecessor of &lt;code&gt;Next&lt;/code&gt; becomes &lt;code&gt;Ins&lt;/code&gt;.&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="mi"&gt;0000168&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2288&lt;/span&gt;                      &lt;span class="n"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;l&lt;/span&gt;  &lt;span class="n"&gt;a0&lt;/span&gt;&lt;span class="o"&gt;,(&lt;/span&gt;&lt;span class="n"&gt;a1&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
-&lt;span class="mi"&gt;0000168&lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2340&lt;/span&gt; &lt;span class="mi"&gt;0004&lt;/span&gt;                 &lt;span class="n"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;l&lt;/span&gt;  &lt;span class="n"&gt;d0&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="mh"&gt;0x4&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a1&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;This moves &lt;code&gt;a0&lt;/code&gt;, the address of &lt;code&gt;Next&lt;/code&gt;, into the first field of &lt;code&gt;Ins&lt;/code&gt;, that is &lt;code&gt;Next&lt;/code&gt; becomes the successor of &lt;code&gt;Ins&lt;/code&gt;. The second line moves &lt;code&gt;d0&lt;/code&gt; (the address of &lt;code&gt;Pred&lt;/code&gt;) into the &lt;code&gt;LN_PRED&lt;/code&gt; of &lt;code&gt;Ins&lt;/code&gt;.&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="mi"&gt;00001690&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2040&lt;/span&gt;                      &lt;span class="n"&gt;movea&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;l&lt;/span&gt; &lt;span class="n"&gt;d0&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="n"&gt;a0&lt;/span&gt;
-&lt;span class="mi"&gt;00001692&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2089&lt;/span&gt;                      &lt;span class="n"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;l&lt;/span&gt;  &lt;span class="n"&gt;a1&lt;/span&gt;&lt;span class="o"&gt;,(&lt;/span&gt;&lt;span class="n"&gt;a0&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
-&lt;span class="mi"&gt;00001694&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="n"&gt;e75&lt;/span&gt;                      &lt;span class="n"&gt;rts&lt;/span&gt;     
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;Last, the address of &lt;code&gt;Ins&lt;/code&gt; becomes the &lt;code&gt;LN_SUCC&lt;/code&gt; of &lt;code&gt;Pred&lt;/code&gt;, so we move &lt;code&gt;d0&lt;/code&gt; into &lt;code&gt;a0&lt;/code&gt; because, as I already mentioned, the Address Register Indirect Mode can be used only with &lt;code&gt;An&lt;/code&gt; registers. After this the function returns to the caller.&lt;/p&gt;
-&lt;h1 id="remove"&gt;&lt;code&gt;Remove&lt;/code&gt;&lt;a class="headerlink" href="#remove" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
-&lt;p&gt;Since we reviewed the code of &lt;code&gt;Enqueue&lt;/code&gt; it makes sense to have a look at the opposite function, &lt;code&gt;Remove&lt;/code&gt;. A protected version of this exists as well, but here I will just show the code of the pure function without the wrapper.&lt;/p&gt;
-&lt;p&gt;Removing a node is simpler than adding it, as all we have to do is to make &lt;code&gt;Pred&lt;/code&gt; point to &lt;code&gt;Next&lt;/code&gt; and vice versa, so the function is much shorter. It's worth noting that while the function accepts the address of the node in &lt;code&gt;a1&lt;/code&gt; the value in this register is eventually overwritten, so the address has to be kept elsewhere when the function is called.&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="mi"&gt;0000163&lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2051&lt;/span&gt;                      &lt;span class="n"&gt;movea&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;l&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a1&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt;&lt;span class="n"&gt;a0&lt;/span&gt;
-&lt;span class="mi"&gt;0000163&lt;/span&gt;&lt;span class="n"&gt;e&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2269&lt;/span&gt; &lt;span class="mi"&gt;0004&lt;/span&gt;                 &lt;span class="n"&gt;movea&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;l&lt;/span&gt; &lt;span class="mh"&gt;0x4&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a1&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt;&lt;span class="n"&gt;a1&lt;/span&gt;
-&lt;span class="mi"&gt;00001642&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2288&lt;/span&gt;                      &lt;span class="n"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;l&lt;/span&gt;  &lt;span class="n"&gt;a0&lt;/span&gt;&lt;span class="o"&gt;,(&lt;/span&gt;&lt;span class="n"&gt;a1&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
-&lt;span class="mi"&gt;00001644&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2149&lt;/span&gt; &lt;span class="mi"&gt;0004&lt;/span&gt;                 &lt;span class="n"&gt;move&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;l&lt;/span&gt;  &lt;span class="n"&gt;a1&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="mh"&gt;0x4&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a0&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
-&lt;span class="mi"&gt;00001648&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="n"&gt;e75&lt;/span&gt; 
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;The first two lines store the address of &lt;code&gt;Next&lt;/code&gt; in &lt;code&gt;a0&lt;/code&gt; and of &lt;code&gt;Pred&lt;/code&gt; in &lt;code&gt;a1&lt;/code&gt; (overwriting the input value). The third line makes &lt;code&gt;Next&lt;/code&gt; the successor of &lt;code&gt;Pred&lt;/code&gt; and the fourth line makes &lt;code&gt;Pred&lt;/code&gt; the predecessor of &lt;code&gt;Next&lt;/code&gt;. Then the function returns to the caller.&lt;/p&gt;
-&lt;h1 id="addlibrary"&gt;&lt;code&gt;AddLibrary&lt;/code&gt;&lt;a class="headerlink" href="#addlibrary" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
-&lt;p&gt;In the &lt;a href="https://www.thedigitalcatonline.com/blog/2018/06/25/exploring-the-amiga-6/"&gt;6th post&lt;/a&gt; of this series we left Kickstart just after it finished adding the physical memory to the system pool. The last instruction we mentioned was a call to &lt;code&gt;AddLibrary&lt;/code&gt;, and this is then the next function I will explore.&lt;/p&gt;
-&lt;p&gt;The code of the function is at &lt;code&gt;fc1448&lt;/code&gt;, and required some work before I was able to read it (see the section "Manual decompilation").&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="mi"&gt;00001448&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;41&lt;/span&gt;&lt;span class="n"&gt;ee&lt;/span&gt; &lt;span class="mi"&gt;017&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;                 &lt;span class="n"&gt;lea&lt;/span&gt; &lt;span class="mh"&gt;0x17a&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a6&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt;&lt;span class="n"&gt;a0&lt;/span&gt;
-&lt;span class="mi"&gt;0000144&lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;6100&lt;/span&gt; &lt;span class="mi"&gt;0270&lt;/span&gt;                 &lt;span class="n"&gt;bsr&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;w&lt;/span&gt; &lt;span class="mh"&gt;0x16be&lt;/span&gt;
-&lt;span class="mi"&gt;00001450&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;6100&lt;/span&gt; &lt;span class="mi"&gt;0082&lt;/span&gt;                 &lt;span class="n"&gt;bsr&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;w&lt;/span&gt; &lt;span class="mh"&gt;0x14d4&lt;/span&gt;
-&lt;span class="mi"&gt;00001454&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="n"&gt;e75&lt;/span&gt;                      &lt;span class="n"&gt;rts&lt;/span&gt;     
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;The first line loads the absolute address of an object &lt;code&gt;0x17a&lt;/code&gt; bytes after the ExecBase address, and looking up this displacement in the library structure published in both the fifth and sixth instalment we find, rather unsurprisingly, that this is the address of &lt;code&gt;LibList&lt;/code&gt;.&lt;/p&gt;
-&lt;p&gt;The following lines call the protected version of &lt;code&gt;Enqueue&lt;/code&gt; and &lt;code&gt;SumLibrary&lt;/code&gt;, after which the routine returns to the caller. The call to &lt;code&gt;Enqueue&lt;/code&gt; follows what I explained at the beginning of this post, where this time &lt;code&gt;a0&lt;/code&gt; points to the library system list and &lt;code&gt;a1&lt;/code&gt; points to the base address of Exec, set just before the call to &lt;code&gt;AddLibrary&lt;/code&gt;. So the Exec library itself is added to the system libraries through this routine.&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;SumLibrary&lt;/code&gt;, as the name suggests, computes the checksum of a library, or checks the existing one.&lt;/p&gt;
-&lt;h1 id="manual-decompilation"&gt;Manual decompilation&lt;a class="headerlink" href="#manual-decompilation" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
-&lt;p&gt;When I was following the call to &lt;code&gt;AddLibrary&lt;/code&gt; from the main body of Kickstart I was surprised to find this code&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="mi"&gt;00001446&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;0000&lt;/span&gt; &lt;span class="mi"&gt;41&lt;/span&gt;&lt;span class="n"&gt;ee&lt;/span&gt;                 &lt;span class="n"&gt;ori&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;b&lt;/span&gt;   &lt;span class="err"&gt;#&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mh"&gt;0x12&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="n"&gt;d0&lt;/span&gt;
-&lt;span class="mi"&gt;0000144&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;017&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="mi"&gt;6100&lt;/span&gt;                 &lt;span class="n"&gt;bchg&lt;/span&gt;    &lt;span class="n"&gt;d0&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="mh"&gt;0x754c&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;pc&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
-&lt;span class="mi"&gt;0000144&lt;/span&gt;&lt;span class="n"&gt;e&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;0270&lt;/span&gt; &lt;span class="mi"&gt;6100&lt;/span&gt; &lt;span class="mi"&gt;0082&lt;/span&gt;            &lt;span class="n"&gt;andi&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;w&lt;/span&gt;  &lt;span class="err"&gt;#&lt;/span&gt;&lt;span class="mh"&gt;0x6100&lt;/span&gt;&lt;span class="o"&gt;,(-&lt;/span&gt;&lt;span class="mh"&gt;0x7e&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="n"&gt;a0&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="n"&gt;d0&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;w&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
-&lt;span class="mi"&gt;00001454&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="n"&gt;e75&lt;/span&gt;                      &lt;span class="n"&gt;rts&lt;/span&gt;     
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;which at first glance doesn't look like a basic function, as the instructions are too convoluted. Furthermore, the branch uses the address &lt;code&gt;0x1448&lt;/code&gt;, which is thus supposed to be the beginning of the function. A quick look at the hexadecimal values reveals the truth: at &lt;code&gt;0x1446&lt;/code&gt; Kickstart contains a padding word &lt;code&gt;0000&lt;/code&gt; that confused the decompiler. To see the code of the function I had to manually decompile the machine code, and since the process is very interesting I decided to show it in detail here.&lt;/p&gt;
-&lt;p&gt;When you try to manually decompile some machine code you need a cheat sheet and the processor manual (see the resources section), which can help you to quickly track down the meaning of the single bits. The values we are interested in are&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="mi"&gt;00001448&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;41&lt;/span&gt;&lt;span class="n"&gt;ee&lt;/span&gt;
-&lt;span class="mi"&gt;0000144&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;017&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;
-&lt;span class="mi"&gt;0000144&lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;6100&lt;/span&gt;
-&lt;span class="mi"&gt;0000144&lt;/span&gt;&lt;span class="n"&gt;e&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;0270&lt;/span&gt;
-&lt;span class="mi"&gt;00001450&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;6100&lt;/span&gt;
-&lt;span class="mi"&gt;00001452&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;0082&lt;/span&gt;
-&lt;span class="mi"&gt;00001454&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="n"&gt;e75&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;since &lt;code&gt;fc1456&lt;/code&gt; is listed as the address of the &lt;code&gt;RemLibrary&lt;/code&gt; function. THe binary representation of these values is&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="mi"&gt;00001448&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;0100&lt;/span&gt; &lt;span class="mi"&gt;0001&lt;/span&gt; &lt;span class="mi"&gt;1110&lt;/span&gt; &lt;span class="mi"&gt;1110&lt;/span&gt;
-&lt;span class="mi"&gt;0000144&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;0000&lt;/span&gt; &lt;span class="mi"&gt;0001&lt;/span&gt; &lt;span class="mi"&gt;0111&lt;/span&gt; &lt;span class="mi"&gt;1010&lt;/span&gt;
-&lt;span class="mi"&gt;0000144&lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;0110&lt;/span&gt; &lt;span class="mi"&gt;0001&lt;/span&gt; &lt;span class="mi"&gt;0000&lt;/span&gt; &lt;span class="mi"&gt;0000&lt;/span&gt;
-&lt;span class="mi"&gt;0000144&lt;/span&gt;&lt;span class="n"&gt;e&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;0000&lt;/span&gt; &lt;span class="mi"&gt;0010&lt;/span&gt; &lt;span class="mi"&gt;0111&lt;/span&gt; &lt;span class="mi"&gt;0000&lt;/span&gt;
-&lt;span class="mi"&gt;00001450&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;0110&lt;/span&gt; &lt;span class="mi"&gt;0001&lt;/span&gt; &lt;span class="mi"&gt;0000&lt;/span&gt; &lt;span class="mi"&gt;0000&lt;/span&gt;
-&lt;span class="mi"&gt;00001452&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;0000&lt;/span&gt; &lt;span class="mi"&gt;0000&lt;/span&gt; &lt;span class="mi"&gt;1000&lt;/span&gt; &lt;span class="mi"&gt;0010&lt;/span&gt;
-&lt;span class="mi"&gt;00001454&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;0100&lt;/span&gt; &lt;span class="mi"&gt;1110&lt;/span&gt; &lt;span class="mi"&gt;0111&lt;/span&gt; &lt;span class="mi"&gt;0101&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;Now, the first 4 bits of any Motorola 68k instruction are the instruction code. While multiple instructions share the same 4 bits (for example &lt;code&gt;andi&lt;/code&gt; and &lt;code&gt;subi&lt;/code&gt;), those bits are never used for addressing or to specify modes, so they are a good starting point.&lt;/p&gt;
-&lt;p&gt;The instruction at &lt;code&gt;0x1448&lt;/code&gt; starts with &lt;code&gt;0100&lt;/code&gt; followed by a &lt;code&gt;0&lt;/code&gt;, and this narrows the selection to either &lt;code&gt;lea&lt;/code&gt; or &lt;code&gt;chk&lt;/code&gt;. Both instructions use the following 3 bits to specify a register (&lt;code&gt;An&lt;/code&gt; for &lt;code&gt;lea&lt;/code&gt;, &lt;code&gt;Dn&lt;/code&gt; for &lt;code&gt;chk&lt;/code&gt;), but then the first has a fixed group &lt;code&gt;111&lt;/code&gt;, while the second has a group &lt;code&gt;110&lt;/code&gt;. This means that we are looking at a &lt;code&gt;lea&lt;/code&gt;. The three bits I mentioned are &lt;code&gt;000&lt;/code&gt;, which translates in &lt;code&gt;a0&lt;/code&gt; as a target. The last 6 bits are the addressing mode and the register, and the cheat sheet tells us that &lt;code&gt;101 110&lt;/code&gt; corresponds to Address Register Indirect with Displacement Mode on &lt;code&gt;a6&lt;/code&gt;. &lt;code&gt;101&lt;/code&gt; is labelled as &lt;code&gt;(d16, An)&lt;/code&gt;, while &lt;code&gt;110&lt;/code&gt; is the number 6. The following word is thus the &lt;code&gt;d16&lt;/code&gt; displacement from &lt;code&gt;a6&lt;/code&gt;, which means that &lt;code&gt;41ee 017a&lt;/code&gt; translates to &lt;code&gt;lea 0x17a(a6),a0&lt;/code&gt;.&lt;/p&gt;
-&lt;p&gt;The second instruction starts at &lt;code&gt;0x144c&lt;/code&gt; with &lt;code&gt;0110&lt;/code&gt;, which is the signature of all the branch commands: &lt;code&gt;bra&lt;/code&gt;, &lt;code&gt;bsr&lt;/code&gt;, and all the condition-based ones like &lt;code&gt;bgt&lt;/code&gt;, &lt;code&gt;blt&lt;/code&gt;, and so on. Since the following 4 bits are &lt;code&gt;0001&lt;/code&gt; we know this is a &lt;code&gt;bsr&lt;/code&gt;, branch to subroutine. Now, in this instruction the 8 least significant bits tell us what the displacement is, and thus the type of the operand (Programmer's Manual, section 4-59, page 163). In this case they are all &lt;code&gt;0&lt;/code&gt;, which means a word displacement, which is in the next 16 bits. Pay attention that, as we discussed for &lt;code&gt;lea&lt;/code&gt; in the &lt;a href="https://www.thedigitalcatonline.com/blog/2018/05/28/exploring-the-amiga-1/"&gt;first post&lt;/a&gt; the Program Counter contains the address of the first displacement word. In this case the displacement is &lt;code&gt;0x270&lt;/code&gt; at address &lt;code&gt;0x144e&lt;/code&gt;, so the branch address is the sum of the two, that is &lt;code&gt;0x16be&lt;/code&gt;.&lt;/p&gt;
-&lt;p&gt;The third instruction is again a &lt;code&gt;bsr&lt;/code&gt; and following the same process we find out that the branch address is the sum between &lt;code&gt;0x82&lt;/code&gt; and &lt;code&gt;0x1452&lt;/code&gt;, that is &lt;code&gt;0x14d4&lt;/code&gt;. The final instruction is an &lt;code&gt;rts&lt;/code&gt;, as we expected, and as the decompiler correctly told us.&lt;/p&gt;
-&lt;p&gt;The most important thing to keep in mind when manually reading instructions is the position of the Program Counter. As we already saw two times, with &lt;code&gt;lea&lt;/code&gt; and with &lt;code&gt;bsr&lt;/code&gt;, the PC moves as soon as the 16-bit instruction has been read, which means that when a displacement is given we have to use the address of the displacement itself as a base for our calculations.&lt;/p&gt;
-&lt;h1 id="resources"&gt;Resources&lt;a class="headerlink" href="#resources" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
-&lt;ul&gt;
-&lt;li&gt;Motorola M68000 Family Programmer's Reference Manual &lt;a href="https://www.nxp.com/docs/en/reference-manual/M68000PRM.pdf"&gt;PDF here&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;Motorola 68000 Opcodes Cheat Sheet http://goldencrystal.free.fr/M68kOpcodes-v2.3.pdf&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h1 id="feedback"&gt;Feedback&lt;a class="headerlink" href="#feedback" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
-&lt;p&gt;Feel free to reach me on &lt;a href="https://twitter.com/thedigicat"&gt;Twitter&lt;/a&gt; if you have questions. The &lt;a href="https://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues"&gt;GitHub issues&lt;/a&gt; page is the best place to submit corrections.&lt;/p&gt;</content><category term="Retro"></category><category term="assembly"></category><category term="amiga"></category><category term="retroprogramming"></category></entry></feed>
+&lt;p&gt;Feel free to reach me on &lt;a href="https://twitter.com/thedigicat"&gt;Twitter&lt;/a&gt; if you have questions. The &lt;a href="https://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues"&gt;GitHub issues&lt;/a&gt; page is the best place to submit corrections.&lt;/p&gt;</content><category term="Retro"></category><category term="assembly"></category><category term="M68000"></category></entry></feed>
