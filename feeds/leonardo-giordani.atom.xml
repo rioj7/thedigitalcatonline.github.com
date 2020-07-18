@@ -1,5 +1,396 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>The Digital Cat - Leonardo Giordani</title><link href="https://www.thedigitalcatonline.com/" rel="alternate"></link><link href="https://www.thedigitalcatonline.com/feeds/leonardo-giordani.atom.xml" rel="self"></link><id>https://www.thedigitalcatonline.com/</id><updated>2020-07-13T00:10:00+01:00</updated><subtitle>Adventures of a curious cat in the land of programming</subtitle><entry><title>Flask project setup: TDD, Docker, Postgres and more - Part 3</title><link href="https://www.thedigitalcatonline.com/blog/2020/07/07/flask-project-setup-tdd-docker-postgres-and-more-part-3/" rel="alternate"></link><published>2020-07-07T13:00:00+01:00</published><updated>2020-07-07T13:00:00+01:00</updated><author><name>Leonardo Giordani</name></author><id>tag:www.thedigitalcatonline.com,2020-07-07:/blog/2020/07/07/flask-project-setup-tdd-docker-postgres-and-more-part-3/</id><summary type="html">&lt;p&gt;A step-by-step tutorial on how to setup a Flask project with TDD, Docker and Postgres&lt;/p&gt;</summary><content type="html">&lt;p&gt;In this series of posts I explore the development of a Flask project with a setup that is built with efficiency and tidiness in mind, using TDD, Docker and Postgres.&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>The Digital Cat - Leonardo Giordani</title><link href="https://www.thedigitalcatonline.com/" rel="alternate"></link><link href="https://www.thedigitalcatonline.com/feeds/leonardo-giordani.atom.xml" rel="self"></link><id>https://www.thedigitalcatonline.com/</id><updated>2020-07-18T15:30:00+01:00</updated><subtitle>Adventures of a curious cat in the land of programming</subtitle><entry><title>Emacs Configuration for Python/JavaScript, Terraform and blogging</title><link href="https://www.thedigitalcatonline.com/blog/2020/07/18/emacs-configuration-for-python-javascript-terraform-and-blogging/" rel="alternate"></link><published>2020-07-18T15:30:00+01:00</published><updated>2020-07-18T15:30:00+01:00</updated><author><name>Leonardo Giordani</name></author><id>tag:www.thedigitalcatonline.com,2020-07-18:/blog/2020/07/18/emacs-configuration-for-python-javascript-terraform-and-blogging/</id><summary type="html">&lt;p&gt;A step-by-step analysis of the Emacs configuration that I use to write Python/JavaScript/Terraform code and  posts for the blog&lt;/p&gt;</summary><content type="html">&lt;p&gt;(image from https://commons.wikimedia.org/wiki/File:Gnu-listen-half.jpg)&lt;/p&gt;
+&lt;p&gt;I have been an Emacs user for a long time. There is no specific reason why I started using Emacs: it was available in the RedHat 6.0 distribution that I found in a magazine in 1999, and with which I started my journey in the open source world. It was mentioned in some Linux guide I read at the time, so it became my editor.&lt;/p&gt;
+&lt;p&gt;I'm not into flame wars, in particular about editors. If I don't like a software/operating system/language/whatever, I just don't use it, and at the same time I'm not scared to test alternatives, even though I'm not actively looking to replace tools that work. Admittedly, at the time I didn't properly configure my Emacs for years, in particular because the C language support was very good out of the box, and that was what I needed, so when I started programming in Python not everything was optimal.&lt;/p&gt;
+&lt;p&gt;One day a new colleague showed me &lt;a href="https://www.sublimetext.com/"&gt;Sublime Text&lt;/a&gt; and PyCharm. I don't like IDEs that much, they are too integrated, so the PyCharm wasn't very attractive, but Sublime Text is a very good editor, it's fast and has a lot of features (multiple cursors blew my mind when I first discovered them) and so it became my editor of choice for some years. In time, however I started growing increasingly dissatisfied with it, and with some alternatives that I tested like Atom. The main reason is that modern editor rely too much on the mouse: many people are happy with this, in particular because they use trackpads, but I honestly can't get use to them, and I simply don't want to take my hands off the keyboards while I code because I want to change tab, reorganise the screen, open a file, and so on.&lt;/p&gt;
+&lt;p&gt;So I went back to Emacs, and started from scratch to configure it in order to match my needs. In this post I want to describe what I did, so that newcomers might be helped to setup their own editor. Emacs is incredibly customisable, and this is one of its main strengths, but a proper setup takes time. Please don't consider configuring your editor a waste of time. If you are a programmer, the editor is your main tool, and you have to take care of it: like any other editor, Emacs has pros and cons, and a proper setup minimises the impact of the shortcomings on your daily work.&lt;/p&gt;
+&lt;h2 id="requirements"&gt;Requirements&lt;a class="headerlink" href="#requirements" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;As always, the choice of tools and their configuration depends on the requirements, so these are the ones I have at the moment.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;I need to create &lt;strong&gt;keyboard shortcuts&lt;/strong&gt; for everything I do often in the editor, I should be able to work without the mouse&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Multiple cursors&lt;/strong&gt; are a very useful feature and I am used to have them, so there should be an implementation similar to the one I found in Sublime Text&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Python&lt;/strong&gt;/&lt;strong&gt;JavaScript&lt;/strong&gt;/&lt;strong&gt;Terraform&lt;/strong&gt; syntax highlighting and formatting/linting&lt;/li&gt;
+&lt;li&gt;As I have some projects written with React, &lt;strong&gt;JSX&lt;/strong&gt; syntax highlighting is also needed&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Markdown&lt;/strong&gt; syntax highlighting with spell-checking for my blogger activity&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="preamble"&gt;Preamble&lt;a class="headerlink" href="#preamble" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;The Emacs configuration file is &lt;code&gt;~/.emacs&lt;/code&gt;, and when you install the editor you might get a default minimal version of it. Whenever part of the configuration is changed from the menus, Emacs writes the changes in the .emacs, using the &lt;code&gt;custom-set-variables&lt;/code&gt; function. That file also contains the list of packages that I have installed, so I moved the &lt;code&gt;custom-set-variables&lt;/code&gt; invocation to a separate file, &lt;code&gt;.emacs-custom&lt;/code&gt;. This way Emacs doesn't have to change the main file whenever I install or remove a package and when I customise the face (colours and fonts).&lt;/p&gt;
+&lt;p&gt;For packages, I'm using the standard &lt;a href="https://melpa.org/#/getting-started"&gt;MELPA configuration&lt;/a&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;;; Added by Package.el.  This must come before configurations of&lt;/span&gt;
+&lt;span class="c1"&gt;;; installed packages.  Don&amp;#39;t delete this line.  If you don&amp;#39;t want it,&lt;/span&gt;
+&lt;span class="c1"&gt;;; just comment it out by adding a semicolon to the start of the line.&lt;/span&gt;
+&lt;span class="c1"&gt;;; You may delete these explanatory comments.&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;package-initialize&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;setq&lt;/span&gt; &lt;span class="nv"&gt;custom-file&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;~/.emacs-custom&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;load&lt;/span&gt; &lt;span class="nv"&gt;custom-file&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="c1"&gt;;; Load package system and add MELPA repository.&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;require&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;package&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;add-to-list&lt;/span&gt;
+ &lt;span class="ss"&gt;&amp;#39;package-archives&lt;/span&gt;
+ &lt;span class="c1"&gt;;; &amp;#39;(&amp;quot;melpa&amp;quot; . &amp;quot;https://stable.melpa.org/packages/&amp;quot;) ; many packages won&amp;#39;t show if using stable&lt;/span&gt;
+ &lt;span class="o"&gt;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;melpa&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;https://melpa.milkbox.net/packages/&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+ &lt;span class="no"&gt;t&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h2 id="global-settings"&gt;Global settings&lt;a class="headerlink" href="#global-settings" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;In Emacs you can define new functions and assign them to key combinations, and this is usually a major part of the setup. As I often need to work on the configuration file, at least initially, the first function I defined is one that allows me to quickly open the &lt;code&gt;.emacs&lt;/code&gt; file. In the comments I'm following &lt;a href="https://www.emacswiki.org/emacs/EmacsKeyNotation"&gt;Emacs key notation&lt;/a&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;;; Open .emacs with C-x c&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;defun&lt;/span&gt; &lt;span class="nv"&gt;dotemacs&lt;/span&gt; &lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;interactive&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;switch-to-buffer&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;find-file-noselect&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;~/.emacs&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)))&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;global-set-key&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;kbd&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;C-x c&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;dotemacs&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;I like the &lt;a href="https://www.emacswiki.org/emacs/VisualLineMode"&gt;visual line mode&lt;/a&gt; to wraps long lines&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;;; Visual line mode everywhere, please&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;global-visual-line-mode&lt;/span&gt; &lt;span class="no"&gt;t&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;I also want to always see &lt;a href="http://ergoemacs.org/emacs/emacs_line_number_mode.html"&gt;line numbers&lt;/a&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;;; Display line numbers&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;global-display-line-numbers-mode&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;I use &lt;code&gt;C-End&lt;/code&gt; a lot to reach the end of the file, but often I press &lt;code&gt;C-&amp;lt;next&amp;gt;&lt;/code&gt; (&lt;code&gt;Ctrl-PgDown&lt;/code&gt;) by mistake. That is by default associated with &lt;code&gt;scroll-left&lt;/code&gt; which is disabled, but Emacs opens a buffer to warn me. I don't want that, so I just unset the key combination&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;;; I keep pressing C-next by mistake...&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;global-unset-key&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;kbd&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;C-&amp;lt;next&amp;gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;I might not be a purist here. I used &lt;code&gt;M-w&lt;/code&gt; and &lt;code&gt;C-y&lt;/code&gt; for many years, but I also use other software during my day, and now the &lt;code&gt;Ctrl-c/x/v&lt;/code&gt; combinations are universally implemented. It's really hard to remap my brain every time I go back to Emacs, so I prefer to remap Emacs. Welcome &lt;a href="https://www.emacswiki.org/emacs/CuaMode"&gt;Cua Mode&lt;/a&gt;, which also maps &lt;code&gt;undo&lt;/code&gt; to &lt;code&gt;C-z&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;;; Set C-c, C-x, C-v just to be in sync with the rest of the world&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;cua-mode&lt;/span&gt; &lt;span class="no"&gt;t&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;I like Emacs to highlight the &lt;a href="https://www.emacswiki.org/emacs/ShowParenMode"&gt;matching parenthesis&lt;/a&gt; whenever I'm on an opening or closing one. Please note that the word "parenthesis" here refers to what are more generally called &lt;a href="https://en.wikipedia.org/wiki/Bracket"&gt;brackets&lt;/a&gt; in English, which includes parentheses or round brackets &lt;code&gt;()&lt;/code&gt;, curly brackets or curly braces &lt;code&gt;{}&lt;/code&gt;, and square brackets &lt;code&gt;[]&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;;; Show the matching parenthesis&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;show-paren-mode&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Speaking of brackets, I like to have a way to automatically match the opened ones. This is good in Lisp because there are more parentheses than words, but also in other languages like Python when dealing with complex data structures. Long story short, I mapped &lt;code&gt;C-]&lt;/code&gt; to the auto-closing feature called &lt;code&gt;syntactic-close&lt;/code&gt; (installed as a package)&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;;; Syntactic close&lt;/span&gt;
+&lt;span class="c1"&gt;;; https://github.com/emacs-berlin/syntactic-close&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;global-set-key&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;kbd&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;C-]&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;syntactic-close&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Minibuffer is a very important part of Emacs, not only when you open files but also when running commands. I like the Ivy completion, so I installed it with MELPA and activate it. I want to have a quick access to the commands that I run previously (history), but since &lt;code&gt;&amp;lt;down&amp;gt;&lt;/code&gt; and &lt;code&gt;&amp;lt;up&amp;gt;&lt;/code&gt; are already used to navigate the suggestions I mapped the history functions to their Shift version. &lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;;; Ivy completion&lt;/span&gt;
+&lt;span class="c1"&gt;;; https://github.com/abo-abo/swiper&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;ivy-mode&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;define-key&lt;/span&gt; &lt;span class="nv"&gt;ivy-minibuffer-map&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;kbd&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;S-&amp;lt;up&amp;gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="nf"&gt;#&amp;#39;&lt;/span&gt;&lt;span class="nv"&gt;ivy-previous-history-element&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;define-key&lt;/span&gt; &lt;span class="nv"&gt;ivy-minibuffer-map&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;kbd&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;S-&amp;lt;down&amp;gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="nf"&gt;#&amp;#39;&lt;/span&gt;&lt;span class="nv"&gt;ivy-next-history-element&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The standard behaviour of &lt;code&gt;C-Del&lt;/code&gt; in Emacs is far too greedy for me. I'm used to have a combination that deletes all spaces if I'm on a space, and the word if I'm on a word, so I found this&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;;; https://stackoverflow.com/questions/17958397/emacs-delete-whitespaces-or-a-word&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;defun&lt;/span&gt; &lt;span class="nv"&gt;kill-whitespace-or-word&lt;/span&gt; &lt;span class="p"&gt;()&lt;/span&gt;
+  &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;interactive&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+  &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;looking-at&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;[ \t\n]&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+      &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;let&lt;/span&gt; &lt;span class="p"&gt;((&lt;/span&gt;&lt;span class="nv"&gt;p&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;point&lt;/span&gt;&lt;span class="p"&gt;)))&lt;/span&gt;
+        &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;re-search-forward&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;[^ \t\n]&amp;quot;&lt;/span&gt; &lt;span class="no"&gt;nil&lt;/span&gt; &lt;span class="ss"&gt;:no-error&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;backward-char&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;kill-region&lt;/span&gt; &lt;span class="nv"&gt;p&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;point&lt;/span&gt;&lt;span class="p"&gt;)))&lt;/span&gt;
+    &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;kill-word&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)))&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;global-set-key&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;kbd&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;C-&amp;lt;delete&amp;gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;kill-whitespace-or-word&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Last, as I have a rotating wallpaper with screenshots from my favourite films I like to see them behind the editor and the terminal, so I enable a little bit of transparency. I like this to be callable as an interactive function as I might want to remove the transparency, for example when sharing the screen, as that way the text might be easier to read.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;;; Set transparency of emacs&lt;/span&gt;
+&lt;span class="c1"&gt;;; https://www.emacswiki.org/emacs/TransparentEmacs&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;defun&lt;/span&gt; &lt;span class="nv"&gt;transparency&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;value&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+  &lt;span class="s"&gt;&amp;quot;Sets the transparency of the frame window. 0=transparent/100=opaque&amp;quot;&lt;/span&gt;
+  &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;interactive&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;nTransparency Value 0 - 100 opaque:&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+  &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;set-frame-parameter&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;selected-frame&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;alpha&lt;/span&gt; &lt;span class="nv"&gt;value&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;set-frame-parameter&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;selected-frame&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;alpha&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;90&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h2 id="keyboard-mapping"&gt;Keyboard mapping&lt;a class="headerlink" href="#keyboard-mapping" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;I'm an Italian native speaker, so I often write texts in that language for my personal blog or for other reasons. In Italian, we use the accented letters à, è, é, ì, ò, ù a lot ("is" is just "è", "why" and "because" are "perché", almost all future tenses end with an accented letter, and so on), so I like to have a proper mapping. Emacs has a very powerful mode for Latin alphabet &lt;a href="https://en.wikipedia.org/wiki/Diacritic"&gt;diacritics&lt;/a&gt;, which is &lt;code&gt;latin-postfix&lt;/code&gt;, where you can write "è" typing &lt;code&gt;e&lt;/code&gt; followed by backticks, so that was my first choice. While this is very powerful, and allows me to input almost everything I need also for other languages like German, on the long run I found it very difficult to use efficiently.&lt;/p&gt;
+&lt;p&gt;First of all, I'm used to the Italian keymap, I know it by heart as I know the English keyboard mapping, so I tend to press keys that are supposed to insert the accented letters directly. Moreover, other software like the browser work with a system keyboard mapping (that Emacs ignores), so again, I need to rewire my brain every time I go back to the editor. Last, &lt;code&gt;latin-postfix&lt;/code&gt; is far too generic and has mappings for letters like ą or ę which are created typing "a," which is a combination that we have every time we type a comma in Italian given that almost all words end in a vowel. This forces me to type "a,," whenever I need "a,", which is far too different from the normal system I'm used to.&lt;/p&gt;
+&lt;p&gt;The input method &lt;code&gt;italian-keyboard&lt;/code&gt; unfortunately doesn't map very well on a standard modern English keyboard, so I decided to just write my own mapping using the &lt;a href="http://web.mit.edu/Emacs/source/emacs/lisp/international/quail.el"&gt;quail&lt;/a&gt; system, which is unsurprisingly not very well documented. I'm sorry to say it, but multilingual input has been and still is one of the great forgotten and messy topics in computer science, in particular in the open source world. Let's not even mention Chinese and other languages not based on an alphabet.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;; Define a proper mapping for the Italian keyboard over the English one&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;quail-define-package&lt;/span&gt;
+ &lt;span class="s"&gt;&amp;quot;italian-english-keyboard&amp;quot;&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;Latin-1&amp;quot;&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;IT@&amp;quot;&lt;/span&gt; &lt;span class="no"&gt;t&lt;/span&gt;
+ &lt;span class="s"&gt;&amp;quot;Italian (Italiano) input method for modern English keyboards&amp;quot;&lt;/span&gt;
+ &lt;span class="no"&gt;nil&lt;/span&gt; &lt;span class="no"&gt;t&lt;/span&gt; &lt;span class="no"&gt;t&lt;/span&gt; &lt;span class="no"&gt;t&lt;/span&gt; &lt;span class="no"&gt;t&lt;/span&gt; &lt;span class="no"&gt;nil&lt;/span&gt; &lt;span class="no"&gt;nil&lt;/span&gt; &lt;span class="no"&gt;nil&lt;/span&gt; &lt;span class="no"&gt;nil&lt;/span&gt; &lt;span class="no"&gt;nil&lt;/span&gt; &lt;span class="no"&gt;t&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="c1"&gt;;; \|  1!  2&amp;quot;  3£  4$  5%  6&amp;amp;  7/  8(  9)  0=  &amp;#39;?  ì^&lt;/span&gt;
+&lt;span class="c1"&gt;;;      qQ  wW  eE  rR  tT  yY  uU  iI  oO  pP  èé  +*&lt;/span&gt;
+&lt;span class="c1"&gt;;;       aA  sS  dD  fF  gG  hH  jJ  kK  lL  òç  à°  ù§&lt;/span&gt;
+&lt;span class="c1"&gt;;;    &amp;lt;&amp;gt;  zZ  xX  cC  vV  bB  nN  mM  ,;  .:  -_&lt;/span&gt;
+
+&lt;span class="c1"&gt;;; èè -&amp;gt; È Originally CapsLock+è&lt;/span&gt;
+&lt;span class="c1"&gt;;; àà -&amp;gt; # Originally AltGr+à&lt;/span&gt;
+&lt;span class="c1"&gt;;; òò -&amp;gt; @ Originally AltGr+ò&lt;/span&gt;
+&lt;span class="c1"&gt;;; ìì -&amp;gt; ~ Originally AltGr+ì&lt;/span&gt;
+
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;quail-define-rules&lt;/span&gt;
+ &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;`&amp;quot;&lt;/span&gt; &lt;span class="nv"&gt;?\\&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;¬&amp;quot;&lt;/span&gt; &lt;span class="nv"&gt;?|)&lt;/span&gt;
+&lt;span class="nv"&gt; (&amp;quot;^&amp;quot; ?&amp;amp;)&lt;/span&gt;
+&lt;span class="nv"&gt; (&amp;quot;&amp;amp;&amp;quot; ?/)&lt;/span&gt;
+&lt;span class="nv"&gt; (&amp;quot;*&amp;quot; ?\()&lt;/span&gt;
+&lt;span class="nv"&gt; (&amp;quot;(&amp;quot; ?\))&lt;/span&gt;
+&lt;span class="nv"&gt; (&amp;quot;)&amp;quot; ?=)&lt;/span&gt;
+&lt;span class="nv"&gt; (&amp;quot;-&amp;quot; ?&amp;#39;) (&amp;quot;_&amp;quot; ??)&lt;/span&gt;
+&lt;span class="nv"&gt; (&amp;quot;=&amp;quot; ?ì) (&amp;quot;+&amp;quot; ?^) (&amp;quot;==&amp;quot; ?~)&lt;/span&gt;
+
+&lt;span class="nv"&gt; (&amp;quot;[&amp;quot; ?è) (&amp;quot;{&amp;quot; ?é) (&amp;quot;[[&amp;quot; ?È)&lt;/span&gt;
+&lt;span class="nv"&gt; (&amp;quot;]&amp;quot; ?+) (&amp;quot;}&amp;quot; ?*)&lt;/span&gt;
+
+&lt;span class="nv"&gt; (&amp;quot;;&amp;quot; ?ò) (&amp;quot;:&amp;quot; ?ç) (&amp;quot;;;&amp;quot; ?@)&lt;/span&gt;
+&lt;span class="nv"&gt; (&amp;quot;&amp;#39;&amp;quot; ?à) (&amp;quot;@&amp;quot; ?\°) (&amp;quot;&amp;#39;&amp;#39;&amp;quot; ?#)&lt;/span&gt;
+&lt;span class="nv"&gt; (&amp;quot;#&amp;quot; ?ù) (&amp;quot;~&amp;quot; ?§)&lt;/span&gt;
+
+&lt;span class="nv"&gt; (&amp;quot;\\&amp;quot; ?&amp;lt;) (&amp;quot;|&lt;/span&gt;&lt;span class="s"&gt;&amp;quot; ?&amp;gt;)&lt;/span&gt;
+&lt;span class="s"&gt; (&amp;quot;&lt;/span&gt;&lt;span class="nb"&gt;&amp;lt;&lt;/span&gt;&lt;span class="s"&gt;&amp;quot; ?\;)&lt;/span&gt;
+&lt;span class="s"&gt; (&amp;quot;&lt;/span&gt;&lt;span class="nb"&gt;&amp;gt;&lt;/span&gt;&lt;span class="s"&gt;&amp;quot; ?:)&lt;/span&gt;
+&lt;span class="s"&gt; (&amp;quot;&lt;/span&gt;&lt;span class="nb"&gt;/&lt;/span&gt;&lt;span class="s"&gt;&amp;quot; ?-) (&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;?&lt;/span&gt;&lt;span class="err"&gt;&amp;quot;&lt;/span&gt; &lt;span class="nv"&gt;?_&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The standard Italian keyboard allows to input &lt;code&gt;È&lt;/code&gt; activating CapsLock, pressing the key for &lt;code&gt;è&lt;/code&gt; and deactivating CapsLock. This because &lt;code&gt;Shift-è&lt;/code&gt; inputs &lt;code&gt;é&lt;/code&gt;. I always found that system incredibly awkward, not to mention that it is impossible (as far as I understand) to create such a combination using quail, so I mapped it to &lt;code&gt;èè&lt;/code&gt;, since that combination doesn't exist in Italian.&lt;/p&gt;
+&lt;p&gt;Another issue is that the Italian keyboard makes use of the right Alt key (AltGr) to input third level characters like &lt;code&gt;#&lt;/code&gt;, &lt;code&gt;@&lt;/code&gt;, and &lt;code&gt;~&lt;/code&gt;. Again, I don't know if and how I can express these in quail so I went for a slight variation of that. Instead of typing AltGr+à for &lt;code&gt;#&lt;/code&gt; I will type &lt;code&gt;àà&lt;/code&gt; and so on. This is not a perfect mapping, but considering that I don't use those character that much when writing notes or blog posts I can accept it.&lt;/p&gt;
+&lt;h2 id="lines-and-regions"&gt;Lines and regions&lt;a class="headerlink" href="#lines-and-regions" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;This section is about shortcuts to interact with lines and regions. First of all something that comments the regions I highlighted or just the line I'm on. This is a good example of something that Emacs doesn't provide out of the box, maybe surprisingly, but that is easily implemented. OK, "easily" might be an overstatement, but this function is a good starting point if you want to learn how &lt;a href="https://www.gnu.org/software/emacs/manual/html_node/elisp/"&gt;Emacs Lisp&lt;/a&gt; works. If you are not interested you can just copy and paste it and call it a day&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;;; Define C-/ to comment and uncomment regions and lines&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;defun&lt;/span&gt; &lt;span class="nv"&gt;comment-or-uncomment-line-or-region&lt;/span&gt; &lt;span class="p"&gt;()&lt;/span&gt;
+    &lt;span class="s"&gt;&amp;quot;Comments or uncomments the region or the current line if there&amp;#39;s no active region.&amp;quot;&lt;/span&gt;
+    &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;interactive&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;let&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;beg&lt;/span&gt; &lt;span class="nv"&gt;end&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;region-active-p&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+            &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;setq&lt;/span&gt; &lt;span class="nv"&gt;beg&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;region-beginning&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="nv"&gt;end&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;region-end&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+            &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;setq&lt;/span&gt; &lt;span class="nv"&gt;beg&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;line-beginning-position&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="nv"&gt;end&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;line-end-position&lt;/span&gt;&lt;span class="p"&gt;)))&lt;/span&gt;
+        &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;comment-or-uncomment-region&lt;/span&gt; &lt;span class="nv"&gt;beg&lt;/span&gt; &lt;span class="nv"&gt;end&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;next-line&lt;/span&gt;&lt;span class="p"&gt;)))&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;global-set-key&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;kbd&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;C-/&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;comment-or-uncomment-line-or-region&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;I want to be able to move up and down lines or regions using &lt;code&gt;Ctrl-Shift-up/down&lt;/code&gt;, that is to &lt;a href="https://github.com/rejeep/drag-stuff.el"&gt;drag stuff&lt;/a&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;;; Drag-stuff - Drag lines and regions&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;drag-stuff-global-mode&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="c1"&gt;;; Use C-S-up/down&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;setq&lt;/span&gt; &lt;span class="nv"&gt;drag-stuff-modifier&lt;/span&gt; &lt;span class="o"&gt;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;control&lt;/span&gt; &lt;span class="nv"&gt;shift&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;define-key&lt;/span&gt; &lt;span class="nv"&gt;drag-stuff-mode-map&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;drag-stuff--kbd&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;up&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;drag-stuff-up&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;define-key&lt;/span&gt; &lt;span class="nv"&gt;drag-stuff-mode-map&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;drag-stuff--kbd&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;down&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;drag-stuff-down&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;I also want to be able to duplicate the current line or region with &lt;code&gt;Ctrl-Shift-d&lt;/code&gt;. This function is a mixture of several solutions I found on Internet, and I'm not 100% satisfied with it, as when I duplicate a region it also duplicates the last line of the region itself, even though the line is not highlighted. Again, it might be surprising that Emacs doesn't provide a solution out-of-the-box, but this way I can implement the behaviour I prefer. The fact that I'm not able to implement the exact behaviour (yet!) is part of the game, I think.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;;; Duplicate line with C-S-d&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;defun&lt;/span&gt; &lt;span class="nv"&gt;duplicate-current-line-or-region&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;arg&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+  &lt;span class="s"&gt;&amp;quot;Duplicates the current line or region ARG times.&lt;/span&gt;
+&lt;span class="s"&gt;If there&amp;#39;s no region, the current line will be duplicated. However, if&lt;/span&gt;
+&lt;span class="s"&gt;there&amp;#39;s a region, all lines that region covers will be duplicated.&amp;quot;&lt;/span&gt;
+  &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;interactive&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;p&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+  &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;let&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;beg&lt;/span&gt; &lt;span class="nv"&gt;end&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;origin&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;point&lt;/span&gt;&lt;span class="p"&gt;)))&lt;/span&gt;
+    &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;and&lt;/span&gt; &lt;span class="nv"&gt;mark-active&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;point&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;mark&lt;/span&gt;&lt;span class="p"&gt;)))&lt;/span&gt;
+        &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;exchange-point-and-mark&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+    &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;setq&lt;/span&gt; &lt;span class="nv"&gt;beg&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;line-beginning-position&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+    &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="nv"&gt;mark-active&lt;/span&gt;
+        &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;exchange-point-and-mark&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+    &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;setq&lt;/span&gt; &lt;span class="nv"&gt;end&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;line-end-position&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+    &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;let&lt;/span&gt; &lt;span class="p"&gt;((&lt;/span&gt;&lt;span class="nv"&gt;region&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;buffer-substring-no-properties&lt;/span&gt; &lt;span class="nv"&gt;beg&lt;/span&gt; &lt;span class="nv"&gt;end&lt;/span&gt;&lt;span class="p"&gt;)))&lt;/span&gt;
+      &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;dotimes&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;i&lt;/span&gt; &lt;span class="nv"&gt;arg&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;goto-char&lt;/span&gt; &lt;span class="nv"&gt;end&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;newline&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;insert&lt;/span&gt; &lt;span class="nv"&gt;region&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;setq&lt;/span&gt; &lt;span class="nv"&gt;end&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;point&lt;/span&gt;&lt;span class="p"&gt;)))&lt;/span&gt;
+      &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;goto-char&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;+&lt;/span&gt; &lt;span class="nv"&gt;origin&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;*&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;length&lt;/span&gt; &lt;span class="nv"&gt;region&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="nv"&gt;arg&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="nv"&gt;arg&lt;/span&gt;&lt;span class="p"&gt;)))))&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;global-set-key&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;kbd&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;C-S-d&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;duplicate-current-line-or-region&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Multiple cursors! Emacs has an implementation of &lt;a href="https://github.com/magnars/multiple-cursors.el"&gt;multiple cursors&lt;/a&gt;, that is slightly different from the Sublime Text one, but that can be customised to my needs. Most notably, multiple cursors don't work perfectly with some parts of the editor like &lt;code&gt;TAB&lt;/code&gt; for indentation, which is not automatically applied to all of them. So, this part of the setup is not perfect, but it's definitely usable and effective.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;Ctrl-d&lt;/code&gt; creates a second cursor on the next repetition of the current word, &lt;code&gt;Ctrl-c Ctrl-d&lt;/code&gt; marks all the repetitions in the text, &lt;code&gt;Ctrl-Alt-up/down&lt;/code&gt; add a new cursor on the previous/following line, and last &lt;code&gt;Ctrl-Alt-d&lt;/code&gt; marks all the lines in a region&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;;; Multiple cursors&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;global-set-key&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;kbd&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;C-d&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;mc/mark-next-like-this-word&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;global-set-key&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;kbd&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;C-c C-d&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;mc/mark-all-words-like-this&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;global-set-key&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;kbd&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;C-M-&amp;lt;up&amp;gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;mc/mark-previous-lines&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;global-set-key&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;kbd&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;C-M-&amp;lt;down&amp;gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;mc/mark-next-lines&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;global-set-key&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;kbd&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;C-M-d&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;mc/edit-lines&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;How many times do I need to highlight the whole buffer? More than I imagined, so I defined the classic &lt;code&gt;Ctrl-a&lt;/code&gt; shortcut&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;;; C-a marks the whole buffer&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;global-set-key&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;kbd&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;C-a&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;mark-whole-buffer&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h2 id="windows-and-buffers"&gt;Windows and buffers&lt;a class="headerlink" href="#windows-and-buffers" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;As everyone else, when I code I need to keep multiple files open, and often to have them side-by-side. Emacs provides out of the box the window split shortcuts &lt;code&gt;Ctrl-2&lt;/code&gt; (horizontal split) and &lt;code&gt;Ctrl-3&lt;/code&gt; (vertical split), but I need a shortcut to quickly move between them. Enter &lt;a href="https://www.emacswiki.org/emacs/WindMove"&gt;Windmove&lt;/a&gt;, which by default uses &lt;code&gt;Shift-&amp;lt;arrow&amp;gt;&lt;/code&gt; combinations, which I instead want to keep for highlighting regions, so I remapped it to &lt;code&gt;Alt-&amp;lt;arrow&amp;gt;&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;;; Windmove - move between windows use ALT&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;windmove-default-keybindings&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;meta&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="c1"&gt;;; Unset Shift-arrow keybindings&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;global-unset-key&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;vector&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;list&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;shift&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;left&lt;/span&gt;&lt;span class="p"&gt;)))&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;global-unset-key&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;vector&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;list&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;shift&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;right&lt;/span&gt;&lt;span class="p"&gt;)))&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;global-unset-key&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;vector&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;list&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;shift&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;up&lt;/span&gt;&lt;span class="p"&gt;)))&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;global-unset-key&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;vector&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;list&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;shift&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;down&lt;/span&gt;&lt;span class="p"&gt;)))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Next I need to move between buffers (open files not currently visible) Emacs used buffers also for its own internal logs, and all those buffers have a name surrounded by &lt;code&gt;*&lt;/code&gt;, so I filter them out when I move through open files&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;;; Skip system buffers when cycling&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;set-frame-parameter&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;selected-frame&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;buffer-predicate&lt;/span&gt;
+             &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;lambda&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;buf&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;not&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;string-match-p&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;^*&amp;quot;&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;buffer-name&lt;/span&gt; &lt;span class="nv"&gt;buf&lt;/span&gt;&lt;span class="p"&gt;)))))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;To move between buffers I map &lt;code&gt;previous-buffer&lt;/code&gt; and &lt;code&gt;next-buffer&lt;/code&gt; to &lt;code&gt;Ctrl-Super-left/right&lt;/code&gt; (Super here is my left Win key, which is between Ctrl and Alt)&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;;; Map previous and next buffer to C-s-&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;global-set-key&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;kbd&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;C-s-&amp;lt;left&amp;gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;previous-buffer&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;global-set-key&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;kbd&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;C-s-&amp;lt;right&amp;gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;next-buffer&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Oh, I love the &lt;a href="https://github.com/roman/golden-ratio.el"&gt;golden ratio mode&lt;/a&gt; that splits window giving more space to the current one &lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;;; Golden ratio mode&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;require&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;golden-ratio&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;golden-ratio-mode&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h2 id="spell-checking"&gt;Spell checking&lt;a class="headerlink" href="#spell-checking" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;When I will learn how to properly spell &lt;code&gt;inconceivably&lt;/code&gt; and &lt;code&gt;counter-intuitive&lt;/code&gt; I might get rid of this. In the meanwhile a good spell check is a blessing from heaven. I haven't used function keys that much so far, and since I'm used to the standard Sublime Text mapping &lt;code&gt;F6&lt;/code&gt; I reused that.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;;; Spell check&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;global-set-key&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;kbd&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;&amp;lt;f6&amp;gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;flyspell-mode&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="c1"&gt;;; Spell check with hunspell&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;when&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;executable-find&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;hunspell&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+  &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;setq-default&lt;/span&gt; &lt;span class="nv"&gt;ispell-program-name&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;hunspell&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+  &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;setq&lt;/span&gt; &lt;span class="nv"&gt;ispell-really-hunspell&lt;/span&gt; &lt;span class="no"&gt;t&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;By the way, I misspell simpler words all the time, no need to get into inconceivably counter-intuitive words. And I'm sure there will be typos in this text, no matter how many times I check and read it =)&lt;/p&gt;
+&lt;h2 id="python-development"&gt;Python development&lt;a class="headerlink" href="#python-development" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;At last, let's get into development! Emacs has a very good package for Python, called &lt;a href="https://elpy.readthedocs.io/en/latest/"&gt;Elpy&lt;/a&gt;.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;;; Enable Elpy for Python development&lt;/span&gt;
+&lt;span class="c1"&gt;;; https://elpy.readthedocs.io/en/latest/&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;setq&lt;/span&gt; &lt;span class="nv"&gt;elpy-rpc-python-command&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;python3&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;elpy-enable&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;There are some adjustment needed to prevent the mode to override the Windmove and other binding&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;;; Prevent Elpy from overriding Windmove shortcuts&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;eval-after-load&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;elpy&amp;quot;&lt;/span&gt;
+  &lt;span class="o"&gt;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;cl-dolist&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;key&lt;/span&gt; &lt;span class="o"&gt;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;M-&amp;lt;up&amp;gt;&amp;quot;&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;M-&amp;lt;down&amp;gt;&amp;quot;&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;M-&amp;lt;left&amp;gt;&amp;quot;&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;M-&amp;lt;right&amp;gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+     &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;define-key&lt;/span&gt; &lt;span class="nv"&gt;elpy-mode-map&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;kbd&lt;/span&gt; &lt;span class="nv"&gt;key&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="no"&gt;nil&lt;/span&gt;&lt;span class="p"&gt;)))&lt;/span&gt;
+
+&lt;span class="c1"&gt;;; Prevent Elpy from overriding standard cursor movements&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;eval-after-load&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;elpy&amp;quot;&lt;/span&gt;
+  &lt;span class="o"&gt;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;cl-dolist&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;key&lt;/span&gt; &lt;span class="o"&gt;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;C-&amp;lt;left&amp;gt;&amp;quot;&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;C-&amp;lt;right&amp;gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+     &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;define-key&lt;/span&gt; &lt;span class="nv"&gt;elpy-mode-map&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;kbd&lt;/span&gt; &lt;span class="nv"&gt;key&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="no"&gt;nil&lt;/span&gt;&lt;span class="p"&gt;)))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Since I use &lt;a href="https://github.com/psf/black"&gt;black&lt;/a&gt; to format Python code I run it on save. Plus I have a shortcut to fix the syntax in the buffer at any time. Since the syntax document is PEP8 &lt;code&gt;C-8&lt;/code&gt; is a nice combination.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;;; Run black on save&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;add-hook&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;elpy-mode-hook&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;lambda&lt;/span&gt; &lt;span class="p"&gt;()&lt;/span&gt;
+  &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;add-hook&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;before-save-hook&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;elpy-black-fix-code&lt;/span&gt; &lt;span class="no"&gt;nil&lt;/span&gt; &lt;span class="no"&gt;t&lt;/span&gt;&lt;span class="p"&gt;)))&lt;/span&gt;
+
+&lt;span class="c1"&gt;;; Set C-8 to format Python code&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;global-set-key&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;kbd&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;C-8&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;elpy-black-fix-code&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h2 id="javascript-development"&gt;JavaScript development&lt;a class="headerlink" href="#javascript-development" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Let's go full-stack and add some JavaScript and JSX to the recipe. The &lt;a href="https://github.com/felipeochoa/rjsx-mode"&gt;rjsx-mode&lt;/a&gt; is perfect for React development and similar things&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;;; JSX&lt;/span&gt;
+&lt;span class="c1"&gt;;;https://github.com/felipeochoa/rjsx-mode&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;add-to-list&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;auto-mode-alist&lt;/span&gt; &lt;span class="o"&gt;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;\\.js\\&amp;#39;&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="nv"&gt;rjsx-mode&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;span class="c1"&gt;;; Don&amp;#39;t override my beloved multiple cursors&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;with-eval-after-load&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;rjsx-mode&lt;/span&gt;
+  &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;define-key&lt;/span&gt; &lt;span class="nv"&gt;rjsx-mode-map&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;kbd&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;C-d&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="no"&gt;nil&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;As I will install Node.js modules locally in &lt;code&gt;node_modules&lt;/code&gt; I want code formatters and other tools to run the binaries stored there&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;;; Use binaries in node_modules&lt;/span&gt;
+&lt;span class="c1"&gt;;; https://github.com/codesuki/add-node-modules-path&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;add-hook&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;js2-mode-hook&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;add-node-modules-path&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;And also JS need to be beautified, at least when I have to read and understand it. I use &lt;a href="https://prettier.io/"&gt;prettier&lt;/a&gt; and &lt;a href="https://github.com/prettier/prettier-emacs"&gt;prettier-emacs&lt;/a&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;;; Pretty JS code&lt;/span&gt;
+&lt;span class="c1"&gt;;; https://github.com/prettier/prettier-emacs&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;require&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;prettier-js&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;add-hook&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;js2-mode-hook&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;prettier-js-mode&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h2 id="other-languages"&gt;Other languages&lt;a class="headerlink" href="#other-languages" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Other languages I use are less demanding in term of customisation (generally because they are simpler or less general-purpose). The &lt;a href="https://github.com/emacsorphanage/terraform-mode"&gt;Terraform mode&lt;/a&gt; automatically fixes the syntax of the file on save&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;;; Terraform&lt;/span&gt;
+&lt;span class="c1"&gt;;; https://github.com/emacsorphanage/terraform-mode&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;require&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;terraform-mode&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;add-to-list&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;auto-mode-alist&lt;/span&gt; &lt;span class="o"&gt;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;\\.tf\\&amp;#39;&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="nv"&gt;terraform-mode&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;add-hook&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;terraform-mode-hook&lt;/span&gt; &lt;span class="nf"&gt;#&amp;#39;&lt;/span&gt;&lt;span class="nv"&gt;terraform-format-on-save-mode&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="c1"&gt;;; YAML&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;require&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;yaml-mode&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;add-to-list&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;auto-mode-alist&lt;/span&gt; &lt;span class="o"&gt;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;\\.ya?ml\\&amp;#39;&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="nv"&gt;yaml-mode&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h2 id="files-and-projects"&gt;Files and projects&lt;a class="headerlink" href="#files-and-projects" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;My setup is still a work in progress here, I'm testing &lt;a href="https://docs.projectile.mx/projectile/usage.html"&gt;Projectile&lt;/a&gt;, &lt;a href="https://github.com/raxod502/prescient.el"&gt;Prescient&lt;/a&gt;, and &lt;a href="https://github.com/Alexander-Miller/treemacs"&gt;Treemacs&lt;/a&gt;. So far, only Projectile made it to the configuration file, but I'm not using it that much yet. I think I might use a good sidebar with Git integration through colours and icons, but I still have to find something I feel comfortable with.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;;; Projectile&lt;/span&gt;
+&lt;span class="c1"&gt;;; https://docs.projectile.mx/projectile/usage.html&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;require&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;projectile&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;define-key&lt;/span&gt; &lt;span class="nv"&gt;projectile-mode-map&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;kbd&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;s-p&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;projectile-command-map&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;projectile-mode&lt;/span&gt; &lt;span class="mi"&gt;+1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;setq&lt;/span&gt; &lt;span class="nv"&gt;projectile-completion-system&lt;/span&gt; &lt;span class="ss"&gt;&amp;#39;ivy&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h2 id="the-custom-file"&gt;The custom file&lt;a class="headerlink" href="#the-custom-file" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;As I mentioned when I discussed the preamble the file &lt;code&gt;.emacs-custom&lt;/code&gt; contains the customisation of variables and faces, and this is what I have&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;custom-set-variables&lt;/span&gt;
+ &lt;span class="c1"&gt;;; custom-set-variables was added by Custom.&lt;/span&gt;
+ &lt;span class="c1"&gt;;; If you edit it by hand, you could mess it up, so be careful.&lt;/span&gt;
+ &lt;span class="c1"&gt;;; Your init file should contain only one such instance.&lt;/span&gt;
+ &lt;span class="c1"&gt;;; If there is more than one, they won&amp;#39;t work right.&lt;/span&gt;
+ &lt;span class="o"&gt;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;ansi-color-faces-vector&lt;/span&gt;
+   &lt;span class="nv"&gt;[default&lt;/span&gt; &lt;span class="nv"&gt;default&lt;/span&gt; &lt;span class="nv"&gt;default&lt;/span&gt; &lt;span class="nv"&gt;italic&lt;/span&gt; &lt;span class="nv"&gt;underline&lt;/span&gt; &lt;span class="nv"&gt;success&lt;/span&gt; &lt;span class="kt"&gt;warning&lt;/span&gt; &lt;span class="nv"&gt;error]&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+ &lt;span class="o"&gt;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;custom-enabled-themes&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;quote&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;tango-dark&lt;/span&gt;&lt;span class="p"&gt;)))&lt;/span&gt;
+ &lt;span class="o"&gt;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;default-input-method&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;quote&lt;/span&gt; &lt;span class="nv"&gt;italian-english-keyboard&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+ &lt;span class="o"&gt;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;inhibit-startup-screen&lt;/span&gt; &lt;span class="no"&gt;t&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+ &lt;span class="o"&gt;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;js-indent-level&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+ &lt;span class="o"&gt;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;package-selected-packages&lt;/span&gt;
+   &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;quote&lt;/span&gt;
+    &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;syntactic-close&lt;/span&gt; &lt;span class="nv"&gt;ivy&lt;/span&gt; &lt;span class="nv"&gt;projectile&lt;/span&gt; &lt;span class="nv"&gt;rjsx-mode&lt;/span&gt; &lt;span class="nv"&gt;js2-mode&lt;/span&gt; &lt;span class="nv"&gt;golden-ratio&lt;/span&gt;
+     &lt;span class="nv"&gt;add-node-modules-path&lt;/span&gt; &lt;span class="nv"&gt;prettier-js&lt;/span&gt; &lt;span class="nv"&gt;tide&lt;/span&gt; &lt;span class="nv"&gt;elpy&lt;/span&gt; &lt;span class="nv"&gt;jinja2-mode&lt;/span&gt; &lt;span class="nv"&gt;drag-stuff&lt;/span&gt;
+     &lt;span class="nv"&gt;markdown-mode&lt;/span&gt; &lt;span class="nv"&gt;fcitx&lt;/span&gt; &lt;span class="nv"&gt;command-log-mode&lt;/span&gt; &lt;span class="nv"&gt;yaml-mode&lt;/span&gt; &lt;span class="nv"&gt;terraform-mode&lt;/span&gt; &lt;span class="nv"&gt;multiple-cursors&lt;/span&gt;&lt;span class="p"&gt;))))&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;custom-set-faces&lt;/span&gt;
+ &lt;span class="c1"&gt;;; custom-set-faces was added by Custom.&lt;/span&gt;
+ &lt;span class="c1"&gt;;; If you edit it by hand, you could mess it up, so be careful.&lt;/span&gt;
+ &lt;span class="c1"&gt;;; Your init file should contain only one such instance.&lt;/span&gt;
+ &lt;span class="c1"&gt;;; If there is more than one, they won&amp;#39;t work right.&lt;/span&gt;
+ &lt;span class="o"&gt;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;flymake-error&lt;/span&gt; &lt;span class="p"&gt;((&lt;/span&gt;&lt;span class="no"&gt;t&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;:foreground&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;orange red&amp;quot;&lt;/span&gt; &lt;span class="ss"&gt;:background&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;yellow&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;))))&lt;/span&gt;
+ &lt;span class="o"&gt;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;js2-external-variable&lt;/span&gt; &lt;span class="p"&gt;((&lt;/span&gt;&lt;span class="no"&gt;t&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;:foreground&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;orange red&amp;quot;&lt;/span&gt; &lt;span class="ss"&gt;:background&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;yellow&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)))))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;As you can see I have a default theme &lt;code&gt;tango-dark&lt;/code&gt;. The default alternate input method activated by &lt;code&gt;C-\&lt;/code&gt; is the one I defined previously, &lt;code&gt;italian-english-keyboard&lt;/code&gt;. JavaScript uses 2 spaces for indentation, and last I changed some colours to make errors in Python and JavaScript stand out very clearly.&lt;/p&gt;
+&lt;h2 id="final-words"&gt;Final words&lt;a class="headerlink" href="#final-words" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Any configuration is a work in progress, as it changes with the personal preferences and the requirements, but this has been my configuration for a while now, so it seems pretty stable. I hope this might help whoever wants to try emacs or who is already using it but struggles to properly configure it. Happy coding!&lt;/p&gt;
+&lt;h2 id="feedback"&gt;Feedback&lt;a class="headerlink" href="#feedback" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Feel free to reach me on &lt;a href="https://twitter.com/thedigicat"&gt;Twitter&lt;/a&gt; if you have questions. The &lt;a href="https://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues"&gt;GitHub issues&lt;/a&gt; page is the best place to submit corrections.&lt;/p&gt;</content><category term="Programming"></category><category term="blogging"></category><category term="editor"></category><category term="Emacs"></category><category term="JavaScript"></category><category term="Markdown"></category><category term="Python"></category><category term="Terraform"></category><category term="tools"></category></entry><entry><title>Flask project setup: TDD, Docker, Postgres and more - Part 3</title><link href="https://www.thedigitalcatonline.com/blog/2020/07/07/flask-project-setup-tdd-docker-postgres-and-more-part-3/" rel="alternate"></link><published>2020-07-07T13:00:00+01:00</published><updated>2020-07-07T13:00:00+01:00</updated><author><name>Leonardo Giordani</name></author><id>tag:www.thedigitalcatonline.com,2020-07-07:/blog/2020/07/07/flask-project-setup-tdd-docker-postgres-and-more-part-3/</id><summary type="html">&lt;p&gt;A step-by-step tutorial on how to setup a Flask project with TDD, Docker and Postgres&lt;/p&gt;</summary><content type="html">&lt;p&gt;In this series of posts I explore the development of a Flask project with a setup that is built with efficiency and tidiness in mind, using TDD, Docker and Postgres.&lt;/p&gt;
 &lt;h2 id="catch-up"&gt;Catch-up&lt;a class="headerlink" href="#catch-up" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;In the &lt;a href="https://www.thedigitalcatonline.com/blog/2020/07/05/flask-project-setup-tdd-docker-postgres-and-more-part-1/"&gt;first&lt;/a&gt; and &lt;a href="https://www.thedigitalcatonline.com/blog/2020/07/06/flask-project-setup-tdd-docker-postgres-and-more-part-2/"&gt;second&lt;/a&gt; posts I created a Flask project with a tidy setup, using Docker to run the development environment and the tests, and mapping important commands in a management script, so that the configuration can be in a single file and drive the whole system.&lt;/p&gt;
 &lt;p&gt;In this post I will show you how to easily create scenarios, that is databases created on the fly with custom data, so that it is possible to test queries in isolation, either with the Flask application or with the command line. I will also show you how to define a configuration for production and give some hints for the deployment.&lt;/p&gt;
@@ -3599,7 +3990,7 @@ pip install -r requirements.txt
 &lt;/ol&gt;
 &lt;p&gt;Each one of these steps, with the notable exception of the second one, is performed through a single command and takes up to few seconds in the worst case. I prefer to have control on the publishing process, so often I run the git commands manually in the &lt;code&gt;deploy&lt;/code&gt; directory, but you can safely use the provided Make directive.&lt;/p&gt;
 &lt;h1 id="versioning"&gt;Versioning&lt;a class="headerlink" href="#versioning" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
-&lt;p&gt;Versioning is not the most important thing to do in a blog, but I personally like to have a trace of what I created and when in my Git log. I use &lt;a href="https://pypi.org/project/punch.py/"&gt;Punch&lt;/a&gt;, a package that I developed to replace bumpversion. If you want to customise the default versioning scheme contained in the template read the &lt;a href="https://punch.readthedocs.io/en/latest/"&gt;Punch documentation&lt;/a&gt;.&lt;/p&gt;</content><category term="Projects"></category><category term="Python"></category><category term="Python3"></category><category term="pelican"></category></entry><entry><title>The Digital Cat Youtube Channel</title><link href="https://www.thedigitalcatonline.com/blog/2019/05/27/youtube-channel/" rel="alternate"></link><published>2019-05-27T12:00:00+01:00</published><updated>2019-05-27T12:00:00+01:00</updated><author><name>Leonardo Giordani</name></author><id>tag:www.thedigitalcatonline.com,2019-05-27:/blog/2019/05/27/youtube-channel/</id><summary type="html">&lt;p&gt;The new Youtube channel The Digital Cat is out in the wild&lt;/p&gt;</summary><content type="html">&lt;p&gt;The Digital Cat &lt;a href="https://www.youtube.com/channel/UCJ70w0WzWjWerpk3utRcAKA"&gt;Youtube channel&lt;/a&gt; just launched!&lt;/p&gt;
+&lt;p&gt;Versioning is not the most important thing to do in a blog, but I personally like to have a trace of what I created and when in my Git log. I use &lt;a href="https://pypi.org/project/punch.py/"&gt;Punch&lt;/a&gt;, a package that I developed to replace bumpversion. If you want to customise the default versioning scheme contained in the template read the &lt;a href="https://punch.readthedocs.io/en/latest/"&gt;Punch documentation&lt;/a&gt;.&lt;/p&gt;</content><category term="Projects"></category><category term="blogging"></category><category term="Python"></category><category term="Python3"></category><category term="pelican"></category></entry><entry><title>The Digital Cat Youtube Channel</title><link href="https://www.thedigitalcatonline.com/blog/2019/05/27/youtube-channel/" rel="alternate"></link><published>2019-05-27T12:00:00+01:00</published><updated>2019-05-27T12:00:00+01:00</updated><author><name>Leonardo Giordani</name></author><id>tag:www.thedigitalcatonline.com,2019-05-27:/blog/2019/05/27/youtube-channel/</id><summary type="html">&lt;p&gt;The new Youtube channel The Digital Cat is out in the wild&lt;/p&gt;</summary><content type="html">&lt;p&gt;The Digital Cat &lt;a href="https://www.youtube.com/channel/UCJ70w0WzWjWerpk3utRcAKA"&gt;Youtube channel&lt;/a&gt; just launched!&lt;/p&gt;
 &lt;p&gt;The channel will host workshops and tutorial on Python and other languages, on operating systems, cryptography, and other topics that you can find here on this blog. I just finished recording the first part of my workshop "TDD in Python with pytest", which was successfully presented at PyCon UK, PyCon IT, PyCon Ireland, EuroPython and PyLadies London, and the 4 videos are already available on the channel.&lt;/p&gt;
 &lt;div class="big-image"&gt;
 &lt;img src="/images/global/banner_large.jpg" alt="Youtube Channel banner" /&gt;
@@ -3607,458 +3998,4 @@ pip install -r requirements.txt
 
 &lt;p&gt;You can subscribe to the channel at &lt;a href="https://www.youtube.com/channel/UCJ70w0WzWjWerpk3utRcAKA"&gt;this link&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;I appreciate that many people struggle to follow a long post or a tutorial and prefer to see how someone works and hear a voice explaining the steps. Well, I'm not sure if they will like hearing my voice, but this channel is the attempts to reach that type of audience. These are my first videos, so the production is not at its best, but I hope I will improve it in the future.&lt;/p&gt;
-&lt;p&gt;I hope you will find them useful, feel free to post comments under the videos if you have suggestions, if you need clarifications, or just to say that you enjoyed them. Thanks!&lt;/p&gt;</content><category term="Programming"></category><category term="Python"></category><category term="Python2"></category><category term="Python3"></category><category term="TDD"></category><category term="testing"></category><category term="video"></category></entry><entry><title>Motorola 68000: addressing modes</title><link href="https://www.thedigitalcatonline.com/blog/2019/03/04/motorola-68000-addressing-modes/" rel="alternate"></link><published>2019-03-04T22:30:00+01:00</published><updated>2019-03-04T22:30:00+01:00</updated><author><name>Leonardo Giordani</name></author><id>tag:www.thedigitalcatonline.com,2019-03-04:/blog/2019/03/04/motorola-68000-addressing-modes/</id><summary type="html">&lt;p&gt;A review of the addressing modes of one of the most famous 32-bit CPUs&lt;/p&gt;</summary><content type="html">&lt;p&gt;The Motorola 68000 is an impressive microprocessor, and this is reflected by the large amount of addressing modes that it provides; it is actually surprising, for people used to the x86 family, to find in this microprocessor's Assembly language constructs that are very similar to the ones provided by high level languages such as pre- and postdecrements, or multiconditional branching instructions.&lt;/p&gt;
-&lt;p&gt;The processor provides 6 different addressing modes, each of which has multiple versions, for a grand total of 14. The specific instruction used to manipulate the data can also work on different data sizes, but these variations are not considered here, being features of the instruction and not of the addressing mode.&lt;/p&gt;
-&lt;p&gt;Addressing refers to the format of the &lt;strong&gt;effective address&lt;/strong&gt; (&lt;code&gt;ea&lt;/code&gt; or &lt;code&gt;EA&lt;/code&gt; in many manuals), that is the representation of the source or destination of an instruction. Remember that not all the instructions support all 14 modes, so whenever you read &lt;code&gt;ea&lt;/code&gt; remember that we are talking about data which address can be represented by one or more of those modes. &lt;/p&gt;
-&lt;p&gt;The syntax of the &lt;code&gt;movea&lt;/code&gt; instruction, for example, is &lt;code&gt;movea &amp;lt;ea&amp;gt;, An&lt;/code&gt;, which tells us that the source is one of the 14 possible combinations presented here, while the destination is one of the address registers &lt;code&gt;a1-a6&lt;/code&gt;. Strictly speaking, however, the syntax of the instruction is &lt;code&gt;movea &amp;lt;ea1&amp;gt;, &amp;lt;ea2&amp;gt;&lt;/code&gt;, where &lt;code&gt;&amp;lt;ea1&amp;gt;&lt;/code&gt; can be one of the 14 modes, and &lt;code&gt;&amp;lt;ea2&amp;gt;&lt;/code&gt; can only be an address register (Address Register Direct Mode).&lt;/p&gt;
-&lt;p&gt;The addressing mode is encoded using three fields of the binary instruction. The &lt;strong&gt;EA Mode&lt;/strong&gt; field, the &lt;strong&gt;EA register&lt;/strong&gt; field, and the &lt;strong&gt;Extension words&lt;/strong&gt;. The first two are 3-bit fields contained in the instruction word, which combination uniquely identifies the addressing mode and the number of the register, in case this is needed. The extension words, instead, are words that follow the instruction word in memory, and that usually represent actual 8-, 16-, or 32-bit numbers.&lt;/p&gt;
-&lt;h1 id="sign-extension"&gt;Sign extension&lt;a class="headerlink" href="#sign-extension" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
-&lt;p&gt;Before we discuss the addressing modes provided by the MC68000 it is worth explaining the sign-extension mechanism used by this processor. Sometimes addressing modes use 8-bit or 16-bit data instead of a full long word, for example to provide a constant that is added to a register before using its value. Calculations inside the microprocessor, however, are always performed on 32-bits numbers, so such values are &lt;em&gt;extended&lt;/em&gt; to a long word.&lt;/p&gt;
-&lt;p&gt;There are two ways to extend a byte/word to a long word. One is to pad with zeroes on the left (unsigned extension) and the other is to pad preserving the sign (signed extension). While this doesn't change positive numbers it affects negative ones. Let's consider an 8-bit negative number like -126, which is represented by &lt;code&gt;10000010&lt;/code&gt; in 8-bit two's complement, &lt;code&gt;0x82&lt;/code&gt; in hexadecimal. A 32-bit signed extension of this number becomes &lt;code&gt;0xffffff82&lt;/code&gt;, which is still -126 in 32-bit two's complement, but an unsigned extension would give &lt;code&gt;0x00000082&lt;/code&gt;, which is 130.&lt;/p&gt;
-&lt;p&gt;While the MC68000 can use both address and data registers for general-purpose data storage, the two categories are meant to manage data of different nature. In particular, &lt;em&gt;data registers never sign-extend bytes or words&lt;/em&gt;, as this would change the pure representation of that sequence of bits, adding spurious bits to keep the sign. Addressed, instead, should never change their value, so the &lt;em&gt;address registers sign-extend incoming values&lt;/em&gt; to preserve the real address or displacement represented by the bits.&lt;/p&gt;
-&lt;h1 id="addressing-modes"&gt;Addressing Modes&lt;a class="headerlink" href="#addressing-modes" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
-&lt;h2 id="register-direct"&gt;Register Direct&lt;a class="headerlink" href="#register-direct" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
-&lt;p&gt;This is the simplest addressing mode, as it reads or writes data in one of the microprocessor's registers. There are two versions of it, one for data registers and one for address registers.&lt;/p&gt;
-&lt;h3 id="data-register-direct"&gt;Data Register Direct&lt;a class="headerlink" href="#data-register-direct" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;Assembly syntax: &lt;code&gt;Dn&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;EA Mode field: &lt;code&gt;000&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;EA Register field: Register number&lt;/li&gt;
-&lt;li&gt;Extension words: 0&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;This mode addresses the data contained in one of the data registers &lt;code&gt;d0-d7&lt;/code&gt;. The EA Mode field is &lt;code&gt;000&lt;/code&gt; and the EA Register field contains the register number. The official documentation uses the syntax &lt;code&gt;Dn&lt;/code&gt; to identify this mode. No extension words are used.&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;cmpi.w  #0x1111,d1&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;                           Compare&lt;/span&gt;
-&lt;span class="err"&gt;                        +----------+&lt;/span&gt;
-&lt;span class="err"&gt;                        |  0x1111  |&lt;/span&gt;
-&lt;span class="err"&gt;                        +----------+&lt;/span&gt;
-&lt;span class="err"&gt;d1 0x12ca ------------&amp;gt; |  0x12ca  |&lt;/span&gt;
-&lt;span class="err"&gt;                        +----------+&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;h3 id="address-register-direct-mode"&gt;Address Register Direct Mode&lt;a class="headerlink" href="#address-register-direct-mode" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;Assembly syntax: &lt;code&gt;An&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;EA Mode field: &lt;code&gt;001&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;EA Register field: Register number&lt;/li&gt;
-&lt;li&gt;Extension words: 0&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;This mode identifies the data contained in one of the address registers &lt;code&gt;a0-a6&lt;/code&gt;. The EA Mode field is &lt;code&gt;001&lt;/code&gt; and the EA Register field is the number of the register, while the official syntax for it is &lt;code&gt;An&lt;/code&gt;.  No extension words are used.&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;cmpi.w  #0x1111,a1&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;                           Compare&lt;/span&gt;
-&lt;span class="err"&gt;                        +------------+&lt;/span&gt;
-&lt;span class="err"&gt;                        |  0x1111    |&lt;/span&gt;
-&lt;span class="err"&gt;                        +------------+&lt;/span&gt;
-&lt;span class="err"&gt;a1 0xfc1d28 ----------&amp;gt; |  0xfc1d28  |&lt;/span&gt;
-&lt;span class="err"&gt;                        +------------+&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;h2 id="register-indirect"&gt;Register Indirect&lt;a class="headerlink" href="#register-indirect" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
-&lt;p&gt;As the name of this mode suggests, the addressing is performed using a register, but the data is accessed indirectly. The register doesn't contain the data we want to use, but the address in memory of the data. This is what higher level languages like C call &lt;em&gt;memory pointer&lt;/em&gt;.&lt;/p&gt;
-&lt;h3 id="address-register-indirect"&gt;Address Register Indirect&lt;a class="headerlink" href="#address-register-indirect" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;Assembly syntax: &lt;code&gt;(An)&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;EA Mode field: &lt;code&gt;010&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;EA Register field: Register number&lt;/li&gt;
-&lt;li&gt;Extension words: 0&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;The simplest form of indirect access is when the address of the data is stored in one of the address registers &lt;code&gt;a0-a6&lt;/code&gt;. The syntax for this mode is &lt;code&gt;(An)&lt;/code&gt;, while the binary form has the EA Mode field set to &lt;code&gt;010&lt;/code&gt; and the EA Register field represents the number of the address register in use. No extension words are used.&lt;/p&gt;
-&lt;p&gt;The following example compares the number &lt;code&gt;0x1111&lt;/code&gt; with the content of the memory cell which address is contained in &lt;code&gt;a1&lt;/code&gt;&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;cmpi.w  #0x1111,(a1)&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;a1 0xfc1d28&lt;/span&gt;
-&lt;span class="err"&gt;      |              0xfc1d24  |         |                Compare&lt;/span&gt;
-&lt;span class="err"&gt;      |                        +---------+              +----------+&lt;/span&gt;
-&lt;span class="err"&gt;      |              0xfc1d26  |         |              |  0x1111  |&lt;/span&gt;
-&lt;span class="err"&gt;      |                        +---------+              +----------+&lt;/span&gt;
-&lt;span class="err"&gt;      +------------&amp;gt; 0xfc1d28  |  0x13c  | -----------&amp;gt; |   0x13c  |&lt;/span&gt;
-&lt;span class="err"&gt;                               +---------+              +----------+&lt;/span&gt;
-&lt;span class="err"&gt;                     0xfc1d2a  |         |&lt;/span&gt;
-&lt;span class="err"&gt;                               +---------+&lt;/span&gt;
-&lt;span class="err"&gt;                     0xfc1d2c  |         |&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;h3 id="address-register-indirect-with-postincrement"&gt;Address Register Indirect with Postincrement&lt;a class="headerlink" href="#address-register-indirect-with-postincrement" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;Assembly syntax: &lt;code&gt;(An)+&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;EA Mode field: &lt;code&gt;011&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;EA Register field: Register number&lt;/li&gt;
-&lt;li&gt;Extension words: 0&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;This addressing mode is another of the high-level languages constructs that the MC68000 provides directly in its Assembly language. This mode works exactly like the Address Register Indirect, but &lt;em&gt;after&lt;/em&gt; the data has been fetched from memory the address register is incremented by the size of the data itself. So, this addressing mode is perfectly suited for algorithms that need to read consecutive arrays from memory, as there is no need to add instructions that increment the pointer.&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;cmpi.w  #0x1111,(a1)+&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;    a1 0xfc1d28&lt;/span&gt;
-&lt;span class="err"&gt;     ^       |              0xfc1d24  |         |                Compare&lt;/span&gt;
-&lt;span class="err"&gt;     |       |                        +---------+              +----------+&lt;/span&gt;
-&lt;span class="err"&gt;     |       |              0xfc1d26  |         |              |  0x1111  |&lt;/span&gt;
-&lt;span class="err"&gt;   +----+    v                        +---------+              +----------+&lt;/span&gt;
-&lt;span class="err"&gt;   | +2 | &amp;lt;--+------------&amp;gt; 0xfc1d28  |  0x13c  | -----------&amp;gt; |   0x13c  |&lt;/span&gt;
-&lt;span class="err"&gt;   +----+                             +---------+              +----------+&lt;/span&gt;
-&lt;span class="err"&gt;                            0xfc1d2a  |         |&lt;/span&gt;
-&lt;span class="err"&gt;                                      +---------+&lt;/span&gt;
-&lt;span class="err"&gt;                            0xfc1d2c  |         |&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;The standard syntax is &lt;code&gt;(An)+&lt;/code&gt;, and for this mode, the EA Mode field is &lt;code&gt;011&lt;/code&gt;, while the EA Register field contains the register number.  No extension words are used.&lt;/p&gt;
-&lt;p&gt;This mode and the following one are very powerful, as they automatically add to the address the size of the data that has been read, so 1 for a byte read, 2 for a word, and 4 for a long word. The only exception to this rule is when the register is &lt;code&gt;a7&lt;/code&gt;, which is an alias for &lt;code&gt;sp&lt;/code&gt;, the system Stack Pointer. In that case the pointer is always kept aligned to a word boundary, so the increment is 2 even for a byte read.&lt;/p&gt;
-&lt;h3 id="address-register-indirect-with-predecrement"&gt;Address Register Indirect with Predecrement&lt;a class="headerlink" href="#address-register-indirect-with-predecrement" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;Assembly syntax: &lt;code&gt;-(An)&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;EA Mode field: &lt;code&gt;100&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;EA Register field: Register number&lt;/li&gt;
-&lt;li&gt;Extension words: 0&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;This is the specular version of the previous mode, where the address register used to point to the data is decremented &lt;em&gt;before&lt;/em&gt; the addressing is performed. The standard syntax is &lt;code&gt;-(An)&lt;/code&gt;; the EA Mode field is &lt;code&gt;100&lt;/code&gt; and the EA Register field contains the register number. No extension words are used.&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;cmpi.w  #0x1111,-(a1)&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;   a1 0xfc1d28&lt;/span&gt;
-&lt;span class="err"&gt;    ^       |&lt;/span&gt;
-&lt;span class="err"&gt;    |       v&lt;/span&gt;
-&lt;span class="err"&gt;    |    +----+&lt;/span&gt;
-&lt;span class="err"&gt;    |    | -2 |          0xfc1d22  |         |                Compare&lt;/span&gt;
-&lt;span class="err"&gt;    |    +----+                    +---------+              +----------+&lt;/span&gt;
-&lt;span class="err"&gt;    |       |            0xfc1d24  |         |              |  0x1111  |&lt;/span&gt;
-&lt;span class="err"&gt;    |       v                      +---------+              +----------+&lt;/span&gt;
-&lt;span class="err"&gt;    +-------+----------&amp;gt; 0xfc1d26  |  0x13c  | -----------&amp;gt; |   0x13c  |&lt;/span&gt;
-&lt;span class="err"&gt;                                   +---------+              +----------+&lt;/span&gt;
-&lt;span class="err"&gt;                         0xfc1d28  |         |&lt;/span&gt;
-&lt;span class="err"&gt;                                   +---------+&lt;/span&gt;
-&lt;span class="err"&gt;                         0xfc1d2a  |         |&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;h3 id="address-register-indirect-with-displacement"&gt;Address Register Indirect with Displacement&lt;a class="headerlink" href="#address-register-indirect-with-displacement" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;Assembly syntax: &lt;code&gt;(d16,An) / d16(An)&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;EA Mode field: &lt;code&gt;101&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;EA Register field: Register number&lt;/li&gt;
-&lt;li&gt;Extension words: 1&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;The natural evolution of the previous two addressing modes is to use an arbitrary offset that is added to the base address contained in the register. The standard syntax for this mode is &lt;code&gt;(d16,An)&lt;/code&gt; or &lt;code&gt;d16(An)&lt;/code&gt;, where &lt;code&gt;d16&lt;/code&gt; is a 16-bit signed integer. So for example &lt;code&gt;0xf(a1)&lt;/code&gt; is the data contained in memory at the address &lt;code&gt;a1 + 0xf&lt;/code&gt;. The EA Mode field is &lt;code&gt;101&lt;/code&gt; and the EA register fields is the number of the address register used. This address mode requires 1 extension word that contains the 16-bit displacement.&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;cmpi.w  #0x1111,0x140(a1)&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;     a1 0xfc1d28&lt;/span&gt;
-&lt;span class="err"&gt;           |&lt;/span&gt;
-&lt;span class="err"&gt;           v&lt;/span&gt;
-&lt;span class="err"&gt;         +---+&lt;/span&gt;
-&lt;span class="err"&gt;0x140 -&amp;gt; | + |            0xfc1e64  |         |                Compare&lt;/span&gt;
-&lt;span class="err"&gt;         +---+                      +---------+              +----------+&lt;/span&gt;
-&lt;span class="err"&gt;           |              0xfc1e66  |         |              |  0x1111  |&lt;/span&gt;
-&lt;span class="err"&gt;           v                        +---------+              +----------+&lt;/span&gt;
-&lt;span class="err"&gt;           +------------&amp;gt; 0xfc1e68  |  0x13c  | -----------&amp;gt; |   0x13c  |&lt;/span&gt;
-&lt;span class="err"&gt;                                    +---------+              +----------+&lt;/span&gt;
-&lt;span class="err"&gt;                          0xfc1e6a  |         |&lt;/span&gt;
-&lt;span class="err"&gt;                                    +---------+&lt;/span&gt;
-&lt;span class="err"&gt;                          0xfc1e6c  |         |&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;Please note that the displacement is fixed to 16-bit, so its value limited in the range &lt;code&gt;(-32768,32767)&lt;/code&gt;; the displacement is however sign-extended to 32-bit before being added to the base address.&lt;/p&gt;
-&lt;p&gt;Note: this mode is sometimes called "Register Indirect with Offset".&lt;/p&gt;
-&lt;h3 id="address-register-indirect-with-index"&gt;Address Register Indirect with Index&lt;a class="headerlink" href="#address-register-indirect-with-index" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;Assembly syntax: &lt;code&gt;(d8,Dn,An)&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;EA Mode field: &lt;code&gt;110&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;EA Register field: Register number&lt;/li&gt;
-&lt;li&gt;Extension words: 1&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;Besides an addressing mode that mimics C-style loops and a way to perform random access of arrays through a 16-bit displacement, the MC68000 provides a double-indexed array access with this addressing mode. The base address contained in one of the address registers is added to the content of a 16/32-bit register and an 8-bit index. This address mode requires 1 extension word that contains the 8-bit index; only the 8 least significant bits of the extension words are kept and sign-extended to 32-bits before any calculation.&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;cmpi.w  #0x1111,(0x4,d0,a1)&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;    a1 0xfc1d28   d0 0x140&lt;/span&gt;
-&lt;span class="err"&gt;          |            |&lt;/span&gt;
-&lt;span class="err"&gt;          v            |&lt;/span&gt;
-&lt;span class="err"&gt;        +---+          |&lt;/span&gt;
-&lt;span class="err"&gt;        | + | &amp;lt;--------+&lt;/span&gt;
-&lt;span class="err"&gt;        +---+&lt;/span&gt;
-&lt;span class="err"&gt;          |&lt;/span&gt;
-&lt;span class="err"&gt;          v&lt;/span&gt;
-&lt;span class="err"&gt;        +---+&lt;/span&gt;
-&lt;span class="err"&gt;0x4 --&amp;gt; | + |            0xfc1e68  |          |                Compare&lt;/span&gt;
-&lt;span class="err"&gt;        +---+                      +----------+              +----------+&lt;/span&gt;
-&lt;span class="err"&gt;          |              0xfc1e6a  |          |              |  0x1111  |&lt;/span&gt;
-&lt;span class="err"&gt;          v                        +----------+              +----------+&lt;/span&gt;
-&lt;span class="err"&gt;          +------------&amp;gt; 0xfc1e6c  |   data   | -----------&amp;gt; |   0x13c  |&lt;/span&gt;
-&lt;span class="err"&gt;                                   +----------+              +----------+&lt;/span&gt;
-&lt;span class="err"&gt;                         0xfc1e6e  |          |&lt;/span&gt;
-&lt;span class="err"&gt;                                   +----------+&lt;/span&gt;
-&lt;span class="err"&gt;                         0xfc1e70  |          |&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;For this mode the EA Mode field is set to &lt;code&gt;110&lt;/code&gt; and the EA Register field contains the number of the address register in use. The standard syntax used by manuals is &lt;code&gt;(d8, An, Dn.SIZE)&lt;/code&gt;, where &lt;code&gt;SIZE&lt;/code&gt; can be either &lt;code&gt;w&lt;/code&gt; or &lt;code&gt;l&lt;/code&gt;. This addressing mode can provide an invaluable way to access two-dimensional arrays, and once again shows how powerful this microprocessor is.&lt;/p&gt;
-&lt;p&gt;Note: this mode is sometimes called "Indexed Register Indirect with Offset"&lt;/p&gt;
-&lt;h2 id="absolute-data"&gt;Absolute Data&lt;a class="headerlink" href="#absolute-data" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
-&lt;p&gt;These modes provide a version of the Address Register Indirect mode where the address is specified directly in the instruction and not through a register.&lt;/p&gt;
-&lt;h3 id="absolute-short-data"&gt;Absolute Short Data&lt;a class="headerlink" href="#absolute-short-data" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;Assembly syntax: &lt;code&gt;&amp;lt;address&amp;gt;.w&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;EA Mode field: &lt;code&gt;111&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;EA Register field: &lt;code&gt;000&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;Extension words: 1&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;This mode specifies the address of the data in memory through a 16-bit direct operand specified in the extension word. The standard syntax is &lt;code&gt;&amp;lt;address&amp;gt;.w&lt;/code&gt;, while the EA mode and EA register fields are respectively &lt;code&gt;111&lt;/code&gt; and &lt;code&gt;000&lt;/code&gt;. Since the address is a signed word, only the first or the last 32KiB of memory can be addressed (respectively using positive and negative addresses).&lt;/p&gt;
-&lt;h3 id="absolute-long-data"&gt;Absolute Long Data&lt;a class="headerlink" href="#absolute-long-data" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;Assembly syntax: &lt;code&gt;&amp;lt;address&amp;gt;.l&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;EA Mode field: &lt;code&gt;111&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;EA Register field: &lt;code&gt;001&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;Extension words: 2&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;This is the 32-bit version of the previous mode, with EA mode and EA register fields set respectively to &lt;code&gt;111&lt;/code&gt; and &lt;code&gt;001&lt;/code&gt;. The standard syntax is &lt;code&gt;&amp;lt;address&amp;gt;.l&lt;/code&gt;, and it requires two extension words. As always in the MC68000 long words are given in big endian order, that is the first word is the most significant part of the address and the second word is the least significant one.&lt;/p&gt;
-&lt;p&gt;It is worth noting that this mode overcomes the limitation of the previous one, allowing you to access the full 16MiB address space. However, it requires more memory space, having two extension words, and 4 additional CPU cycles to be executed.&lt;/p&gt;
-&lt;h2 id="program-counter-relative"&gt;Program Counter Relative&lt;a class="headerlink" href="#program-counter-relative" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
-&lt;p&gt;The addressing modes relative to the Program Counter (PC) are the fundamental building block of relocatable programs, as the effective address is computed as a displacement from the address of the current instruction being executed. Strictly speaking the base address is that of the extension word, as will be shown in detail later in this article.&lt;/p&gt;
-&lt;p&gt;Please note that effective addresses expressed with Program Counter Relative can only be used to read from memory.&lt;/p&gt;
-&lt;h3 id="program-counter-relative-with-displacement"&gt;Program Counter Relative with Displacement&lt;a class="headerlink" href="#program-counter-relative-with-displacement" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;Assembly syntax: &lt;code&gt;(d16,PC)&lt;/code&gt; or &lt;code&gt;d16(PC)&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;EA Mode field: &lt;code&gt;111&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;EA Register field: &lt;code&gt;010&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;Extension words: 1&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;This mode is very similar to Address Register Indirect with Displacement, as both use a 16-bit offset added to a base address; in this case the latter is provided by the PC instead of an address register. The EA mode field is &lt;code&gt;111&lt;/code&gt; and the EA Register field is &lt;code&gt;010&lt;/code&gt;. One extension word is needed, to provide the signed 16-bits displacement, extended to 32-bit before any other calculation.&lt;/p&gt;
-&lt;p&gt;Note: this mode is sometimes called "Program Counter Relative with Offset".&lt;/p&gt;
-&lt;h3 id="program-counter-relative-with-index"&gt;Program Counter Relative with Index&lt;a class="headerlink" href="#program-counter-relative-with-index" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;Assembly syntax: &lt;code&gt;(d8,Dn,PC)&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;EA Mode field: &lt;code&gt;111&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;EA Register field: &lt;code&gt;011&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;Extension words: 1&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;This is the Program Counter version of Address Register Indirect with Index. The EA mode field is &lt;code&gt;111&lt;/code&gt; and the EA Register field is &lt;code&gt;011&lt;/code&gt;. One extension word is needed, to provide the signed 8-bits displacement, which will be extended to 32 bit before using it.&lt;/p&gt;
-&lt;p&gt;Note: this mode is sometimes called "Program Counter Relative with Index and Offset".&lt;/p&gt;
-&lt;h2 id="immediate-data"&gt;Immediate Data&lt;a class="headerlink" href="#immediate-data" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
-&lt;ul&gt;
-&lt;li&gt;Assembly syntax: &lt;code&gt;#&amp;lt;data&amp;gt;&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;EA Mode field: &lt;code&gt;111&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;EA Register field: &lt;code&gt;100&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;Extension words: 1,2&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;Immediate data uses the plain data written in the extension words instead of referring to the system memory. In this mode you can specify a constant of any length (byte, word, long word). The EA mode and EA register fields are respectively &lt;code&gt;111&lt;/code&gt; and &lt;code&gt;100&lt;/code&gt;, and the number of extension words is either 1 (byte and word) or 2 (long word). Remember that the 68000 sign-extends data only when the destination is an address register, leaving it untouched when a data register is used. The standard syntax for this addressing mode is &lt;code&gt;#&amp;lt;data&amp;gt;&lt;/code&gt;&lt;/p&gt;
-&lt;h3 id="quick-immediate"&gt;Quick Immediate&lt;a class="headerlink" href="#quick-immediate" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h3&gt;
-&lt;p&gt;This addressing mode is available for a set of 3 instructions only, namely &lt;code&gt;addq&lt;/code&gt;, &lt;code&gt;subq&lt;/code&gt;, and &lt;code&gt;moveq&lt;/code&gt;. For the first two instructions, it allows to specify a value between 1 and 8 (3 bits), while the third one can interact with a full signed byte, managing a value between -128 and 127. The "quick" label comes from the fact that the instructions use bits of their own binary representation to store the data, thus requiring no extension words. As happens for the simple Immediate Data addressing, EA mode field is &lt;code&gt;111&lt;/code&gt; and EA Register field is &lt;code&gt;100&lt;/code&gt;.&lt;/p&gt;
-&lt;h2 id="implied"&gt;Implied&lt;a class="headerlink" href="#implied" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
-&lt;p&gt;This is another mode that is available only for some instructions. Those are bound to specific registers, and are thus not really allowing any generic effective address to be used. The registers used in this addressing mode are only &lt;code&gt;SP&lt;/code&gt;, &lt;code&gt;PC&lt;/code&gt;, &lt;code&gt;SP&lt;/code&gt;, &lt;code&gt;SSP&lt;/code&gt;, &lt;code&gt;SR&lt;/code&gt;, and &lt;code&gt;USP&lt;/code&gt;.&lt;/p&gt;
-&lt;h1 id="table-of-addressing-modes"&gt;Table of addressing modes&lt;a class="headerlink" href="#table-of-addressing-modes" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
-&lt;p&gt;The following table gives an overview of all the addressing modes. For each of them I show the name, the standard Assembly syntax, the value of the EA Mode field, the value of the EA Register field, and the number of extension word required.&lt;/p&gt;
-&lt;table&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th&gt;Name&lt;/th&gt;
-&lt;th&gt;Syntax&lt;/th&gt;
-&lt;th&gt;EA Mode&lt;/th&gt;
-&lt;th&gt;EA Register&lt;/th&gt;
-&lt;th&gt;Extension words&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-&lt;tbody&gt;
-&lt;tr&gt;
-&lt;td&gt;Data Register Direct&lt;/td&gt;
-&lt;td&gt;&lt;code&gt;Dn&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;&lt;code&gt;000&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;Reg. number&lt;/td&gt;
-&lt;td&gt;0&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;Address Register Direct Mode&lt;/td&gt;
-&lt;td&gt;&lt;code&gt;An&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;&lt;code&gt;001&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;Reg. number&lt;/td&gt;
-&lt;td&gt;0&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;Address Register Indirect&lt;/td&gt;
-&lt;td&gt;&lt;code&gt;(An)&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;&lt;code&gt;010&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;Reg. number&lt;/td&gt;
-&lt;td&gt;0&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;Address Register Indirect with Postincrement&lt;/td&gt;
-&lt;td&gt;&lt;code&gt;(An)+&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;&lt;code&gt;011&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;Reg. number&lt;/td&gt;
-&lt;td&gt;0&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;Address Register Indirect with Predecrement&lt;/td&gt;
-&lt;td&gt;&lt;code&gt;-(An)&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;&lt;code&gt;100&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;Reg. number&lt;/td&gt;
-&lt;td&gt;0&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;Address Register Indirect with Displacement&lt;/td&gt;
-&lt;td&gt;&lt;code&gt;(d16,An)&lt;/code&gt; or &lt;code&gt;d16(An)&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;&lt;code&gt;101&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;Reg. number&lt;/td&gt;
-&lt;td&gt;1&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;Address Register Indirect with Index&lt;/td&gt;
-&lt;td&gt;&lt;code&gt;(d8,Dn,An)&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;&lt;code&gt;110&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;Reg. number&lt;/td&gt;
-&lt;td&gt;1&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;Absolute Short Data&lt;/td&gt;
-&lt;td&gt;&lt;code&gt;&amp;lt;address&amp;gt;.w&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;&lt;code&gt;111&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;&lt;code&gt;000&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;1&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;Absolute Long Data&lt;/td&gt;
-&lt;td&gt;&lt;code&gt;&amp;lt;address&amp;gt;.l&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;&lt;code&gt;111&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;&lt;code&gt;001&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;2&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;Program Counter Relative with Displacement&lt;/td&gt;
-&lt;td&gt;&lt;code&gt;(d16,PC)&lt;/code&gt; / &lt;code&gt;d16(PC)&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;&lt;code&gt;111&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;&lt;code&gt;010&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;1&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;Program Counter Relative with Index&lt;/td&gt;
-&lt;td&gt;&lt;code&gt;(d8,Dn,PC)&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;&lt;code&gt;111&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;&lt;code&gt;011&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;1&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;Immediate&lt;/td&gt;
-&lt;td&gt;&lt;code&gt;#&amp;lt;data&amp;gt;&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;&lt;code&gt;111&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;&lt;code&gt;100&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;1,2&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
-&lt;h1 id="examples"&gt;Examples&lt;a class="headerlink" href="#examples" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
-&lt;p&gt;Let's consider some example of actual MC68000 code that uses effective addressing modes.&lt;/p&gt;
-&lt;h2 id="example-1"&gt;Example 1&lt;a class="headerlink" href="#example-1" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;0280 0003 ffff          andi.l  #0x3ffff,d0&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;This instruction uses the the Data Register Direct mode to address register &lt;code&gt;d0&lt;/code&gt;. The instruction format of &lt;code&gt;andi&lt;/code&gt; is the following&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;| 15 | 14 | 13 | 12 | 11 | 10 | 09 | 08 | 07 | 06 | 05 | 04 | 03 | 02 | 01 | 00 |&lt;/span&gt;
-&lt;span class="err"&gt;| 0  | 0  | 0  | 0  | 0  | 0  | 1  | 0  | SIZE    | EFFECTIVE ADDRESS           |&lt;/span&gt;
-&lt;span class="err"&gt;|                                       |         | MODE         | REGISTER     |&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;which in the example shown above translates to&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;00000010  10    000  000 0000000000000011 1111111111111111&lt;/span&gt;
-&lt;span class="err"&gt;^         ^     ^    ^&lt;/span&gt;
-&lt;span class="err"&gt;andi      long  Dn   d0  &lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;So the microprocessor expects the instruction to be followed by two extension words (long), that will contain the immediate data that will be added to the register. The register is selected among the data ones because the EA Mode field is &lt;code&gt;000&lt;/code&gt;, and the EA Register field selects register number 0. The two following extension words are &lt;code&gt;0003&lt;/code&gt; and &lt;code&gt;ffff&lt;/code&gt;, so the number &lt;code&gt;0x3ffff&lt;/code&gt; is added to the register.&lt;/p&gt;
-&lt;h2 id="example-2"&gt;Example 2&lt;a class="headerlink" href="#example-2" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;2052                    movea.l (a2),a0&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;The &lt;code&gt;movea&lt;/code&gt; instruction moves data into an address register, but in this case uses the Address Register Indirect mode to specify the source. The instruction format is&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;| 15 | 14 | 13 | 12 | 11 | 10 | 09 | 08 | 07 | 06 | 05 | 04 | 03 | 02 | 01 | 00 |&lt;/span&gt;
-&lt;span class="err"&gt;| 0  | 0  | SIZE    | DEST. REG.   | 0  | 0  | 1  | SOURCE EFFECTIVE ADDRESS    |&lt;/span&gt;
-&lt;span class="err"&gt;|         |         |              |              | MODE         | REGISTER     |&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;so in this case the hexadecimal code &lt;code&gt;2052&lt;/code&gt; becomes&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;00  10    000  001  010   010&lt;/span&gt;
-&lt;span class="err"&gt;    ^     ^         ^     ^&lt;/span&gt;
-&lt;span class="err"&gt;    long  a0        (An)  a2&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;h2 id="example-3"&gt;Example 3&lt;a class="headerlink" href="#example-3" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;397c 0200 0100          move.w  #0x200,0x100(a4)&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;This &lt;code&gt;move&lt;/code&gt; instruction puts a word with the value &lt;code&gt;0x200&lt;/code&gt; into an address which is &lt;code&gt;0x100&lt;/code&gt; above the address pointed by &lt;code&gt;a4&lt;/code&gt;. It uses Immediate Data for the source and Address Register Indirect with Displacement for the destination. The format of the &lt;code&gt;move&lt;/code&gt; instruction is&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;| 15 | 14 | 13 | 12 | 11 | 10 | 09 | 08 | 07 | 06 | 05 | 04 | 03 | 02 | 01 | 00 |&lt;/span&gt;
-&lt;span class="err"&gt;| 0  | 0  | SIZE    | DEST. EFFECTIVE ADDRESS     | SOURCE EFFECTIVE ADDRESS    |&lt;/span&gt;
-&lt;span class="err"&gt;|         |         | REGISTER     | MODE         | MODE         | REGISTER     |&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;(please note that register and mode are swapped in the destination part)&lt;/p&gt;
-&lt;p&gt;In this case we have&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;00    11    100  101       111100&lt;/span&gt;
-&lt;span class="err"&gt;^     ^     ^    ^         ^    &lt;/span&gt;
-&lt;span class="err"&gt;move  word  a4   (d16,An)  Immediate Data&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;It is interesting to note that the word for the source is given with Immediate Data, and is indeed just after the instruction (&lt;code&gt;0x0200&lt;/code&gt;), followed by the 16-bit displacement for Address Register Indirect with Displacement (&lt;code&gt;0x0100&lt;/code&gt;).&lt;/p&gt;
-&lt;h1 id="lea-load-effective-address"&gt;LEA: Load Effective Address&lt;a class="headerlink" href="#lea-load-effective-address" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
-&lt;p&gt;Many newcomers to Assembly are confused by the need of the &lt;code&gt;lea&lt;/code&gt; instruction, so I want to briefly show why we need it, and dig into its low-level representation to clarify possible doubts.&lt;/p&gt;
-&lt;p&gt;As we saw in the previous sections there are three ways to manage data in the M68000 Assembly language: the first is to mention a &lt;em&gt;pure number&lt;/em&gt;, the second is to use a &lt;em&gt;register&lt;/em&gt;, and the third is to use a &lt;em&gt;memory address&lt;/em&gt;. Registers can be considered memory, but since they are not proper arrays I will consider them something different.&lt;/p&gt;
-&lt;p&gt;The Immediate Data addressing mode allows us to use pure data in an instruction. For example we may write &lt;code&gt;move.l  #0x20000,d0&lt;/code&gt;, which puts the number &lt;code&gt;0x20000&lt;/code&gt; into the first data register. So when we mention a pure number the microprocessor uses its binary representation directly.&lt;/p&gt;
-&lt;p&gt;When we mention a register, the microprocessor does the only thing it can do with it, that is it reads its value or writes into it. The instruction mentioned previously, &lt;code&gt;move.l  #0x20000,d0&lt;/code&gt;, puts the number into the register &lt;code&gt;d0&lt;/code&gt;. An instruction like &lt;code&gt;cmp.l d2,d3&lt;/code&gt;, instead, reads the value of both registers and performs the comparison.&lt;/p&gt;
-&lt;p&gt;Memory addresses are similar to registers, but they are identified by a number and not by a name (and are part of a contiguous array). Whenever an instruction mentions a memory address the microprocessor automatically tries to access that location, to read or to write. An instruction like &lt;code&gt;move.l 0x4,d3&lt;/code&gt; moves into &lt;code&gt;d3&lt;/code&gt; &lt;em&gt;the content&lt;/em&gt; of the address &lt;code&gt;0x4&lt;/code&gt;, and this happens just because &lt;code&gt;0x4&lt;/code&gt; is a memory address.&lt;/p&gt;
-&lt;p&gt;That said, the problem we face is that often we want to compute a memory address and deal with &lt;em&gt;its value&lt;/em&gt; and not with its content. For example, if we write &lt;code&gt;move.w 0xe(a1),d0&lt;/code&gt;, the microprocessor computes &lt;code&gt;a1 + 0xe&lt;/code&gt;, that is, the content of &lt;code&gt;a1&lt;/code&gt; plus the number &lt;code&gt;0xe&lt;/code&gt;, and then fetches the content of that address in memory, putting it into &lt;code&gt;d0&lt;/code&gt;. How can we compute &lt;code&gt;a1 + 0xe&lt;/code&gt; and put that &lt;em&gt;result&lt;/em&gt; into &lt;code&gt;d0&lt;/code&gt;?&lt;/p&gt;
-&lt;p&gt;This is where &lt;code&gt;lea&lt;/code&gt; comes into play. This instruction loads the effective address computed by the addressing mode that we are using into an address register. So &lt;code&gt;lea 0xe(a1),a2&lt;/code&gt; puts the sum between the content of &lt;code&gt;a1&lt;/code&gt; and &lt;code&gt;0xe&lt;/code&gt; into the register &lt;code&gt;a2&lt;/code&gt;. Familiarising with &lt;code&gt;lea&lt;/code&gt; is very important, as it is one of the most important instructions that the Motorola 68000 provides. A quick analysis of the Amiga Kickstart code shows that &lt;code&gt;lea&lt;/code&gt; is the 4th most used instruction, after &lt;code&gt;move&lt;/code&gt;, &lt;code&gt;jsr&lt;/code&gt;, and &lt;code&gt;bra&lt;/code&gt;.&lt;/p&gt;
-&lt;h1 id="program-counter-relative-syntax-and-representation"&gt;Program Counter Relative syntax and representation&lt;a class="headerlink" href="#program-counter-relative-syntax-and-representation" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
-&lt;p&gt;As we discussed previously, the two Program Counter Relative modes just mirror Address Register Indirect with Displacement and Address Register Indirect with Index, binding them to the Program Counter instead of a generic register. It is worth however digging exactly into what the microprocessor is doing when decoding this addressing mode, and what the standard Assembly representation means.&lt;/p&gt;
-&lt;p&gt;To describe the mechanism behind this modes let's consider an example of actual M68000 code&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="mi"&gt;00000364&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;41&lt;/span&gt;&lt;span class="n"&gt;fa&lt;/span&gt; &lt;span class="n"&gt;ffa6&lt;/span&gt;         &lt;span class="n"&gt;lea&lt;/span&gt;     &lt;span class="mh"&gt;0x30c&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;pc&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt;&lt;span class="n"&gt;a0&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;This &lt;code&gt;lea&lt;/code&gt; instruction stores the address &lt;code&gt;0x30c&lt;/code&gt; into &lt;code&gt;a0&lt;/code&gt;, but it's pretty evident that this address mode doesn't work like the traditional Address Register Indirect with Displacement. The instruction is at address &lt;code&gt;0x364&lt;/code&gt; and if we read the displacement as usual we would expect the effective address to be at &lt;code&gt;0x364 + 0x30c&lt;/code&gt;. It is important to understand that this is what the Assembler (or the disassembler) shows, and that the proper meaning of &lt;code&gt;0x30c(pc)&lt;/code&gt; is "the address &lt;code&gt;0x30c&lt;/code&gt; knowing that this instruction is at &lt;code&gt;0x364&lt;/code&gt;". I believe this clearly shows why relocatable code makes use of this addressing mode. The address that we identify with &lt;code&gt;0x364&lt;/code&gt; might actually be anywhere in memory, as this number means only &lt;code&gt;0x364&lt;/code&gt; words after the first instruction (which is at &lt;code&gt;0x0&lt;/code&gt; in our relative space).&lt;/p&gt;
-&lt;p&gt;The binary representation of the instruction is actually revealing. The hexadecimal values of the two words &lt;code&gt;41fa ffa6&lt;/code&gt; become &lt;code&gt;01000001111110101111111110100110&lt;/code&gt; which can be split as follows&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;0100  000  111  111010    1111111110100110&lt;/span&gt;
-&lt;span class="err"&gt;^     ^         ^         ^&lt;/span&gt;
-&lt;span class="err"&gt;lea   a0        (d16,PC)  extension word&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;According to the documentation of the addressing mode, the extension word &lt;code&gt;1111111110100110&lt;/code&gt; is a signed 16-bit displacement, so it is a number expressed in two's complement notation. The conversion gives &lt;code&gt;-0x5a&lt;/code&gt;, which added to the instruction relative address &lt;code&gt;0x364&lt;/code&gt; surprisingly gives &lt;code&gt;0x30a&lt;/code&gt;.&lt;/p&gt;
-&lt;p&gt;The documentation of the addressing mode, however, states that&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;In this mode, the operand is in memory. The address of the operand is the sum of the address in the program counter (PC) and the sign-extended 16-bit displacement integer in the extension word. The value in the PC is the address of the extension word.&lt;/p&gt;
-&lt;p&gt;(2.2.11, page 13)&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;The thing that can be easily overlooked is that the PC points to the extension word and not to the instruction word. In this case, while the instruction word is at &lt;code&gt;0x364&lt;/code&gt;, the extension word is at &lt;code&gt;0x366&lt;/code&gt;, and &lt;code&gt;0x366 - 0x5a&lt;/code&gt; gives exactly &lt;code&gt;0x30c&lt;/code&gt;, which is what the Assembly syntax shows us. As you can see, the Assembler and the Disassembler have to perform some calculations to show the actual relative final value.&lt;/p&gt;
-&lt;h1 id="resources"&gt;Resources&lt;a class="headerlink" href="#resources" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
-&lt;ul&gt;
-&lt;li&gt;Motorola M68000 Family Programmer's Reference Manual &lt;a href="https://www.nxp.com/docs/en/reference-manual/M68000PRM.pdf"&gt;PDF here&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;M68000 Microprocessors User's Manual &lt;a href="https://www.nxp.com/docs/en/reference-manual/MC68000UM.pdf"&gt;PDF here&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;The 68000 Principles and Programming, Leo J. Scanion, 1981&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h1 id="updates"&gt;Updates&lt;a class="headerlink" href="#updates" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
-&lt;p&gt;2017-12-24: Reddit user &lt;a href="https://new.reddit.com/user/SpaceShrimp"&gt;SpaceShrimp&lt;/a&gt; pointed out the rage of a signed 16-bit number is &lt;code&gt;(-32768,32767)&lt;/code&gt; and not &lt;code&gt;(-32767,32768)&lt;/code&gt;. Thanks!&lt;/p&gt;
-&lt;h1 id="feedback"&gt;Feedback&lt;a class="headerlink" href="#feedback" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
-&lt;p&gt;Feel free to reach me on &lt;a href="https://twitter.com/thedigicat"&gt;Twitter&lt;/a&gt; if you have questions. The &lt;a href="https://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues"&gt;GitHub issues&lt;/a&gt; page is the best place to submit corrections.&lt;/p&gt;</content><category term="Retro"></category><category term="assembly"></category><category term="M68000"></category></entry></feed>
+&lt;p&gt;I hope you will find them useful, feel free to post comments under the videos if you have suggestions, if you need clarifications, or just to say that you enjoyed them. Thanks!&lt;/p&gt;</content><category term="Programming"></category><category term="Python"></category><category term="Python2"></category><category term="Python3"></category><category term="TDD"></category><category term="testing"></category><category term="video"></category></entry></feed>
