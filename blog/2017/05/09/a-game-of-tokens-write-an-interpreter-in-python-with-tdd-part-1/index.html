@@ -14,7 +14,7 @@
 <meta name="twitter:site" content="@thedigicat" />
 <meta name="twitter:title" content="A game of tokens: write an interpreter in Python with TDD - Part 1" />
 <meta name="twitter:description" content="How to write a programming language in Python, a TDD game" />
-<meta name="twitter:image" content="https://www.thedigitalcatonline.com/images/a-game-of-tokens.jpg" />
+<meta name="twitter:image" content="https://www.thedigitalcatonline.com/images/a-game-of-tokens-1.jpg" />
 		<script src="https://kit.fontawesome.com/15214b60ba.js" crossorigin="anonymous"></script>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,400italic,600italic|Roboto+Slab:400,700">
 
@@ -58,8 +58,8 @@
 	  "@id": "https://www.thedigitalcatonline.com/blog/2017/05/09/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-1/"
       },
       "datePublished" : "09/05/2017",
-      "dateModified" : "09/05/2017",
-      "image" : "https://www.thedigitalcatonline.com/images/a-game-of-tokens.jpg",
+      "dateModified" : "05/08/2020",
+      "image" : "https://www.thedigitalcatonline.com/images/a-game-of-tokens-1.jpg",
       "description" : "How to write a programming language in Python, a TDD game",
       "headline" : "How to write a programming language in Python, a TDD game",
       "url" : "https://www.thedigitalcatonline.com/blog/2017/05/09/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-1/"
@@ -82,7 +82,7 @@
     
     A game of tokens #1
 
-    <a href="/blog/2017/07/12/a-game-of-tokens-solution-part-1/"><i class="fas fa-caret-square-right"></i></a>
+    <a href="/blog/2017/10/01/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-2/"><i class="fas fa-caret-square-right"></i></a>
 
   </div>
 </header>
@@ -101,6 +101,7 @@
 
     <span class="fas fa-calendar-alt"></span> <time datetime="2017-05-09T23:00:00+01:00"> 09/05/2017</time>
 
+    <span class="fas fa-edit"></span> <time datetime="2020-08-05T11:00:00+00:00"> 05/08/2020</time>
 
     <span class="fas fa-tags"></span>
     <a class="tag" href="/categories/python/">Python</a>    <a class="tag" href="/categories/python3/">Python3</a>    <a class="tag" href="/categories/tdd/">TDD</a>    <a class="tag" href="/categories/testing/">testing</a>    <a class="tag" href="/categories/compilers/">compilers</a>    <br>
@@ -112,20 +113,20 @@
   </section>
 
   <section id="content">
-    <h1 id="introduction">Introduction<a class="headerlink" href="#introduction" title="Permanent link">&para;</a></h1>
-<p>Writing an interpreter or a compiler is usually considered one of the greatest goals that a programmer can achieve, and with good reason. I do not believe the importance of going through this experience is primarily due to its difficulty. After all, writing an efficient compiler is difficult, but the same is true for a good web framework, or a feature-rich editor.</p>
+    <h2 id="introduction">Introduction<a class="headerlink" href="#introduction" title="Permanent link">&para;</a></h2>
+<p>Writing an interpreter or a compiler is usually considered one of the greatest goals that a programmer can achieve, and with good reason. I do not believe the importance of going through this experience is primarily due to its difficulty, though. After all, writing an efficient compiler is difficult, but the same is true for a good web framework, or a feature-rich editor.</p>
 <p>Being able to write an interpreter is a significant skill mainly because of its recursive (or self-referring) nature. Think about it: you use a language to write a new language. And this new language, if it becomes sufficiently rich, can eventually be used to create its own compiler.</p>
 <p><strong>A language can be used to write the program that executes that same language.</strong></p>
 <p>Didn't this last sentence fire you with enthusiasm? It makes me eager to start!</p>
 <p>Compilers have been the subject of academic research since the 50s, with the works of <a href="https://en.wikipedia.org/wiki/Grace_Hopper">Hopper</a> and <a href="https://en.wikipedia.org/wiki/Alick_Glennie">Glennie</a>, so trying to provide an overview in a few lines is basically impossible. I highly recommend you to check the online resources listed at the bottom of the post if you are seriously interested in the matter.</p>
 <p>In this series of posts I want to try an experiment. I want to guide you through the creation of a simple interpreter in Python using a pure TDD (Test-Driven Development) approach. The posts will be structured like a game, where every level is represented by a new test that I will add to the suite. If you are not confident with TDD, you will find more on it in the specific section.</p>
-<p>Following this series you will learn about Python, compilers, interpreters, parsers, lexers, test-driven development, refactoring, coverage, regular expressions, classes, context managers. </p>
+<p>Following this series you will learn about Python, compilers, interpreters, parsers, lexers, test-driven development, refactoring, coverage, regular expressions, classes, context managers. Wow, that's a lot!</p>
 <p>Are you ready to start?</p>
-<h1 id="on-the-tdd-game">On the TDD game<a class="headerlink" href="#on-the-tdd-game" title="Permanent link">&para;</a></h1>
-<p>This series of posts will introduce you to TDD with a sort of game. I'll give you the test, and you are supposed to write something that passes that test, finishing the level. This is the reason why I will not provide my solution in the same post as the tests, but in the following one. Let's say that this should help you resisting the temptation.</p>
+<h2 id="on-the-tdd-game">On the TDD game<a class="headerlink" href="#on-the-tdd-game" title="Permanent link">&para;</a></h2>
+<p>This series of posts will introduce you to TDD with a sort of game. I'll give you the test, and you are supposed to write something that passes that test, finishing the level. <strong>Update</strong>: I decided to move solutions into the same post where the challenge is given, you will find them in specific sections named "Solution" after each level.</p>
 <p>My best advice for the TDD game is: remember that the easiest solution for a test that requires the output <code>A</code> is to write a function that returns exactly <code>A</code>.</p>
 <p><strong>Beautiful is better than ugly, but ugly and tested is better than beautiful and untested.</strong></p>
-<h1 id="about-the-language">About the language<a class="headerlink" href="#about-the-language" title="Permanent link">&para;</a></h1>
+<h2 id="about-the-language">About the language<a class="headerlink" href="#about-the-language" title="Permanent link">&para;</a></h2>
 <p>At the time of writing the language we are going to implement is a simple calculator with support for <strong>integer</strong> and <strong>floats</strong>, <strong>binary operators</strong> (addition, subtraction, multiplication, division, and power), <strong>unary operators</strong> (negation), <strong>nested expressions</strong> (parentheses) and <strong>variables</strong>.</p>
 <p>The name <strong>smallcalc</strong> is a homage to one of the most innovative and influential languages ever conceived: <a href="https://en.wikipedia.org/wiki/Smalltalk">Smalltalk</a>.</p>
 <p>I do not know if the final version will be something richer, it depends on how much fun you will find in the series. So, if you are interested, just ask! You can drop a line of appreciation <a href="https://twitter.com/thedigicat">on Twitter</a>.</p>
@@ -140,14 +141,14 @@ line : assignment | expression
 
 
 <p>The syntax of the grammar is pretty self-explanatory if you have some programming background. If you want to know more about grammars like the one above start from the links in the resources section.</p>
-<h1 id="tdd-and-refactoring">TDD and refactoring<a class="headerlink" href="#tdd-and-refactoring" title="Permanent link">&para;</a></h1>
+<h2 id="tdd-and-refactoring">TDD and refactoring<a class="headerlink" href="#tdd-and-refactoring" title="Permanent link">&para;</a></h2>
 <p>If you already know what TDD is feel free to skip this section.</p>
 <p><strong>TDD</strong> means <strong>Test-Driven Development</strong>, and in short it is a programming methodology that requires you to write a test for a feature before implementing the feature itself. Much has been said on the benefits of TDD elsewhere. I personally think it is one of the most effective ways to work on a programming task, and something that every programmer should know. I wrote a post on TDD with Python that you can find <a href="https://www.thedigitalcatonline.com/blog/2015/05/13/python-oop-tdd-example-part1/">here</a>.</p>
 <p>A <strong>test</strong>, in TDD, is code that uses the code you are going to develop. You will start with a project skeleton and add the tests I will present in the posts one at a time. Once you add the test, you have to write the code that passes the test. Your code doesn't need to be beautiful or smart, it just needs to pass the test. Then you can move to the following test and start the cycle again.</p>
 <p>After adding some tests you can start considering <strong>refactoring</strong>, which means changing the existing code in order to make it more beautiful, simpler or better organised. Every change has to be tested against the existing battery of tests. If the tests do not fail your change is correct, at least in terms of the behaviour that the tests are checking.</p>
 <p><strong>Coverage</strong> is the check of how much of your code is covered by your tests. We call some code "covered" by a test if executing the test makes that code run. So, for example, if you have a test (an <code>if</code> block) you should write two tests. One to cover the first option, and another to cover the second one. If you work with a strict TDD methodology your coverage is going to be always 100%, because you wrote just the code that makes the tests pass.</p>
 <p>You can find more on TDD on this blog <a href="/categories/tdd/">here</a>.</p>
-<h1 id="about-the-project">About the project<a class="headerlink" href="#about-the-project" title="Permanent link">&para;</a></h1>
+<h2 id="about-the-project">About the project<a class="headerlink" href="#about-the-project" title="Permanent link">&para;</a></h2>
 <p>The main components of our interpreter are the following:</p>
 <ul>
 <li><strong>Token</strong>: a token is the minimal element of the language syntax, like an integer (not a digit, but a group of them), a name (not a letter but a group of them), or a symbol (like the mathematical operations).</li>
@@ -157,8 +158,8 @@ line : assignment | expression
 <li><strong>Visitor</strong>: the output of the parser is processed by a component that will either write the equivalent in another language or execute it.</li>
 <li><strong>Command Line Interface (CLI)</strong>: the whole stack can be directly used by a REPL (Read, Evaluate, Print Loop), a command line interface similar to the one Python provides. There each line is lexed, parsed, and visited, and the result is printed immediately.</li>
 </ul>
-<p>I will provide two classes: <code>Token</code> and <code>TextBuffer</code>. These will avoid you spending too much time in creating the basic tools, and allow you to get straight into the game. Since those classes come obviously with their own test suites you are free to develop them on your own, however, starting from the same tests.</p>
-<h1 id="initial-setup">Initial setup<a class="headerlink" href="#initial-setup" title="Permanent link">&para;</a></h1>
+<p>I will provide two classes: <code>Token</code> and <code>TextBuffer</code>. These will avoid you spending too much time in creating the basic tools, and allow you to get straight into the game. Since those classes come obviously with their own test suit you are free to develop them on your own, however, starting from the same tests that I used.</p>
+<h2 id="initial-setup">Initial setup<a class="headerlink" href="#initial-setup" title="Permanent link">&para;</a></h2>
 <p>I prepared <a href="https://github.com/lgiordani/smallcalc">this repository</a>, which contains everything you need to start the project.</p>
 <div class="highlight"><pre><span></span><code>$ git clone https://github.com/lgiordani/smallcalc.git
 </code></pre></div>
@@ -167,7 +168,7 @@ line : assignment | expression
 <p>I created that repository using the amazing <a href="https://github.com/audreyr/cookiecutter">Cookiecutter</a> project by Audrey Roy Greenfeld. The specific template I used is one that I created as a fork of the official one. You can find the source <a href="https://github.com/lgiordani/cookiecutter-pypackage">on GitHub</a>.</p>
 <p>Once you cloned the repository you can set up an environment with</p>
 <div class="highlight"><pre><span></span><code><span class="nb">cd</span> smallcalc
-virtualenv venv3 -p python3
+python3 -m venv venv3
 <span class="nb">source</span> venv3/bin/activate
 pip install -r requirements/test.txt
 </code></pre></div>
@@ -183,7 +184,7 @@ pip install -r requirements/test.txt
 </code></pre></div>
 
 
-<h1 id="tokens">Tokens<a class="headerlink" href="#tokens" title="Permanent link">&para;</a></h1>
+<h2 id="tokens">Tokens<a class="headerlink" href="#tokens" title="Permanent link">&para;</a></h2>
 <p>The first class that I provide to start working on our interpreter is <code>Token</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">Token</span><span class="p">:</span>
 
@@ -222,10 +223,10 @@ pip install -r requirements/test.txt
 </code></pre></div>
 
 
-<p>This represents one syntax unit in which we divide the input text. The token can contain information about its original position, which can be useful in case of syntax errors to print meaningful messages for the user. The class implements the <code>__eq__</code> method to provide comparison between tokens.</p>
+<p>This represents one syntax unit in which we divide the input text. The token can contain information about its original position, which can be useful in case of syntax errors to print meaningful messages for the user. The class implements the method <code>__eq__</code> to provide comparison between tokens.</p>
 <p>The value of a token is always a string, and shall be converted into a different type by an external object according to the value that the token assumes. For example the string <code>'123'</code> can be interpreted as an integer, but could also be the name of a variable if our language supports such a feature.</p>
 <p>Remember that everything you find in this class has been introduced to make one or more tests pass, so check the test suite to understand how the object can be used.</p>
-<h1 id="buffer">Buffer<a class="headerlink" href="#buffer" title="Permanent link">&para;</a></h1>
+<h2 id="buffer">Buffer<a class="headerlink" href="#buffer" title="Permanent link">&para;</a></h2>
 <p>The second element that you will find in the initial setup is the class <code>TextBuffer</code>, that provides a very basic manager for an input text</p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">EOLError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
 
@@ -302,19 +303,19 @@ pip install -r requirements/test.txt
 </code></pre></div>
 
 
-<p>As for the <code>Token</code> class you can read the tests to understand how to use the class. Basically, however, the class can <code>load()</code> an input text and extract the <code>current_line()</code>, the <code>current_char()</code>, and the <code>next_char()</code>. You can also <code>skip()</code> a given number of characters, <code>goto()</code> a given position, extract the current <code>position()</code> and read the <code>tail()</code>, which is the remaining text from the current position on.</p>
-<p>This class has not been optimized or designed to manage big files or continuous streams of text. This is perfectly fine for our current project, but be aware that for a real compiler you should implement a better file/memory management.</p>
-<h1 id="cli">CLI<a class="headerlink" href="#cli" title="Permanent link">&para;</a></h1>
-<p>The third element we will need for the first part of the tutorial (that is, while we will deal with a simple calculator), is a simple Command Line Interface. For the moment is just echoes any text you will input, and gracefully exit when we press Ctrl+D. There are and there will be no tests for the CLI. Testing endpoints like this is complex and not always worth the effort, as in this case.</p>
+<p>As happened for the <code>Token</code> class, you can read the tests to understand how to use the class. Basically, however, the class can <code>load</code> an input text and extract the <code>current_line</code>, the <code>current_char</code>, and the <code>next_char</code>. You can also <code>skip</code> a given number of characters, <code>goto</code> a given position, extract the current <code>position</code> and read the <code>tail</code>, which is the remaining text from the current position on.</p>
+<p>This class has not been optimized or designed to manage big files or continuous streams of text. This is perfectly fine for our current project, but be aware that for a real compiler you should implement something more powerful.</p>
+<h2 id="cli">CLI<a class="headerlink" href="#cli" title="Permanent link">&para;</a></h2>
+<p>The third element we will need for the first part of the tutorial (that is, while we will deal with a simple calculator), is a Command Line Interface. For the moment, it just echoes any text you will input, and gracefully exit when we press Ctrl+D. There are and there will be no tests for the CLI. Testing endpoints like this is complex and not always worth the effort, as in this case.</p>
 <p>The command line can be run from the project main directory with</p>
 <div class="highlight"><pre><span></span><code>python cli.py
 </code></pre></div>
 
 
-<h1 id="level-1-end-of-file">Level 1 - End of file<a class="headerlink" href="#level-1-end-of-file" title="Permanent link">&para;</a></h1>
-<p><em>"End? No, the journey doesn't end here."</em></p>
-<p>The first thing a Lexer shall be able to do is to load and process an empty text. This should return an <code>EOF</code> token (which stands for "End of File"). <code>EOF</code> is used to signal that the input buffer has ended and that there is no more text to process.</p>
-<p>The <code>get_tokens()</code> method returns all the tokens of the input stream in a single list.</p>
+<h2 id="level-1-end-of-file">Level 1 - End of file<a class="headerlink" href="#level-1-end-of-file" title="Permanent link">&para;</a></h2>
+<p><em>"End? No, the journey doesn't end here."</em> - The Lord of the Rings: The Return of the King (2003)</p>
+<p>The first thing a Lexer shall be able to do is to load and process an empty text. This should return an <code>EOF</code> token (<code>End Of File</code>). <code>EOF</code> is used to signal that the input buffer has ended and that there is no more text to process.</p>
+<p>The method <code>get_tokens</code> returns all the tokens of the input stream in a single list.</p>
 <p>Edit the <code>tests/test_calc_lexer.py</code> to contain the following code</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">smallcalc</span> <span class="kn">import</span> <span class="n">tok</span> <span class="k">as</span> <span class="n">token</span>
 <span class="kn">from</span> <span class="nn">smallcalc</span> <span class="kn">import</span> <span class="n">calc_lexer</span> <span class="k">as</span> <span class="n">clex</span>
@@ -345,17 +346,46 @@ tests/test_calc_lexer.py:6: <span class="nv">AttributeError</span>
 </code></pre></div>
 
 
-<p>Implement now a class <code>CalcLexer</code> in the file <code>smallcalc/calc_lexer.py</code> that makes the test pass. Remember that you just need the code to pass this test. So do not implement complex systems now and go for the simplest solution (hint: the test expects that specific output...).</p>
+<p>Implement now a class <code>CalcLexer</code> in the file <code>smallcalc/calc_lexer.py</code> that makes the test pass. Remember that you just need the code to pass this test. So do not implement complex systems now and go for the simplest solution (hint: the test expects that specific output).</p>
 <p>The <code>EOF</code> constant can be a simple string with the <code>'EOF</code> value.</p>
 <p>It is worth executing the test suite with coverage (check the command line above), which will tell you if you overengineered your code. You should aim for 100% coverage, always.</p>
-<h1 id="level-2-single-digit-integers">Level 2 - Single digit integers<a class="headerlink" href="#level-2-single-digit-integers" title="Permanent link">&para;</a></h1>
-<p><em>"You're missing just a couple of digits there."</em></p>
+<hr>
+<h3 id="solution">Solution<a class="headerlink" href="#solution" title="Permanent link">&para;</a></h3>
+<p>The base class to pass the test leverages the provided <code>text_buffer.TextBuffer</code> class, that exposes a method <code>load</code>, directly composed here to <code>CalcLexer.load</code>. As the test is not providing a text the easiest solution is just to return the tested token. I extracted <code>get_token</code> from <code>get_tokens</code> to have a method that is specifically focused on dealing with the current token. The file <code>smallcalc/calc_lexer.py</code> is then</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">smallcalc</span> <span class="kn">import</span> <span class="n">text_buffer</span>
+<span class="kn">from</span> <span class="nn">smallcalc</span> <span class="kn">import</span> <span class="n">tok</span> <span class="k">as</span> <span class="n">token</span>
+
+<span class="n">EOF</span> <span class="o">=</span> <span class="s1">&#39;EOF&#39;</span>
+
+
+<span class="k">class</span> <span class="nc">CalcLexer</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_text_storage</span> <span class="o">=</span> <span class="n">text_buffer</span><span class="o">.</span><span class="n">TextBuffer</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_text_storage</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_token</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_token</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">Token</span><span class="p">(</span><span class="n">EOF</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_token</span>
+
+    <span class="k">def</span> <span class="nf">get_tokens</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">get_token</span><span class="p">()]</span>
+</code></pre></div>
+
+
+<hr>
+<p>You can see here in practice what I mentioned in the introduction about TDD. The method <code>get_token</code> returns a hardcoded <code>token.Token(EOF)</code>, because <em>that is enough to pass the test</em>. It is not enough to be a good Lexer, but if we write and pass the right tests, this will happen in time. Be smart, be strict: write the minimal code needed to pass the test.</p>
+<h2 id="level-2-single-digit-integers">Level 2 - Single digit integers<a class="headerlink" href="#level-2-single-digit-integers" title="Permanent link">&para;</a></h2>
+<p><em>"You're missing just a couple of digits there."</em> - Iron Man (2008)</p>
+<p>The requirement for this section is</p>
 <div class="highlight"><pre><span></span><code># The only accepted value for the input is one single digit between 0 and 9
 integer: [0-9]
 </code></pre></div>
 
 
-<h2 id="lexer">Lexer<a class="headerlink" href="#lexer" title="Permanent link">&para;</a></h2>
+<h3 id="lexer">Lexer<a class="headerlink" href="#lexer" title="Permanent link">&para;</a></h3>
 <p>Since a calculator has to deal with numbers let us implement support for integers (we will add floating point numbers later). The first thing that we need is to recognise single-digit integers. This is the test that you have to add to <code>tests\test_calc_lexer.py</code></p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_get_token_understands_integers</span><span class="p">():</span>
     <span class="n">l</span> <span class="o">=</span> <span class="n">clex</span><span class="o">.</span><span class="n">CalcLexer</span><span class="p">()</span>
@@ -366,7 +396,7 @@ integer: [0-9]
 </code></pre></div>
 
 
-<p>Note that here we are testing <code>get_token()</code> and not <code>get_tokens()</code>. This method will come handy later, so it is worth introducing it here. As soon as this method works you can test the behavious of <code>get_tokens()</code></p>
+<p>Note that here we are testing <code>get_token</code> and not <code>get_tokens</code>. This method will come handy later, so it is worth testing it here. As soon as that works you can test the behaviour of <code>get_tokens</code></p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_get_tokens_understands_integers</span><span class="p">():</span>
     <span class="n">l</span> <span class="o">=</span> <span class="n">clex</span><span class="o">.</span><span class="n">CalcLexer</span><span class="p">()</span>
 
@@ -380,10 +410,10 @@ integer: [0-9]
 </code></pre></div>
 
 
-<p>Please note that now the lexer shall output both an <code>EOF</code> and an <code>EOL</code> token, as the current line of code ends. The biggest issue you have to face here is that when you recognise a token you have to skip it in the original text.</p>
-<p>After this test you may end up with some code duplication, as <code>get_token()</code> and <code>get_tokens()</code> perform similar tasks. If you didn't already use the first one in the second it could be worth doing some refactoring. Remember: as long as the tests pass your changes are correct!</p>
+<p>Please note that now the lexer shall output both an <code>EOF</code> and an <code>EOL</code> token, as the current line of code ends. The biggest issue you have to face here is that when you recognise a token then you have to skip it in the source text.</p>
+<p>After this test you may end up with some code duplication, as <code>get_token</code> and <code>get_tokens</code> perform similar tasks. If you haven't already, please use the first one in the second. It could also be worth doing some refactoring. Remember: you can confidently change your code, because as long as the tests pass your changes are correct! This is the true power of TDD.</p>
 <p>If you refactor the code creating helper methods you should make them "private" by prefixing their name with an underscore. This also means that you do not need to test them, in principle (watch <a href="https://www.youtube.com/watch?v=URSWYvyc42M">this talk</a> by Sandy Metz on this subject).</p>
-<h2 id="parser">Parser<a class="headerlink" href="#parser" title="Permanent link">&para;</a></h2>
+<h3 id="parser">Parser<a class="headerlink" href="#parser" title="Permanent link">&para;</a></h3>
 <p>Now that we have a working lexer that recognises integers let us work on the parser. This has to use the lexer to process a text and produce a tree of nodes that represent the syntactic structure of the processed code. Don't worry if it seems extremely complex, it is actually pretty simple if you follow the tests.</p>
 <p>Edit the <code>tests/test_calc_parser.py</code> file and insert this code</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">smallcalc</span> <span class="kn">import</span> <span class="n">calc_parser</span> <span class="k">as</span> <span class="n">cpar</span>
@@ -402,12 +432,12 @@ integer: [0-9]
 </code></pre></div>
 
 
-<p>The <code>node</code> variable is an instance of a specific class that contains integers, <code>IntegerNode</code> (but you are free to name it as you want, as this is not tested). Please note that this class doesn't consider the value as a string any more, but as a proper (Python) integer. Now edit the file <code>smallcalc/calc_parser.py</code> and write some code that passes the test.</p>
+<p>The <code>node</code> variable is an instance of a specific class that contains integers, <code>IntegerNode</code> (but you are free to name it as you want, as this is not tested). Please note that this class doesn't consider the value as a string any more, but as a proper (Python) integer (<code>'value': 5</code>). Now edit the file <code>smallcalc/calc_parser.py</code> and write some code that passes the test.</p>
 <p>Does it work? Well, you just wrote your first parser! Congratulations! From here to something that understands C++ or Python the journey is pretty long, but the initial steps are promising.</p>
-<h2 id="visitor">Visitor<a class="headerlink" href="#visitor" title="Permanent link">&para;</a></h2>
+<h3 id="visitor">Visitor<a class="headerlink" href="#visitor" title="Permanent link">&para;</a></h3>
 <p>Let us consider the visitor, now. This is the run-time component of our language, the part that actually runs through the tree of nodes and executes it. This part, thus, is where most of the actual behaviour of the language happens. For instance, the fact that the symbol "+" actually sums integers is because the visitor implements that operation.</p>
 <p>This can seem a trivial consideration, but if you think about the division between integers you immediately understand that the visitor has a great responsibility. Does the symbol <code>/</code> divide integers with or without floating point math? Python 3, for instance, opted for a floating point division, and introduced the <code>//</code> operator for the integer version of the operation, but other languages behave differently.</p>
-<p>I'll discuss further about this later when we will implement mathematical operations. For the moment being, let us create the <code>tests/test_calc_visitor.py</code> file and introduce the following test</p>
+<p>I'll discuss this in more detail later, when we will implement mathematical operations. For the time being, let us create the <code>tests/test_calc_visitor.py</code> file and introduce the following test</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">smallcalc</span> <span class="kn">import</span> <span class="n">calc_visitor</span> <span class="k">as</span> <span class="n">cvis</span>
 
 
@@ -422,7 +452,7 @@ integer: [0-9]
 </code></pre></div>
 
 
-<p>As you can see, at this stage the visitor has a trivial job, which is to just return the value and the type of the number that it finds in the tree. Note that the visitor provides a <code>visit()</code> method which is type agnostic (i.e. it doesn't care about the type of the node). This is correct, as the visitor has to traverse the whole tree recursively and to react to the different nodes without a previous knowledge of what it should expect. This however doesn't prevent us to split it internally into different small private methods.</p>
+<p>As you can see, at this stage the visitor has a trivial job, which is to just return the value and the type of the number that it finds in the tree. Note that the visitor provides a method <code>visit</code> which is type agnostic (i.e. it doesn't care about the type of the node). This is correct, as the visitor has to traverse the whole tree recursively and to react to the different nodes without a previous knowledge of what it should expect.</p>
 <p>As simple as the visitor can be, now we can make our CLI interface use the parser and the visitor to understand and execute one simple command, which is to parse a single-digit integer and print it with its type. Change the <code>cli.py</code> file to </p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">smallcalc</span> <span class="kn">import</span> <span class="n">calc_parser</span> <span class="k">as</span> <span class="n">cpar</span>
 <span class="kn">from</span> <span class="nn">smallcalc</span> <span class="kn">import</span> <span class="n">calc_visitor</span> <span class="k">as</span> <span class="n">cvis</span>
@@ -463,17 +493,150 @@ smallcalc :&gt; <span class="m">3</span>
 
 
 <p>Let me recap what we just created. We wrote a lexer, which is a component that splits the input text in different tokens with a meaning, and we instructed it to react to single-digits integers. Then, we created a parser, which is the component that tries to make sense of several tokens put together, applying syntactical rules. Last, the visitor runs through the output of the parser and actually performs the actions that the grammar describes. All this to just print out an integer? Seems overkill! It is, actually, but there is a lot to come, and this separation of levels will come handy.</p>
-<h1 id="level-3-binary-operations-addition">Level 3 - Binary operations: addition<a class="headerlink" href="#level-3-binary-operations-addition" title="Permanent link">&para;</a></h1>
-<p><em>"You're about to become a permanent addition to this archaeological find."</em></p>
+<hr>
+<h3 id="solution_1">Solution<a class="headerlink" href="#solution_1" title="Permanent link">&para;</a></h3>
+<p>The two functions <code>get_token</code> and <code>get_tokens</code> have to evolve to deal with the new requirements, and to avoid having too much code in a single function I created some private helpers (where "private" has the Python meaning of "please don't use them").</p>
+<p>The idea behind <code>get_tokens</code> is to call <code>get_token</code> until the <code>EOF</code> token is returned, even though we want the latter to be present in the final result.</p>
+<div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">get_tokens</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_token</span><span class="p">()</span>
+        <span class="n">tokens</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">while</span> <span class="n">t</span> <span class="o">!=</span> <span class="n">token</span><span class="o">.</span><span class="n">Token</span><span class="p">(</span><span class="s1">&#39;EOF&#39;</span><span class="p">):</span>
+            <span class="n">tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_token</span><span class="p">()</span>
+
+        <span class="n">tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">token</span><span class="o">.</span><span class="n">Token</span><span class="p">(</span><span class="s1">&#39;EOF&#39;</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">tokens</span>
+</code></pre></div>
+
+
+<p>Then I decided to make <code>get_token</code> the central hub of my process with the following paradigm: the function tries to extract a specific token (<code>_process_integer</code>, in this case) and to return it; if the token cannot be extracted, the function tries the following one. At the moment I don't have any other type of token, but I will have them soon.</p>
+<div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">get_token</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">eof</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_eof</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">eof</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">eof</span>
+
+        <span class="n">eol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_eol</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">eol</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">eol</span>
+
+        <span class="n">integer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_integer</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">integer</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">integer</span>
+</code></pre></div>
+
+
+<p>The three helpers shall just try to extract and return the token they have been assigned or None. After some refactoring I came up with three functions (two of them as properties) that simplify common tasks. <code>_current_char</code> and <code>_current_line</code> are just wrappers around two attributes of <code>self._text_storage</code>, while <code>_set_current_token_and_skip</code> is a bit more complex and ensures that the <code>_current_token</code> is always up to date.</p>
+<div class="highlight"><pre><span></span><code>    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_current_char</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_text_storage</span><span class="o">.</span><span class="n">current_char</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_current_line</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_text_storage</span><span class="o">.</span><span class="n">current_line</span>
+
+    <span class="k">def</span> <span class="nf">_set_current_token_and_skip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_text_storage</span><span class="o">.</span><span class="n">skip</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">token</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_token</span> <span class="o">=</span> <span class="n">token</span>
+        <span class="k">return</span> <span class="n">token</span>
+</code></pre></div>
+
+
+<p>Once this functions are in place I can write the actual helpers for the token extraction. The method <code>_process_eol</code> leverages <code>self._text_storage</code>, which raises an <code>EOLError</code> when the end of line has been reached. So all I need to do is to try to get the current char and return <code>None</code> if nothing happens. In case an <code>EOLError</code> exception is raised I run <code>_set_current_token_and_skip</code> with the end of line token.</p>
+<div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">_process_eol</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_current_char</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">except</span> <span class="n">text_buffer</span><span class="o">.</span><span class="n">EOLError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_text_storage</span><span class="o">.</span><span class="n">newline</span><span class="p">()</span>
+
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_current_token_and_skip</span><span class="p">(</span>
+                <span class="n">token</span><span class="o">.</span><span class="n">Token</span><span class="p">(</span><span class="n">EOL</span><span class="p">)</span>
+            <span class="p">)</span>
+</code></pre></div>
+
+
+<p>The helper to process the end of file (<code>_process_eof</code>) is exactly like <code>_process_eol</code>, using <code>self._current_line</code> and <code>text_buffer.EOFError</code>.</p>
+<div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">_process_eof</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_current_line</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">except</span> <span class="n">text_buffer</span><span class="o">.</span><span class="n">EOFError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_current_token_and_skip</span><span class="p">(</span>
+                <span class="n">token</span><span class="o">.</span><span class="n">Token</span><span class="p">(</span><span class="n">EOF</span><span class="p">)</span>
+            <span class="p">)</span>
+</code></pre></div>
+
+
+<p>At this point of the development the incoming token can only be <code>EOL</code>, <code>EOF</code>, or an integer, so the <code>_process_integer</code> function doesn't need to return <code>None</code>. Therefore, it is sufficient to create an integer token with the current char and return it.</p>
+<div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">_process_integer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_current_token_and_skip</span><span class="p">(</span>
+            <span class="n">token</span><span class="o">.</span><span class="n">Token</span><span class="p">(</span><span class="n">INTEGER</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_char</span><span class="p">)</span>
+        <span class="p">)</span>
+</code></pre></div>
+
+
+<p>The above methods use two new global variables <code>EOL</code> and <code>INTEGER</code> that are defined at the beginning of the file along with <code>EOF</code></p>
+<div class="highlight"><pre><span></span><code><span class="n">EOL</span> <span class="o">=</span> <span class="s1">&#39;EOL&#39;</span>
+<span class="n">INTEGER</span> <span class="o">=</span> <span class="s1">&#39;INTEGER&#39;</span>
+</code></pre></div>
+
+
+<p><code>CalcParser</code> is the only class that is tested, but forecasting (actually, knowing) that we are going to manage multiple types of nodes, I isolated the code for the <code>IntegerNode</code> in its own class. There is no need to abstract things further for the time being, so <code>IntegerNode</code> doesn't inherit from any other class.</p>
+<p>From a pure TDD point of view this is wrong, because I should have written some tests for the <code>IntegerNode</code> class before writing it. The purpose of this exercise, however is to guide you through the creation of a simple compiler, so tests are already given, and I will turn a blind eye on my own exception to the rule (how convenient!).</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">smallcalc</span> <span class="kn">import</span> <span class="n">calc_lexer</span> <span class="k">as</span> <span class="n">clex</span>
+
+
+<span class="k">class</span> <span class="nc">IntegerNode</span><span class="p">:</span>
+    <span class="n">node_type</span> <span class="o">=</span> <span class="s1">&#39;integer&#39;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">asdict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">node_type</span><span class="p">,</span>
+            <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span>
+        <span class="p">}</span>
+
+
+<span class="k">class</span> <span class="nc">CalcParser</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lexer</span> <span class="o">=</span> <span class="n">clex</span><span class="o">.</span><span class="n">CalcLexer</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">parse_integer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lexer</span><span class="o">.</span><span class="n">get_token</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">IntegerNode</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+</code></pre></div>
+
+
+<p><code>CalcVisitor</code> is by far the simplest class at the moment, as the only node we are managing is the one with an <code>integer</code> type.</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">CalcVisitor</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="nf">visit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">node</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;integer&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">node</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">],</span> <span class="n">node</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span>
+</code></pre></div>
+
+
+<hr>
+<h2 id="level-3-binary-operations-addition">Level 3 - Binary operations: addition<a class="headerlink" href="#level-3-binary-operations-addition" title="Permanent link">&para;</a></h2>
+<p><em>"You're about to become a permanent addition to this archaeological find."</em> - Raiders of the Lost Ark (1981)</p>
+<p>Let's update the grammar of the language with <code>addsymbol</code> and <code>expression</code></p>
 <div class="highlight"><pre><span></span><code>integer: [0-9]
+
 # Label the symbol &#39;+&#39;&#39; with the name &#39;addsymbol&#39;
 addsymbol: &#39;+&#39;
+
 # An expression is an integer followed by an addsymbol followed by another integer
 expression: integer addsymbol integer
 </code></pre></div>
 
 
-<p>At the moment our parser doesn't sound like an important component, as its output is just a refurbished version of the lexer one. The visitor, in turn, doesn't really perform any action but to print in a different format what the parser produces.</p>
+<p>At the moment, our parser doesn't sound like an important component, as its output is just a refurbished version of the lexer one. The visitor, in turn, doesn't really perform any action but to print in a different format what the parser produces.</p>
 <p>Let us try to introduce a simple mathematical operation, then, that should spice up our components. The new test for the lexer component (<code>tests/test_calc_lexer.py</code>) is</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_get_tokens_understands_unspaced_sum_of_integers</span><span class="p">():</span>
     <span class="n">l</span> <span class="o">=</span> <span class="n">clex</span><span class="o">.</span><span class="n">CalcLexer</span><span class="p">()</span>
@@ -490,7 +653,7 @@ expression: integer addsymbol integer
 </code></pre></div>
 
 
-<p>Please note that there are no spaces, as our lexer doesn't know how to deal with them yet. As you can see the output is straightforward, so go and change the <code>CalcLexer</code> class to make all the tests pass. Check for coverage, to spot possible overengineered parts, and if necessary refactor the class to keep methods as simple as possible.</p>
+<p>Please note that there are no spaces, as our lexer doesn't know how to deal with them yet. As you can see the output is straightforward, so go and change the <code>CalcLexer</code> class to make this tests pass without breaking any of the ones you already wrote. Check for coverage, to spot possible overengineered parts, and if necessary refactor the class to keep methods as simple as possible.</p>
 <p>The parser now has a more complex job than before, though not yet really challenging. The test for the parser is</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_parse_expression</span><span class="p">():</span>
     <span class="n">p</span> <span class="o">=</span> <span class="n">cpar</span><span class="o">.</span><span class="n">CalcParser</span><span class="p">()</span>
@@ -542,7 +705,7 @@ expression: integer addsymbol integer
 </code></pre></div>
 
 
-<p>As soon as you changed the <code>visit()</code> method to deal with <code>'expression'</code> nodes, you can test the new syntax in the CLI. Since we changed the <code>visit()</code> method internally, that part of the CLI doesn't require any modification. We have, however, to change the parser entry point from <code>p.parse_integer()</code> to <code>p.parse_expression()</code>, so the new <code>cli.py</code> file will be</p>
+<p>As soon as you changed the method <code>visit</code> to deal with <code>'expression'</code> nodes, you can test the new syntax in the CLI. Since we changed <code>visit</code> internally, that part of the CLI doesn't require any modification. We have, however, to change the parser entry point from <code>parse_integer</code> to <code>parse_expression</code>, so the new <code>cli.py</code> file will be</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">smallcalc</span> <span class="kn">import</span> <span class="n">calc_parser</span> <span class="k">as</span> <span class="n">cpar</span>
 <span class="kn">from</span> <span class="nn">smallcalc</span> <span class="kn">import</span> <span class="n">calc_visitor</span> <span class="k">as</span> <span class="n">cvis</span>
 
@@ -581,10 +744,158 @@ smallcalc :&gt; <span class="m">2</span>+4
 </code></pre></div>
 
 
-<p>Everything? Well, not exactly. If I type just a single integer in the CLI the whole program crashes with and exception. (If your solution doesn't blow up it means that you (probably) overengineered it a little. This is fine, but if you had implemented just what was needed to pass the tests the result would have been an error.)</p>
-<p>Why do we have an error? Because we now parse the input with <code>parse_expression()</code> and this method expects its input to be a full-formed expression, not a single integer. Generally speaking, our parser's entry point should be able to parse different syntax structures. We will improve this behaviour later, when we will address the problem of nested expressions.</p>
-<h1 id="level-4-multi-digit-integers">Level 4 - Multi-digit integers<a class="headerlink" href="#level-4-multi-digit-integers" title="Permanent link">&para;</a></h1>
-<p><em>"So many."</em></p>
+<p>Everything? Well, not exactly. If I type just a single integer in the CLI the whole program crashes with an exception. If your solution doesn't blow up with a single integer, it means that you (probably) overengineered it a little. This is fine, but if you had implemented just what was needed to pass the tests the result would have been an error in that case.</p>
+<p>Why do we have an error? Because we now parse the input with <code>parse_expression</code> and this method expects its input to be a full-formed expression, not a single integer. Generally speaking, our parser's entry point should be able to parse different syntax structures. We will improve this behaviour later, when we will address the problem of nested expressions.</p>
+<hr>
+<h3 id="solution_2">Solution<a class="headerlink" href="#solution_2" title="Permanent link">&para;</a></h3>
+<p>The helper <code>_process_literal</code> does what <code>_process_integer</code> did before, which is to blindly return a token, this time with the <code>LITERAL</code> type.</p>
+<div class="highlight"><pre><span></span><code><span class="n">LITERAL</span> <span class="o">=</span> <span class="s1">&#39;LITERAL&#39;</span>
+</code></pre></div>
+
+
+<div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">_process_literal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_current_token_and_skip</span><span class="p">(</span>
+            <span class="n">token</span><span class="o">.</span><span class="n">Token</span><span class="p">(</span><span class="n">LITERAL</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_char</span><span class="p">)</span>
+        <span class="p">)</span>
+</code></pre></div>
+
+
+<p>The helper <code>_process_integer</code>, on the other hand, changes to return <code>None</code> when no integer can be parsed, which is easily checked with <code>isdigit</code>.</p>
+<div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">_process_integer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_char</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_current_token_and_skip</span><span class="p">(</span>
+            <span class="n">token</span><span class="o">.</span><span class="n">Token</span><span class="p">(</span><span class="n">INTEGER</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_char</span><span class="p">)</span>
+        <span class="p">)</span>
+</code></pre></div>
+
+
+<p>Last, the method <code>get_token</code> receives <code>_process_literal</code> as an additional case.</p>
+<div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">get_token</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">eof</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_eof</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">eof</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">eof</span>
+
+        <span class="n">eol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_eol</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">eol</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">eol</span>
+
+        <span class="n">integer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_integer</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">integer</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">integer</span>
+
+        <span class="n">literal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_literal</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">literal</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">literal</span>
+</code></pre></div>
+
+
+<p>The parser needs a node that represents the literal, namely <code>LiteralNode</code>, and a node to represent a binary operation, called <code>BinaryNode</code>. To avoid duplicating methods I created the <code>ValueNode</code> class and made both <code>IntegerNode</code> and <code>LiteralNode</code> inherit from that.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">smallcalc</span> <span class="kn">import</span> <span class="n">calc_lexer</span> <span class="k">as</span> <span class="n">clex</span>
+
+
+<span class="k">class</span> <span class="nc">Node</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="nf">asdict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{}</span>  <span class="c1"># pragma: no cover</span>
+
+
+<span class="k">class</span> <span class="nc">ValueNode</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+
+    <span class="n">node_type</span> <span class="o">=</span> <span class="s1">&#39;value_node&#39;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="k">def</span> <span class="nf">asdict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">node_type</span><span class="p">,</span>
+            <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span>
+        <span class="p">}</span>
+
+
+<span class="k">class</span> <span class="nc">IntegerNode</span><span class="p">(</span><span class="n">ValueNode</span><span class="p">):</span>
+    <span class="n">node_type</span> <span class="o">=</span> <span class="s1">&#39;integer&#39;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">LiteralNode</span><span class="p">(</span><span class="n">ValueNode</span><span class="p">):</span>
+
+    <span class="n">node_type</span> <span class="o">=</span> <span class="s1">&#39;literal&#39;</span>
+
+
+<span class="k">class</span> <span class="nc">BinaryNode</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+
+    <span class="n">node_type</span> <span class="o">=</span> <span class="s1">&#39;binary&#39;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">operator</span><span class="p">,</span> <span class="n">right</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">left</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">operator</span> <span class="o">=</span> <span class="n">operator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">right</span>
+
+    <span class="k">def</span> <span class="nf">asdict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">node_type</span><span class="p">,</span>
+            <span class="s1">&#39;left&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">asdict</span><span class="p">()</span>
+        <span class="p">}</span>
+
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;right&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="p">:</span>
+            <span class="n">result</span><span class="p">[</span><span class="s1">&#39;right&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">asdict</span><span class="p">()</span>
+
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;operator&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">operator</span><span class="p">:</span>
+            <span class="n">result</span><span class="p">[</span><span class="s1">&#39;operator&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">operator</span><span class="o">.</span><span class="n">asdict</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">result</span>
+</code></pre></div>
+
+
+<p>The most important change, however, is in <code>CalcParser</code>, where I added the methods <code>parse_addsymbol</code> and <code>parse_expression</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">CalcParser</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lexer</span> <span class="o">=</span> <span class="n">clex</span><span class="o">.</span><span class="n">CalcLexer</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">parse_addsymbol</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lexer</span><span class="o">.</span><span class="n">get_token</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">LiteralNode</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">parse_integer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lexer</span><span class="o">.</span><span class="n">get_token</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">IntegerNode</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">parse_expression</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">left</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_integer</span><span class="p">()</span>
+        <span class="n">operator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_addsymbol</span><span class="p">()</span>
+        <span class="n">right</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_integer</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">BinaryNode</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">operator</span><span class="p">,</span> <span class="n">right</span><span class="p">)</span>
+</code></pre></div>
+
+
+<p>The visitor has to add the processing code for <code>binary</code> nodes, which assumes the operation is a sum, so it just needs to visit the left and right nodes.</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">CalcVisitor</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="nf">visit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">node</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;integer&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">node</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">],</span> <span class="n">node</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">node</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;binary&#39;</span><span class="p">:</span>
+            <span class="n">lvalue</span><span class="p">,</span> <span class="n">ltype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="s1">&#39;left&#39;</span><span class="p">])</span>
+            <span class="n">rvalue</span><span class="p">,</span> <span class="n">rtype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="s1">&#39;right&#39;</span><span class="p">])</span>
+
+            <span class="k">return</span> <span class="n">lvalue</span> <span class="o">+</span> <span class="n">rvalue</span><span class="p">,</span> <span class="n">rtype</span>
+</code></pre></div>
+
+
+<hr>
+<h2 id="level-4-multi-digit-integers">Level 4 - Multi-digit integers<a class="headerlink" href="#level-4-multi-digit-integers" title="Permanent link">&para;</a></h2>
+<p><em>"So many."</em> - Braveheart (1995)</p>
+<p>Let's move allowing integers to be made of multiple digits.</p>
 <div class="highlight"><pre><span></span><code># An integer is a sequence of digits, + here means `one or more`
 integer: [0-9]+
 addsymbol: &#39;+&#39;
@@ -607,17 +918,38 @@ expression: integer addsymbol integer
 
 
 <p>There are many ways to solve this problem, one of the simplest (and a perfectly valid one) is using regular expressions (which are, if you think about it, another language).</p>
-<p>If you do not know how to use regular expressions do yourself a favour and learn them! You can find a nice tutorial on them at <a href="https://regexone.com/">RegexOne</a>. If you already know the syntax and don't know how to use them in Python <a href="https://developers.google.com/edu/python/regular-expressions">this Google for Education page</a> and the <a href="https://docs.python.org/3/howto/regex.html">official documentation</a> are your friends.</p>
+<p>If you do not know how to use regular expressions do yourself a favour and learn them! You can find a nice tutorial on them at <a href="https://regexone.com/">RegexOne</a>. If you already know the syntax but don't know how to use them in Python <a href="https://developers.google.com/edu/python/regular-expressions">this Google for Education page</a> and the <a href="https://docs.python.org/3/howto/regex.html">official documentation</a> are your friends.</p>
 <p>After this test the CLI should be able to handle expressions like <code>123+456</code>. We don't need any change in the parser and in the visitor, can you tell why?</p>
-<h1 id="level-5-whitespaces">Level 5 - Whitespaces<a class="headerlink" href="#level-5-whitespaces" title="Permanent link">&para;</a></h1>
-<p><em>"Follow the white rabbit."</em></p>
-<div class="highlight"><pre><span></span><code><span class="c">integer: [0-9]+</span>
-<span class="c">addsymbol: &#39;+&#39;</span>
-<span class="c">expression: integer addsymbol integer</span>
+<hr>
+<h3 id="solution_3">Solution<a class="headerlink" href="#solution_3" title="Permanent link">&para;</a></h3>
+<p>To provide support for multi-digit integers we just need to change the method <code>_process_integer</code> of the lexer. The new version makes use of a very simple regular expressions.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">re</span>
 </code></pre></div>
 
 
-<p>The second limitation that our language has at the moment is that it cannot handle whitespaces. If you try to input an expression like <code>3 + 4</code> in the CLI the program will crash with an exception (why?). Traditionally, whitespaces are completely ignored by programming languages: in Python, as well as in C and many other languages, writing <code>3+4</code>, <code>3 + 4</code>, <code>3+ 4</code>, or <code>3   +   4</code> doesn't change the meaning at all.</p>
+<div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">_process_integer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">regexp</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s1">&#39;\d+&#39;</span><span class="p">)</span>
+
+        <span class="n">match</span> <span class="o">=</span> <span class="n">regexp</span><span class="o">.</span><span class="n">match</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_text_storage</span><span class="o">.</span><span class="n">tail</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">match</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="n">token_string</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_current_token_and_skip</span><span class="p">(</span>
+            <span class="n">token</span><span class="o">.</span><span class="n">Token</span><span class="p">(</span><span class="n">INTEGER</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">token_string</span><span class="p">))</span>
+        <span class="p">)</span>
+</code></pre></div>
+
+
+<p>The reason why we don't need to change the parser and the visitor is that nothing changed at that level. We altered the way the lexer identifies an integer token, but once that has been isolated the following steps are exactly the same as before.</p>
+<hr>
+<h2 id="level-5-whitespaces">Level 5 - Whitespaces<a class="headerlink" href="#level-5-whitespaces" title="Permanent link">&para;</a></h2>
+<p><em>"Follow the white rabbit."</em> - The Matrix (1999)</p>
+<p>The second limitation that our language has at the moment is that it cannot handle whitespaces. If you try to input an expression like <code>3 + 4</code> in the CLI the program will crash with an exception (why?). Traditionally, whitespaces are completely ignored by programming languages: in Python, as well as in C and many other languages, writing <code>3+4</code>, <code>3 + 4</code>, <code>3+ 4</code>, or <code>3   +   4</code> doesn't change the meaning at all. In Python, however, whitespaces matter at the beginning of the line, as indentation is used in lieu of parentheses.</p>
 <p>How can we put such a behaviour in our language? Again, the lexer is the component in charge, as it should just skip whitespaces. So add this test to <code>tests/test_calc_lexer.py</code></p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_get_tokens_ignores_spaces</span><span class="p">():</span>
     <span class="n">l</span> <span class="o">=</span> <span class="n">clex</span><span class="o">.</span><span class="n">CalcLexer</span><span class="p">()</span>
@@ -635,11 +967,55 @@ expression: integer addsymbol integer
 
 
 <p>While you change the <code>CalcLexer</code> class to make it pass this test, ask yourself if the current structure of the class satisfies you or if it is the right time to refactor it, possibly even heavily rewriting some parts of it. You have a good test suite, now, so you can be sure that what you implemented is correct, at least according to the current requirements.</p>
-<h1 id="level-6-subtraction">Level 6 - Subtraction<a class="headerlink" href="#level-6-subtraction" title="Permanent link">&para;</a></h1>
-<p><em>"I can add, subtract. I can make coffee. I can shuffle cards."</em></p>
+<p>Note that we are hitting a limitation of unit testing here, which is that we should test that the language skips <em>any</em> amount of whitespaces, but it is impossible to write a test for this. We can test 1, 2, 100 whitespaces, but never <em>any</em> amount. The pragmatic solution, here is that of testing that the language skips one whitespace and leave further tests to be written only if specific errors arise in the future. The code should however try to provide a generic solution.</p>
+<hr>
+<h3 id="solution_4">Solution<a class="headerlink" href="#solution_4" title="Permanent link">&para;</a></h3>
+<p>To process whitespaces I needed to add a helper called <code>_process_whitespace</code> with the same structure of the new <code>_process_integer</code>.</p>
+<div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">_process_whitespace</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">regexp</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s1">&#39;\ +&#39;</span><span class="p">)</span>
+
+        <span class="n">match</span> <span class="o">=</span> <span class="n">regexp</span><span class="o">.</span><span class="n">match</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_text_storage</span><span class="o">.</span><span class="n">tail</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">match</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_text_storage</span><span class="o">.</span><span class="n">skip</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">()))</span>
+</code></pre></div>
+
+
+<p>Note that the solution here is <code>'\ +'</code> which skips any amount of whitespaces, even though <code>'\ '</code> would have been enough to pass the test. As I said before, every time we have to test cases with "any" in them we have to be a bit less strict. TDD is not perfect, and remember that at the end of the day it's more important to have something that works and is not perfect than something that is perfect and doesn't work at all.</p>
+<p>As this time I am not interested in returning whitespace tokens, I just want to skip them. The helper is therefore added to <code>get_token</code> without a <code>return</code> statement.</p>
+<div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">get_token</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">eof</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_eof</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">eof</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">eof</span>
+
+        <span class="n">eol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_eol</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">eol</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">eol</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_process_whitespace</span><span class="p">()</span>
+
+        <span class="n">integer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_integer</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">integer</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">integer</span>
+
+        <span class="n">literal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_literal</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">literal</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">literal</span>
+</code></pre></div>
+
+
+<hr>
+<h2 id="level-6-subtraction">Level 6 - Subtraction<a class="headerlink" href="#level-6-subtraction" title="Permanent link">&para;</a></h2>
+<p><em>"I can add, subtract. I can make coffee. I can shuffle cards."</em> - The Bourne Identity (2002)</p>
 <div class="highlight"><pre><span></span><code>integer: [0-9]+
+
 # An addsymbol can be the symbol &#39;+&#39; or the symbol &#39;-&#39;
 addsymbol: &#39;+&#39; | &#39;-&#39;
+
 expression: integer addsymbol integer
 </code></pre></div>
 
@@ -662,7 +1038,7 @@ expression: integer addsymbol integer
 
 
 <p>Does the lexer require any change? Why?</p>
-<p>As you can see the decision to handle operators and symbols as <code>LITERAL</code> tokens allows us to introduce new symbols without the need to change the lexer. This obviously means that we will need to tell the symbols apart in a later stage, as nothing happens automatically. We could have decided to represent each symbol with a specific token, like <code>PLUS</code> and <code>MINUS</code>, but if you think about it it would not have really changed the code in later stages, as <code>PLUS</code> is just another symbol, exactly like <code>+</code> is.</p>
+<p>As you can see the decision to handle operators and symbols as <code>LITERAL</code> tokens allows us to introduce new symbols without the need to change the lexer. This obviously means that we will need to tell the symbols apart in a later stage, as nothing happens automatically. We could have decided to represent each symbol with a specific token, like <code>PLUS</code> and <code>MINUS</code>, but if you think about it, this would not have really changed the code in later stages, as <code>PLUS</code> is just another symbol, exactly like <code>+</code> is.</p>
 <p>Using specific tokens, however, can simplify things if we want to handle multi-character literals. If we have an operator like <code>-&gt;</code> (as in C) or <code>//</code> (like in Python), or something more complex, we could prefer to handle those in the lexer, emitting a single token with a specific name.</p>
 <p>We could introduce in the lexer a table of accepted values for literals, which would lead to an earlier and better error reporting. At the moment our language accepts every literal between two integers (try with <code>$</code>, for example), but fails to process them in the parser, interpreting any literal as <code>+</code>. Feel free to expand the project in such a direction if you want.</p>
 <p>The test for the parser is the following</p>
@@ -690,9 +1066,8 @@ expression: integer addsymbol integer
 </code></pre></div>
 
 
-<p>which is a small variation of the previous one, <code>test_parse_expression()</code>.</p>
-<p>The considerations made for the lexer are perfectly valid for the parser as well, so you should need no node change at this point.</p>
-<p>The last test we have to add is that of the visitor, which is again very similar to the previous one</p>
+<p>which is a small variation of the previously implemented <code>test_parse_expression</code>.</p>
+<p>The considerations made for the lexer are perfectly valid for the parser as well, so you should need no node change at this point. The last test we have to add is that of the visitor, which is again very similar to the previous one</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_visitor_expression_subtraction</span><span class="p">():</span>
     <span class="n">ast</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;binary&#39;</span><span class="p">,</span>
@@ -724,18 +1099,44 @@ smallcalc :&gt; <span class="m">4</span> - <span class="m">6</span>
 
 
 <p>and since we rely on Python to perform the actual subtraction we get negative numbers for free. Pay attention: we can have negative numbers in the results, but we cannot input negative numbers. This is something that we will have to add later.</p>
-<h1 id="level-7-multiple-operations">Level 7 - Multiple operations<a class="headerlink" href="#level-7-multiple-operations" title="Permanent link">&para;</a></h1>
-<p><em>"The machine simply does not operate as expected."</em></p>
+<hr>
+<h3 id="solution_5">Solution<a class="headerlink" href="#solution_5" title="Permanent link">&para;</a></h3>
+<p>Adding the addition binary operation changed code in the lexer, the parser, and in the visitor. That operation was however considered a generic binary operation, and only the visitor implements the actual <code>+</code> operation. So adding the subtraction works out of the box for the first two stages and requires me to change the visitor only, with a simple <code>if</code> condition on the value of the operator.</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">CalcVisitor</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="nf">visit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">node</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;integer&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">node</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">],</span> <span class="n">node</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">node</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;binary&#39;</span><span class="p">:</span>
+            <span class="n">lvalue</span><span class="p">,</span> <span class="n">ltype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="s1">&#39;left&#39;</span><span class="p">])</span>
+            <span class="n">rvalue</span><span class="p">,</span> <span class="n">rtype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="s1">&#39;right&#39;</span><span class="p">])</span>
+
+            <span class="n">operator</span> <span class="o">=</span> <span class="n">node</span><span class="p">[</span><span class="s1">&#39;operator&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">operator</span> <span class="o">==</span> <span class="s1">&#39;+&#39;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">lvalue</span> <span class="o">+</span> <span class="n">rvalue</span><span class="p">,</span> <span class="n">rtype</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">lvalue</span> <span class="o">-</span> <span class="n">rvalue</span><span class="p">,</span> <span class="n">rtype</span>
+</code></pre></div>
+
+
+<hr>
+<h2 id="level-7-multiple-operations">Level 7 - Multiple operations<a class="headerlink" href="#level-7-multiple-operations" title="Permanent link">&para;</a></h2>
+<p><em>"The machine simply does not operate as expected."</em> - The Prestige (2006)</p>
 <div class="highlight"><pre><span></span><code>integer: [0-9]+
 addsymbol: &#39;+&#39; | &#39;-&#39;
-# A expression starts with a single integer and optionally contains and addsymbol and another expression (this is a recursive definition) 
+
+# A expression starts with a single integer and optionally
+# contains an addsymbol and another expression
+# (this is a recursive definition) 
 expression: integer (addsymbol expression)
 </code></pre></div>
 
 
 <p>Before we dive into the fascinating but complex topic of nested operations, let us take a look and implement multiple operations, that is the application of a chain of "similar" operators with the same priority.</p>
 <p>Since this tutorial is a practical approach to the construction of an interpreter, I will not go too deep into the subject matter. Feel free to check the references if you are interested in such topics. For the moment, it is sufficient to understand that addition and subtraction are two operations that have the same precedence, which means that their order can be changed without affecting the result.</p>
-<p>For instance: the expression <code>3 + 4 - 5</code> gives <code>2</code> as a result. The result is the same if we perform <code>(3 + 4) - 5 = 7 - 5 = 2</code> or <code>3 + (4 - 5) = 3 - 1 = 2</code>, where the expressions between parenthesis are executed first.</p>
+<p>For instance: the expression <code>3 + 4 - 5</code> gives <code>2</code> as a result. The result is the same if we perform <code>(3 + 4) - 5 = 7 - 5 = 2</code> or <code>3 + (4 - 5) = 3 - 1 = 2</code>, where the expressions between parentheses are executed first.</p>
 <p>From the interpreter's point of view, then, we can process a chain of additions and subtractions without being concerned about precedence, which greatly simplifies our job. As the output of the parser is a tree, however, we need to find a way to represent such a chain of operations in that form. One way is to nest expressions, which means that each operation is a single <code>binary</code> node, with the left term containing an integer and the right one the rest of the expression. In the previous example <code>3 + 4 - 5</code> is represented by an addition between <code>3</code> and <code>4 - 5</code>. <code>4 - 5</code>, in turn, is another binary node, a subtraction between <code>4</code> and <code>5</code>.</p>
 <p>Let us start checking if the lexer understand multiple operations</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_get_tokens_understands_multiple_operations</span><span class="p">():</span>
@@ -757,7 +1158,7 @@ expression: integer (addsymbol expression)
 
 <p>If the current version of your lexer doesn't pass this test make the necessary changes to the code.</p>
 <p>Now we should modify the parser. While expressing the test is very simple, actually creating the code that makes it pass is not that trivial. So, as an intermediate step, I will make you implement the code that allows the parser to check upcoming tokens.</p>
-<p>One solution to this problem is to save the state of the parser, get as many tokens as we need, and then restore the status. Inspired by Git, I called those methods <code>stash()</code> and <code>pop()</code>. Put the following test in <code>tests/test_calc_lexer.py</code></p>
+<p>One solution to this problem is to save the state of the parser, get as many tokens as we need, and then restore the status. Inspired by Git, I called those methods <code>stash</code> and <code>pop</code>. Put the following test in <code>tests/test_calc_lexer.py</code></p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_lexer_can_stash_and_pop_status</span><span class="p">():</span>
     <span class="n">l</span> <span class="o">=</span> <span class="n">clex</span><span class="o">.</span><span class="n">CalcLexer</span><span class="p">()</span>
     <span class="n">l</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;3 5&#39;</span><span class="p">)</span>
@@ -770,8 +1171,8 @@ expression: integer (addsymbol expression)
 </code></pre></div>
 
 
-<p>As you can see the <code>get_token()</code> call between <code>stash()</code> and <code>pop()</code> doesn't leave any trace.</p>
-<p>Once your code is working implement the second test. Create a <code>peek_token()</code> method that performs all the previous actions together</p>
+<p>As you can see the <code>get_token</code> call between <code>stash</code> and <code>pop</code> doesn't leave any trace.</p>
+<p>Once your code is working implement the second test. Create a method <code>peek_token</code> that performs all the previous actions together</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_lexer_can_peek_token</span><span class="p">():</span>
     <span class="n">l</span> <span class="o">=</span> <span class="n">clex</span><span class="o">.</span><span class="n">CalcLexer</span><span class="p">()</span>
     <span class="n">l</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;3 + 5&#39;</span><span class="p">)</span>
@@ -781,7 +1182,7 @@ expression: integer (addsymbol expression)
 </code></pre></div>
 
 
-<p>You can implement <code>peek_token()</code> very easily leveraging <code>stash()</code> and <code>pop()</code>.</p>
+<p>You can implement <code>peek_token</code> very easily leveraging <code>stash</code> and <code>pop</code>.</p>
 <p>Now we are ready to face the test that covers nested operations, which goes in <code>tests/test_calc_parser.py</code></p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_parse_expression_with_multiple_operations</span><span class="p">():</span>
     <span class="n">p</span> <span class="o">=</span> <span class="n">cpar</span><span class="o">.</span><span class="n">CalcParser</span><span class="p">()</span>
@@ -818,7 +1219,7 @@ expression: integer (addsymbol expression)
 </code></pre></div>
 
 
-<p>A note of warning: probably the first version of the code that makes this test pass will be horrible, as the logic involved is not trivial. Remember that your first target is to make the test pass and then, with the battery of tests in your arsenal, to tidy up the code.</p>
+<p>A note of warning: probably the first version of the code that makes this test pass will be horrible, as the logic involved is not trivial. Remember that your <strong>first goal is to make the test pass and then, with the battery of tests in your arsenal, to tidy up the code</strong>.</p>
 <p>As usual, the last test involves the visitor</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_visitor_expression_with_multiple_operations</span><span class="p">():</span>
     <span class="n">ast</span> <span class="o">=</span> <span class="p">{</span>
@@ -854,7 +1255,70 @@ expression: integer (addsymbol expression)
 
 
 <p>What changes do you need to make to the <code>CalcVisitor</code> class? Why?</p>
-<h1 id="resources">Resources<a class="headerlink" href="#resources" title="Permanent link">&para;</a></h1>
+<hr>
+<h3 id="solution_6">Solution<a class="headerlink" href="#solution_6" title="Permanent link">&para;</a></h3>
+<p>I made no assumptions on the length of the tokens stream in <code>get_tokens</code>, so processing multiple tokens comes out of the box in the lexer.</p>
+<p>Adding <code>stash</code> and <code>pop</code> is not very complex, as the tests show exactly what we need to save and retrieve. Here I leverage the <code>position</code> attribute and the <code>goto</code> functions of the <code>TextBuffer</code> class.</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">CalcLexer</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_text_storage</span> <span class="o">=</span> <span class="n">text_buffer</span><span class="o">.</span><span class="n">TextBuffer</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_status</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_token</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="p">[</span><span class="o">...</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_current_status</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">status</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">status</span><span class="p">[</span><span class="s1">&#39;text_storage&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_text_storage</span><span class="o">.</span><span class="n">position</span>
+        <span class="n">status</span><span class="p">[</span><span class="s1">&#39;current_token&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_token</span>
+        <span class="k">return</span> <span class="n">status</span>
+
+    <span class="k">def</span> <span class="nf">stash</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_status</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_status</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">pop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_status</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_text_storage</span><span class="o">.</span><span class="n">goto</span><span class="p">(</span><span class="o">*</span><span class="n">status</span><span class="p">[</span><span class="s1">&#39;text_storage&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_token</span> <span class="o">=</span> <span class="n">status</span><span class="p">[</span><span class="s1">&#39;current_token&#39;</span><span class="p">]</span>
+</code></pre></div>
+
+
+<p>Once <code>stash</code> and <code>pop</code> are in place implementing <code>peek_token</code> is trivial</p>
+<div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">peek_token</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stash</span><span class="p">()</span>
+        <span class="n">token</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_token</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">token</span>
+</code></pre></div>
+
+
+<p>Finally, <code>peek_token</code> allows me to add support for multiple expressions in the parser.</p>
+<div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">parse_expression</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">left</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_integer</span><span class="p">()</span>
+
+        <span class="n">next_token</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lexer</span><span class="o">.</span><span class="n">peek_token</span><span class="p">()</span>
+
+        <span class="k">while</span> <span class="n">next_token</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">clex</span><span class="o">.</span><span class="n">LITERAL</span><span class="p">:</span>
+            <span class="n">operator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_addsymbol</span><span class="p">()</span>
+            <span class="n">right</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_integer</span><span class="p">()</span>
+
+            <span class="n">left</span> <span class="o">=</span> <span class="n">BinaryNode</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">operator</span><span class="p">,</span> <span class="n">right</span><span class="p">)</span>
+
+            <span class="n">next_token</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lexer</span><span class="o">.</span><span class="n">peek_token</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">left</span>
+</code></pre></div>
+
+
+<hr>
+<h2 id="final-words">Final words<a class="headerlink" href="#final-words" title="Permanent link">&para;</a></h2>
+<p>Phew! That was something, wasn't it? I think so, we went from nothing to a trivial calculator, but the engine we have under the bonnet is clearly powerful, so I'm already looking forward to implementing more complex syntax elements, like round brackets, multiplication, division, not to mention that sooner or later this should become a language, so we will need variables, functions, scopes, and so on.</p>
+<p>The code I developed in this post is available on the GitHub repository tagged with <code>part1</code> (<a href="https://github.com/lgiordani/smallcalc/tree/part1">link</a>).</p>
+<p>Well, See you in the next post of the series, then!</p>
+<h2 id="resources">Resources<a class="headerlink" href="#resources" title="Permanent link">&para;</a></h2>
 <p>Some links on compilers history</p>
 <ul>
 <li><a href="http://gcc.gnu.org/wiki/History">GCC history</a></li>
@@ -873,13 +1337,9 @@ expression: integer (addsymbol expression)
 <li><a href="https://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_form">Extended Backus-Naur form on Wikipedia</a></li>
 <li><a href="http://matt.might.net/articles/grammars-bnf-ebnf/">The language of languages</a></li>
 </ul>
-<h1 id="solution">Solution<a class="headerlink" href="#solution" title="Permanent link">&para;</a></h1>
-<p>You can find my solution to this part <a href="https://www.thedigitalcatonline.com/blog/2017/07/12/a-game-of-tokens-solution-part-1/">here</a>.</p>
-<h1 id="titles">Titles<a class="headerlink" href="#titles" title="Permanent link">&para;</a></h1>
-<p>The section quotes come from some good movies, the complete list is: "The Lord of the Rings - The Return of the King" (2003), "Iron Man" (2008), "Raiders of the Lost Ark" (1981), "Braveheart" (1995), "The Matrix" (1999), "The Bourne Identity" (2002), "The Prestige" (2006).</p>
-<h1 id="updates">Updates<a class="headerlink" href="#updates" title="Permanent link">&para;</a></h1>
+<h2 id="updates">Updates<a class="headerlink" href="#updates" title="Permanent link">&para;</a></h2>
 <p>2017-12-24: Victor Uriarte (<a href="https://github.com/vmuriart">vmuriart</a>) spotted an important issue in a previous version of the post. The last two tests (<code>test_parse_expression_with_multiple_operations</code> and <code>test_visitor_expression_with_multiple_operations</code>) used a right-growing tree instead of a left-growing one. The problem with a right-growing tree is that an operator affects <em>everything</em> is on the right side, that is the whole rest of the operation. Thus, an operation like <code>10 - 1 + 1</code> would become <code>10 - (1 + 1)</code>, and the result is obviously different. I fixed the tests and the solution I give in the next posts. You can read Victor's issue <a href="https://github.com/lgiordani/smallcalc/issues/4">here</a>. Thanks Victor for spotting it!</p>
-<h1 id="feedback">Feedback<a class="headerlink" href="#feedback" title="Permanent link">&para;</a></h1>
+<h2 id="feedback">Feedback<a class="headerlink" href="#feedback" title="Permanent link">&para;</a></h2>
 <p>Feel free to reach me on <a href="https://twitter.com/thedigicat">Twitter</a> if you have questions. The <a href="https://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues">GitHub issues</a> page is the best place to submit corrections.</p>
   </section>
 
@@ -889,13 +1349,10 @@ expression: integer (addsymbol expression)
       
       <h5>Next articles</h5>
       <ul>
-        <li><a href="/blog/2017/07/12/a-game-of-tokens-solution-part-1/">A game of tokens: solution - Part 1</a></li>
         <li><a href="/blog/2017/10/01/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-2/">A game of tokens: write an interpreter in Python with TDD - Part 2</a></li>
-        <li><a href="/blog/2017/10/17/a-game-of-tokens-solution-part-2/">A game of tokens: solution - Part 2</a></li>
         <li><a href="/blog/2017/10/31/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-3/">A game of tokens: write an interpreter in Python with TDD - Part 3</a></li>
-        <li><a href="/blog/2017/10/31/a-game-of-tokens-solution-part-3/">A game of tokens: solution - Part 3</a></li>
         <li><a href="/blog/2018/06/02/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-4/">A game of tokens: write an interpreter in Python with TDD - Part 4</a></li>
-        <li><a href="/blog/2018/06/02/a-game-of-tokens-solution-part-4/">A game of tokens: solution - Part 4</a></li>
+        <li><a href="/blog/2020/08/09/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-5/">A game of tokens: write an interpreter in Python with TDD - Part 5</a></li>
       </ul>
     </div>
   </section>
@@ -903,6 +1360,18 @@ expression: integer (addsymbol expression)
   <section class="footer">
     <h1>Related Posts</h1>
     <div class="posts mini">
+      <article class="card">
+        <a href="/blog/2020/08/09/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-5/" class="image">
+          <img src="/images/a-game-of-tokens-5.jpg" alt="a-game-of-tokens-5" />
+        </a>
+        <div class="card-body">
+          <a href="/blog/2020/08/09/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-5/"><h2 class="card-title">A game of tokens: write an interpreter in Python with TDD - Part 5</h2></a>
+	  <p class="article-info">
+            <time datetime="2020-08-09T18:00:00+01:00">Aug 9, 2020</time>
+            <span class="fas fa-tags"></span>
+            <a href="/categories/python/" class="tag">Python</a>            <a href="/categories/python3/" class="tag">Python3</a>            <a href="/categories/tdd/" class="tag">TDD</a>            <a href="/categories/testing/" class="tag">testing</a>            <a href="/categories/compilers/" class="tag">compilers</a>          </p>
+        </div>
+      </article>
       <article class="card">
         <a href="/blog/2018/06/02/a-game-of-tokens-solution-part-4/" class="image">
           <img src="/images/a-game-of-tokens-solutions.jpg" alt="a-game-of-tokens-solutions" />
@@ -917,7 +1386,7 @@ expression: integer (addsymbol expression)
       </article>
       <article class="card">
         <a href="/blog/2018/06/02/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-4/" class="image">
-          <img src="/images/a-game-of-tokens.jpg" alt="a-game-of-tokens" />
+          <img src="/images/a-game-of-tokens-4.jpg" alt="a-game-of-tokens-4" />
         </a>
         <div class="card-body">
           <a href="/blog/2018/06/02/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-4/"><h2 class="card-title">A game of tokens: write an interpreter in Python with TDD - Part 4</h2></a>
@@ -941,7 +1410,7 @@ expression: integer (addsymbol expression)
       </article>
       <article class="card">
         <a href="/blog/2017/10/31/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-3/" class="image">
-          <img src="/images/a-game-of-tokens.jpg" alt="a-game-of-tokens" />
+          <img src="/images/a-game-of-tokens-3.jpg" alt="a-game-of-tokens-3" />
         </a>
         <div class="card-body">
           <a href="/blog/2017/10/31/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-3/"><h2 class="card-title">A game of tokens: write an interpreter in Python with TDD - Part 3</h2></a>
@@ -965,7 +1434,7 @@ expression: integer (addsymbol expression)
       </article>
       <article class="card">
         <a href="/blog/2017/10/01/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-2/" class="image">
-          <img src="/images/a-game-of-tokens.jpg" alt="a-game-of-tokens" />
+          <img src="/images/a-game-of-tokens-2.jpg" alt="a-game-of-tokens-2" />
         </a>
         <div class="card-body">
           <a href="/blog/2017/10/01/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-2/"><h2 class="card-title">A game of tokens: write an interpreter in Python with TDD - Part 2</h2></a>
@@ -1007,18 +1476,6 @@ expression: integer (addsymbol expression)
           <a href="/blog/2020/07/06/flask-project-setup-tdd-docker-postgres-and-more-part-2/"><h2 class="card-title">Flask project setup: TDD, Docker, Postgres and more - Part 2</h2></a>
 	  <p class="article-info">
             <time datetime="2020-07-06T13:00:00+01:00">Jul 6, 2020</time>
-            <span class="fas fa-tags"></span>
-            <a href="/categories/aws/" class="tag">AWS</a>            <a href="/categories/docker/" class="tag">Docker</a>            <a href="/categories/flask/" class="tag">Flask</a>            <a href="/categories/http/" class="tag">HTTP</a>            <a href="/categories/postgres/" class="tag">Postgres</a>            <a href="/categories/python/" class="tag">Python</a>            <a href="/categories/python3/" class="tag">Python3</a>            <a href="/categories/tdd/" class="tag">TDD</a>            <a href="/categories/testing/" class="tag">testing</a>            <a href="/categories/www/" class="tag">WWW</a>          </p>
-        </div>
-      </article>
-      <article class="card">
-        <a href="/blog/2020/07/05/flask-project-setup-tdd-docker-postgres-and-more-part-1/" class="image">
-          <img src="/images/flask-project-setup-tdd-docker-postgres-and-more-part-1.jpg" alt="flask-project-setup-tdd-docker-postgres-and-more-part-1" />
-        </a>
-        <div class="card-body">
-          <a href="/blog/2020/07/05/flask-project-setup-tdd-docker-postgres-and-more-part-1/"><h2 class="card-title">Flask project setup: TDD, Docker, Postgres and more - Part 1</h2></a>
-	  <p class="article-info">
-            <time datetime="2020-07-05T13:00:00+01:00">Jul 5, 2020</time>
             <span class="fas fa-tags"></span>
             <a href="/categories/aws/" class="tag">AWS</a>            <a href="/categories/docker/" class="tag">Docker</a>            <a href="/categories/flask/" class="tag">Flask</a>            <a href="/categories/http/" class="tag">HTTP</a>            <a href="/categories/postgres/" class="tag">Postgres</a>            <a href="/categories/python/" class="tag">Python</a>            <a href="/categories/python3/" class="tag">Python3</a>            <a href="/categories/tdd/" class="tag">TDD</a>            <a href="/categories/testing/" class="tag">testing</a>            <a href="/categories/www/" class="tag">WWW</a>          </p>
         </div>
@@ -1245,16 +1702,16 @@ expression: integer (addsymbol expression)
             </header>
 <div class="mini-posts">
     <article>
+        <a href="/blog/2020/08/09/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-5/" class="image"><img src="/images/a-game-of-tokens-5.jpg" alt="a-game-of-tokens-5" /></a>
+        <p><strong>A game of tokens: write an interpreter in Python with TDD - Part 5</strong> <a href="/blog/2020/08/09/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-5/">Read</a></p> 
+    </article>
+    <article>
         <a href="/blog/2020/07/18/emacs-configuration-for-python-javascript-terraform-and-blogging/" class="image"><img src="/images/emacs-configuration-for-python-javascript-terraform-and-blogging.jpg" alt="emacs-configuration-for-python-javascript-terraform-and-blogging" /></a>
         <p><strong>Emacs Configuration for Python/JavaScript, Terraform and blogging</strong> <a href="/blog/2020/07/18/emacs-configuration-for-python-javascript-terraform-and-blogging/">Read</a></p> 
     </article>
     <article>
         <a href="/blog/2020/07/07/flask-project-setup-tdd-docker-postgres-and-more-part-3/" class="image"><img src="/images/flask-project-setup-tdd-docker-postgres-and-more-part-3.jpg" alt="flask-project-setup-tdd-docker-postgres-and-more-part-3" /></a>
         <p><strong>Flask project setup: TDD, Docker, Postgres and more - Part 3</strong> <a href="/blog/2020/07/07/flask-project-setup-tdd-docker-postgres-and-more-part-3/">Read</a></p> 
-    </article>
-    <article>
-        <a href="/blog/2020/07/06/flask-project-setup-tdd-docker-postgres-and-more-part-2/" class="image"><img src="/images/flask-project-setup-tdd-docker-postgres-and-more-part-2.jpg" alt="flask-project-setup-tdd-docker-postgres-and-more-part-2" /></a>
-        <p><strong>Flask project setup: TDD, Docker, Postgres and more - Part 2</strong> <a href="/blog/2020/07/06/flask-project-setup-tdd-docker-postgres-and-more-part-2/">Read</a></p> 
     </article>
 </div>        </section>
 
