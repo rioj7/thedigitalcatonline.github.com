@@ -1,5 +1,486 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>The Digital Cat</title><link href="https://www.thedigitalcatonline.com/" rel="alternate"></link><link href="https://www.thedigitalcatonline.com/atom.xml" rel="self"></link><id>https://www.thedigitalcatonline.com/</id><updated>2020-08-09T18:00:00+01:00</updated><subtitle>Adventures of a curious cat in the land of programming</subtitle><entry><title>A game of tokens: write an interpreter in Python with TDD - Part 5</title><link href="https://www.thedigitalcatonline.com/blog/2020/08/09/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-5/" rel="alternate"></link><published>2020-08-09T18:00:00+01:00</published><updated>2020-08-09T18:00:00+01:00</updated><author><name>Leonardo Giordani</name></author><id>tag:www.thedigitalcatonline.com,2020-08-09:/blog/2020/08/09/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-5/</id><summary type="html"></summary><content type="html">&lt;h2 id="introduction"&gt;Introduction&lt;a class="headerlink" href="#introduction" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>The Digital Cat</title><link href="https://www.thedigitalcatonline.com/" rel="alternate"></link><link href="https://www.thedigitalcatonline.com/atom.xml" rel="self"></link><id>https://www.thedigitalcatonline.com/</id><updated>2020-08-17T09:00:00+01:00</updated><subtitle>Adventures of a curious cat in the land of programming</subtitle><entry><title>Delegation: composition and inheritance in object-oriented programming</title><link href="https://www.thedigitalcatonline.com/blog/2020/08/17/delegation-composition-and-inheritance-in-object-oriented-programming/" rel="alternate"></link><published>2020-08-17T09:00:00+01:00</published><updated>2020-08-17T09:00:00+01:00</updated><author><name>Leonardo Giordani</name></author><id>tag:www.thedigitalcatonline.com,2020-08-17:/blog/2020/08/17/delegation-composition-and-inheritance-in-object-oriented-programming/</id><summary type="html"></summary><content type="html">&lt;h2 id="introduction"&gt;Introduction&lt;a class="headerlink" href="#introduction" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Object-oriented programming (OOP) is a methodology that was introduced in the 60s, though as for many other concepts related to programming languages it is difficult to give a proper date. While recent years have witnessed a second youth of functional languages, object-oriented is still a widespread paradigm among successful programming languages, and for good reasons. OOP is not the panacea for all the architectural problems in software development, but if used correctly can give a solid foundation to any system.&lt;/p&gt;
+&lt;p&gt;It might sound obvious, but if you use an object-oriented language or a language with strong OOP traits, you have to learn this paradigm well. Being very active in the Python community, I see how many times young programmers are introduced to the language, the main features, and the most important libraries and frameworks, &lt;em&gt;without a proper and detailed description of OOP and how OOP is implemented in the language&lt;/em&gt;.&lt;/p&gt;
+&lt;p&gt;The &lt;em&gt;implementation&lt;/em&gt; part is particularly important, as OOP is a set of concepts and features that are expressed theoretically and then implemented in the language, with specific traits or choices. It is very important, then, to keep in mind that the concepts behind OOP are generally shared among OOP languages, but are not tenets, and are subject to interpretation.&lt;/p&gt;
+&lt;p&gt;What is the core of OOP? Many books and tutorials mention the three pillars encapsulation, delegation, and polymorphism, but I believe these are traits of a more central concept, which is the &lt;strong&gt;collaboration of entities&lt;/strong&gt;. In a well-designed OO system, we can observe a set of actors that send messages to each other to keep the system alive, responsive, and consistent.&lt;/p&gt;
+&lt;p&gt;These actors have a state, the data, and give access to it through an interface: this is &lt;strong&gt;encapsulation&lt;/strong&gt;. Each actor can use functionalities implemented by another sending a message, that is calling a method, and when the relationship between the two is stable we have &lt;strong&gt;delegation&lt;/strong&gt;. As communication happens through messages, actors are not concerned with the nature of the recipients, only with their interface, and this is &lt;strong&gt;polymorphism&lt;/strong&gt;.&lt;/p&gt;
+&lt;p&gt;Alan Kay, in his "The Early History of Smalltalk", says&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;In computer terms, Smalltalk is a recursion on the notion of computer itself. Instead of dividing "computer stuff" into things each less strong than the whole—like data structures, procedures, and functions which are the usual paraphernalia of programming languages—each Smalltalk object is a recursion on the entire possibilities of the computer. Thus its semantics are a bit like having thousands and thousands of computers all hooked together by a very fast network.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;I find this extremely enlightening, as it reveals the idea behind the three pillars, and the reason why we do or don't do certain things in OOP, why we consider good to provide some automatisms or to forbid specific solutions.&lt;/p&gt;
+&lt;p&gt;By the way, if you replace the word "object" with "microservice" in the quote above, you might be surprised by the description of a very modern architecture for cloud-based systems. Once again, concepts in computer science are like fractals, they are self-similar and pop up in unexpected places.&lt;/p&gt;
+&lt;p&gt;In this post, I want to focus on the second of the pillars of object-oriented programming: &lt;strong&gt;delegation&lt;/strong&gt;. I will discuss its nature and the main two strategies we can follow to implement it: &lt;strong&gt;composition&lt;/strong&gt; and &lt;strong&gt;inheritance&lt;/strong&gt;. I will provide examples in Python and show how the powerful OOP implementation of this language opens the door to interesting atypical solutions.&lt;/p&gt;
+&lt;p&gt;For the rest of this post, I will consider objects as mini computers and the system in which they live a "very fast network", using the words of Alan Kay. Data contained in an object is the state of the computer, its methods are the input/output devices, and calling methods is the same thing as sending a message to another computer through the network.&lt;/p&gt;
+&lt;h2 id="delegation-in-oop"&gt;Delegation in OOP&lt;a class="headerlink" href="#delegation-in-oop" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Delegation is the mechanism through which an actor assigns a task or part of a task to another actor. This is not new in computer science, as any program can be split into blocks and each block generally depends on the previous ones. Furthermore, code can be isolated in libraries and reused in different parts of a program, implementing this "task assignment". In an OO system the assignee is not just the code of a function, but a full-fledged object, another actor.&lt;/p&gt;
+&lt;p&gt;The main concept to retain here is that the reason behind delegation is &lt;strong&gt;code reuse&lt;/strong&gt;. We want to avoid code repetition, as it is often the source of regressions; fixing a bug in one of the repetitions doesn't automatically fix it in all of them, so keeping one single version of each algorithm is paramount to ensure the consistency of a system. Delegation helps us to keep our actors small and specialised, which makes the whole architecture more flexible and easier to maintain (if properly implemented). Changing a very big subsystem to satisfy a new requirement might affect other parts system in bad ways, so the smaller the subsystems the better (up to a certain point, where we incur in the opposite problem, but this shall be discussed in another post).&lt;/p&gt;
+&lt;p&gt;There is a &lt;strong&gt;dichotomy&lt;/strong&gt; in delegation, as it can be implemented following two different strategies, which are orthogonal from many points of view, and I believe that one of the main problems that object-oriented systems have lies in the use of the wrong strategy, in particular the overuse of inheritance. When we create a system using an object-oriented language we need to keep in mind this dichotomy at every step of the design.&lt;/p&gt;
+&lt;p&gt;There are four areas or points of views that I want to introduce to help you to visualise delegation between actors: &lt;strong&gt;visibility&lt;/strong&gt;, &lt;strong&gt;control&lt;/strong&gt;, &lt;strong&gt;relationship&lt;/strong&gt;, and &lt;strong&gt;entities&lt;/strong&gt;. As I said previously, while these concepts apply to systems at every scale, and in particular to every object-oriented language, I will provide examples in Python.&lt;/p&gt;
+&lt;h3 id="visibility-state-sharing"&gt;Visibility: state sharing&lt;a class="headerlink" href="#visibility-state-sharing" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;The first way to look at delegation is through the lenses of state sharing. As I said before the data contained in an object can be seen as its state, and if hearing this you think about components in a frontend framework or state machines you are on the right path. The state of a computer, its memory or the data on the mass storage, can usually be freely accessed by &lt;em&gt;internal&lt;/em&gt; systems, while the access is mediated for &lt;em&gt;external&lt;/em&gt; ones. Indeed, the level of access to the state is probably one of the best ways to define internal and external systems in a software or hardware architecture.&lt;/p&gt;
+&lt;p&gt;When using inheritance, the child class shares its whole state with the parent class. Let's have a look at a simple example&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Parent&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;value&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_value&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;value&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;describe&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="sa"&gt;f&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Parent: value is &lt;/span&gt;&lt;span class="si"&gt;{&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_value&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Child&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Parent&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="k"&gt;pass&lt;/span&gt;
+
+&lt;span class="n"&gt;cld&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Child&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cld&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_value&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;cld&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;describe&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;As you can see, &lt;code&gt;describe&lt;/code&gt; is defined in &lt;code&gt;Parent&lt;/code&gt;, so when the instance &lt;code&gt;cld&lt;/code&gt; calls it, its class &lt;code&gt;Child&lt;/code&gt; delegated the call to the class &lt;code&gt;Parent&lt;/code&gt;. This, in turn, uses &lt;code&gt;_value&lt;/code&gt; as if it was defined locally, while it is defined in &lt;code&gt;cld&lt;/code&gt;. This works because, from the point of view of the state, &lt;code&gt;Parent&lt;/code&gt; has complete access to the state of &lt;code&gt;Child&lt;/code&gt;. Please note that the state is not even namespaced, as the state of the child class &lt;em&gt;becomes&lt;/em&gt; the state of the parent class.&lt;/p&gt;
+&lt;p&gt;Composition, on the other side, keeps the state completely private and makes the delegated object see only what is explicitly shared through message passing. A simple example of this is&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Logger&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;log&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;value&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="sa"&gt;f&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Logger: value is &lt;/span&gt;&lt;span class="si"&gt;{&lt;/span&gt;&lt;span class="n"&gt;value&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+
+&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Process&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;value&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_value&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;value&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;logger&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Logger&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;info&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;log&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_value&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="n"&gt;prc&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Process&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;prc&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_value&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="n"&gt;prc&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;info&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Here, &lt;code&gt;Process&lt;/code&gt; objects have an attribute &lt;code&gt;_value&lt;/code&gt; that is shared with &lt;code&gt;Logger&lt;/code&gt; objects only when it comes to calling &lt;code&gt;Logger.log&lt;/code&gt; inside their &lt;code&gt;info&lt;/code&gt; method. &lt;code&gt;Logger&lt;/code&gt; objects have no visibility of the state of &lt;code&gt;Process&lt;/code&gt; objects unless it is explicitly shared.&lt;/p&gt;
+&lt;p&gt;Note for advanced readers: I'm clearly mixing the concepts of instance and class here, and blatantly ignoring the resulting inconsistencies. The state of an instance is not the same thing as the state of a class, and it should also be mentioned that classes are themselves instances of metaclasses, at least in Python. What I want to point out here is that access to attributes is granted automatically to inherited classes because of the way &lt;code&gt;__getattribute__&lt;/code&gt; and bound methods work, while in composition such mechanisms are not present and the effect is that the state is not shared.&lt;/p&gt;
+&lt;h3 id="control-implicit-and-explicit-delegation"&gt;Control: implicit and explicit delegation&lt;a class="headerlink" href="#control-implicit-and-explicit-delegation" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;Another way to look at the dichotomy between inheritance and composition is that of the control we have over the process. Inheritance is usually provided by the language itself and is implemented according to some rules that are part of the definition of the language itself. This makes inheritance an implicit mechanism: when you make a class inherit from another one, there is an automatic and implicit process that rules the delegation between the two, which makes it run outside our control.&lt;/p&gt;
+&lt;p&gt;Let's see an example of this in action using inheritance&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Window&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;title&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size_x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size_y&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_title&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;title&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_size_x&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;size_x&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_size_y&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;size_y&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;resize&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;new_size_x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;new_size_y&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_size_x&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;new_size_x&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_size_y&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;new_size_y&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;info&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;info&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="sa"&gt;f&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Window &amp;#39;&lt;/span&gt;&lt;span class="si"&gt;{&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_title&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;&amp;#39; is &lt;/span&gt;&lt;span class="si"&gt;{&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_size_x&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;x&lt;/span&gt;&lt;span class="si"&gt;{&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_size_y&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+
+&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;TransparentWindow&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Window&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;title&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size_x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size_y&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;transparency&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;50&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_title&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;title&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_size_x&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;size_x&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_size_y&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;size_y&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_transparency&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;transparency&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;change_transparency&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;new_transparency&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_transparency&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;new_transparency&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;info&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="nb"&gt;super&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;info&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+        &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="sa"&gt;f&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Transparency is set to &lt;/span&gt;&lt;span class="si"&gt;{&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_transparency&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;       
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;At this point we can instantiate and use &lt;code&gt;TransparentWindow&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;twin&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;TransparentWindow&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Terminal&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;640&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;480&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;80&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;twin&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;info&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;span class="n"&gt;twin&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;change_transparency&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;70&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;twin&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;resize&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;800&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;600&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;When we call &lt;code&gt;twin.info&lt;/code&gt;, Python is running &lt;code&gt;TransparentWindow&lt;/code&gt;'s implementation of that method and is not automatically delegating anything to &lt;code&gt;Window&lt;/code&gt; even though the latter has a method with that name. Indeed, we have to explicitly call it through &lt;code&gt;super&lt;/code&gt; when we want to reuse it. When we use &lt;code&gt;resize&lt;/code&gt;, though, the implicit delegation kicks in and we end up with the execution of &lt;code&gt;Window.resize&lt;/code&gt;. Please note that this delegation doesn't propagate to the next calls, as when &lt;code&gt;Window.resize&lt;/code&gt; calls &lt;code&gt;self.info&lt;/code&gt; this runs &lt;code&gt;TransparentWindow.info&lt;/code&gt;, as the original call was made from that class.&lt;/p&gt;
+&lt;p&gt;Composition is on the other end of the spectrum, as any delegation performed through composed objects has to be explicit. Let's see an example&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Body&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;text&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_text&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;text&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;info&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="s2"&gt;&amp;quot;length&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="nb"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_text&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+
+
+&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Page&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;title&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;text&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_title&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;title&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_body&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Body&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;text&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;info&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="s2"&gt;&amp;quot;title&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_title&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="s2"&gt;&amp;quot;body&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_body&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;info&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;When we instantiate a &lt;code&gt;Page&lt;/code&gt; and call &lt;code&gt;info&lt;/code&gt; everything works&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;page&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Page&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;New post&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Some text for an exciting new post&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;page&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;info&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;but as you can see, &lt;code&gt;Page.info&lt;/code&gt; has to explicitly mention &lt;code&gt;Body.info&lt;/code&gt; through &lt;code&gt;self._body&lt;/code&gt;, as we had to do when using inheritance with &lt;code&gt;super&lt;/code&gt;. Composition is not different from inheritance when methods are overridden, at least in Python.&lt;/p&gt;
+&lt;h3 id="relationship-to-be-vs-to-have"&gt;Relationship: to be vs to have&lt;a class="headerlink" href="#relationship-to-be-vs-to-have" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;The third point of view from which you can look at delegation is that of the nature of the relationship between actors. Inheritance gives the child class the same nature as the parent class, with specialised behaviour. We can say that a child class implements new features or changes the behaviour of existing ones, but generally speaking, we agree that it &lt;em&gt;is&lt;/em&gt; like the parent class. Think about a gaming laptop: it &lt;em&gt;is&lt;/em&gt; a laptop, only with specialised features that enable it to perform well in certain situations. On the other end, composition deals with actors that are usually made of other actors of a different nature. A simple example is that of the computer itself, which &lt;em&gt;has&lt;/em&gt; a CPU, &lt;em&gt;has&lt;/em&gt; a mass storage, &lt;em&gt;has&lt;/em&gt; memory. We can't say that the computer &lt;em&gt;is&lt;/em&gt; the CPU, because that is reductive.&lt;/p&gt;
+&lt;p&gt;This difference in the nature of the relationship between actors in a delegation is directly mapped into inheritance and composition. When using inheritance, we implement the verb &lt;em&gt;to be&lt;/em&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Car&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;colour&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;max_speed&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_colour&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;colour&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_speed&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_max_speed&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;max_speed&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;accelerate&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;speed&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_speed&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;min&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;speed&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_max_speed&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+
+&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;SportsCar&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Car&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;accelerate&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;speed&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_speed&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;speed&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Here, &lt;code&gt;SportsCar&lt;/code&gt; &lt;em&gt;is&lt;/em&gt; a &lt;code&gt;Car&lt;/code&gt;, it can be initialised in the same way and has the same methods, though it can accelerate much more (wow, that might be a fun ride). Since the relationship between the two actors is best described by &lt;em&gt;to be&lt;/em&gt; it is natural to use inheritance.&lt;/p&gt;
+&lt;p&gt;Composition, on the other hand, implements the verb &lt;em&gt;to have&lt;/em&gt; and describes an object that is "physically" made of other objects&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Employee&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;name&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_name&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;name&lt;/span&gt;
+
+
+&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Company&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;ceo_name&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;cto_name&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_ceo&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Employee&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;ceo_name&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_cto&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Employee&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cto_name&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;We can say that a company is the sum of its employees (plus other things), and we easily recognise that the two classes &lt;code&gt;Employee&lt;/code&gt; and &lt;code&gt;Company&lt;/code&gt; have a very different nature. They don't have the same interface, and if they have methods with the same name is just by chance and not because they are serving the same purpose.&lt;/p&gt;
+&lt;h3 id="entities-classes-or-instances"&gt;Entities: classes or instances&lt;a class="headerlink" href="#entities-classes-or-instances" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;The last point of view that I want to explore is that of the entities involved in the delegation. When we discuss a theoretical delegation, for example saying "This Boeing 747 is a plane, thus it flies" we are describing a delegation between abstract, immaterial objects, namely generic "planes" and generic "flying objects".&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;FlyingObject&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="k"&gt;pass&lt;/span&gt;
+
+
+&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Plane&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;FlyingObject&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="k"&gt;pass&lt;/span&gt;
+
+
+&lt;span class="n"&gt;boeing747&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Plane&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Since &lt;code&gt;Plane&lt;/code&gt; and &lt;code&gt;FlyingObject&lt;/code&gt; share the same underlying nature, their relationship is valid for all objects of that type and it is thus established between classes, which are ideas that become concrete when instantiated.&lt;/p&gt;
+&lt;p&gt;When we use composition, instead, we are putting into play a delegation that is not valid for all objects of that type, but only for those that we connected. For example, we can separate gears from the rest of a bicycle, and it is only when we put together &lt;em&gt;that&lt;/em&gt; specific set of gears and &lt;em&gt;that&lt;/em&gt; bicycle that the delegation happens. So, while we can think theoretically at bicycles and gears, the actual delegation happens only when dealing with concrete objects.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Gears&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;current&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;up&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;current&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;min&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;current&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;8&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;down&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;current&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;max&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;current&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+
+&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Bicycle&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;gears&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Gears&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;gear_up&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;gears&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;up&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;gear_down&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;gears&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;down&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+&lt;span class="n"&gt;bicycle&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Bicycle&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;As you can see here, an instance of &lt;code&gt;Bicycle&lt;/code&gt; contains an instance of &lt;code&gt;Gears&lt;/code&gt; and this allows us to create a delegation in the methods &lt;code&gt;gear_up&lt;/code&gt; and &lt;code&gt;gear_down&lt;/code&gt;. The delegation, however, happens between &lt;code&gt;bicycle&lt;/code&gt; and &lt;code&gt;bicycle.gears&lt;/code&gt; which are instances.&lt;/p&gt;
+&lt;p&gt;It is also possible, at least in Python, to have composition using pure classes, which is useful when the class is a pure helper or a simple container of methods (I'm not going to discuss here the benefits or the disadvantages of such a solution)&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Gears&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="nd"&gt;@classmethod&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;up&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;cls&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;current&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="nb"&gt;min&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;current&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;8&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="nd"&gt;@classmethod&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;down&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;cls&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;current&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="nb"&gt;max&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;current&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+
+&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Bicycle&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;gears&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Gears&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;current_gear&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;gear_up&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;current_gear&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;gears&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;up&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;current_gear&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;gear_down&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;current_gear&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;gears&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;down&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;current_gear&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="n"&gt;bicycle&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Bicycle&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Now, when we run &lt;code&gt;bicycle.gear_up&lt;/code&gt; the delegation happens between &lt;code&gt;bicycle&lt;/code&gt;, and instance, and &lt;code&gt;Gears&lt;/code&gt;, a class. We might extend this forward to have a class which class methods call class methods of another class, but I won't give an example of this because it sounds a bit convoluted and probably not very reasonable to do. But it can be done.&lt;/p&gt;
+&lt;p&gt;So, we might devise a pattern here and say that in composition there is no rule that states the nature of the entities involved in the delegation, but that most of the time this happens between instances.&lt;/p&gt;
+&lt;p&gt;Note for advanced readers: in Python, classes are instances of metaclasses, usually &lt;code&gt;type&lt;/code&gt;, and &lt;code&gt;type&lt;/code&gt; is an instance of itself, so it is correct to say that composition happens always between instances.&lt;/p&gt;
+&lt;h2 id="bad-signs"&gt;Bad signs&lt;a class="headerlink" href="#bad-signs" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Now that we looked at the two delegations strategies from different points of view, it's time to discuss what happens when you use the wrong one. You might have heard of the "composition over inheritance" mantra, which comes from the fact that inheritance is often overused. This wasn't and is not helped by the fact that OOP is presented as encapsulation, inheritance, and polymorphism; open a random OOP post or book and you will see this with your own eyes.&lt;/p&gt;
+&lt;p&gt;Please, bloggers, authors, mentors, teachers, and overall programmers: &lt;strong&gt;stop considering inheritance the only delegation system in OOP&lt;/strong&gt;.&lt;/p&gt;
+&lt;p&gt;That said, I think we should avoid going from one extreme to the opposite, and in general learn to use the tools languages give us. So, let's learn how to recognise the "smell" of bad code!&lt;/p&gt;
+&lt;p&gt;You are incorrectly using inheritance when:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;There is a clash between attributes with the same name and different meanings. In this case, you are incorrectly sharing the state of a parent class with the child one (visibility). With composition the state of another object is namespaced and it's always clear which attribute you are dealing with.&lt;/li&gt;
+&lt;li&gt;You feel the need to remove methods from the child class. This is typically a sign that you are polluting the class interface (relationship) with the content of the parent class. using composition makes it easy to expose only the methods that you want to delegate.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;You are incorrectly using composition when:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;You have to map too many methods from the container class to the contained one, to expose them. The two objects might benefit from the automatic delegation mechanism (control) provided by inheritance, with the child class overriding the methods that should behave differently.&lt;/li&gt;
+&lt;li&gt;You are composing instances, but creating many class methods so that the container can access them. This means that the nature of the delegation is more related to the code and the object might benefit from inheritance, where the classes delegate the method calls, instead of relying on the relationship between instances.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Overall, code smells for inheritance are the need to override or delete attributes and methods, changes in one class affecting too many other classes in the inheritance tree, big classes that contain heavily unrelated methods. For composition: too many methods that just wrap methods of the contained instances, the need to pass too many arguments to methods, classes that are too empty and that just contain one instance of another class.&lt;/p&gt;
+&lt;h2 id="domain-modelling"&gt;Domain modelling&lt;a class="headerlink" href="#domain-modelling" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;We all know that there are few cases (in computer science as well as in life) where we can draw a clear line between two options and that most of the time the separation is blurry. There are many grey shades between black and white.&lt;/p&gt;
+&lt;p&gt;The same applies to composition and inheritance. While the nature of the relationship often can guide us to the best solution, we are not always dealing with the representation of real objects, and even when we do we always have to keep in mind that we are &lt;em&gt;modelling&lt;/em&gt; them, not implementing them perfectly.&lt;/p&gt;
+&lt;p&gt;As a colleague of mine told me once, we have to represent reality with our code, but we have to avoid representing it too faithfully, to avoid bringing reality's limitations into our programs.&lt;/p&gt;
+&lt;p&gt;I believe this is very true, so I think that when it comes to choosing between composition an inheritance we need to be guided by the nature of the relationship &lt;em&gt;in our system&lt;/em&gt;. In this, object-oriented programming and database design are very similar. When you design a database you have to think about the domain and the way you extract information, not (only) about the real-world objects that you are modelling.&lt;/p&gt;
+&lt;p&gt;Let's consider a quick example, bearing in mind that I'm only scratching the surface of something about which people write entire books. Let's pretend we are designing a web application that manages companies and their owners, and we started with the consideration that and &lt;code&gt;Owner&lt;/code&gt;, well, &lt;em&gt;owns&lt;/em&gt; the &lt;code&gt;Company&lt;/code&gt;. This is a clear composition relationship.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Company&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;name&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;name&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;name&lt;/span&gt;
+
+&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Owner&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;first_name&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;last_name&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;company_name&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;first_name&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;first_name&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;last_name&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;last_name&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;company&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Company&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;company_name&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="n"&gt;owner1&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Owner&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;John&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Doe&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Pear&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Unfortunately, this automatically limits the number of companies owned by an &lt;code&gt;Owner&lt;/code&gt; to one. If we want to relax that requirement, the best way to do it is to reverse the composition, and make the &lt;code&gt;Company&lt;/code&gt; contain the &lt;code&gt;Owner&lt;/code&gt;.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Owner&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;first_name&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;last_name&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;first_name&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;first_name&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;last_name&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;last_name&lt;/span&gt;
+
+&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Company&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;name&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;owner_first_name&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;owner_last_name&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;name&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;name&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;owner&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Owner&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;owner_first_name&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;owner_last_name&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="n"&gt;company1&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Company&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Pear&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;John&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Doe&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;company2&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Company&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Pulses&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;John&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Doe&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;As you can see this is in direct contrast with the initial modelling that comes from our perception of the relationship between the two in the real world, which in turn comes from the specific word "owner" that I used. If I used a different word like "president" or "CEO", you would immediately accept the second solution as more natural, as the "president" is one of many employees.&lt;/p&gt;
+&lt;p&gt;The code above is not satisfactory, though, as it initialises &lt;code&gt;Owner&lt;/code&gt; every time we create a company, while we might want to use the same instance. Again, this is not mandatory, it depends on the data contained in the &lt;code&gt;Owner&lt;/code&gt; objects and the level of consistency that we need. For example, if we add to the owner an attribute &lt;code&gt;online&lt;/code&gt; to mark that they are currently using the website and can be reached on the internal chat, we don't want have to cycle between all companies and set the owner's online status for each of them if the owner is the same. So, we might want to change the way we compose them, passing an instance of &lt;code&gt;Owner&lt;/code&gt; instead of the data used to initialise it.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Owner&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;first_name&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;last_name&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;online&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="kc"&gt;False&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;first_name&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;first_name&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;last_name&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;last_name&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;online&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;online&lt;/span&gt;
+
+&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Company&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;name&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;owner&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;name&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;name&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;owner&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;owner&lt;/span&gt;
+
+&lt;span class="n"&gt;owner1&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Owner&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;John&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Doe&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;company1&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Company&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Pear&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;owner1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;company2&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Company&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Pulses&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;owner1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Clearly, if the class &lt;code&gt;Company&lt;/code&gt; has no other purpose than having a name, using a class is overkill, so this design might be further reduced to an &lt;code&gt;Owner&lt;/code&gt; with a list of company names.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Owner&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;first_name&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;last_name&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;first_name&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;first_name&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;last_name&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;last_name&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;companies&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[]&lt;/span&gt;
+
+&lt;span class="n"&gt;owner1&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Owner&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;John&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Doe&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;owner1&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;companies&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;extend&lt;/span&gt;&lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Pear&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Pulses&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Can we use inheritance? Now I am stretching the example to its limit, but I can accept there might be a use case for something like this.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Owner&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;first_name&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;last_name&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;first_name&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;first_name&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;last_name&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;last_name&lt;/span&gt;
+
+&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Company&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Owner&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;name&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;owner_first_name&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;owner_last_name&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;name&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;name&lt;/span&gt;
+        &lt;span class="nb"&gt;super&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;owner_first_name&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;owner_last_name&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="n"&gt;company1&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Company&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Pear&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;John&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Doe&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;company2&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Company&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Pulses&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;John&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Doe&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;As I showed in the previous sections, though, this code smells as soon as we start adding something like the &lt;code&gt;email&lt;/code&gt; address.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Owner&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;first_name&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;last_name&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;email&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;first_name&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;first_name&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;last_name&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;last_name&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;email&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;email&lt;/span&gt;
+
+&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Company&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Owner&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;name&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;owner_first_name&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;owner_last_name&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;email&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;name&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;name&lt;/span&gt;
+        &lt;span class="nb"&gt;super&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;owner_first_name&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;owner_last_name&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;email&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="n"&gt;company1&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Company&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Pear&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;John&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Doe&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;company2&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Company&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Pulses&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;John&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Doe&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Is &lt;code&gt;email&lt;/code&gt; that of the company or the personal one of its owner? There is a clash, and this is a good example of "state pollution": both attributes have the same name, but they represent different things and might need to coexist.&lt;/p&gt;
+&lt;p&gt;In conclusion, as you can see we have to be very careful to discuss relationships between objects in the context of our domain and avoid losing connection with the business logic.&lt;/p&gt;
+&lt;h2 id="mixing-the-two-composed-inheritance"&gt;Mixing the two: composed inheritance&lt;a class="headerlink" href="#mixing-the-two-composed-inheritance" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Speaking of blurry separations, Python offers an interesting hook to its internal attribute resolution mechanism which allows us to create a hybrid between composition and inheritance that I call "composed inheritance".&lt;/p&gt;
+&lt;p&gt;Let's have a look at what happens internally when we deal with classes that are linked through inheritance.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="n"&gt;Parent:&lt;/span&gt;
+    &lt;span class="n"&gt;def&lt;/span&gt; &lt;span class="n"&gt;__init__&lt;/span&gt;(&lt;span class="nb"&gt;self&lt;/span&gt;, &lt;span class="nb"&gt;value&lt;/span&gt;):
+        &lt;span class="nb"&gt;self&lt;/span&gt;.&lt;span class="nb"&gt;value&lt;/span&gt; = &lt;span class="nb"&gt;value&lt;/span&gt;
+
+    &lt;span class="n"&gt;def&lt;/span&gt; &lt;span class="n"&gt;info&lt;/span&gt;(&lt;span class="nb"&gt;self&lt;/span&gt;):
+        &lt;span class="nb"&gt;print&lt;/span&gt;(&lt;span class="nb"&gt;f&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;Value: {self.value}&amp;quot;&lt;/span&gt;)
+
+&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="n"&gt;Child&lt;/span&gt;(&lt;span class="n"&gt;Parent&lt;/span&gt;):
+    &lt;span class="n"&gt;def&lt;/span&gt; &lt;span class="n"&gt;is_even&lt;/span&gt;(&lt;span class="nb"&gt;self&lt;/span&gt;):
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="nb"&gt;self&lt;/span&gt;.&lt;span class="nb"&gt;value&lt;/span&gt; % &lt;span class="mi"&gt;2&lt;/span&gt; == &lt;span class="mi"&gt;0&lt;/span&gt;
+
+&lt;span class="n"&gt;c&lt;/span&gt; = &lt;span class="n"&gt;Child&lt;/span&gt;(&lt;span class="mi"&gt;5&lt;/span&gt;)
+&lt;span class="n"&gt;c&lt;/span&gt;.&lt;span class="n"&gt;info&lt;/span&gt;()
+&lt;span class="n"&gt;c&lt;/span&gt;.&lt;span class="n"&gt;is_even&lt;/span&gt;()
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;This is a trivial example of an inheritance relationship between &lt;code&gt;Child&lt;/code&gt; and &lt;code&gt;Parent&lt;/code&gt;, where &lt;code&gt;Parent&lt;/code&gt; provides the methods &lt;code&gt;__init__&lt;/code&gt; and &lt;code&gt;info&lt;/code&gt; and &lt;code&gt;Child&lt;/code&gt; augments the interface with the method &lt;code&gt;is_even&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Let's have a look at the internals of the two classes. &lt;code&gt;Parent.__dict__&lt;/code&gt; is&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;mappingproxy&lt;/span&gt;&lt;span class="p"&gt;({&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;__module__&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;__main__&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+              &lt;span class="s1"&gt;&amp;#39;__init__&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;function&lt;/span&gt; &lt;span class="n"&gt;__main__&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Parent&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;value&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+              &lt;span class="s1"&gt;&amp;#39;info&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;function&lt;/span&gt; &lt;span class="n"&gt;__main__&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Parent&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;info&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+              &lt;span class="s1"&gt;&amp;#39;__dict__&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;attribute&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;__dict__&amp;#39;&lt;/span&gt; &lt;span class="n"&gt;of&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;Parent&amp;#39;&lt;/span&gt; &lt;span class="n"&gt;objects&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+              &lt;span class="s1"&gt;&amp;#39;__weakref__&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;attribute&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;__weakref__&amp;#39;&lt;/span&gt; &lt;span class="n"&gt;of&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;Parent&amp;#39;&lt;/span&gt; &lt;span class="n"&gt;objects&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+              &lt;span class="s1"&gt;&amp;#39;__doc__&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="kc"&gt;None&lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;and &lt;code&gt;Child.__dict__&lt;/code&gt; is&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;mappingproxy&lt;/span&gt;&lt;span class="p"&gt;({&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;__module__&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;__main__&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+              &lt;span class="s1"&gt;&amp;#39;is_even&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;function&lt;/span&gt; &lt;span class="n"&gt;__main__&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Child&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;is_even&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+              &lt;span class="s1"&gt;&amp;#39;__doc__&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="kc"&gt;None&lt;/span&gt;&lt;span class="p"&gt;})&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Finally, the bond between the two is established through &lt;code&gt;Child.__bases__&lt;/code&gt;, which has the value &lt;code&gt;(__main__.Parent,)&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;So, when we call &lt;code&gt;c.is_even&lt;/code&gt; the instance has a bound method that comes from the class &lt;code&gt;Child&lt;/code&gt;, as its &lt;code&gt;__dict__&lt;/code&gt; contains the function &lt;code&gt;is_even&lt;/code&gt;. Conversely, when we call &lt;code&gt;c.info&lt;/code&gt; Python has to fetch it from &lt;code&gt;Parent&lt;/code&gt;, as &lt;code&gt;Child&lt;/code&gt; can't provide it. This mechanism is implemented by the method &lt;code&gt;__getattribute__&lt;/code&gt; that is the core of the Python inheritance system.&lt;/p&gt;
+&lt;p&gt;As I mentioned before, however, there is a hook into this system that the language provides us, namely the method &lt;code&gt;__getattr__&lt;/code&gt;, which is not present by default. What happens is that when a class can't provide an attribute, Python &lt;em&gt;first&lt;/em&gt; tries to get the attribute with the standard inheritance mechanism but if it can't be found, as a last resort it tries to run &lt;code&gt;__getattr__&lt;/code&gt; passing the attribute name.&lt;/p&gt;
+&lt;p&gt;An example can definitely clarify the matter.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Parent&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;value&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;value&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;value&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;info&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="sa"&gt;f&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Value: &lt;/span&gt;&lt;span class="si"&gt;{&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;value&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Child&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Parent&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;is_even&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;value&lt;/span&gt; &lt;span class="o"&gt;%&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__getattr__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;attr&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;attr&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;secret&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;a_secret_string&amp;quot;&lt;/span&gt;
+
+        &lt;span class="k"&gt;raise&lt;/span&gt; &lt;span class="ne"&gt;AttributeError&lt;/span&gt;
+
+&lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Child&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Now, if we try to access &lt;code&gt;c.secret&lt;/code&gt;, Python would raise an &lt;code&gt;AttributeError&lt;/code&gt;, as neither &lt;code&gt;Child&lt;/code&gt; nor &lt;code&gt;Parent&lt;/code&gt; can provide that attribute. As a last resort, though, Python runs &lt;code&gt;c.__getattr__("secret")&lt;/code&gt;, and the code of that method that we implemented in the class &lt;code&gt;Child&lt;/code&gt; returns the string &lt;code&gt;"a_secret_string"&lt;/code&gt;. Please note that the value of the argument &lt;code&gt;attr&lt;/code&gt; is the &lt;em&gt;name&lt;/em&gt; of the attribute as a string.&lt;/p&gt;
+&lt;p&gt;Because of the catch-all nature of &lt;code&gt;__getattr__&lt;/code&gt;, we eventually have to raise an &lt;code&gt;AttributeError&lt;/code&gt; to keep the inheritance mechanism working, unless we actually need or want to implement something very special.&lt;/p&gt;
+&lt;p&gt;This opens the door to an interesting hybrid solution where we can compose objects retaining an automatic delegation mechanism.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Parent&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;value&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;value&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;value&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;info&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="sa"&gt;f&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Value: &lt;/span&gt;&lt;span class="si"&gt;{&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;value&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Child&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;value&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;parent&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Parent&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;value&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;is_even&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;value&lt;/span&gt; &lt;span class="o"&gt;%&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__getattr__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;attr&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="nb"&gt;getattr&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;parent&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;attr&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Child&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;c&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;value&lt;/span&gt;
+&lt;span class="n"&gt;c&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;info&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;span class="n"&gt;c&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;is_even&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;As you can see, here &lt;code&gt;Child&lt;/code&gt; is composing &lt;code&gt;Parent&lt;/code&gt; and there is no inheritance between the two. We can nevertheless access &lt;code&gt;c.value&lt;/code&gt; and call &lt;code&gt;c.info&lt;/code&gt;, thanks to the face that &lt;code&gt;Child.__getattr__&lt;/code&gt; is delegating everything can't be found in &lt;code&gt;Child&lt;/code&gt; to the instance of &lt;code&gt;Parent&lt;/code&gt; stored in &lt;code&gt;self.parent&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Note: don't confuse &lt;code&gt;getattr&lt;/code&gt; with &lt;code&gt;__getattr__&lt;/code&gt;. The former is a builtin function that gets an attribute provided its name, a replacement for the dotted notation when the name of the attribute is known as a string. The latter is the hook into the inheritance mechanism that I described in this section.&lt;/p&gt;
+&lt;p&gt;Now, this is very powerful, but is it also useful?&lt;/p&gt;
+&lt;p&gt;I think this is not one of the techniques that will drastically change the way you write code in Python, but it can definitely help you to use composition instead of inheritance even when the amount of methods that you have to wrap is high. One of the limits of composition is that you are at the extreme spectrum of automatism; while inheritance is completely automatic, composition doesn't do anything for you. This means that when you compose objects you need to decide which methods or attributes of the contained objects you want to wrap, in order to expose then in the container object. In the previous example, the class &lt;code&gt;Child&lt;/code&gt; might want to expose the attribute &lt;code&gt;value&lt;/code&gt; and the method &lt;code&gt;info&lt;/code&gt;, which would result in something like&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Parent&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;value&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;value&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;value&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;info&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="sa"&gt;f&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Value: &lt;/span&gt;&lt;span class="si"&gt;{&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;value&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Child&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;value&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;parent&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Parent&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;value&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;is_even&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;value&lt;/span&gt; &lt;span class="o"&gt;%&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;info&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;parent&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;info&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+    &lt;span class="nd"&gt;@property&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;value&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;parent&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;value&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;As you can easily see, the more &lt;code&gt;Child&lt;/code&gt; wants to expose of the &lt;code&gt;Parent&lt;/code&gt; interface, the more wrapper methods and properties you need. To be perfectly clear, in this example the code above smells, as there are too many one-liner wrappers, which tells me it would be better to use inheritance. But if the class &lt;code&gt;Child&lt;/code&gt; had a dozen of its own methods, suddenly it would make sense to do something like this, and in that case, &lt;code&gt;__getattr__&lt;/code&gt; might come in handy.&lt;/p&gt;
+&lt;h2 id="final-words"&gt;Final words&lt;a class="headerlink" href="#final-words" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Both composition and inheritance are tools, and both exist to serve the bigger purpose of code reuse, so learn their strength and their weaknesses, so that you might be able to use the correct one and avoid future issues in your code.&lt;/p&gt;
+&lt;p&gt;I hope this rather long discussion helped you to get a better picture of the options you have when you design an object-oriented system, and also maybe introduced some new ideas or points of view if you are already comfortable with the concepts I wrote about.&lt;/p&gt;
+&lt;h2 id="feedback"&gt;Feedback&lt;a class="headerlink" href="#feedback" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Feel free to reach me on &lt;a href="https://twitter.com/thedigicat"&gt;Twitter&lt;/a&gt; if you have questions. The &lt;a href="https://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues"&gt;GitHub issues&lt;/a&gt; page is the best place to submit corrections.&lt;/p&gt;</content><category term="Programming, Projects, Retro"></category><category term="OOP"></category><category term="Python"></category><category term="Python3"></category></entry><entry><title>A game of tokens: write an interpreter in Python with TDD - Part 5</title><link href="https://www.thedigitalcatonline.com/blog/2020/08/09/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-5/" rel="alternate"></link><published>2020-08-09T18:00:00+01:00</published><updated>2020-08-09T18:00:00+01:00</updated><author><name>Leonardo Giordani</name></author><id>tag:www.thedigitalcatonline.com,2020-08-09:/blog/2020/08/09/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-5/</id><summary type="html"></summary><content type="html">&lt;h2 id="introduction"&gt;Introduction&lt;a class="headerlink" href="#introduction" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;This is part 5 of &lt;a href="https://www.thedigitalcatonline.com/blog/2017/05/09/a-game-of-tokens-write-an-interpreter-in-python-with-tdd-part-1/"&gt;A game of tokens&lt;/a&gt;, a series of posts where I build an interpreter in Python following a pure TDD methodology and engaging you in a sort of a game: I give you the tests and you have to write the code that passes them. After part 4 I had a long hiatus because I focused on other projects, but now I resurrected this series and I'm moving on.&lt;/p&gt;
 &lt;p&gt;First of all I reviewed the first 4 posts, merging the posts that contained the solutions. While this is definitely better for me, I think it might be better for the reader as well, this way it should be easier to follow along. Remember however that you learn if you do, not if you read!&lt;/p&gt;
 &lt;p&gt;Secondly, I was wondering in which direction to go, and I decided to shamelessly follow the steps of Ruslan Spivak, who first inspired this set of posts and who set off to build an Pascal interpreter; you can find the impressive series of posts Ruslan wrote on &lt;a href="https://ruslanspivak.com"&gt;his website&lt;/a&gt;. Thank you Ruslan for the great posts!&lt;/p&gt;
@@ -4602,93 +5083,4 @@ nginx_1         &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="o"&gt;[&lt;
 &lt;li&gt;The configuration of each file managed by Punch can override the global serializers or add new ones. See &lt;a href="https://punch.readthedocs.io/en/latest/configuration/#files"&gt;Configuration &amp;gt; FILES&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;Release notes: Punch can be configured to check if a pattern based on the new version is present in the managed files. This makes it simple to check if HISTORY files have been updated without requiring to interrupt the execution of the program and later restore it. See &lt;a href="https://punch.readthedocs.io/en/latest/advanced/#release-notes"&gt;Advanced configuration &amp;gt; Release notes&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;Read the full documentation &lt;a href="https://punch.readthedocs.io/en/latest/"&gt;here&lt;/a&gt;&lt;/p&gt;</content><category term="Projects"></category><category term="Git"></category><category term="Python"></category><category term="Python3"></category><category term="versioning"></category></entry><entry><title>Run a blog with pelican</title><link href="https://www.thedigitalcatonline.com/blog/2019/06/07/run-a-pelican-blog/" rel="alternate"></link><published>2019-06-07T15:30:00+01:00</published><updated>2019-06-07T15:30:00+01:00</updated><author><name>Leonardo Giordani</name></author><id>tag:www.thedigitalcatonline.com,2019-06-07:/blog/2019/06/07/run-a-pelican-blog/</id><summary type="html">&lt;p&gt;How to set up a static blog with Pelican, a step-by-step guide&lt;/p&gt;</summary><content type="html">&lt;p&gt;One of the biggest piece of advice I can give to beginner developers is: write a blog.&lt;/p&gt;
-&lt;p&gt;Writing, and in general teaching, is a perfect way to understand concepts. Some say that you cannot claim you understood something until you can explain it properly. This unfortunately doesn't take into account that not everyone is a good communicator, and writing (also technical writing) is an art, not just a set of checkboxes to tick.&lt;/p&gt;
-&lt;p&gt;Nevertheless, explaining a concept forces you to try to organise your thought, to write them down in a sequential way, to explore corners that you take for granted while the concepts involved are all but simple.&lt;/p&gt;
-&lt;p&gt;So my advice is once again: write a blog. Share your experience as a programmer, mathematician, physicist, data scientist (and thousands of other interesting jobs that I can't mention here). Don't worry if you don't have a revolutionary discovery to share with others. We are standing on the shoulders of giants, and every little contribution is welcome.&lt;/p&gt;
-&lt;p&gt;One of my most successful posts on this blog is something I wrote after fighting for 3 hours with a trivial Python syntax mistake. I was already a senior programmer, I did a novice mistake. I shared the solution and now that post has a huge amount of visits every day, which hopefully means that some people stuck with the same problem can quickly find a solution. Maybe these people will one day write the new Google or the new AWS, and I'm glad I helped them today.&lt;/p&gt;
-&lt;h1 id="pelican"&gt;Pelican&lt;a class="headerlink" href="#pelican" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
-&lt;p&gt;I run this blog since 2013. I wanted to use a static website generator because I liked the simplicity of the concept, and since GitHub was providing free hosting on &lt;a href="https://pages.github.com/"&gt;GitHub Pages&lt;/a&gt; I considered it a viable option.&lt;/p&gt;
-&lt;p&gt;I started with &lt;a href="https://jekyllrb.com/"&gt;Jekyll&lt;/a&gt;, a very well-known static website generator written in Ruby, because it was the system used by the vast majority of technical bloggers out there at the time. Unfortunately I'm not a Ruby programmer, so every issue I had with the build system that ended in a crash was a mystery to me. I also wanted to add functionalities to the system, and the language once again was a barrier. Jekyll is surely a very good system but it didn't suit my needs.&lt;/p&gt;
-&lt;p&gt;Since I didn't have the time to study Ruby at that point, I tried to find a good static site generator written in Python, a language that I know, and I found it in &lt;a href="https://blog.getpelican.com/"&gt;Pelican&lt;/a&gt;. Arguably, the Pelican website is not graphically amazing, and this worried me a bit, but I quickly discovered that the whole system is pretty good.&lt;/p&gt;
-&lt;p&gt;In 6 years, with the help of Pelican, I developed a wonderfully simple blogging work flow based on Git, so I decided to share my Pelican setup with a Cookiecutter template. Recently I refurbished the template to update it with the latest changes that I made to my personal setup and I realised that, despite the documentation, setting up a blog based on pelican might still be difficult for some.&lt;/p&gt;
-&lt;p&gt;In this post I will show you how to create your blog from scratch using Pelican. You don't need to know Python to use it, even though, as it happened to me with Jekyll, it might help if you want to get involved in the development of the project.&lt;/p&gt;
-&lt;p&gt;You can also run Pelican without this template, just follow the &lt;a href="http://docs.getpelican.com/en/latest/install.html"&gt;instructions&lt;/a&gt; on the official documentation. My template simplifies the initial installation, and creates some script that make you follow a specific work flow, but you are free to change them to suit you needs.&lt;/p&gt;
-&lt;p&gt;If you are not acquainted with static web sites have a look at the &lt;a href="https://en.wikipedia.org/wiki/Static_web_page"&gt;Wikipedia page&lt;/a&gt;.&lt;/p&gt;
-&lt;h1 id="prerequisites"&gt;Prerequisites&lt;a class="headerlink" href="#prerequisites" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
-&lt;p&gt;You need to have &lt;a href="https://www.python.org/"&gt;Python 3&lt;/a&gt; and &lt;a href="https://git-scm.com/"&gt;Git&lt;/a&gt; installed in your system. &lt;a href="https://github.com/petervanderdoes/gitflow-avh"&gt;Git Flow&lt;/a&gt; is optional, so if you don't want to use it you can avoid installing it.&lt;/p&gt;
-&lt;h1 id="github"&gt;GitHub&lt;a class="headerlink" href="#github" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
-&lt;p&gt;You need to create two repositories in your GitHub account. The first one will host the source files of your blog (the &lt;em&gt;source&lt;/em&gt; repository), while the second one will host the actual static site files (deploy repository). Follow the instructions &lt;a href="https://help.github.com/en/articles/create-a-repo"&gt;here&lt;/a&gt; if you are not sure how to create them.&lt;/p&gt;
-&lt;p&gt;Call the first repository &lt;code&gt;blog_source&lt;/code&gt; and the second one &lt;code&gt;&amp;lt;your_user_name&amp;gt;.github.io&lt;/code&gt;. The former is just a convention followed by my template, while the latter is enforced by GitHub pages, which uses by default that repository to publish the website at the address with that name.&lt;/p&gt;
-&lt;h1 id="install-the-template"&gt;Install the template&lt;a class="headerlink" href="#install-the-template" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
-&lt;p&gt;Create a &lt;a href="https://docs.python.org/3/tutorial/venv.html"&gt;Python virtual environment&lt;/a&gt; and install &lt;code&gt;cookiecutter&lt;/code&gt;&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;pip install cookiecutter
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;Then run &lt;code&gt;cookiecutter&lt;/code&gt; on the template I prepared&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;cookiecutter https://github.com/lgiordani/cookiecutter-pelicanblog.git
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;Now, you will be asked some questions, let's look at them in detail. Remember that you can always start from scratch of fix the values you entered manually later.&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;github_username [yourusername]&lt;/code&gt; - Well, this should be self-explanatory.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;blog_source_repo [blog_source]&lt;/code&gt; - This is just the name of the source repository that you created on GitHub. You can accept the default if you didn't change the name.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;deploy_repository [yourusername.github.com]&lt;/code&gt; - This is the name of the deploy repository, i.e. the one that contains the actual static website. The default value is already filled with your GitHub username, so if you are setting up a GitHub Pages blog you can just accept it.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;deploy_directory [deploy]&lt;/code&gt; - The local directory where the deploy repository is cloned and that will be updated by the deployment process. By default, this is set to &lt;code&gt;deploy&lt;/code&gt; inside the project directory.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;use_versioning [y]&lt;/code&gt; - Say &lt;code&gt;y&lt;/code&gt; if you want to have a release process for your website with a version number and associated Git tags.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;use_git_flow [y]&lt;/code&gt; - Say &lt;code&gt;y&lt;/code&gt; if you want to initialise Git Flow on the repository (you need to have Git Flow already installed in the system).&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h1 id="set-up-the-environment"&gt;Set up the environment&lt;a class="headerlink" href="#set-up-the-environment" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
-&lt;p&gt;Now enter the directory that was created by the template, install the requirements and run the &lt;code&gt;setup.sh&lt;/code&gt; script&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nb"&gt;cd&lt;/span&gt; &amp;lt;blog_source_repo&amp;gt;
-pip install -r requirements.txt
-./setup.sh
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;This script performs the following actions&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;it initializes git in the local repository, adding the source repository as a remote with the name &lt;code&gt;origin&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;if you decided to use Git Flow, it initializes the repository, creating the &lt;code&gt;develop&lt;/code&gt; branch.&lt;/li&gt;
-&lt;li&gt;it clones the https://github.com/getpelican/pelican-plugins repository&lt;/li&gt;
-&lt;li&gt;it clones the https://github.com/getpelican/pelican-themes repository&lt;/li&gt;
-&lt;li&gt;it creates the &lt;code&gt;deploy&lt;/code&gt; directory which is a local clone one of the deploy repository&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h1 id="configure-pelican"&gt;Configure Pelican&lt;a class="headerlink" href="#configure-pelican" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
-&lt;p&gt;Now everything is ready to run the &lt;code&gt;pelican-quickstart&lt;/code&gt; script.&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;pelican-quickstart
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;This script asks the following questions. I marked with a &lt;strong&gt;!!!&lt;/strong&gt; the answers that are not up to you but depend on the current setup&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;Where do you want to create your new web site? [.]&lt;/code&gt; - &lt;strong&gt;!!!&lt;/strong&gt; Answer &lt;code&gt;pelican&lt;/code&gt; so everything will be installed in that directory inside the current one, keeping the installation tidy.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;What will be the title of this web site?&lt;/code&gt; - This is up to you&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;Who will be the author of this web site?&lt;/code&gt; - This is up to you&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;What will be the default language of this web site? [en]&lt;/code&gt; - This is up to you&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;Do you want to specify a URL prefix? e.g., https://example.com   (Y/n)&lt;/code&gt; &lt;strong&gt;!!!&lt;/strong&gt; Answer &lt;code&gt;Y&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;What is your URL prefix? (see above example; no trailing slash)&lt;/code&gt; &lt;strong&gt;!!!&lt;/strong&gt; This is &lt;code&gt;https://&amp;lt;username&amp;gt;.github.io&lt;/code&gt; if you are using GH pages&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;Do you want to enable article pagination? (Y/n)&lt;/code&gt; - This is up to you&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;How many articles per page do you want? [10]&lt;/code&gt; - This is up to you&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;What is your time zone? [Europe/Paris]&lt;/code&gt; - This is up to you&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;Do you want to generate a tasks.py/Makefile to automate generation and publishing? (Y/n)&lt;/code&gt; - &lt;strong&gt;!!!&lt;/strong&gt; Answer &lt;code&gt;Y&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;Answer &lt;code&gt;n&lt;/code&gt; to all the following questions&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;If you have questions on this part you can read the &lt;a href="http://docs.getpelican.com/en/latest/install.html"&gt;Pelican documentation&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;Now you can enter the &lt;code&gt;pelican&lt;/code&gt; directory and run &lt;code&gt;make devserver&lt;/code&gt; which will run the development server at http://localhost:8000. &lt;a href="http://docs.getpelican.com/en/latest/publish.html#make"&gt;This page&lt;/a&gt; of the official documentation explains all the options of the Makefile.&lt;/p&gt;
-&lt;h1 id="the-work-flow"&gt;The work flow&lt;a class="headerlink" href="#the-work-flow" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
-&lt;p&gt;The work flow that you will follow using this setup is the following (I assume you use Git Flow, change the git commands accordingly if you are using another flow)&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;Create a git branch: &lt;code&gt;git flow feature start &amp;lt;branch&amp;gt;&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;Create one or more new articles / Edit previous articles: create the files as &lt;code&gt;pelican/content/&amp;lt;slug&amp;gt;.markdown&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;Commit: &lt;code&gt;git commit&lt;/code&gt; (repeat 2 and 3 until you are satisfied with the results)&lt;/li&gt;
-&lt;li&gt;Merge the branch: &lt;code&gt;git flow feature finish&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;Release: &lt;code&gt;./release.sh&lt;/code&gt; (this runs Punch to create a new release)&lt;/li&gt;
-&lt;li&gt;Deploy: &lt;code&gt;./deploy.sh&lt;/code&gt; (this runs Pelican to create the static site and copies everything in the &lt;code&gt;deploy&lt;/code&gt; directory)&lt;/li&gt;
-&lt;li&gt;Publish: &lt;code&gt;./publish.sh&lt;/code&gt; (this adds, commits, and pushes the files in the &lt;code&gt;deploy&lt;/code&gt; directory)&lt;/li&gt;
-&lt;/ol&gt;
-&lt;p&gt;Each one of these steps, with the notable exception of the second one, is performed through a single command and takes up to few seconds in the worst case. I prefer to have control on the publishing process, so often I run the git commands manually in the &lt;code&gt;deploy&lt;/code&gt; directory, but you can safely use the provided Make directive.&lt;/p&gt;
-&lt;h1 id="versioning"&gt;Versioning&lt;a class="headerlink" href="#versioning" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
-&lt;p&gt;Versioning is not the most important thing to do in a blog, but I personally like to have a trace of what I created and when in my Git log. I use &lt;a href="https://pypi.org/project/punch.py/"&gt;Punch&lt;/a&gt;, a package that I developed to replace bumpversion. If you want to customise the default versioning scheme contained in the template read the &lt;a href="https://punch.readthedocs.io/en/latest/"&gt;Punch documentation&lt;/a&gt;.&lt;/p&gt;</content><category term="Projects"></category><category term="blogging"></category><category term="Python"></category><category term="Python3"></category><category term="pelican"></category></entry></feed>
+&lt;p&gt;Read the full documentation &lt;a href="https://punch.readthedocs.io/en/latest/"&gt;here&lt;/a&gt;&lt;/p&gt;</content><category term="Projects"></category><category term="Git"></category><category term="Python"></category><category term="Python3"></category><category term="versioning"></category></entry></feed>
