@@ -1,5 +1,581 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>The Digital Cat - OOP</title><link href="https://www.thedigitalcatonline.com/" rel="alternate"></link><link href="https://www.thedigitalcatonline.com/categories/oop/atom.xml" rel="self"></link><id>https://www.thedigitalcatonline.com/</id><updated>2020-08-17T09:00:00+01:00</updated><subtitle>Adventures of a curious cat in the land of programming</subtitle><entry><title>Delegation: composition and inheritance in object-oriented programming</title><link href="https://www.thedigitalcatonline.com/blog/2020/08/17/delegation-composition-and-inheritance-in-object-oriented-programming/" rel="alternate"></link><published>2020-08-17T09:00:00+01:00</published><updated>2020-08-17T09:00:00+01:00</updated><author><name>Leonardo Giordani</name></author><id>tag:www.thedigitalcatonline.com,2020-08-17:/blog/2020/08/17/delegation-composition-and-inheritance-in-object-oriented-programming/</id><summary type="html"></summary><content type="html">&lt;h2 id="introduction"&gt;Introduction&lt;a class="headerlink" href="#introduction" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>The Digital Cat - OOP</title><link href="https://www.thedigitalcatonline.com/" rel="alternate"></link><link href="https://www.thedigitalcatonline.com/categories/oop/atom.xml" rel="self"></link><id>https://www.thedigitalcatonline.com/</id><updated>2020-09-10T10:00:00+02:00</updated><subtitle>Adventures of a curious cat in the land of programming</subtitle><entry><title>Test Driven Development in Python from scratch - Part 1</title><link href="https://www.thedigitalcatonline.com/blog/2020/09/10/test-driven-development-in-python-from-scratch-part-1/" rel="alternate"></link><published>2020-09-10T10:00:00+02:00</published><updated>2020-09-10T10:00:00+02:00</updated><author><name>Leonardo Giordani</name></author><id>tag:www.thedigitalcatonline.com,2020-09-10:/blog/2020/09/10/test-driven-development-in-python-from-scratch-part-1/</id><summary type="html"></summary><content type="html">&lt;p&gt;This series of posts comes directly from my book &lt;a href="https://leanpub.com/clean-architectures-in-python"&gt;Clean Architectures in Python&lt;/a&gt;. As I am reviewing the book to prepare a second edition, I realised that Harry percival was right when he said that the initial part on TDD shouldn't be in the book. That's a prerequisite to follow the chapters on the clean architecture, but it is something many programmers already know and they might be surprised to find it in a book that discusses architectures.&lt;/p&gt;
+&lt;p&gt;So, I decided to move it here before I start working on a new version of the book. I also followed the advice of &lt;a href="https://github.com/valorien"&gt;valorien&lt;/a&gt;, who pointed out that the main example has some bad naming choices, and so I reworked the code.&lt;/p&gt;
+&lt;h2 id="introduction"&gt;Introduction&lt;a class="headerlink" href="#introduction" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;"Test-Driven Development" (TDD) is fortunately one of the names that I can spot most frequently when people talk about methodologies. Unfortunately, many programmers still do not follow it, fearing that it will impose a further burden on the already difficult life of the developer.&lt;/p&gt;
+&lt;p&gt;In this chapter I will try to outline the basic concept of TDD and to show you how your job as a programmer can greatly benefit from it. I will develop a very simple project to show how to practically write software following this methodology.&lt;/p&gt;
+&lt;p&gt;TDD is a &lt;em&gt;methodology&lt;/em&gt;, something that can help you to create better code. But it is not going to solve all your problems. As with all methodologies you have to pay attention not to commit blindly to it. Try to understand the reasons why certain practices are suggested by the methodology and you will also understand when and why you can or have to be flexible.&lt;/p&gt;
+&lt;p&gt;Keep also in mind that testing is a broader concept that doesn't end with TDD, which focuses a lot on unit testing, a specific type of test that helps you to develop the API of your library/package. There are other types of tests, like integration or functional ones, that are not specifically part of the TDD methodology, strictly speaking, even though the TDD approach can be extended to any testing activity.&lt;/p&gt;
+&lt;h2 id="a-real-life-example"&gt;A real-life example&lt;a class="headerlink" href="#a-real-life-example" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Let's start with a simple example taken from a programmer's everyday life.&lt;/p&gt;
+&lt;p&gt;The programmer is in the office with other colleagues, trying to nail down an issue in some part of the software. Suddenly the boss storms into the office, and addresses the programmer:&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Boss&lt;/strong&gt;: I just met with the rest of the board. Our clients are not happy, we didn't fix enough bugs in the last two months.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Programmer&lt;/strong&gt;: I see. How many bugs did we fix?&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Boss&lt;/strong&gt;: Well, not enough!&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Programmer&lt;/strong&gt;: OK, so how many bugs do we have to fix every month?&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Boss&lt;/strong&gt;: More!&lt;/p&gt;
+&lt;p&gt;I guess you feel very sorry for the poor programmer. Apart from the aggressive attitude of the boss, what is the real issue in this conversation? At the end of it there is no hint for the programmer and their colleagues about what to do next. They don't have any clue about what they have to change. They can definitely try to work harder, but the boss didn't refer to actual figures, so it will be definitely hard for the developers to understand if they improved "enough".&lt;/p&gt;
+&lt;p&gt;The classical &lt;a href="https://en.wikipedia.org/wiki/Sorites_paradox"&gt;sorites paradox&lt;/a&gt; may help to understand the issue. One of the standard formulations, taken from the Wikipedia page, is&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;1,000,000 grains of sand is a heap of sand (Premise 1)&lt;/p&gt;
+&lt;p&gt;A heap of sand minus one grain is still a heap. (Premise 2)&lt;/p&gt;
+&lt;p&gt;So 999,999 grains is a heap of sand.&lt;/p&gt;
+&lt;p&gt;A heap of sand minus one grain is still a heap. (Premise 2)&lt;/p&gt;
+&lt;p&gt;So 999,998 grains is a heap of sand.&lt;/p&gt;
+&lt;p&gt;...&lt;/p&gt;
+&lt;p&gt;So one grain is a heap of sand.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Where is the issue? The concept expressed by the word "heap" is nebulous, it is not defined clearly enough to allow the process to find a stable point, or a solution.&lt;/p&gt;
+&lt;p&gt;When you write software you face that same challenge. You cannot conceive a function and just expect it "to work", because this is not clearly defined. How do you test if the function that you wrote "works"? What do you mean by "works"? TDD forces you to &lt;strong&gt;clearly state your goal&lt;/strong&gt; before you write the code. Actually, the TDD mantra is "Test first, code later", which can be translated to "Goal first, solution later". Will shortly see a practical example of this.&lt;/p&gt;
+&lt;p&gt;For the time being, consider that this is a valid practice also outside the realm of software creation. Whoever runs a business knows that you need to be able to extract some numbers (KPIs) from the activity of your company, because it is by comparing those numbers with some predefined thresholds that you can easily tell if the business is healthy or not. KPIs are a form of test, and you have to define them in advance, according to the expectations or needs that you have. &lt;/p&gt;
+&lt;p&gt;Pay attention. Nothing prevents you from changing the thresholds as a reaction to external events. You may consider that, given the incredible heat wave that hit your country, the amount of coats that your company sold could not reach the goal. So, because of a specific event, you can justify a change in the test (KPI). If you didn't have the test you would have just generically recorded that you earned less money.&lt;/p&gt;
+&lt;p&gt;Going back to software and TDD, following this methodology you are forced to state clear goals like&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nb"&gt;sum&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;9&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Let me read this test for you: there will be a &lt;code&gt;sum&lt;/code&gt; function available in the system that accepts two integers. If the two integers are 4 and 5 the function will return 9.&lt;/p&gt;
+&lt;p&gt;As you can see there are many things that are tested by this statement.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;The function exists and can be imported&lt;/li&gt;
+&lt;li&gt;The function accepts two integers&lt;/li&gt;
+&lt;li&gt;Passing 4 and 5 as inputs, the output of the function will be 9.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Pay attention that at this stage there is no code that implements the &lt;code&gt;sum&lt;/code&gt; function, the tests will fail for sure.&lt;/p&gt;
+&lt;p&gt;As we will see with a practical example in the next chapter, what I explained in this section will become a set of rules of the methodology.&lt;/p&gt;
+&lt;h2 id="a-simple-tdd-project"&gt;A simple TDD project&lt;a class="headerlink" href="#a-simple-tdd-project" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;The project we are going to develop is available at &lt;a href="https://github.com/lgiordani/simple_calculator"&gt;https://github.com/lgiordani/simple_calculator&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;This project is purposefully extremely simple. You don't need to be an experienced Python programmer to follow this chapter, but you need to know the basics of the language. The goal of this series of posts is not that of making you write the best Python code, but that of allowing you learn the TDD work flow, so don't be too worried if your code is not perfect.&lt;/p&gt;
+&lt;p&gt;Methodologies are like sports or arts: you cannot learn them just by reading their description on a book. You have to practice them. Thus, you should avoid as much as possible to just follow this chapter reading the code passively. Instead, you should try to write the code and to try new solutions to the problems that I discuss. This is very important, as it actually makes you use TDD. This way, at the end of the chapter you will have a personal experience of what TDD is like.&lt;/p&gt;
+&lt;p&gt;The repository is tagged, and at the end of each section you will find a link to the relative tag that contains the working solution.&lt;/p&gt;
+&lt;h2 id="setup-the-project"&gt;Setup the project&lt;a class="headerlink" href="#setup-the-project" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Clone the project repository and move to the &lt;code&gt;develop&lt;/code&gt; branch. The &lt;code&gt;master&lt;/code&gt; branch contains the full solution, and I use it to maintain the repository, but if you want to code along you need to start from scratch. If you prefer, you can clearly clone it on GitHub and make your own copy of the repository.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;git clone https://github.com/lgiordani/simple_calculator
+&lt;span class="nb"&gt;cd&lt;/span&gt; simple_calculator
+git checkout develop
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Create a virtual environment following your preferred process and install the requirements&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;pip install -r requirements/dev.txt
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;You should at this point be able to run&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;pytest -svv
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;and get an output like&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;=============================== test session starts ===============================
+platform linux -- Python XXXX, pytest-XXXX, py-XXXX, pluggy-XXXX --
+cabook/venv3/bin/python3
+cachedir: .cache
+rootdir: cabook/code/calc, inifile: pytest.ini
+plugins: cov-XXXX
+collected 0 items 
+
+============================== no tests ran in 0.02s ==============================
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h2 id="requirements"&gt;Requirements&lt;a class="headerlink" href="#requirements" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;The goal of the project is to write a class &lt;code&gt;SimpleCalculator&lt;/code&gt; that performs calculations: addition, subtraction, multiplication, and division. Addition and multiplication shall accept multiple arguments. Division shall return a float value, and division by zero shall return the string &lt;code&gt;"inf"&lt;/code&gt;. Multiplication by zero must raise a &lt;code&gt;ValueError&lt;/code&gt; exception. The class will also provide a function to compute the average of an iterable like a list. This function gets two optional upper and lower thresholds and should remove from the computation the values that fall outside these boundaries.&lt;/p&gt;
+&lt;p&gt;As you can see the requirements are pretty simple, and a couple of them are definitely not "good" requirements, like the behaviour of division and multiplication. I added those requirements for the sake of example, to show how to deal with exceptions when developing in TDD.&lt;/p&gt;
+&lt;h2 id="step-1-adding-two-numbers"&gt;Step 1 - Adding two numbers&lt;a class="headerlink" href="#step-1-adding-two-numbers" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;The first test we are going to write is one that checks if the class &lt;code&gt;SimpleCalculator&lt;/code&gt; can perform an addition. Add the following code to the file &lt;code&gt;tests/test_main.py&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;simple_calculator.main&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;SimpleCalculator&lt;/span&gt;
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_add_two_numbers&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+    &lt;span class="n"&gt;calculator&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;SimpleCalculator&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+    &lt;span class="n"&gt;result&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;calculator&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;add&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;result&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;9&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;As you can see the first thing we do is to import the class &lt;code&gt;SimpleCalculator&lt;/code&gt; that we are supposed to write. This class doesn't exist yet, don't worry, you didn't skip any passage.&lt;/p&gt;
+&lt;p&gt;The test is a standard function (this is how pytest works), and the function name shall begin with &lt;code&gt;test_&lt;/code&gt; so that pytest can automatically discover all the tests. I tend to give my tests a descriptive name, so it is easier later to come back and understand what the test is about with a quick glance. You are free to follow the style you prefer but in general remember that naming components in a proper way is one of the most difficult things in programming. So better to get a handle on it as soon as possible.&lt;/p&gt;
+&lt;p&gt;The body of the test function is pretty simple. The class &lt;code&gt;SimpleCalculator&lt;/code&gt; is instantiated, and the method &lt;code&gt;add&lt;/code&gt; of the instance is called with two numbers, 4 and 5. The result is stored in the variable &lt;code&gt;result&lt;/code&gt;, which is later the subject of the test itself. The statement &lt;code&gt;assert result == 9&lt;/code&gt; first computes &lt;code&gt;result == 9&lt;/code&gt; which is a boolean, with a value that is either &lt;code&gt;True&lt;/code&gt; or &lt;code&gt;False&lt;/code&gt;. The &lt;code&gt;assert&lt;/code&gt; keyword, then, silently passes if the argument is &lt;code&gt;True&lt;/code&gt;, but raises an exception if it is &lt;code&gt;False&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;And this is how you write tests in pytest: if your code doesn't raise any exception the test passes, otherwise it fails. The keyword &lt;code&gt;assert&lt;/code&gt; is used to force an exception in case of wrong result. Remember that pytest doesn't consider the return value of the function, so it can detect a failure only if it raises an exception.&lt;/p&gt;
+&lt;p&gt;Save the file and go back to the terminal. Execute &lt;code&gt;py.test -svv&lt;/code&gt; and you should receive the following error message&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;===================================== ERRORS ======================================
+_______________________ ERROR collecting tests/test_main.py _______________________
+
+[...]
+
+tests/test_main.py:4: in &amp;lt;module&amp;gt;
+    from simple_calculator.main import SimpleCalculator
+E   ImportError: cannot import name &amp;#39;SimpleCalculator&amp;#39; from &amp;#39;simple_calculator.main&amp;#39;
+!!!!!!!!!!!!!!!!!!!!!! Interrupted: 1 errors during collection !!!!!!!!!!!!!!!!!!!!!
+============================= 1 error in 0.20 seconds =============================
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;No surprise here, actually, as we just tried to use something that doesn't exist. This is good, the test is showing us that something we suppose exists actually doesn't.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;TDD rule number 1:&lt;/strong&gt; Test first, code later&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;This, by the way, is not yet an error in a test. The error happens very soon, during the tests collection phase (as shown by the message in the bottom line &lt;code&gt;Interrupted: 1 errors during collection&lt;/code&gt;). Given this, the methodology is still valid, as we wrote a test and it fails because of an error or a missing feature in the code.&lt;/p&gt;
+&lt;p&gt;Let's fix this issue. Open the file &lt;code&gt;simple_calculator/main.py&lt;/code&gt; and add this code&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;SimpleCalculator&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="k"&gt;pass&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;But, I hear you scream, this class doesn't implement any of the requirements that are in the project. Yes, this is the hardest lesson you have to learn when you start using TDD. The development is ruled by the tests, not by the requirements. The requirements are used to write the tests, the tests are used to write the code. You shouldn't worry about something that is more than one level above the current one.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;TDD rule number 2:&lt;/strong&gt; Add the reasonably minimum amount of code you need to pass the tests&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Run the test again, and this time you should receive a different error, that is&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;=============================== test session starts ===============================
+platform linux -- Python XXXX, pytest-XXXX, py-XXXX, pluggy-XXXX --
+cachedir: .pytest_cache
+rootdir: simple_calculator, inifile: pytest.ini
+plugins: cov-XXXX
+collected 1 item
+
+tests/test_main.py::test_add_two_numbers FAILED
+
+==================================== FAILURES =====================================
+______________________________ test_add_two_numbers _______________________________
+
+
+    def test_add_two_numbers():
+        calculator = SimpleCalculator()
+
+&amp;gt;       result = calculator.add(4, 5)
+E       AttributeError: &amp;#39;SimpleCalculator&amp;#39; object has no attribute &amp;#39;add&amp;#39;
+
+tests/test_main.py:9: AttributeError
+============================ 1 failed in 0.04 seconds =============================
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;This is the first proper pytest failure report that we receive, so it's time to learn how to read the output. The first lines show you general information about the system where the tests are run&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;=============================== test session starts ===============================
+platform linux -- Python XXXX, pytest-XXXX, py-XXXX, pluggy-XXXX --
+cachedir: .pytest_cache
+rootdir: simple_calculator, inifile: pytest.ini
+plugins: cov-XXXX
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;You can see here the operating system and a short list of the versions of the main packages involved in running pytest: Python, pytest itself, &lt;code&gt;py&lt;/code&gt; (https://py.readthedocs.io/en/latest/) and &lt;code&gt;pluggy&lt;/code&gt; (https://pluggy.readthedocs.io/en/latest/). You can also see here where pytest is reading its configuration from (&lt;code&gt;pytest.ini&lt;/code&gt;), and the pytest plugins that are installed. As this header is standard I will omit it from the output I will show in the rest of the chapter.&lt;/p&gt;
+&lt;p&gt;The second part of the output shows the list of files containing tests and the result of each test&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;collected 1 item
+
+tests/test_main.py::test_add_two_numbers FAILED
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Please note that this list is formatted with a syntax that can be given directly to pytest to run a single test. In this case we already have only one test, but later you might run a single failing test giving the name shown here on the command line. For example&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;pytest -svv tests/test_main.py::test_add_two_numbers
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The third part of the output shows details on the failing tests, if any&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;______________________________ test_add_two_numbers _______________________________
+
+    def test_add_two_numbers():
+        calculator = SimpleCalculator()
+
+&amp;gt;       result = calculator.add(4, 5)
+E       AttributeError: &amp;#39;SimpleCalculator&amp;#39; object has no attribute &amp;#39;add&amp;#39;
+
+tests/test_main.py:9: AttributeError
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;For each failing test, pytest shows a header with the name of the test and the part of the code that raised the exception. At the end of each box, pytest shows the line of the test file where the error happened.&lt;/p&gt;
+&lt;p&gt;Back to the project. The new error is no surprise, as the test uses the method &lt;code&gt;add&lt;/code&gt; that wasn't defined in the class. I bet you already guessed what I'm going to do, didn't you? This is the code that you should add to the class&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;SimpleCalculator&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;add&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;pass&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;And again, as you notice, we made the smallest possible addition to the code to pass the test. Running pytest again you should receive a different error message&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;_______________________________ test_add_two_numbers _______________________________
+
+    def test_add_two_numbers():
+        calculator = SimpleCalculator()
+
+&amp;gt;       result = calculator.add(4, 5)
+E       TypeError: add() takes 1 positional argument but 3 were given
+
+tests/test_main.py:9: TypeError
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The function we defined doesn't accept any argument other than &lt;code&gt;self&lt;/code&gt; (&lt;code&gt;def add(self)&lt;/code&gt;), but in the test we pass three of them (&lt;code&gt;calculator.add(4, 5)&lt;/code&gt;. Remember that in Python &lt;code&gt;self&lt;/code&gt; is implicit. Our move at this point is to change the function to accept the parameters that it is supposed to receive, namely two numbers. The code now becomes&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;SimpleCalculator&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;add&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;pass&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Run the test again, and you will receive another error&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;______________________________ test_add_two_numbers ________________________________
+
+    def test_add_two_numbers():
+        calculator = SimpleCalculator()
+
+        result = calculator.add(4, 5)
+
+&amp;gt;       assert result == 9
+E       assert None == 9
+E         -None
+E         +9
+
+tests/test_main.py:11: AssertionError
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The function returns &lt;code&gt;None&lt;/code&gt;, as it doesn't contain any code, while the test expects it to return &lt;code&gt;9&lt;/code&gt;. What do you think is the minimum code you can add to pass this test?&lt;/p&gt;
+&lt;p&gt;Well, the answer is&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;SimpleCalculator&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;add&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="mi"&gt;9&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;and this may surprise you (it should!). You might have been tempted to add some code that performs an addition between &lt;code&gt;a&lt;/code&gt; and &lt;code&gt;b&lt;/code&gt;, but this would violate the TDD principles, because you would have been driven by the requirements and not by the tests.&lt;/p&gt;
+&lt;p&gt;When you run pytest again, you will be rewarded by a success message&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;tests/test_main.py::test_add_two_numbers PASSED
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;I know this sound weird, but think about it for a moment: if your code works (that is, it passes the tests), you don't need anything more, as your tests should specify everything the code should do. Maybe in the future you will discover that this solution is not good enough, and at that point you will have to change it (this will happen with the next test, in this case). But for now everything works, and you shouldn't implement more than this.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Git tag:&lt;/strong&gt; &lt;a href="https://github.com/lgiordani/simple_calculator/tree/step-1-adding-two-numbers"&gt;step-1-adding-two-numbers&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id="step-2-adding-three-numbers"&gt;Step 2 - Adding three numbers&lt;a class="headerlink" href="#step-2-adding-three-numbers" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;The requirements state that "Addition and multiplication shall accept multiple arguments". This means that we should be able to execute not only &lt;code&gt;add(4, 5)&lt;/code&gt; like we did, but also &lt;code&gt;add(4, 5, 11)&lt;/code&gt;, &lt;code&gt;add(4, 5, 11, 2)&lt;/code&gt;, and so on. We can start testing this behaviour with the following test, that you should put in &lt;code&gt;tests/test_main.py&lt;/code&gt;, after the previous test that we wrote.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_add_three_numbers&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+    &lt;span class="n"&gt;calculator&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;SimpleCalculator&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+    &lt;span class="n"&gt;result&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;calculator&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;add&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;6&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;result&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;15&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;This test fails when we run the test suite&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;_____________________________ test_add_three_numbers _______________________________
+
+    def test_add_three_numbers():
+        calculator = SimpleCalculator()
+
+&amp;gt;       result = calculator.add(4, 5, 6)
+E       TypeError: add() takes 3 positional arguments but 4 were given
+
+tests/test_main.py:18: TypeError
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;for the obvious reason that the function we wrote in the previous section accepts only 2 arguments other than &lt;code&gt;self&lt;/code&gt;. What is the minimum code that you can write to fix this test?&lt;/p&gt;
+&lt;p&gt;Well, the simplest solution is to add another argument, so my first attempt is&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;SimpleCalculator&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;add&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;c&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="mi"&gt;9&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;which solves the previous error, but creates a new one. If that wasn't enough, it also makes the first test fail!&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;______________________________ test_add_two_numbers ________________________________
+
+    def test_add_two_numbers():
+        calculator = SimpleCalculator()
+
+&amp;gt;       result = calculator.add(4, 5)
+E       TypeError: add() missing 1 required positional argument: &amp;#39;c&amp;#39;
+
+tests/test_main.py:10: TypeError
+_____________________________ test_add_three_numbers _______________________________
+
+    def test_add_two_numbers():
+        calculator = SimpleCalculator()
+
+&amp;gt;       result = calculator.add(4, 5)
+E       TypeError: add() missing 1 required positional argument: &amp;#39;c&amp;#39;
+
+tests/test_main.py:10: TypeError
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The first test now fails because the new &lt;code&gt;add&lt;/code&gt; method requires three arguments and we are passing only two. The second tests fails because the &lt;code&gt;add&lt;/code&gt; method returns &lt;code&gt;9&lt;/code&gt; and not &lt;code&gt;15&lt;/code&gt; as expected by the test.&lt;/p&gt;
+&lt;p&gt;When multiple tests fail it's easy to feel discomforted and lost. Where are you supposed to start fixing this? Well, one possible solution is to undo the previous change and to try a different solution, but in general you should try to get to a situation in which only one test fails.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;TDD rule number 3:&lt;/strong&gt; You shouldn't have more than one failing test at a time&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;This is very important as it allows you to focus on one single test and thus one single problem. And remember, commenting tests to make them inactive is a perfectly valid way to have only one failing test. Pytest, however, has a smarter solution: you can use the &lt;code&gt;-k&lt;/code&gt; option that allows you to specify a matching name. That option has a lot of expressive power, but for now we can just give it the name of the test that we want to run&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;pytest -svv -k test_add_two_numbers
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;which will run only the first test and return the same result returned before, since we didn't change the test itself&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;______________________________ test_add_two_numbers ________________________________
+
+    def test_add_two_numbers():
+        calculator = SimpleCalculator()
+
+&amp;gt;       result = calculator.add(4, 5)
+E       TypeError: add() missing 1 required positional argument: &amp;#39;c&amp;#39;
+
+tests/test_main.py:10: TypeError
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;To fix this error we can obviously revert the addition of the third argument, but this would mean going back to the previous solution. Obviously, though tests focus on a very small part of the code, we have to keep in mind what we are doing in terms of the big picture. A better solution is to add to the third argument a default value. The additive identity is &lt;code&gt;0&lt;/code&gt;, so the new code of the &lt;code&gt;add&lt;/code&gt; method is&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;SimpleCalculator&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;add&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;c&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="mi"&gt;9&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;And this makes the first test pass. At this point we can run the full suite and see what happens.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;_____________________________ test_add_three_numbers ______________________________
+
+    def test_add_three_numbers():
+        calculator = SimpleCalculator()
+
+        result = calculator.add(4, 5, 6)
+
+&amp;gt;       assert result == 15
+E       assert 9 == 15
+E         -9
+E         +15
+
+tests/test_main.py:20: AssertionError
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The second test still fails, because the returned value that we hard coded doesn't match the expected one. At this point the tests show that our previous solution (&lt;code&gt;return 9&lt;/code&gt;) is not sufficient anymore, and we have to try to implement something more complex.&lt;/p&gt;
+&lt;p&gt;I want to stress this. You should implement the minimal change in the code that makes tests pass, if that solution is not enough there will be a test that shows it. Now, as you can see, the addition of a new requirement changes the tests, adding a new one, and the old solution is not sufficient any more.&lt;/p&gt;
+&lt;p&gt;How can we solve this? We know that writing &lt;code&gt;return 15&lt;/code&gt; will make the first test fail (you may try, if you want), so here we have to be a bit smarter and try a better solution, that in this case is actually to implement a real sum&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;SimpleCalculator&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;add&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;c&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;c&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;This solution makes both tests pass, so the entire suite runs without errors.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Git tag:&lt;/strong&gt; &lt;a href="https://github.com/lgiordani/simple_calculator/tree/step-2-adding-three-numbers"&gt;step-2-adding-three-numbers&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;I can see your face, your are probably frowning at the fact that it took us 10 minutes to write a method that performs the addition of two or three numbers. On the one hand, keep in mind that I'm going at a very slow pace, this being an introduction, and for these first tests it is better to take the time to properly understand every single step. Later, when you will be used to TDD, some of these steps will be implicit. On the other hand, TDD &lt;em&gt;is&lt;/em&gt; slower than untested development, but the time that you invest writing tests now is usually negligible compared to the amount of time you would spend trying to indentify and fix bugs later.&lt;/p&gt;
+&lt;h2 id="step-3-adding-multiple-numbers"&gt;Step 3 - Adding multiple numbers&lt;a class="headerlink" href="#step-3-adding-multiple-numbers" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;The requirements are not yet satisfied, however, as they mention "multiple" numbers and not just three. How can we test that we can add a generic amount of numbers? We might add a &lt;code&gt;test_add_four_numbers&lt;/code&gt;, a &lt;code&gt;test_add_five_numbers&lt;/code&gt;, and so on, but this will cover specific cases and will never cover all of them. Sad to say, it is impossible to test that generic condition, or, at least in this case, so complex that it is not worth trying to do it.&lt;/p&gt;
+&lt;p&gt;What you shall do in TDD is to test boundary cases. In general you should always try to find the so-called "corner cases" of your algorithm and write tests that show that the code covers them. For example, if you are testing some code that accepts as inputs a number from 1 to 100, you need a test that runs it with a generic number like 42 (which is far from being generic, but don't panic!), but you definitely want to have a specific test that runs the algorithm with the number 1 and one that runs with the number 100. You also want to have tests that show the algorithm doesn't work with 0 and with 101, but we will talk later about testing error conditions.&lt;/p&gt;
+&lt;p&gt;In our example there is no real limitation to the number of arguments that you pass to your function. Before Python 3.7 there was a limit of 256 arguments, which has been removed in that version of the language, but these are limitations enforced by an external system, and they are not real boundaries of your algorithm.&lt;/p&gt;
+&lt;p&gt;The definition of "external system" obviously depends on what you are testing. If you are implementing a programming language you want to have tests that show how many arguments you can pass to a function, or that check the amount of memory used by certain language features. In this case we accept the Python language as the environment in which we work, so we don't want to test its features.&lt;/p&gt;
+&lt;p&gt;The solution, in this case, might be to test a reasonable high amount of input arguments, to check that everything works. In particular, we should try to keep in mind that our goal is to devise as much as possible a generic solution. For example, we easily realise that we cannot come up with a function like&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;add&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;c&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;d&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;e&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;g&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;h&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;as it is not &lt;em&gt;generic&lt;/em&gt;, it is just covering a greater amount of inputs (9, in this case, but not 10 or more).&lt;/p&gt;
+&lt;p&gt;That said, a good test might be the following&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_add_many_numbers&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+    &lt;span class="n"&gt;numbers&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;range&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;100&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="n"&gt;calculator&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;SimpleCalculator&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+    &lt;span class="n"&gt;result&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;calculator&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;add&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;numbers&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;result&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;4950&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;which creates an array (strictly speaking a &lt;code&gt;range&lt;/code&gt;, which is an iterable) of all the numbers from 0 to 99. The sum of all those numbers is 4950, which is what the algorithm shall return. The test suite fails because we are giving the function too many arguments&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;______________________________ test_add_many_numbers _______________________________
+
+    def test_add_many_numbers():
+        numbers = range(100)
+
+        calculator = SimpleCalculator()
+
+&amp;gt;       result = calculator.add(*numbers)
+E       TypeError: add() takes from 3 to 4 positional arguments but 101 were given
+
+tests/test_main.py:28: TypeError
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The minimum amount of code that we can add, this time, will not be so trivial, as we have to pass three tests. This is actually the greatest advantage of TDD: the tests that we wrote are still there and will check that the previous conditions are still satisfied. And since tests are committed with the code they will always be there.&lt;/p&gt;
+&lt;p&gt;The Python way to support a generic number of arguments (technically called &lt;em&gt;variadic functions&lt;/em&gt;) is through the use of the &lt;code&gt;*args&lt;/code&gt; syntax, which stores in &lt;code&gt;args&lt;/code&gt; a tuple that contains all the arguments.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;SimpleCalculator&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;add&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;args&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="nb"&gt;sum&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;args&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;At that point we can use the &lt;code&gt;sum&lt;/code&gt; built-in function to sum all the arguments. This solution makes the whole test suite pass without errors, so it is correct.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Git tag:&lt;/strong&gt; &lt;a href="https://github.com/lgiordani/simple_calculator/tree/step-3-adding-multiple-numbers"&gt;step-3-adding-multiple-numbers&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Pay attention here, please. In TDD a solution is not correct when it is beautiful, when it is smart, or when it uses the latest feature of the language. All these things are good, but TDD wants your code to pass the tests. So, your code might be ugly, convoluted, and slow, but if it passes the test it is correct. This in turn means that TDD doesn't cover all the needs of your software project. Delivering fast routines, for example, might be part of the advantage you have on your competitors, but it is not really testable with the TDD methodology (typically, performance testing is done in a completely different way).&lt;/p&gt;
+&lt;p&gt;Part of the TDD methodology, then, deals with "refactoring", which means changing the code in a way that doesn't change the outputs, which in turns means that all your tests keep passing. Once you have a proper test suite in place, you can focus on the beauty of the code, or you can introduce smart solutions according to what the language allows you to do. We will discuss refactoring further later in this post.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;TDD rule number 4:&lt;/strong&gt; Write code that passes the test. Then refactor it.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id="step-4-subtraction"&gt;Step 4 - Subtraction&lt;a class="headerlink" href="#step-4-subtraction" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;From the requirements we know that we have to implement a function to subtract numbers, but this doesn't mention multiple arguments (as it would be complex to define what subtracting 3 of more numbers actually means). The tests that implements this requirements is&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_subtract_two_numbers&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+    &lt;span class="n"&gt;calculator&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;SimpleCalculator&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+    &lt;span class="n"&gt;result&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;calculator&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sub&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;result&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;7&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;which doesn't pass with the following error&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;____________________________ test_subtract_two_numbers ____________________________
+
+    def test_subtract_two_numbers():
+        calculator = SimpleCalculator()
+
+&amp;gt;       result = calculator.sub(10, 3)
+E       AttributeError: &amp;#39;SimpleCalculator&amp;#39; object has no attribute &amp;#39;sub&amp;#39;
+
+tests/test_main.py:36: AttributeError
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Now that you understood the TDD process, and that you know you should avoid over-engineering, you can also skip some of the passages that we run through in the previous sections. A good solution for this test is&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;sub&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;which makes the test suite pass.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Git tag:&lt;/strong&gt; &lt;a href="https://github.com/lgiordani/simple_calculator/tree/step-4-subtraction"&gt;step-4-subtraction&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id="step-5-multiplication"&gt;Step 5 - Multiplication&lt;a class="headerlink" href="#step-5-multiplication" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;It's time to move to multiplication, which has many similarities to addition. The requirements state that we have to provide a function to multiply numbers and that this function shall allow us to multiply multiple arguments. In TDD you should try to tackle problems one by one, possibly dividing a bigger requirement in multiple smaller ones.&lt;/p&gt;
+&lt;p&gt;In this case the first test can be the multiplication of two numbers, as it was for addition.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_mul_two_numbers&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+    &lt;span class="n"&gt;calculator&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;SimpleCalculator&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+    &lt;span class="n"&gt;result&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;calculator&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;mul&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;6&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;result&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;24&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;And the test suite fails as expected with the following error&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;______________________________ test_mul_two_numbers _______________________________
+
+    def test_mul_two_numbers():
+        calculator = SimpleCalculator()
+
+&amp;gt;       result = calculator.mul(6, 4)
+E       AttributeError: &amp;#39;SimpleCalculator&amp;#39; object has no attribute &amp;#39;mul&amp;#39;
+
+tests/test_main.py:44: AttributeError
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;We face now a classical TDD dilemma. Shall we implement the solution to this test as a function that multiplies two numbers, knowing that the next test will invalidate it, or shall we already consider that the target is that of implementing a variadic function and thus use &lt;code&gt;*args&lt;/code&gt; directly?&lt;/p&gt;
+&lt;p&gt;In this case the choice is not really important, as we are dealing with very simple functions. In other cases, however, it might be worth recognising that we are facing the same issue we solved in a similar case and try to implement a smarter solution from the very beginning. In general, however, you should not implement anything that you don't plan to test in one of the next few tests that you will write.&lt;/p&gt;
+&lt;p&gt;If we decide to follow the strict TDD, that is implement the simplest first solution, the bare minimum code that passes the test would be&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;mul&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;&lt;strong&gt;Git tag:&lt;/strong&gt; &lt;a href="https://github.com/lgiordani/simple_calculator/tree/step-5-multiply-two-numbers"&gt;step-5-multiply-two-numbers&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;To show you how to deal with redundant tests I will in this case choose the second path, and implement a smarter solution for the present test. Keep in mind however that it is perfectly correct to implement that solution shown above and then move on and try to solve the problem of multiple arguments later.&lt;/p&gt;
+&lt;p&gt;The problem of multiplying a tuple of numbers can be solved in Python using the &lt;code&gt;reduce&lt;/code&gt; function. This function implements a typical algorithm that "reduces" an array to a single number, applying a given function. The algorithm steps are the following&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Apply the function to the first two elements&lt;/li&gt;
+&lt;li&gt;Remove the first two elements from the array&lt;/li&gt;
+&lt;li&gt;Apply the function to the result of the previous step and to the first element of the array&lt;/li&gt;
+&lt;li&gt;Remove the first element&lt;/li&gt;
+&lt;li&gt;If there are still elements in the array go back to step 3&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;So, suppose the function is&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;mul2&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;and the array is&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;6&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;8&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The steps followed by the algorithm will be&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Apply the function to 2 and 6 (first two elements). The result is &lt;code&gt;2 * 6&lt;/code&gt;, that is 12&lt;/li&gt;
+&lt;li&gt;Remove the first two elements, the array is now &lt;code&gt;a = [4, 8, 3]&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Apply the function to 12 (result of the previous step) and 4 (first element of the array). The new result is &lt;code&gt;12 * 4&lt;/code&gt;, that is 48&lt;/li&gt;
+&lt;li&gt;Remove the first element, the array is now &lt;code&gt;a = [8, 3]&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Apply the function to 48 (result of the previous step) and 8 (first element of the array). The new result is &lt;code&gt;48 * 8&lt;/code&gt;, that is 384&lt;/li&gt;
+&lt;li&gt;Remove the first element, the array is now &lt;code&gt;a = [3]&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Apply the function to 384 (result of the previous step) and 3 (first element of the array). The new result is &lt;code&gt;384 * 3&lt;/code&gt;, that is 1152&lt;/li&gt;
+&lt;li&gt;Remove the first element, the array is now empty and the procedure ends&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Going back to our class &lt;code&gt;SimpleCalculator&lt;/code&gt;, we might import &lt;code&gt;reduce&lt;/code&gt; from the &lt;code&gt;functools&lt;/code&gt; module and use it on the &lt;code&gt;args&lt;/code&gt; array. We need to provide a function that we can define in the &lt;code&gt;mul&lt;/code&gt; function itself.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;functools&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;reduce&lt;/span&gt;
+
+
+&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;SimpleCalculator&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="o"&gt;...&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;mul&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;args&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;mul2&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+            &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;
+
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;reduce&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;mul2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;args&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;&lt;strong&gt;Git tag:&lt;/strong&gt; &lt;a href="https://github.com/lgiordani/simple_calculator/tree/step-5-multiply-two-numbers-smart"&gt;step-5-multiply-two-numbers-smart&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;More information about the &lt;code&gt;reduce&lt;/code&gt; algorithm can be found on the MapReduce Wikipedia page &lt;a href="https://en.wikipedia.org/wiki/MapReduce"&gt;https://en.wikipedia.org/wiki/MapReduce&lt;/a&gt;. The Python function documentation can be found at &lt;a href="https://docs.python.org/3.6/library/functools.html#functools.reduce"&gt;https://docs.python.org/3.6/library/functools.html#functools.reduce&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;The above code makes the test suite pass, so we can move on and address the next problem. As happened with addition we cannot properly test that the function accepts a potentially infinite number of arguments, so we can test a reasonably high number of inputs.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_mul_many_numbers&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+    &lt;span class="n"&gt;numbers&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;range&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="n"&gt;calculator&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;SimpleCalculator&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+    &lt;span class="n"&gt;result&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;calculator&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;mul&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;numbers&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;result&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;362880&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;&lt;strong&gt;Git tag:&lt;/strong&gt; &lt;a href="https://github.com/lgiordani/simple_calculator/tree/step-5-multiply-many-numbers"&gt;step-5-multiply-many-numbers&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;We might use 100 arguments as we did with addition, but the multiplication of all numbers from 1 to 100 gives a result with 156 digits and I don't really need to clutter the tests file with such a monstrosity. As I said, testing multiple arguments is testing a boundary, and the idea is that if the algorithm works for 2 numbers and for 10 it will work for 10 thousands arguments as well.&lt;/p&gt;
+&lt;p&gt;If we run the test suite now all tests pass, and &lt;em&gt;this should worry you&lt;/em&gt;.&lt;/p&gt;
+&lt;p&gt;Yes, you shouldn't be happy. When you follow TDD each new test that you add should fail. If it doesn't fail you should ask yourself if it is worth adding that test or not. This is because chances are that you are adding a useless test and we don't want to add useless code, because code has to be maintained, so the less the better.&lt;/p&gt;
+&lt;p&gt;In this case, however, we know why the test already passes. We implemented a smarter algorithm as a solution for the first test knowing that we would end up trying to solve a more generic problem. And the value of this new test is that it shows that multiple arguments can be used, while the first test doesn't.&lt;/p&gt;
+&lt;p&gt;So, after these considerations, we can be happy that the second test already passes.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;TDD rule number 5:&lt;/strong&gt; A test should fail the first time you run it. If it doesn't, ask yourself why you are adding it.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id="step-6-refactoring"&gt;Step 6 - Refactoring&lt;a class="headerlink" href="#step-6-refactoring" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Previously, I introduced the concept of refactoring, which means changing the code without altering the results. How can you be sure you are not altering the behaviour of your code? Well, this is what the tests are for. If the new code keeps passing the test suite you can be sure that you didn't remove any feature.&lt;/p&gt;
+&lt;p&gt;In theory, refactoring shouldn't add any new behaviour to the code, as it should be an idempotent transformation. There is no real practical way to check this, and we will not bother with it now. You should be concerned with this if you are discussing security, as your code shouldn't add any entry point you don't want to be there. In this case you will need tests that check the absence of features instead of their presence.&lt;/p&gt;
+&lt;p&gt;This means that if you have no tests you shouldn't refactor. But, after all, if you have no tests you shouldn't have any code, either, so refactoring shouldn't be a problem you have. If you have some code without tests (I know you have it, I do), you should seriously consider writing tests for it, at least before changing it. More on this in a later section.&lt;/p&gt;
+&lt;p&gt;For the time being, let's see if we can work on the code of the class &lt;code&gt;SimpleCalculator&lt;/code&gt; without altering the results. I do not really like the definition of the function &lt;code&gt;mul2&lt;/code&gt; inside the &lt;code&gt;mul&lt;/code&gt; one. It is obviously perfectly fine and valid, but for the sake of example I will pretend we have to get rid of it.&lt;/p&gt;
+&lt;p&gt;Python provides support for anonymous functions with the &lt;code&gt;lambda&lt;/code&gt; operator, so I might replace the &lt;code&gt;mul&lt;/code&gt; code with&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;functools&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;reduce&lt;/span&gt;
+
+
+&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;SimpleCalculator&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="o"&gt;...&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;mul&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;args&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;reduce&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;lambda&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;args&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;&lt;strong&gt;Git tag:&lt;/strong&gt; &lt;a href="https://github.com/lgiordani/simple_calculator/tree/step-6-refactoring"&gt;step-6-refactoring&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;where I define an anonymous function that accepts two inputs &lt;code&gt;x, y&lt;/code&gt; and returns their multiplication &lt;code&gt;x*y&lt;/code&gt;. Running the test suite I can see that all the test pass, so my refactoring is correct.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;TDD rule number 6:&lt;/strong&gt; Never refactor without tests.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id="final-words"&gt;Final words&lt;a class="headerlink" href="#final-words" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Well, I think we learned a lot. We started with no knowledge of TDD and we managed to implement a fully tested class with 3 methods. We also briefly touched the topic of refactoring, which is of paramount importance in development. In the next post I will cover the remaining requirements: division, testing exceptions, and the average function.&lt;/p&gt;
+&lt;h2 id="feedback"&gt;Feedback&lt;a class="headerlink" href="#feedback" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Feel free to reach me on &lt;a href="https://twitter.com/thedigicat"&gt;Twitter&lt;/a&gt; if you have questions. The &lt;a href="https://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues"&gt;GitHub issues&lt;/a&gt; page is the best place to submit corrections.&lt;/p&gt;</content><category term="Programming"></category><category term="OOP"></category><category term="Python"></category><category term="Python3"></category><category term="refactoring"></category><category term="TDD"></category><category term="testing"></category></entry><entry><title>Delegation: composition and inheritance in object-oriented programming</title><link href="https://www.thedigitalcatonline.com/blog/2020/08/17/delegation-composition-and-inheritance-in-object-oriented-programming/" rel="alternate"></link><published>2020-08-17T09:00:00+01:00</published><updated>2020-08-17T09:00:00+01:00</updated><author><name>Leonardo Giordani</name></author><id>tag:www.thedigitalcatonline.com,2020-08-17:/blog/2020/08/17/delegation-composition-and-inheritance-in-object-oriented-programming/</id><summary type="html"></summary><content type="html">&lt;h2 id="introduction"&gt;Introduction&lt;a class="headerlink" href="#introduction" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;Object-oriented programming (OOP) is a methodology that was introduced in the 60s, though as for many other concepts related to programming languages it is difficult to give a proper date. While recent years have witnessed a second youth of functional languages, object-oriented is still a widespread paradigm among successful programming languages, and for good reasons. OOP is not the panacea for all the architectural problems in software development, but if used correctly can give a solid foundation to any system.&lt;/p&gt;
 &lt;p&gt;It might sound obvious, but if you use an object-oriented language or a language with strong OOP traits, you have to learn this paradigm well. Being very active in the Python community, I see how many times young programmers are introduced to the language, the main features, and the most important libraries and frameworks, &lt;em&gt;without a proper and detailed description of OOP and how OOP is implemented in the language&lt;/em&gt;.&lt;/p&gt;
 &lt;p&gt;The &lt;em&gt;implementation&lt;/em&gt; part is particularly important, as OOP is a set of concepts and features that are expressed theoretically and then implemented in the language, with specific traits or choices. It is very important, then, to keep in mind that the concepts behind OOP are generally shared among OOP languages, but are not tenets, and are subject to interpretation.&lt;/p&gt;
@@ -4318,264 +4894,4 @@ E           Actual call: setup&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class
 &lt;h1 id="updates"&gt;Updates&lt;a class="headerlink" href="#updates" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;2019-02-27: &lt;a href="https://github.com/schneeemensch"&gt;schneeemensch&lt;/a&gt; spotted a mistake in the code of the "Return value" section, where &lt;code&gt;m.some_attribute.side_effect()&lt;/code&gt; was used instead of &lt;code&gt;m.some_attribute()&lt;/code&gt;. Thanks!&lt;/p&gt;
 &lt;h1 id="feedback"&gt;Feedback&lt;a class="headerlink" href="#feedback" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
-&lt;p&gt;The &lt;a href="https://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues"&gt;GitHub issues&lt;/a&gt; page is the best place to submit corrections.&lt;/p&gt;</content><category term="Programming"></category><category term="decorators"></category><category term="OOP"></category><category term="Python"></category><category term="Python2"></category><category term="Python3"></category><category term="TDD"></category><category term="testing"></category></entry><entry><title>A simple example of Python OOP development (with TDD) - Part 2</title><link href="https://www.thedigitalcatonline.com/blog/2015/09/10/python-oop-tdd-example-part2/" rel="alternate"></link><published>2015-09-10T20:00:00+01:00</published><updated>2015-09-10T20:00:00+01:00</updated><author><name>Leonardo Giordani</name></author><id>tag:www.thedigitalcatonline.com,2015-09-10:/blog/2015/09/10/python-oop-tdd-example-part2/</id><summary type="html"></summary><content type="html">&lt;p&gt;In &lt;a href="https://www.thedigitalcatonline.com/blog/2015/05/13/python-oop-tdd-example-part1/"&gt;the first part&lt;/a&gt; of this small series I introduced you to TDD with Python by means of the powerful &lt;code&gt;py.test&lt;/code&gt; package. We developed together a simple library which provides a &lt;code&gt;Binary&lt;/code&gt; class that is a bit more useful than the default binary representation that Python provides with the &lt;code&gt;bin()&lt;/code&gt; builtin function.&lt;/p&gt;
-&lt;p&gt;In this part I'll go on with the development of the library, discussing the implementation of a binary number with a fixed size, which is a very interesting and useful matter, being the foundation of the computer we are working with. Fixed-size binaries may also represent negative numbers with the two's complement technique, and this will be an important point to test.&lt;/p&gt;
-&lt;p&gt;You may happen to dislike some decisions about the interface or the behaviour of the resulting class. Since this post is just a way to show you a concrete TDD session you are totally free to change the tests and to come up with a better solution than mine. Feel free to get in touch and submit better ideas, I'm always looking for something new to learn.&lt;/p&gt;
-&lt;p&gt;As already suggested in the first instalment try to follow the post up to the section where I write the tests. Then move on implementing your own class and try to make it pass all the tests: this is the best way for you to learn TDD, actually applying it.&lt;/p&gt;
-&lt;h2 id="fixed-size-binaries"&gt;Fixed-size binaries&lt;a class="headerlink" href="#fixed-size-binaries" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
-&lt;p&gt;As soon as you build an electronic circuit to store information (a flip-flop, for example) you start dealing with binary numbers and with fixed-size quantities. Limiting the number of digits brings immediately the limitation of having a maximum number that can be represented and requires to decide what to do with bigger numbers. Another issue that arises is that of the representation of negative numbers. Since we can only use two symbols (one and zero) we have to decide a "syntax" for negative values.&lt;/p&gt;
-&lt;p&gt;You will find a lot of information about some of those issues in the following Wikipedia articles: &lt;a href="https://en.wikipedia.org/wiki/Integer_overflow"&gt;Integer overflow&lt;/a&gt; and &lt;a href="https://en.wikipedia.org/wiki/Signed_number_representations"&gt;signed number representations&lt;/a&gt;. Check also this page on &lt;a href="https://en.wikipedia.org/wiki/Bitwise_operation"&gt;bitwise operations&lt;/a&gt; as some of them will be implemented.&lt;/p&gt;
-&lt;h2 id="object-interface"&gt;Object interface&lt;a class="headerlink" href="#object-interface" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
-&lt;p&gt;So we aim to create a class called &lt;code&gt;SizeBinary&lt;/code&gt; that provides the following interface:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;Can be instantiated giving a size in bits and a value. The value is optional, if not specified is 0.&lt;/li&gt;
-&lt;li&gt;The value can be set after instantiation with a &lt;code&gt;set()&lt;/code&gt; method.&lt;/li&gt;
-&lt;li&gt;If instantiated or set with a value greater than the maximum representable one the &lt;code&gt;overflow&lt;/code&gt; attribute of the object becomes &lt;code&gt;True&lt;/code&gt;.&lt;/li&gt;
-&lt;li&gt;May initialized with all the data types supported by the &lt;code&gt;Binary&lt;/code&gt; class developed in the first post.&lt;/li&gt;
-&lt;li&gt;Just like the &lt;code&gt;Binary&lt;/code&gt; class may be converted into an integer (e.g. &lt;code&gt;42&lt;/code&gt;, a binary string (e.g. &lt;code&gt;0b101010&lt;/code&gt;, an hexadecimal string (&lt;code&gt;0x2a&lt;/code&gt;) and a bit string (&lt;code&gt;101010&lt;/code&gt;). May also be converted to a &lt;code&gt;Binary&lt;/code&gt; without size limitations.&lt;/li&gt;
-&lt;li&gt;Support binary logic operations such as: NOT, AND, OR, XOR, shift left and right (without carry).&lt;/li&gt;
-&lt;li&gt;Can be splitted in two arbitrary sized &lt;code&gt;SizeBinary&lt;/code&gt; objects.&lt;/li&gt;
-&lt;li&gt;Can be negated with both one's complement and two's complement techniques.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;So now, obeying the TDD methodology, I will write some tests that exploit these features. After this I'm going to develop an object that makes all test pass. Like we did in the previous post you may follow along as I write te tests and then write your own class.&lt;/p&gt;
-&lt;h3 id="initialization"&gt;Initialization&lt;a class="headerlink" href="#initialization" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h3&gt;
-&lt;p&gt;The &lt;code&gt;SizeBinary&lt;/code&gt; object shall support all the initialization options supported by &lt;code&gt;Binary&lt;/code&gt;, but its main interface is different because when creating a &lt;code&gt;SizeBinary&lt;/code&gt; we must be allowed to specify the size. The first tests are though pretty straightforward.&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_size_binary_init_int&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
-    &lt;span class="n"&gt;size_binary&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;SizeBinary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;8&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;6&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-    &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="nb"&gt;int&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;size_binary&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;6&lt;/span&gt;
-
-&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_size_binary_init_int_overflow&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
-    &lt;span class="n"&gt;size_binary&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;SizeBinary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;8&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;512&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-    &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="nb"&gt;int&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;size_binary&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
-    &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;size_binary&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;overflow&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="kc"&gt;True&lt;/span&gt;
-
-&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_size_binary_set&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
-    &lt;span class="n"&gt;size_binary&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;SizeBinary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;8&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-    &lt;span class="n"&gt;size_binary&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;set&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;22&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-    &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="nb"&gt;str&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;size_binary&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;00010110&amp;#39;&lt;/span&gt;
-    &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;size_binary&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;overflow&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="kc"&gt;False&lt;/span&gt;
-
-&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_size_binary_set_overflow&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
-    &lt;span class="n"&gt;size_binary&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;SizeBinary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;8&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-    &lt;span class="n"&gt;size_binary&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;set&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;512&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-    &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="nb"&gt;str&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;size_binary&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;00000000&amp;#39;&lt;/span&gt;
-    &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;size_binary&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;overflow&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="kc"&gt;True&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;I will cover all the cases already covered for the &lt;code&gt;Binary&lt;/code&gt; class. As you can see, I'm specifying the bit size when instantiating the object and testing the overflow condition. Other initialization and conversion tests are very similar to their &lt;code&gt;Binary&lt;/code&gt; counterpart and I will not copy them here, as you can find them in the source code.&lt;/p&gt;
-&lt;h2 id="splitting"&gt;Splitting&lt;a class="headerlink" href="#splitting" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
-&lt;p&gt;One of the requirements is to provide a method to split a &lt;code&gt;SizeBinary&lt;/code&gt; object into two arbitrarily sized &lt;code&gt;Binary&lt;/code&gt; objects. The tests are&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_size_binary_split&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
-    &lt;span class="n"&gt;size_binary8&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;SizeBinary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;8&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;01010110&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-    &lt;span class="n"&gt;size_binary4u&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size_binary4l&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;size_binary8&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;split&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-    &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;size_binary4u&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size_binary4l&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;SizeBinary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;0101&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="n"&gt;SizeBinary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;0110&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
-
-&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_size_binary_split_asymmetric&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
-    &lt;span class="n"&gt;size_binary8&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;SizeBinary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;8&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;01010110&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-    &lt;span class="n"&gt;size_binary9u&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size_binary3l&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;size_binary8&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;split&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;9&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-    &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;size_binary9u&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size_binary3l&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;SizeBinary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;9&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;000001010&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="n"&gt;SizeBinary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;110&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;As you can see the split shall be able to pad the resulting values if the number of bits exceedes that of the available ones.&lt;/p&gt;
-&lt;h2 id="negative-numbers"&gt;Negative numbers&lt;a class="headerlink" href="#negative-numbers" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
-&lt;p&gt;There are many techniques to represent negative numbers with binary digits, and there is no way to tell from a binary number neither if it is positive or negative nor which technique has been used. It is a matter of conventions into the system in use. We want to implement &lt;a href="https://en.wikipedia.org/wiki/Ones'_complement"&gt;one's complement&lt;/a&gt; and &lt;a href="https://en.wikipedia.org/wiki/Two's_complement"&gt;two's complement&lt;/a&gt;, which are described in detail in the linked Wikipedia articles. The tests to check the correct behaviour are&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_size_binary_OC&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
-    &lt;span class="c1"&gt;# 6 = 0b00000110 -&amp;gt; 0b11111001&lt;/span&gt;
-    &lt;span class="n"&gt;size_binary&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;SizeBinary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;8&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;6&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-    &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;size_binary&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;oc&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;SizeBinary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;8&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;11111001&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-
-    &lt;span class="c1"&gt;# 7 = 0b00000111 -&amp;gt; 0b11111000&lt;/span&gt;
-    &lt;span class="n"&gt;size_binary&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;SizeBinary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;8&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;7&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-    &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;size_binary&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;oc&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;SizeBinary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;8&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;11111000&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-
-    &lt;span class="c1"&gt;# 15 = 0b00001111 -&amp;gt; 0b11110000&lt;/span&gt;
-    &lt;span class="n"&gt;size_binary&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;SizeBinary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;8&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;15&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-    &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;size_binary&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;oc&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;SizeBinary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;8&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;11110000&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-
-    &lt;span class="c1"&gt;# 15 = 0b0000000000001111 -&amp;gt; 0b1111111111110000&lt;/span&gt;
-    &lt;span class="n"&gt;size_binary&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;SizeBinary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;16&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;15&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-    &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;size_binary&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;oc&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;SizeBinary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;16&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;1111111111110000&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-
-&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_size_binary_TC&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
-    &lt;span class="c1"&gt;# 6 = 0b00000110 -&amp;gt; 0b11111010&lt;/span&gt;
-    &lt;span class="n"&gt;size_binary&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;SizeBinary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;8&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;6&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-    &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;size_binary&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;tc&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;SizeBinary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;8&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;11111010&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-
-    &lt;span class="c1"&gt;# 7 = 0b00000111 -&amp;gt; 0b11111001&lt;/span&gt;
-    &lt;span class="n"&gt;size_binary&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;SizeBinary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;8&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;7&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-    &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;size_binary&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;tc&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;SizeBinary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;8&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;11111001&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-
-    &lt;span class="c1"&gt;# 15 = 0b00001111 -&amp;gt; 0b11110001&lt;/span&gt;
-    &lt;span class="n"&gt;size_binary&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;SizeBinary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;8&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;15&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-    &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;size_binary&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;tc&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;SizeBinary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;8&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;11110001&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-
-    &lt;span class="c1"&gt;# 15 = 0b0000000000001111 -&amp;gt; 0b1111111111110001&lt;/span&gt;
-    &lt;span class="n"&gt;size_binary&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;SizeBinary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;16&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;15&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-    &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;size_binary&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;tc&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;SizeBinary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;16&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;1111111111110001&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;h2 id="mathematics-indexing-and-slicing"&gt;Mathematics, indexing and slicing&lt;a class="headerlink" href="#mathematics-indexing-and-slicing" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
-&lt;p&gt;The basic mathematical and logical operations are the same implemented for the &lt;code&gt;Binary&lt;/code&gt; class. Some tests have been added to check what happens when performing operations between two &lt;code&gt;SizeBinary&lt;/code&gt; with a different size. We expect the result to have the size of the bigger of the two operands.&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_binary_addition_int&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
-    &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;SizeBinary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;8&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;SizeBinary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;8&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-
-&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_binary_addition_binary&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
-    &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;SizeBinary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;8&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;SizeBinary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;8&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;SizeBinary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;8&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;9&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-
-&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_binary_addition_binary_different_size&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
-    &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;SizeBinary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;8&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;SizeBinary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;16&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;SizeBinary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;16&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;9&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;Being very straightforward, I do not copy here all the tests written to cover this part, you will find them in the source code.&lt;/p&gt;
-&lt;p&gt;Even the shift left operation now drops bits if there is not enough space for them, while the &lt;code&gt;Binary&lt;/code&gt; class did it only for the shift right operation. For simplicity's sake I didn't implement a carry flag, i.e. there is no way to retrieve the bits shifted outside the available space. You are free to try and implement it, it's a good exercise but remember to write tests first!&lt;/p&gt;
-&lt;p&gt;The indexing and slicing operations are basically the same as in the &lt;code&gt;Binary&lt;/code&gt; case. The slicing operation produces a new &lt;code&gt;SizeBinary&lt;/code&gt; with the correct size.&lt;/p&gt;
-&lt;h2 id="implementation-time"&gt;Implementation time!&lt;a class="headerlink" href="#implementation-time" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
-&lt;p&gt;Now be a good OOP programmer and go, write a class that passes all the tests you find in the &lt;a href="/code/python-oop-tdd-part2/test_size_binary.py"&gt;source code&lt;/a&gt;. Just an advice, before you start headlong: being a &lt;code&gt;SizeBinary&lt;/code&gt; mostly a &lt;code&gt;Binary&lt;/code&gt; object with some new features it is recommended to use inheritance as the key delegation technique.&lt;/p&gt;
-&lt;h2 id="my-solution"&gt;My solution&lt;a class="headerlink" href="#my-solution" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
-&lt;p&gt;Following my own advice my &lt;code&gt;SizeBinary&lt;/code&gt; class inherits from &lt;code&gt;Binary&lt;/code&gt;&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;binary&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;Binary&lt;/span&gt;
-
-&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;SizeBinary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Binary&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-    &lt;span class="k"&gt;pass&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;and with this simple declaration I get 1 test passed and still 50 to go. We obviously may also create a new object that does not inherit from &lt;code&gt;Binary&lt;/code&gt; but we would have to explicitly delegate a lot of functions to the latter class. So, in this case, better to stick to an automatic delegation mechanism like inheritance. To get a review of those two concepts read &lt;a href="https://www.thedigitalcatonline.com/blog/2014/08/20/python-3-oop-part-3-delegation-composition-and-inheritance/"&gt;this post&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;Composition could be another viable solution, with a &lt;code&gt;Binary&lt;/code&gt; value stored internally and accessed whenever we call &lt;code&gt;super()&lt;/code&gt; in the inheritance version. In this case, however, inheritance and composition lead to very similar results, with the latter being somehow counter-intuitive and thus not the best choice.&lt;/p&gt;
-&lt;p&gt;We need to reimplement many of the special methods already implemented in the &lt;code&gt;Binary&lt;/code&gt; class. This because Python resolves magic methods through a dedicated channel that avoids the &lt;code&gt;__getattr__()&lt;/code&gt; and &lt;code&gt;__getattribute__()&lt;/code&gt; methods, making the whole thing faster. This makes impossible to automatically delegate magic methods, except by means of metaclasses, which are however too complex to be a useful addition to this post.&lt;/p&gt;
-&lt;p&gt;The initialization function shall store the bit length and initialize a flag to signal the overflow condition. Since I also want to have a &lt;code&gt;set()&lt;/code&gt; function that changes the value I implement it and call it in the &lt;code&gt;__init__()&lt;/code&gt; method.&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;bits&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;value&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;bits&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;bits&lt;/span&gt;
-        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;overflow&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kc"&gt;False&lt;/span&gt;
-
-        &lt;span class="nb"&gt;super&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-
-        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;set&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;value&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-
-    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;set&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;value&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="n"&gt;binary&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Binary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;value&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-        &lt;span class="n"&gt;upper&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;lower&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;binary&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;split&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;bits&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-
-        &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;upper&lt;/span&gt; &lt;span class="o"&gt;!=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-            &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;overflow&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kc"&gt;True&lt;/span&gt;
-
-        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_value&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Binary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;lower&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_value&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;I'm not that happy to poke into the &lt;code&gt;Binary&lt;/code&gt; class implementation setting the &lt;code&gt;_value&lt;/code&gt; attribute, but this is the only way to change the value of the underlying &lt;code&gt;Binary&lt;/code&gt; class. If the &lt;code&gt;Binary&lt;/code&gt; class had a &lt;code&gt;set()&lt;/code&gt; method we could call it through &lt;code&gt;super()&lt;/code&gt;, and I cannot directly set it through &lt;code&gt;__init__()&lt;/code&gt; because I need to check the overflow condition.&lt;/p&gt;
-&lt;p&gt;With this code I get a surprising result of 37 passed tests, while 14 still refuse to let me call it a day. This is however misleading, as many tests assume the &lt;code&gt;SizeBinary&lt;/code&gt; object correctly performs comparison, which is not the case, as shown by the failure of the &lt;code&gt;test_binary_equality_checks_bits&lt;/code&gt; test.&lt;/p&gt;
-&lt;p&gt;This was done on purpose, to show you that writing tests is not something that automatically guarantees you to have correct code. As a matter of fact, in this case tests like&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_binary_addition_int&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
-    &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;SizeBinary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;8&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;SizeBinary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;8&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;do not fail, even if the result of the addition is a &lt;code&gt;Binary&lt;/code&gt; and not a &lt;code&gt;SizeBinary&lt;/code&gt;.&lt;/p&gt;
-&lt;p&gt;Let us check why this happens. The &lt;code&gt;SizeBinary&lt;/code&gt; object is also a &lt;code&gt;Binary&lt;/code&gt; object, and its &lt;code&gt;__add__()&lt;/code&gt; method returns a &lt;code&gt;Binary&lt;/code&gt;. The subsequent comparison is made using the &lt;code&gt;__eq__()&lt;/code&gt; method of the &lt;code&gt;Binary&lt;/code&gt; class, since the &lt;code&gt;SizeBinary&lt;/code&gt; one does not provide its own version of the comparison. Since &lt;code&gt;Binary&lt;/code&gt; classes just compare their value the test ends successfully.&lt;/p&gt;
-&lt;p&gt;Let us add some code to implement the correct comparision&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__eq__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;other&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="nb"&gt;super&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="fm"&gt;__eq__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;other&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;and&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;bits&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;other&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;bits&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;which adds a check on the number of bits to the check already made by the &lt;code&gt;Binary&lt;/code&gt; class. This results in 35 failed tests and 16 passed, showing that the previous result was biased by "inaccurate" tests. As a matter of fact, the presence of a test that shows if the comparison is correct or not makes perfectly reasonable to have tests that take it for granted.&lt;/p&gt;
-&lt;p&gt;One simple thing to add is the right padding with zeros that shall be provided for input values that are shorter than the given number of bits&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__str__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="n"&gt;s&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;super&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="fm"&gt;__str__&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
-        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;s&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;rjust&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;bits&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;0&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;And this simple addition lowers the count of failed tests from 35 to 30. Another small addition that satisfies 2 more tests is the splitting function, which shall return &lt;code&gt;SizeBinary&lt;/code&gt; objects instead of &lt;code&gt;Binary&lt;/code&gt; ones&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;split&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;upper_bits&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;lower_bits&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="n"&gt;upper&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;lower&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;super&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;split&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;lower_bits&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;SizeBinary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;upper_bits&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;upper&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="n"&gt;SizeBinary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;lower_bits&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;lower&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;As already explained we want to get the negative version of the number both with the one's complement and the two's complement techniques. For starters, let's deal with one's complement.&lt;/p&gt;
-&lt;p&gt;A very smart way to reverse all the n bits of a value x is to compute &lt;code&gt;(1 &amp;lt;&amp;lt; n) - x - 1&lt;/code&gt;. An example will show you that this works, avoiding long and boring mathematical explanations. We want to negate the number 1 represented as 8 bits ('00000001'). First we compute &lt;code&gt;1 &amp;lt;&amp;lt; 8&lt;/code&gt; which returns &lt;code&gt;100000000&lt;/code&gt;, then we subtract the value 1 of the number which returns &lt;code&gt;1111111&lt;/code&gt; and finally we subtract the constant 1, which returns &lt;code&gt;11111110&lt;/code&gt;. Look and behold! So this is exactly what I will implement for my &lt;code&gt;oc()&lt;/code&gt; function&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;oc&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;SizeBinary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;bits&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;bits&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_value&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;From the same boring mathematics tomes we may discover that the two's complement representation of a number is its one's complement version plus 1. So the implementation of &lt;code&gt;tc()&lt;/code&gt; is straightforward&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;tc&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;oc&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;As a matter of fact this function doesn't make the relative test (&lt;code&gt;test_size_binary_TC&lt;/code&gt;) pass, because it depends on the correct implementation of the sum operation, which is still not implemented. So now the updated battle report is: 27 failed, 24 passed.&lt;/p&gt;
-&lt;p&gt;Right and left shifts are the same of the &lt;code&gt;Binary&lt;/code&gt; class, except that the result shall fit into the given bits. So we may delegate them to the &lt;code&gt;Binary&lt;/code&gt; class implementation&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__lshift__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;pos&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;SizeBinary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;bits&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;super&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="fm"&gt;__lshift__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;pos&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
-
-    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__rshift__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;pos&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;SizeBinary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;bits&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;super&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="fm"&gt;__rshift__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;pos&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;And this is enough to make the 5 related tests pass.&lt;/p&gt;
-&lt;p&gt;Now it's time for some arithmetic and logic functions. Since the internal representation of our value is always in base 10, as already done with the arithmetic functions of the &lt;code&gt;Binary&lt;/code&gt; class we may go back to the base-10 world, perform the requested operation, and go back to the base-2 representation.&lt;/p&gt;
-&lt;p&gt;The problem with those functions is that if we mix binaries with different sizes we want to "promote" the smaller one, to that the result has the size of the bigger. To handle this situation I isolated some code in a helper function called &lt;code&gt;_max_and_convert()&lt;/code&gt;&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;_max_and_convert&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;other&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="k"&gt;try&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-            &lt;span class="n"&gt;other_bits&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;other&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;bits&lt;/span&gt;
-            &lt;span class="n"&gt;sb_other&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;other&lt;/span&gt;
-        &lt;span class="k"&gt;except&lt;/span&gt; &lt;span class="ne"&gt;AttributeError&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-            &lt;span class="n"&gt;other_bits&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;bits&lt;/span&gt;
-            &lt;span class="n"&gt;sb_other&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;SizeBinary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;other_bits&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;other&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-
-        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="nb"&gt;max&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;bits&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;other_bits&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="n"&gt;sb_other&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;It checks if the &lt;code&gt;other&lt;/code&gt; argument has a &lt;code&gt;bits&lt;/code&gt; attribute, otherwise converts it into a &lt;code&gt;SizeBinary&lt;/code&gt;. Then it returns the converted argument and the greatest length between the latter and &lt;code&gt;self&lt;/code&gt;. Using this function I can then implement some magic methods such as&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__add__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;other&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="n"&gt;bits&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;sb_other&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_max_and_convert&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;other&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;SizeBinary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;bits&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;super&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="fm"&gt;__add__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sb_other&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;This template is used to implement &lt;code&gt;__add__()&lt;/code&gt;, &lt;code&gt;__sub__()&lt;/code&gt;, &lt;code&gt;__mul__()&lt;/code&gt;, &lt;code&gt;__truediv__()&lt;/code&gt;, &lt;code&gt;__and__()&lt;/code&gt;, &lt;code&gt;__or__()&lt;/code&gt;, &lt;code&gt;__xor__()&lt;/code&gt;. The &lt;code&gt;__invert__()&lt;/code&gt; method is simpler, missing the second argument&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__invert__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;SizeBinary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;bits&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;super&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="fm"&gt;__invert__&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;With those functions I now have 49 successful tests and 2 still failing, namely &lt;code&gt;test_size_binary_to_binary&lt;/code&gt; and &lt;code&gt;test_binary_slice&lt;/code&gt;. The first one depends on the missing &lt;code&gt;to_binary()&lt;/code&gt; method&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;to_binary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;Binary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;The second needs some consideration: slicing depends on the &lt;code&gt;__getitem__()&lt;/code&gt; magic method, which is used also for the simple indexing, tested by &lt;code&gt;test_binary_get_bit&lt;/code&gt; and &lt;code&gt;test_binary_negative_index&lt;/code&gt;, for example. The requested behaviour of the &lt;code&gt;SizeBinary&lt;/code&gt; class is to return a single character when indexing a single bit and a &lt;code&gt;SizeBinary&lt;/code&gt; or the correct length when slicing. The following code handles both situations&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__getitem__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;key&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="n"&gt;res&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;super&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="fm"&gt;__getitem__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;key&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-        &lt;span class="n"&gt;bits&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;list&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;res&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
-
-        &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;bits&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-            &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;SizeBinary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;bits&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;res&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-        &lt;span class="k"&gt;else&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-            &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;res&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;First of all I use the slicing function of the underlying &lt;code&gt;Binary&lt;/code&gt; object which was already tested and correctly working. Then I compute the length of that result and act depending on the result.&lt;/p&gt;
-&lt;h2 id="resources"&gt;Resources&lt;a class="headerlink" href="#resources" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
-&lt;ul&gt;
-&lt;li&gt;Wikipedia entries on &lt;a href="https://en.wikipedia.org/wiki/Integer_overflow"&gt;integer overflow&lt;/a&gt;, &lt;a href="https://en.wikipedia.org/wiki/Signed_number_representations"&gt;signed number representations&lt;/a&gt;, and &lt;a href="https://en.wikipedia.org/wiki/Bitwise_operation"&gt;bitwise operations&lt;/a&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;The code developed in this post can be found here:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;The full code of the &lt;code&gt;SizeBinary&lt;/code&gt; class is &lt;a href="/code/python-oop-tdd-part2/size_binary.py"&gt;here&lt;/a&gt;, while the tests file is &lt;a href="/code/python-oop-tdd-part2/test_size_binary.py"&gt;here&lt;/a&gt;.&lt;/li&gt;
-&lt;li&gt;&lt;a href="/code/python-oop-tdd-part2/binary.zip"&gt;Here&lt;/a&gt; you find a zip file containing both source code files and the relative tests.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id="feedback"&gt;Feedback&lt;a class="headerlink" href="#feedback" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
-&lt;p&gt;The &lt;a href="https://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues"&gt;GitHub issues&lt;/a&gt; page is the best place to submit corrections.&lt;/p&gt;</content><category term="Programming"></category><category term="OOP"></category><category term="Python"></category><category term="Python3"></category><category term="TDD"></category><category term="testing"></category></entry></feed>
+&lt;p&gt;The &lt;a href="https://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues"&gt;GitHub issues&lt;/a&gt; page is the best place to submit corrections.&lt;/p&gt;</content><category term="Programming"></category><category term="decorators"></category><category term="OOP"></category><category term="Python"></category><category term="Python2"></category><category term="Python3"></category><category term="TDD"></category><category term="testing"></category></entry></feed>
