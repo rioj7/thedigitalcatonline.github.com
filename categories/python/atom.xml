@@ -1,5 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>The Digital Cat - Python</title><link href="https://www.thedigitalcatonline.com/" rel="alternate"></link><link href="https://www.thedigitalcatonline.com/categories/python/atom.xml" rel="self"></link><id>https://www.thedigitalcatonline.com/</id><updated>2020-09-11T10:30:00+02:00</updated><subtitle>Adventures of a curious cat in the land of programming</subtitle><entry><title>TDD in Python with pytest - Part 2</title><link href="https://www.thedigitalcatonline.com/blog/2020/09/11/tdd-in-python-with-pytest-part-2/" rel="alternate"></link><published>2020-09-11T10:30:00+02:00</published><updated>2020-09-11T10:30:00+02:00</updated><author><name>Leonardo Giordani</name></author><id>tag:www.thedigitalcatonline.com,2020-09-11:/blog/2020/09/11/tdd-in-python-with-pytest-part-2/</id><summary type="html"></summary><content type="html">&lt;p&gt;This is the second post in the series "TDD in Python with pytest" where I develop a simple project following a strict TDD methodology. The posts come from my book &lt;a href="https://leanpub.com/clean-architectures-in-python"&gt;Clean Architectures in Python&lt;/a&gt; and have been reviewed to get rid of some bad naming choices of the version published in the book.&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>The Digital Cat - Python</title><link href="https://www.thedigitalcatonline.com/" rel="alternate"></link><link href="https://www.thedigitalcatonline.com/categories/python/atom.xml" rel="self"></link><id>https://www.thedigitalcatonline.com/</id><updated>2020-09-15T08:00:00+02:00</updated><subtitle>Adventures of a curious cat in the land of programming</subtitle><entry><title>TDD in Python with pytest - Part 3</title><link href="https://www.thedigitalcatonline.com/blog/2020/09/15/tdd-in-python-with-pytest-part-3/" rel="alternate"></link><published>2020-09-15T08:00:00+02:00</published><updated>2020-09-15T08:00:00+02:00</updated><author><name>Leonardo Giordani</name></author><id>tag:www.thedigitalcatonline.com,2020-09-15:/blog/2020/09/15/tdd-in-python-with-pytest-part-3/</id><summary type="html"></summary><content type="html">&lt;p&gt;This is the third post in the series "TDD in Python from scratch" where I develop a simple project following a strict TDD methodology. The posts come from my book &lt;a href="https://leanpub.com/clean-architectures-in-python"&gt;Clean Architectures in Python&lt;/a&gt; and have been reviewed to get rid of some bad naming choices of the version published in the book.&lt;/p&gt;
+&lt;p&gt;What I introduced in the previous two posts is commonly called "unit testing", since it focuses on testing a single and very small unit of code. As simple as it may seem, the TDD process has some caveats that are worth being discussed. In this chapter I discuss some aspects of TDD and unit testing that I consider extremely important.&lt;/p&gt;
+&lt;h2 id="tests-should-be-fast"&gt;Tests should be fast&lt;a class="headerlink" href="#tests-should-be-fast" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;You will run your tests many times, potentially you should run them every time you save your code. Your tests are the watchdogs of your code, the dashboard warning lights that signal a correct status or some malfunction. This means that your testing suite should be &lt;em&gt;fast&lt;/em&gt;. If you have to wait minutes for each execution to finish, chances are that you will end up running your tests only after some long coding session, which means that you are not using them as guides.&lt;/p&gt;
+&lt;p&gt;It's true however that some tests may be intrinsically slow, or that the test suite might be so big that running it would take an amount of time which makes continuous testing uncomfortable. In this case you should identify a subset of tests that run quickly and that can show you if something is not working properly, the so-called "smoke tests", and leave the rest of the suite for longer executions that you run less frequently. Typically, the library part of your project has tests that run very quickly, as testing functions does not require specific set-ups, while the user interface tests (be it a CLI or a GUI) are usually slower. If your tests are well-structured you can also run just the tests that are connected with the subsystem that you are dealing with.&lt;/p&gt;
+&lt;h2 id="tests-should-be-idempotent"&gt;Tests should be idempotent&lt;a class="headerlink" href="#tests-should-be-idempotent" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;em&gt;Idempotency&lt;/em&gt; in mathematics and computer science identifies processes that can be run multiple times without changing the status of the system. Since this latter doesn't change, the tests can be run in whichever order without changing their results. If a test interacts with an external system leaving it in a different state you will have random failures depending on the execution order.&lt;/p&gt;
+&lt;p&gt;The typical example is when you interact with the filesystem in your tests. A test may create a file and not remove it, and this makes another test fail because the file already exists, or because the directory is not empty. Whatever you do while interacting with external systems has to be reverted after the test. If you run your tests concurrently, however, even this precaution is not enough.&lt;/p&gt;
+&lt;p&gt;This poses a big problem, as interacting with external systems is definitely to be considered dangerous. Mocks, introduced in the next chapter, are a very good tool to deal with this aspect of testing.&lt;/p&gt;
+&lt;h2 id="tests-should-be-isolated"&gt;Tests should be isolated&lt;a class="headerlink" href="#tests-should-be-isolated" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;In computer science &lt;em&gt;isolation&lt;/em&gt; means that a component shall not change its behaviour depending on something that happens externally. In particular it shouldn't be affected by the execution of other components in the system (spatial isolation) and by the previous execution of the component itself (temporal isolation). Each test should run as much as possible in an isolated universe.&lt;/p&gt;
+&lt;p&gt;While this is easy to achieve for small components, like we did with the class &lt;code&gt;SimpleCalculator&lt;/code&gt;, it might be almost impossible to do in more complex cases. Whenever you write a routine that deals with time, for example, be it the current date or a time interval, you are faced with something that flows incessantly and that cannot be stopped or slowed down. This is also true in other cases, for example if you are testing a routine that accesses an external service like a website. If the website is not reachable the test will fail, but this failure comes from an external source, not from the code under test.&lt;/p&gt;
+&lt;p&gt;Mocks or fake objects are a good tool to enforce isolation in tests that need to communicate with external actors in the system.&lt;/p&gt;
+&lt;h2 id="external-systems"&gt;External systems&lt;a class="headerlink" href="#external-systems" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;It is important to understand that the above definitions (idempotency, isolation) depend on the scope of the test. You should consider &lt;em&gt;external&lt;/em&gt; whatever part of the system is not directly involved in the test, even though you need to use it to run the test itself. You should also try to reduce the scope of the test as much as possible.&lt;/p&gt;
+&lt;p&gt;Let me give you an example. Consider a web application and imagine a test that checks that a user can log in. The login process involves many layers: the user inputs, the username and the password in a GUI and submits the form, the GUI communicates with the core of the application that finds the user in the DB and checks the password hash against the one stored there, then sends back a message that grants access to the user, and the GUI stores a cookie to keep the user logged in. Suppose now that the test fails. Where is the error? Is it in the query that retrieves the user from the DB? Or in the routine that hashes the password? Or is it just an issue in the connectivity between the application and the database?&lt;/p&gt;
+&lt;p&gt;As you can see there are too many possible points of failure. While this is a perfectly valid &lt;em&gt;integration test&lt;/em&gt;, it is definitely not a &lt;em&gt;unit test&lt;/em&gt;. Unit tests try to test the smallest possible units of code in your system, usually simple routines like functions or object methods. Integration tests, instead, put together whole systems that have already been tested and test that they can work together.&lt;/p&gt;
+&lt;p&gt;Too many times developers confuse integration tests with unit tests. One simple example: every time a web framework makes you test your models against a real database you are mixing a unit test (the methods of the model object work) with an integration one (the model object connects with the database and can store/retrieve data). You have to learn how to properly identify what is external to your system in the scope of a given test, so your tests can be focused and small.&lt;/p&gt;
+&lt;h2 id="focus-on-messages"&gt;Focus on messages&lt;a class="headerlink" href="#focus-on-messages" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;I will never recommend enough Sandi Metz's talk &lt;a href="https://speakerdeck.com/skmetz/magic-tricks-of-testing-railsconf"&gt;"The Magic Tricks of Testing"&lt;/a&gt; where she considers the different messages that a software component has to deal with. She comes up with 3 different origins for messages (incoming, sent to self, and outgoing) and 2 types (query and command). The very interesting conclusion she reaches is that you should only test half of them, and I believe this is one of the most useful results you can learn as a software developer. In this section I will shamelessly start from Sandi Metz's categorisations and give a personal view of the matter. I absolutely recommend to watch the original talk as it is both short and very effective.&lt;/p&gt;
+&lt;p&gt;Testing is all about the behaviour of a component when it is used, i.e. when it is connected to other components that interact with it. This interaction is well represented by the word "message", which has hereafter the simple meaning of "data exchanged between two actors".&lt;/p&gt;
+&lt;p&gt;We can then classify the interactions happening in our system, and thus to our components, by flow and by type (Sandi Metz speaks of &lt;em&gt;origin&lt;/em&gt; and &lt;em&gt;type&lt;/em&gt;).&lt;/p&gt;
+&lt;h3 id="message-flow"&gt;Message flow&lt;a class="headerlink" href="#message-flow" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;The flow is defined as the tuple &lt;code&gt;(source, origin)&lt;/code&gt;, that is where the message comes from and what is its destination. There are three different combinations that we are interested in: &lt;code&gt;(outside, self)&lt;/code&gt;, &lt;code&gt;(self, self)&lt;/code&gt;, and &lt;code&gt;(self, outside)&lt;/code&gt;, where &lt;code&gt;self&lt;/code&gt; is the object we are testing, and &lt;code&gt;outside&lt;/code&gt; is a generic object that lives in the system. There is a fourth combination, &lt;code&gt;(outside, outside)&lt;/code&gt; that is not relevant for the testing, since it doesn't involve the object under analysis.&lt;/p&gt;
+&lt;p&gt;So &lt;code&gt;(outside, self)&lt;/code&gt; contains all the messages that other parts of the system send to our component. These messages correspond to the public API of the component, that is the set of entry points the component makes available to interact with it. Notable examples are the public methods of an object in an object-oriented programming language or the HTTP endpoints of a Web application. This flow represents the &lt;em&gt;incoming messages&lt;/em&gt;.&lt;/p&gt;
+&lt;p&gt;At the opposite side of the spectrum there is &lt;code&gt;(self, outside)&lt;/code&gt;, which is the set of messages that the component under test sends to other parts of the system. These are for example the external calls that an object does to a library or to other objects, or the API of other applications we rely on, like databases or Web applications. This flow describes all the &lt;em&gt;outgoing messages&lt;/em&gt;.&lt;/p&gt;
+&lt;p&gt;Between the two there is &lt;code&gt;(self, self)&lt;/code&gt;, which identifies the messages that the component sends to itself, i.e. the use that the component does of its own internal API. This can be the set of private methods of an object or the business logic inside a Web application. The important thing about this last case is that while the component is seen as a black box by the rest of the system it actually has an internal structure and it uses it to run. This flow contains all the &lt;em&gt;private messages&lt;/em&gt;.&lt;/p&gt;
+&lt;h3 id="message-type"&gt;Message type&lt;a class="headerlink" href="#message-type" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;Messages can be further divided according to the interaction the source requires to have with the target: &lt;em&gt;queries&lt;/em&gt; and &lt;em&gt;commands&lt;/em&gt;. Queries are messages that do not change the status of the component, they just extract information. The class &lt;code&gt;SimpleCalculator&lt;/code&gt; that we developed in the previous section is a typical example of object that exposes query methods. Adding two numbers doesn't change the status of the object, and you will receive the same answer every time you call the method &lt;code&gt;add&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Commands are the opposite. They do not extract any information, but they change the status of the object. A method of an object that increases an internal counter or a method that adds values to an array are perfect examples of commands.&lt;/p&gt;
+&lt;p&gt;It's perfectly normal to combine a query and a command in a single message, as long as you are aware that your message is changing the status of the component. Remember that changing the status is something that can have concrete secondary effect.&lt;/p&gt;
+&lt;h2 id="the-testing-grid"&gt;The testing grid&lt;a class="headerlink" href="#the-testing-grid" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Combining 3 flows and 2 message types we get 6 different message cases that involve the component under testing. For each one of this cases we have to decide how to test the interaction represented by that flow and message type.&lt;/p&gt;
+&lt;h3 id="incoming-queries"&gt;Incoming queries&lt;a class="headerlink" href="#incoming-queries" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;An incoming query is a message that an external actor sends to get a value from your component. Testing this behaviour is straightforward, as you just need to write a test that sends the message and makes an assertion on the returned value. A concrete example of this is what we did to test the method &lt;code&gt;add&lt;/code&gt; of &lt;code&gt;SimpleCalculator&lt;/code&gt;.&lt;/p&gt;
+&lt;h3 id="incoming-commands"&gt;Incoming commands&lt;a class="headerlink" href="#incoming-commands" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;An incoming command comes from an external actor that wants to change the status of the system. There should be a way for an external actor to check the status, which translates into the need of having either a companion incoming query message that allows to extract the status (or at least the part of the status affected by the command), or the knowledge that the change is going to affect the behaviour of another query. A simple example might be a method that sets the precision (number of digits) of the division in the object &lt;code&gt;SimpleCalculator&lt;/code&gt;. Setting that value changes the result of a query, which can be used to test the effect of the incoming command.&lt;/p&gt;
+&lt;h3 id="private-queries"&gt;Private queries&lt;a class="headerlink" href="#private-queries" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;A private query is a message that the component sends to self to get a value without affecting its own state, and it is basically nothing more than an explicit use of some internal logic. This happens often in object-oriented languages because you extracted some common logic from one or more methods of an object and created a private method to avoid duplication.&lt;/p&gt;
+&lt;p&gt;Since private queries use the internal logic you shouldn't test them. This might be surprising, as private methods are code, and code should be tested, but remember that other methods are calling them, so the effects of that code are not invisible, they are tested by the tests of the public entry points, although indirectly. The only effect you would achieve by testing private methods is to lock the tests to the internal implementation of the component, which by definition shouldn't be used by anyone outside of the component itself. This in turn, makes refactoring painful, because you have to keep redundant tests in sync with the changes that you do, instead of using them as a guide for the code changes like TDD wants you to do.&lt;/p&gt;
+&lt;p&gt;As Sandi Metz says, however, this is not an inflexible rule. Whenever you see that testing an internal method makes the structure more robust feel free to do it. Be aware that you are locking the implementation, so do it only where it makes a real difference businesswise.&lt;/p&gt;
+&lt;h3 id="private-commands"&gt;Private commands&lt;a class="headerlink" href="#private-commands" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;Private commands shouldn't be treated differently than private queries. They change the status of the component, but this is again part of the internal logic of the component itself, so you shouldn't test private commands either. As stated for private queries, feel free to do it if this makes a real difference.&lt;/p&gt;
+&lt;h3 id="outgoing-queries-and-commands"&gt;Outgoing queries and commands&lt;a class="headerlink" href="#outgoing-queries-and-commands" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;An outgoing query is a message that the component under testing sends to an external actor asking for a value, without changing the status of the actor itself. The correctness of the returned value, given the inputs, is not part of what you want to test, because that is an incoming query for the external actor. Let me repeat this: you don't want to test that the external actor return the correct value given some inputs.&lt;/p&gt;
+&lt;p&gt;This is perhaps one of the biggest mistakes that programmers make when they test their applications. Definitely it is a mistake that I made many times. We tend to introduce tests that, starting from the code of our component, end up testing different components.&lt;/p&gt;
+&lt;p&gt;Outgoing commands are messages sent to external actors in order to change their state. Since our component sends such messages to cause an effect in another part of the system we have to be sure that the sent values are correct. We do not want to test that the state of the external actor change accordingly, as this is part of the testing suite of the external actor itself (incoming command).&lt;/p&gt;
+&lt;p&gt;From this consideration it is evident that you shouldn't test the results of any outgoing query or command. Possibly, you should avoid running them at all, otherwise you will need the external system to be up and running when you run the test suite.&lt;/p&gt;
+&lt;p&gt;We want to be sure, however, that our component uses the API of the external actor in a proper way and the standard technique to test this is to use mocks, that is components that simulate other components. Mocks are an important tool in the TDD methodology and for this reason they are the topic of the next chapter.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;| Flow     | Type    | Test? |
+|----------|---------|-------|
+| Incoming | Query   | Yes   |
+| Incoming | Command | Yes   |
+| Private  | Query   | Maybe |
+| Private  | Command | Maybe |
+| Outgoing | Query   | Mock  |
+| Outgoing | Command | Mock  |
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h2 id="recap"&gt;Recap&lt;a class="headerlink" href="#recap" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Since the discovery of TDD few things changed the way I write code more than these considerations on what I am supposed to test. Out of 6 different types of tests we discovered that 2 shouldn't be tested, 2 of them require a very simple technique based on assertions, and the last 2 are the only ones that requires an advanced technique (mocks). This should cheer you up, as for once a good methodology doesn't add new rules and further worries, but removes one third of them, even forbidding you to implement them!&lt;/p&gt;</content><category term="Programming"></category><category term="OOP"></category><category term="pytest"></category><category term="Python"></category><category term="Python3"></category><category term="refactoring"></category><category term="TDD"></category><category term="testing"></category></entry><entry><title>TDD in Python with pytest - Part 2</title><link href="https://www.thedigitalcatonline.com/blog/2020/09/11/tdd-in-python-with-pytest-part-2/" rel="alternate"></link><published>2020-09-11T10:30:00+02:00</published><updated>2020-09-11T10:30:00+02:00</updated><author><name>Leonardo Giordani</name></author><id>tag:www.thedigitalcatonline.com,2020-09-11:/blog/2020/09/11/tdd-in-python-with-pytest-part-2/</id><summary type="html"></summary><content type="html">&lt;p&gt;This is the second post in the series "TDD in Python with pytest" where I develop a simple project following a strict TDD methodology. The posts come from my book &lt;a href="https://leanpub.com/clean-architectures-in-python"&gt;Clean Architectures in Python&lt;/a&gt; and have been reviewed to get rid of some bad naming choices of the version published in the book.&lt;/p&gt;
 &lt;p&gt;You can find the first post &lt;a href="https://www.thedigitalcatonline.com/blog/2020/09/10/tdd-in-python-with-pytest-part-1/"&gt;here&lt;/a&gt;.&lt;/p&gt;
 &lt;h2 id="step-7-division"&gt;Step 7 - Division&lt;a class="headerlink" href="#step-7-division" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;The requirements state that there shall be a division function, and that it has to return a float value. This is a simple condition to test, as it is sufficient to divide two numbers that do not give an integer result&lt;/p&gt;
@@ -4961,492 +5022,4 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
 &lt;p&gt;If you found this useful, please consider sharing it with a friend! &lt;/p&gt;
 &lt;h1 id="feedback"&gt;Feedback&lt;a class="headerlink" href="#feedback" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;Feel free to reach me on &lt;a href="https://twitter.com/thedigicat"&gt;Twitter&lt;/a&gt; if you have questions. The &lt;a href="https://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues"&gt;GitHub issues&lt;/a&gt; page is the best place to submit corrections.&lt;/p&gt;
-&lt;p&gt;Image by &lt;a href="https://pixabay.com/users/LoggaWiggler-15/?utm_source=link-attribution&amp;amp;utm_medium=referral&amp;amp;utm_campaign=image&amp;amp;utm_content=5236"&gt;LoggaWiggler&lt;/a&gt; from &lt;a href="https://pixabay.com/?utm_source=link-attribution&amp;amp;utm_medium=referral&amp;amp;utm_campaign=image&amp;amp;utm_content=5236"&gt;Pixabay&lt;/a&gt;&lt;/p&gt;</content><category term="Programming"></category><category term="metaclasses"></category><category term="metaprogramming"></category><category term="OOP"></category><category term="Python"></category><category term="Python3"></category></entry><entry><title>Multiple inheritance and mixin classes in Python</title><link href="https://www.thedigitalcatonline.com/blog/2020/03/27/mixin-classes-in-python/" rel="alternate"></link><published>2020-03-27T12:00:00+01:00</published><updated>2020-04-08T12:00:00+01:00</updated><author><name>Leonardo Giordani</name></author><id>tag:www.thedigitalcatonline.com,2020-03-27:/blog/2020/03/27/mixin-classes-in-python/</id><summary type="html">&lt;p&gt;This post describes what mixin classes are in theory, why we need them and how they can be implemented in Python. It also shows a working example from the class-based views code of the Django framework.&lt;/p&gt;</summary><content type="html">&lt;p&gt;I recently revisited three old posts on Django class-based views that I wrote for this blog, updating them to Django 3.0 (you can find them &lt;a href="https://www.thedigitalcatonline.com/blog/2013/10/28/digging-up-django-class-based-views-1/"&gt;here&lt;/a&gt;) and noticed once again that the code base uses &lt;em&gt;mixin classes&lt;/em&gt; to increase code reuse. I also realised that mixins are not very popular in Python, so I decided to explore them, brushing up my knowledge of the OOP theory in the meanwhile.&lt;/p&gt;
-&lt;p&gt;To fully appreciate the content of the post, be sure you grasp two pillars of the OOP approach: &lt;strong&gt;delegation&lt;/strong&gt;, in particular how it is implemented through inheritance, and &lt;strong&gt;polymorphism&lt;/strong&gt;. &lt;a href="https://www.thedigitalcatonline.com/blog/2014/08/20/python-3-oop-part-3-delegation-composition-and-inheritance/"&gt;This post about delegation&lt;/a&gt; and &lt;a href="https://www.thedigitalcatonline.com/blog/2014/08/21/python-3-oop-part-4-polymorphism/"&gt;this post about polymorphism&lt;/a&gt; contain all you need to understand how Python implements those concepts.&lt;/p&gt;
-&lt;h1 id="multiple-inheritance-blessing-and-curse"&gt;Multiple inheritance: blessing and curse&lt;a class="headerlink" href="#multiple-inheritance-blessing-and-curse" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
-&lt;h2 id="general-concepts"&gt;General concepts&lt;a class="headerlink" href="#general-concepts" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
-&lt;p&gt;To discuss mixins we need to start from one of the most controversial subjects in the whole OOP world: multiple inheritance. This is a natural extension of the concept of simple inheritance, where a class automatically delegates method and attribute resolution to another class (the parent class).&lt;/p&gt;
-&lt;p&gt;Let me state it again, as it is important for the rest of the discussion: &lt;em&gt;inheritance is just an automatic delegation mechanism&lt;/em&gt;.&lt;/p&gt;
-&lt;p&gt;Delegation was introduced in OOP as a way to reduce code duplication. When an object needs a specific feature it just delegates it to another class (either explicitly or implicitly), so the code is written just once.&lt;/p&gt;
-&lt;p&gt;Let's consider the example of code management website, clearly completely fictional and not inspired by any existing product. Let's assume we created the following hierarchy&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;      assignable reviewable item
- (assign_to_user, ask_review_to_user)
-                 ^
-                 |
-                 |
-                 |
-            pull request
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;which allows us to put in &lt;code&gt;pull request&lt;/code&gt; only the specific code required by that element. This is a great achievement, as it is what libraries do for code, but on live objects. Method calls and delegation are nothing more than messages between objects, so the delegation hierarchy is just a simple networked system.&lt;/p&gt;
-&lt;p&gt;Unfortunately, the use of inheritance over composition often leads to systems that, paradoxically, increase code duplication. The main problem lies in the fact that inheritance can directly delegate to only one other class (the parent class), as opposed to composition, where the object can delegate to any number of other ones. This limitation of inheritance means that we might have a class that inherits from another one because it needs some of its features, but doing this receives features it doesn't want, or shouldn't have.&lt;/p&gt;
-&lt;p&gt;Let's continue the example of the code management portal, and consider an &lt;code&gt;issue&lt;/code&gt;, which is an item that we want to store in the system, but cannot be reviewed by a user. If we create a hierarchy like this&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;      assignable reviewable item
-   (assign_to_user, ask_review_to_user)
-                   ^
-                   |
-                   |
-                   |
-                   |
-          +--------+--------+
-          |                 |
-          |                 |
-          |                 |
-        issue          pull request
-   (not reviewable)
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;we end up putting the features related to the review process in an object that shouldn't have them. The standard solution to this problem is that of increasing the depth of the inheritance hierarchy and to derive from the new simpler ancestor.&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;          assignable item
-         (assign_to_user)
-                 ^
-                 |
-                 |
-                 |
-                 |
-          +------+--------------+
-          |                     |
-          |                     |
-          |                     |
-          |         reviewable assignable item
-          |            (ask_review_to_user)
-          |                     ^
-          |                     |
-          |                     |
-          |                     |
-        issue              pull request
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;However, this approach stops being viable as soon as an object needs to inherit from a given class but not from the parent of that class. For example, an element that has to be reviewable but not assignable, like a &lt;code&gt;best practice&lt;/code&gt; that we want to add to the site. If we want to keep using inheritance, the only solution at this point is to duplicate the code that implements the reviewable nature of the item (or the code that implements the assignable feature) and create two different class hierarchies.&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;          assignable item              +--------&amp;gt;  reviewable item
-         (assign_to_user)              |         (ask_review_to_user)
-                 ^                     |                  ^
-                 |                     |                  |
-                 |                     |                  |
-                 |             CODE DUPLICATION           |
-                 |                     |                  |
-          +------+--------------+      |                  |
-          |                     |      |                  |
-          |                     |      |                  |
-          |                     |      V                  |
-          |         reviewable assignable item            |
-          |            (ask_review_to_user)               |
-          |                     ^                         |
-          |                     |                         |
-          |                     |                         |
-          |                     |                         |
-        issue              pull request             best practice
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;Please note that this doesn't even take into account that the new &lt;code&gt;reviewable item&lt;/code&gt; might need attributes from &lt;code&gt;assignable item&lt;/code&gt;, which prompts for another level of depth in the hierarchy, where we isolate those features in a more generic class. So, unfortunately, chances are that this is only the first of many compromises we will have to accept to keep the system in a stable state if we can't change our approach.&lt;/p&gt;
-&lt;p&gt;Multiple inheritance was then introduced in OOP, as it was clear that an object might want to delegate certain actions to a given class, and other actions to a different one, mimicking what life forms do when they inherit traits from multiple ancestors (parents, grandparents, etc.).&lt;/p&gt;
-&lt;p&gt;The above situation can then be solved having &lt;code&gt;pull request&lt;/code&gt; inherit from both the class that provides the assign feature and from the one that implements the reviewable nature. &lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;          assignable item                          reviewable item
-         (assign_to_user)                        (ask_review_to_user)
-                 ^                                      ^  ^
-                 |                                      |  |
-                 |                                      |  |
-                 |                                      |  |
-                 |                                      |  |
-          +------+-------------+ +----------------------+  |
-          |                    | |                         |
-          |                    | |                         |
-          |                    | |                         |
-          |                    | |                         |
-          |                    | |                         |
-          |                    | |                         |
-          |                    | |                         |
-          |                    | |                         |
-          |                    | |                         |
-        issue              pull request              best practice
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;Generally speaking, then, multiple inheritance is introduced to give the programmer a way to keep using inheritance without introducing code duplication, keeping the class hierarchy simpler and cleaner. Eventually, everything we do in software design is to try and separate concerns, that is, to isolate features, and multiple inheritance can help to do this.&lt;/p&gt;
-&lt;p&gt;These are just examples and might be valid or not, depending on the concrete case, but they clearly show the issues that we can have even with a very simple hierarchy of 4 classes. Many of these problems clearly arise from the fact that we wanted to implement delegation only through inheritance, and I dare to say that 80% of the architectural errors in OOP projects come from using inheritance instead of composition and from using god objects, that is classes that have responsibilities over too many different parts of the system. Always remember that OOP was born with the idea of small objects interacting through messages, so the considerations we make for monolithic architectures are valid even here.&lt;/p&gt;
-&lt;p&gt;That said, as inheritance and composition implement two different types of delegation (&lt;em&gt;to be&lt;/em&gt; and &lt;em&gt;to have&lt;/em&gt;), they are both valuable, and multiple inheritance is the way to remove the single provider limitation that comes from having only one parent class.&lt;/p&gt;
-&lt;h2 id="why-is-it-controversial"&gt;Why is it controversial?&lt;a class="headerlink" href="#why-is-it-controversial" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
-&lt;p&gt;Given what I just said, multiple inheritance seems to be a blessing. When an object can inherit from multiple parents, we can easily spread responsibilities among different classes and use only the ones we need, promoting code reuse and avoiding god objects.&lt;/p&gt;
-&lt;p&gt;Unfortunately, things are not that simple. First of all, we face the issue that every microservice-oriented architecture faces, that is the risk of going from god objects (the extreme monolithic architecture) to almost empty objects (the extreme distributed approach), burdening the programmer with too a fine-grained control that eventually results in a system where relationships between objects are so complicated that it becomes impossible to grasp the effect of a change in the code.&lt;/p&gt;
-&lt;p&gt;There is a more immediate problem in multiple inheritance, though. As it happens with the natural inheritance, parents can provide the same "genetic trait" in two different flavours, but the resulting individual will have only one. Leaving aside genetics (which is incredibly more complicated than programming) and going back to OOP, we face a problem when an object inherits from two other objects that provide the same attribute.&lt;/p&gt;
-&lt;p&gt;So, if your class &lt;code&gt;Child&lt;/code&gt; inherits from parents &lt;code&gt;Parent1&lt;/code&gt; and &lt;code&gt;Parent2&lt;/code&gt;, and both provide the &lt;code&gt;__init__&lt;/code&gt; method, which one should your object use?&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Parent1&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
-    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="o"&gt;...&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
-
-
-&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Parent2&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
-    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="o"&gt;...&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
-
-
-&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Child&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Parent1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;Parent2&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-    &lt;span class="c1"&gt;# This inherits from both Parent1 and Parent2, which __init__ does it use?&lt;/span&gt;
-    &lt;span class="k"&gt;pass&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;Things can even get worse, as parents can have different signatures of the common method, for example&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Parent1&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-    &lt;span class="c1"&gt;# This inherits from Ancestor but redefines __init__&lt;/span&gt;
-    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;status&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="o"&gt;...&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
-
-
-&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Parent2&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-    &lt;span class="c1"&gt;# This inherits from Ancestor but redefines __init__&lt;/span&gt;
-    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;name&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="o"&gt;...&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
-
-
-&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Child&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Parent1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;Parent2&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-    &lt;span class="c1"&gt;# This inherits from both Parent1 and Parent2, which __init__ does it use?&lt;/span&gt;
-    &lt;span class="k"&gt;pass&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;The problem can be extended even further, introducing a common ancestor above &lt;code&gt;Parent1&lt;/code&gt; and &lt;code&gt;Parent2&lt;/code&gt;.&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Ancestor&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-    &lt;span class="c1"&gt;# The common ancestor, defines its own __init__ method&lt;/span&gt;
-    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="o"&gt;...&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
-
-
-&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Parent1&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Ancestor&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-    &lt;span class="c1"&gt;# This inherits from Ancestor but redefines __init__&lt;/span&gt;
-    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;status&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="o"&gt;...&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
-
-
-&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Parent2&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Ancestor&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-    &lt;span class="c1"&gt;# This inherits from Ancestor but redefines __init__&lt;/span&gt;
-    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;name&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="o"&gt;...&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
-
-
-&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Child&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Parent1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;Parent2&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-    &lt;span class="c1"&gt;# This inherits from both Parent1 and Parent2, which __init__ does it use?&lt;/span&gt;
-    &lt;span class="k"&gt;pass&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;As you can see, we already have a problem when we introduce multiple parents, and a common ancestor just adds a new level of complexity. The ancestor class can clearly be at any point of the inheritance tree (grandparent, grand-grandparent, etc.), the important part is that it is shared between &lt;code&gt;Parent1&lt;/code&gt; and &lt;code&gt;Parent2&lt;/code&gt;. This is the so-called diamond problem, as the inheritance graph has the shape of a diamond&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;      Ancestor
-       ^   ^
-      /     \
-     /       \
-Parent1     Parent2
-    ^         ^
-     \       /
-      \     /
-       Child
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;So, while with single-parent inheritance the rules are straightforward, with multiple inheritance we immediately have a more complex situation that doesn't have a trivial solution. Does all this prevent multiple inheritance from being implemented?&lt;/p&gt;
-&lt;p&gt;Not at all! There are solutions to this problem, as we will see shortly, but this further level of intricacy makes multiple inheritance something that doesn't fit easily in a design and has to be implemented carefully to avoid subtle bugs. Remember that inheritance is an automatic delegation mechanism, as this makes what happens in the code less evident. For these reasons, multiple inheritance is often depicted as scary and convoluted, and usually given some space only in the advanced OOP courses, at least in the Python world. I believe every Python programmer, instead, should familiarise with it and learn how to take advantage of it.&lt;/p&gt;
-&lt;h2 id="multiple-inheritance-the-python-way"&gt;Multiple inheritance: the Python way&lt;a class="headerlink" href="#multiple-inheritance-the-python-way" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
-&lt;p&gt;Let's see how it is possible to solve the diamond problem. Unlike genetics, we programmers can't afford any level of uncertainty or randomness in our processes, so in the presence of a possible ambiguity as the one created by multiple inheritance, we need to write down a rule that will be strictly followed in every case. In Python, this rule goes by the name of MRO (Method Resolution Order), which was introduced in Python 2.3 and is described in &lt;a href="https://www.python.org/download/releases/2.3/mro/"&gt;this document&lt;/a&gt; by Michele Simionato.&lt;/p&gt;
-&lt;p&gt;There is a lot to say about MRO and the underlying C3 linearisation algorithm, but for the scope of this post, it is enough to see how it solves the diamond problem. In case of multiple inheritance, Python follows the usual inheritance rules (automatic delegation to an ancestor if the attribute is not present locally), but the &lt;em&gt;order&lt;/em&gt; followed to traverse the inheritance tree now includes all the classes that are specified in the class signature. In the example above, Python would look for attributes in the following order: &lt;code&gt;Child&lt;/code&gt;, &lt;code&gt;Parent1&lt;/code&gt;, &lt;code&gt;Parent2&lt;/code&gt;, &lt;code&gt;Ancestor&lt;/code&gt;.&lt;/p&gt;
-&lt;p&gt;So, as in the case of standard inheritance, this means that the first class in the list that implements a specific attribute will be the selected provider for that resolution. An example might clarify the matter&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Ancestor&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;rewind&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Ancestor: rewind&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-
-
-&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Parent1&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Ancestor&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;open&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Parent1: open&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-
-
-&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Parent2&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Ancestor&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;open&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Parent2: open&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-
-    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;close&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Parent2: close&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-
-    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;flush&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Parent2: flush&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-
-
-&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Child&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Parent1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;Parent2&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;flush&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Child: flush&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-
-
-&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Child&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="vm"&gt;__mro__&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-
-&lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Child&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
-&lt;span class="n"&gt;c&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;rewind&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
-&lt;span class="n"&gt;c&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;open&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
-&lt;span class="n"&gt;c&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;close&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
-&lt;span class="n"&gt;c&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;flush&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;As you can see, we can access the MRO of any class reasind its &lt;code&gt;__mro__&lt;/code&gt; attribute, and as we expected its value is &lt;code&gt;(&amp;lt;class '__main__.Child'&amp;gt;, &amp;lt;class '__main__.Parent1'&amp;gt;, &amp;lt;class '__main__.Parent2'&amp;gt;, &amp;lt;class '__main__.Ancestor'&amp;gt;, &amp;lt;class 'object'&amp;gt;).&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;So, in this case an instance &lt;code&gt;c&lt;/code&gt; of &lt;code&gt;Child&lt;/code&gt; provides &lt;code&gt;rewind&lt;/code&gt;, &lt;code&gt;open&lt;/code&gt;, &lt;code&gt;close&lt;/code&gt;, and &lt;code&gt;flush&lt;/code&gt;. When &lt;code&gt;c.rewind&lt;/code&gt; is called, the code in &lt;code&gt;Ancestor&lt;/code&gt; is executed, as this is the first class in the MRO list that provides that method. The method &lt;code&gt;open&lt;/code&gt; is provided by &lt;code&gt;Parent1&lt;/code&gt;, while &lt;code&gt;close&lt;/code&gt; is provided by &lt;code&gt;Parent2&lt;/code&gt;. If the method &lt;code&gt;c.flush&lt;/code&gt; is called, the code is provided by the &lt;code&gt;Child&lt;/code&gt; class itself, that redefines it overriding the one provided by &lt;code&gt;Parent2&lt;/code&gt;.&lt;/p&gt;
-&lt;p&gt;As we see with the &lt;code&gt;flush&lt;/code&gt; method, Python doesn't change its behaviour when it comes to method overriding with multiple parents. The first implementation of a method with that name is executed, and the parent's implementation is not automatically called. As in the case of standard inheritance, then, it's up to us to design classes with matching method signatures.&lt;/p&gt;
-&lt;h3 id="under-the-bonnet"&gt;Under the bonnet&lt;a class="headerlink" href="#under-the-bonnet" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h3&gt;
-&lt;p&gt;How does multiple inheritance work internally? How does Python create the MRO list?&lt;/p&gt;
-&lt;p&gt;Python has a very simple approach to OOP (even though it ultimately ends with a mind-blowing ouroboros, see &lt;a href="https://www.thedigitalcatonline.com/blog/2014/09/01/python-3-oop-part-5-metaclasses/"&gt;here&lt;/a&gt;). Classes are objects themselves, so they contain data structures that are used by the language to provide features, and delegation makes no exception. When we run a method on an object, Python silently uses the &lt;code&gt;__getattribute__&lt;/code&gt; method (provided by &lt;code&gt;object&lt;/code&gt;), which uses &lt;code&gt;__class__&lt;/code&gt; to reach the class from the instance, and &lt;code&gt;__bases__&lt;/code&gt; to find the parent classes. The latter, in particular, is a tuple, so it is ordered, and it contains all the classes that the current class inherits from.&lt;/p&gt;
-&lt;p&gt;The MRO is created using only &lt;code&gt;__bases__&lt;/code&gt;, but the underlying algorithm is not that trivial and has to with the monotonicity of the resulting class linearisation. It is less scary than it sounds, but not something you want to read while suntanning, probably. If that's the case, the aforementioned &lt;a href="https://www.python.org/download/releases/2.3/mro/"&gt;document&lt;/a&gt; by Michele Simionato contains all the gory details on class linearisation that you always wanted to explore while lying on the beach.&lt;/p&gt;
-&lt;h1 id="inheritance-and-interfaces"&gt;Inheritance and interfaces&lt;a class="headerlink" href="#inheritance-and-interfaces" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
-&lt;p&gt;To approach mixins, we need to discuss inheritance in detail, and specifically the role of method signatures.&lt;/p&gt;
-&lt;p&gt;In Python, when you override a method provided by an ancestor class, you have to decide if and when to call its original implementation. This gives the programmer the freedom to decide whether they need to just augment a method or to replace it completely. Remember that the only thing Python does when a class inherits from another is to automatically delegate methods that are not implemented.&lt;/p&gt;
-&lt;p&gt;When a class inherits from another we are ideally creating objects that keep the backward compatibility with the interface of the parent class, to allow a polymorphic use of them. This means that when we inherit from a class and override a method changing its signature we are doing something that is dangerous and, at least from the point of view of polymorphism, wrong. Have a look at this example&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;GraphicalEntity&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;pos_x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;pos_y&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size_x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size_y&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;pos_x&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pos_x&lt;/span&gt;
-        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;pos_y&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pos_y&lt;/span&gt;
-        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;size_x&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;size_x&lt;/span&gt;
-        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;size_y&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;size_y&lt;/span&gt;
-
-    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;move&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;pos_x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;pos_y&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;pos_x&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pos_x&lt;/span&gt;
-        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;pos_y&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pos_y&lt;/span&gt;
-
-    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;resize&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size_x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size_y&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;size_x&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;size_x&lt;/span&gt;
-        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;size_y&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;size_y&lt;/span&gt;
-
-
-&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Rectangle&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;GraphicalEntity&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-    &lt;span class="k"&gt;pass&lt;/span&gt;
-
-
-&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Square&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;GraphicalEntity&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;pos_x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;pos_y&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="nb"&gt;super&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;pos_x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;pos_y&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-
-    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;resize&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="nb"&gt;super&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;resize&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;size&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;Please note that &lt;code&gt;Square&lt;/code&gt; changes the signature of both &lt;code&gt;__init__&lt;/code&gt; and &lt;code&gt;resize&lt;/code&gt;. Now, when we instantiate those classes we need to keep in mind the different signature of &lt;code&gt;__init__&lt;/code&gt; in &lt;code&gt;Square&lt;/code&gt;&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;r1&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Rectangle&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;100&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;200&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;15&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;30&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;span class="n"&gt;r2&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Rectangle&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;150&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;280&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;23&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;55&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;span class="n"&gt;q1&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Square&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;300&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;400&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;50&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;We usually accept that an enhanced version of a class accepts different parameters when it is initialized, as we do not expect it to be polymorphic on &lt;code&gt;__init__&lt;/code&gt;. Problems arise when we try to leverage polymorphism on other methods, for example resizing all &lt;code&gt;GraphicalEntity&lt;/code&gt; objects in a list&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;shape&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;r1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;r2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;q1&lt;/span&gt;&lt;span class="p"&gt;]:&lt;/span&gt;
-    &lt;span class="n"&gt;size_x&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;shape&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;size_x&lt;/span&gt;
-    &lt;span class="n"&gt;size_y&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;shape&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;size_y&lt;/span&gt;
-    &lt;span class="n"&gt;shape&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;resize&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;size_x&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size_y&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;Since &lt;code&gt;r1&lt;/code&gt;, &lt;code&gt;r2&lt;/code&gt;, and &lt;code&gt;q1&lt;/code&gt; are all objects that inherit from &lt;code&gt;GraphicalEntity&lt;/code&gt; we expect them to provide the interface provided by that class, but this fails, because &lt;code&gt;Square&lt;/code&gt; changed the signature of &lt;code&gt;resize&lt;/code&gt;. The same would happen if we instantiated them in a for loop from a list of classes, but as I said it is generally accepted that child classes change the signature of the &lt;code&gt;__init__&lt;/code&gt; method. This is not true, for example, in a plugin-based system, where all plugins shall be initialized the same way.&lt;/p&gt;
-&lt;p&gt;This is a classic problem in OOP. While we, as humans, perceive a square just as a slightly special rectangle, from the interface point of view the two classes are different, and thus should not be in the same inheritance tree when we are dealing with dimensions. This is an important consideration: &lt;code&gt;Rectangle&lt;/code&gt; and &lt;code&gt;Square&lt;/code&gt; are polymorphic on the &lt;code&gt;move&lt;/code&gt; method, but not on &lt;code&gt;__init__&lt;/code&gt; and &lt;code&gt;resize&lt;/code&gt;. So, the question is if we could somehow separate the two natures of being movable and resizable.&lt;/p&gt;
-&lt;p&gt;Now, discussing interfaces, polymorphism, and the reasons behind them would require an entirely separate post, so in the following sections, I'm going to ignore the matter and just consider the object interface optional. You will thus find examples of objects that break the interface of the parent, and objects that keep it. Just remember: whenever you change the signature of a method you change the (implicit) interface of the object, and thus you stop polymorphism. I'll discuss another time if I consider this right or wrong.&lt;/p&gt;
-&lt;h1 id="mixin-classes"&gt;Mixin classes&lt;a class="headerlink" href="#mixin-classes" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
-&lt;p&gt;MRO is a good solution that prevents ambiguity, but it leaves programmers with the responsibility of creating sensible inheritance trees. The algorithm helps to resolve complicated situations, but this doesn't mean we should create them in the first place. So, how can we leverage multiple inheritance without creating systems that are too complicated to grasp? Moreover, is it possible to use multiple inheritance to solve the problem of managing the double (or multiple) nature of an object, as in the previous example of a movable and resizable shape?&lt;/p&gt;
-&lt;p&gt;The solution comes from mixin classes: those are small classes that provide attributes but are not included in the standard inheritance tree, working more as "additions" to the current class than as proper ancestors. Mixins originate in the LISP programming language, and specifically in what could be considered the first version of the Common Lisp Object System, the Flavors extension. Modern OOP languages implement mixins in many different ways: Scala, for example, has a feature called &lt;em&gt;traits&lt;/em&gt;, which live in their own space with a specific hierarchy that doesn't interfere with the proper class inheritance.&lt;/p&gt;
-&lt;h2 id="mixin-classes-in-python"&gt;Mixin classes in Python&lt;a class="headerlink" href="#mixin-classes-in-python" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
-&lt;p&gt;Python doesn't provide support for mixins with any dedicated language feature, so we use multiple inheritance to implement them. This clearly requires great discipline from the programmer, as it violates one of the main assumptions for mixins: their orthogonality to the inheritance tree. In Python, so-called mixins are classes that live in the normal inheritance tree, but they are kept small to avoid creating hierarchies that are too complicated for the programmer to grasp. In particular, mixins shouldn't have common ancestors other than &lt;code&gt;object&lt;/code&gt; with the other parent classes.&lt;/p&gt;
-&lt;p&gt;Let's have a look at a simple example&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;GraphicalEntity&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;pos_x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;pos_y&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size_x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size_y&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;pos_x&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pos_x&lt;/span&gt;
-        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;pos_y&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pos_y&lt;/span&gt;
-        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;size_x&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;size_x&lt;/span&gt;
-        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;size_y&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;size_y&lt;/span&gt;
-
-
-&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;ResizableMixin&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;resize&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size_x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size_y&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;size_x&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;size_x&lt;/span&gt;
-        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;size_y&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;size_y&lt;/span&gt;
-
-
-&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;ResizableGraphicalEntity&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;GraphicalEntity&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;ResizableMixin&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-    &lt;span class="k"&gt;pass&lt;/span&gt;
-
-&lt;span class="n"&gt;rge&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;ResizableGraphicalEntity&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;200&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;300&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;span class="n"&gt;rge&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;resize&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1000&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2000&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;Here, the class &lt;code&gt;ResizableMixin&lt;/code&gt; doesn't inherit from &lt;code&gt;GraphicalEntity&lt;/code&gt;, but directly from &lt;code&gt;object&lt;/code&gt;, so &lt;code&gt;ResizableGraphicalEntity&lt;/code&gt; gets from it just the &lt;code&gt;resize&lt;/code&gt; method. As we said before, this simplifies the inheritance tree of &lt;code&gt;ResizableGraphicalEntity&lt;/code&gt; and helps to reduce the risk of the diamond problem. It leaves us free to use &lt;code&gt;GraphicalEntity&lt;/code&gt; as a parent for other classes without having to inherit methods that we don't want. Please remember that this happens because the classes are designed to avoid it, and not because of language features: the MRO algorithm just ensures that there will always be an unambiguous choice in case of multiple ancestors.&lt;/p&gt;
-&lt;p&gt;Mixins cannot usually be too generic. After all, they are designed to add features to classes, but these new features often interact with other pre-existing features of the augmented class. In this case, the &lt;code&gt;resize&lt;/code&gt; method interacts with the attributes &lt;code&gt;size_x&lt;/code&gt; and &lt;code&gt;size_y&lt;/code&gt; that have to be present in the object. Obviously, there are obviously examples of &lt;em&gt;pure&lt;/em&gt; mixins, but since they would require no initialization their scope is definitely limited.&lt;/p&gt;
-&lt;h2 id="using-mixins-to-hijack-inheritance"&gt;Using mixins to hijack inheritance&lt;a class="headerlink" href="#using-mixins-to-hijack-inheritance" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
-&lt;p&gt;Thanks to the MRO, Python programmers can leverage multiple inheritance to override methods that objects inherit from their parents, allowing them to customise classes without code duplication. Let's have a look at this example&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;GraphicalEntity&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;pos_x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;pos_y&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size_x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size_y&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;pos_x&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pos_x&lt;/span&gt;
-        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;pos_y&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pos_y&lt;/span&gt;
-        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;size_x&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;size_x&lt;/span&gt;
-        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;size_y&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;size_y&lt;/span&gt;
-
-&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Button&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;GraphicalEntity&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;pos_x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;pos_y&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size_x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size_y&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="nb"&gt;super&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;pos_x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;pos_y&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size_x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size_y&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;status&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kc"&gt;False&lt;/span&gt;
-
-    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;toggle&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;status&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="ow"&gt;not&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;status&lt;/span&gt;
-
-&lt;span class="n"&gt;b&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Button&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;20&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;200&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;100&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;As you can see the &lt;code&gt;Button&lt;/code&gt; class extends the &lt;code&gt;GraphicalEntity&lt;/code&gt; one in a classic way, using &lt;code&gt;super&lt;/code&gt; to call the parent's &lt;code&gt;__init__&lt;/code&gt; method before adding the new &lt;code&gt;status&lt;/code&gt; attribute. Now, if I wanted to create a &lt;code&gt;SquareButton&lt;/code&gt; class I have two choices.&lt;/p&gt;
-&lt;p&gt;I might just override &lt;code&gt;__init__&lt;/code&gt; in the new class&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;GraphicalEntity&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;pos_x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;pos_y&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size_x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size_y&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;pos_x&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pos_x&lt;/span&gt;
-        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;pos_y&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pos_y&lt;/span&gt;
-        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;size_x&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;size_x&lt;/span&gt;
-        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;size_y&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;size_y&lt;/span&gt;
-
-
-&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Button&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;GraphicalEntity&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;pos_x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;pos_y&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size_x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size_y&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="nb"&gt;super&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;pos_x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;pos_y&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size_x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size_y&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;status&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kc"&gt;False&lt;/span&gt;
-
-    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;toggle&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;status&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="ow"&gt;not&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;status&lt;/span&gt;
-
-
-&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;SquareButton&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Button&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;pos_x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;pos_y&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="nb"&gt;super&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;pos_x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;pos_y&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-
-&lt;span class="n"&gt;b&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;SquareButton&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;20&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;200&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;which performs the requested job, but strongly connects the feature of having a single dimension with the &lt;code&gt;Button&lt;/code&gt; nature. If we wanted to create a circular image we could not inherit from &lt;code&gt;SquareButton&lt;/code&gt;, as the image has a different nature.&lt;/p&gt;
-&lt;p&gt;The second option is that of isolating the features connected with having a single dimension in a mixin class, and add it as a parent for the new class&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;GraphicalEntity&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;pos_x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;pos_y&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size_x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size_y&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;pos_x&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pos_x&lt;/span&gt;
-        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;pos_y&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pos_y&lt;/span&gt;
-        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;size_x&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;size_x&lt;/span&gt;
-        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;size_y&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;size_y&lt;/span&gt;
-
-
-&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Button&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;GraphicalEntity&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;pos_x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;pos_y&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size_x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size_y&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="nb"&gt;super&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;pos_x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;pos_y&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size_x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size_y&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;status&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kc"&gt;False&lt;/span&gt;
-
-    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;toggle&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;status&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="ow"&gt;not&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;status&lt;/span&gt;
-
-
-&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;SingleDimensionMixin&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;pos_x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;pos_y&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="nb"&gt;super&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;pos_x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;pos_y&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-
-
-&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;SquareButton&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;SingleDimensionMixin&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;Button&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-    &lt;span class="k"&gt;pass&lt;/span&gt;
-
-&lt;span class="n"&gt;b&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;SquareButton&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;20&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;200&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;The second solution gives the same final result, but promotes code reuse, as now the &lt;code&gt;SingleDimensionMixin&lt;/code&gt; class can be applied to other classes derived from &lt;code&gt;GraphicalEntity&lt;/code&gt; and make them accept only one size, while in the first solution that feature was tightly connected with the &lt;code&gt;Button&lt;/code&gt; ancestor class.&lt;/p&gt;
-&lt;p&gt;Please note that the position of the mixin is important as &lt;code&gt;super&lt;/code&gt; follows the MRO. As it is, the MRO of &lt;code&gt;SquareButton&lt;/code&gt; is &lt;code&gt;(SquareButton, SingleDimensionMixin, Button, GraphicalEntity, object)&lt;/code&gt;, so, when we instantiate it the &lt;code&gt;__init__&lt;/code&gt; method is provided by &lt;code&gt;SingleDimensionMixin&lt;/code&gt;, which in turn calls through &lt;code&gt;super&lt;/code&gt; the method &lt;code&gt;__init__&lt;/code&gt; of &lt;code&gt;Button&lt;/code&gt;. The call &lt;code&gt;super().__init__(pos_x, pos_y, size, size)&lt;/code&gt; in &lt;code&gt;SingleDimensionMixin&lt;/code&gt; and the signature &lt;code&gt;def __init__(self, pos_x, pos_y, size_x, size_y):&lt;/code&gt; in &lt;code&gt;Button&lt;/code&gt; match, so everything works.&lt;/p&gt;
-&lt;p&gt;If we defined &lt;code&gt;SquareButton&lt;/code&gt; as&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;SquareButton&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Button&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;SingleDimensionMixin&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-    &lt;span class="k"&gt;pass&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;then the &lt;code&gt;__init__&lt;/code&gt; method would first be provided by &lt;code&gt;Button&lt;/code&gt;, and its &lt;code&gt;super&lt;/code&gt; would call the &lt;code&gt;__init__&lt;/code&gt; method of &lt;code&gt;SingleDimensionMixin&lt;/code&gt;. This would however result in an error, as the call &lt;code&gt;super().__init__(pos_x, pos_y, size_x, size_y)&lt;/code&gt; in &lt;code&gt;Button&lt;/code&gt; doesn't match the signature &lt;code&gt;def __init__(self, pos_x, pos_y, size):&lt;/code&gt; of &lt;code&gt;SingleDimensionMixin&lt;/code&gt;.&lt;/p&gt;
-&lt;p&gt;Mixins are not used only when you want to change the object's interface, though. Leveraging &lt;code&gt;super&lt;/code&gt; we can achieve interesting designs like&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;GraphicalEntity&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;pos_x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;pos_y&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size_x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size_y&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;pos_x&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pos_x&lt;/span&gt;
-        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;pos_y&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pos_y&lt;/span&gt;
-        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;size_x&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;size_x&lt;/span&gt;
-        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;size_y&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;size_y&lt;/span&gt;
-
-
-&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Button&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;GraphicalEntity&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;pos_x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;pos_y&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size_x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size_y&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="nb"&gt;super&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;pos_x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;pos_y&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size_x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size_y&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;status&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kc"&gt;False&lt;/span&gt;
-
-    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;toggle&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;status&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="ow"&gt;not&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;status&lt;/span&gt;
-
-
-&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;LimitSizeMixin&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;pos_x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;pos_y&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size_x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size_y&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="n"&gt;size_x&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;min&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;size_x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;500&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-        &lt;span class="n"&gt;size_y&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;min&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;size_y&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;400&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-        &lt;span class="nb"&gt;super&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;pos_x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;pos_y&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size_x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;size_y&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-
-
-&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;LimitSizeButton&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;LimitSizeMixin&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;Button&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-    &lt;span class="k"&gt;pass&lt;/span&gt;
-
-&lt;span class="n"&gt;b&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;LimitSizeButton&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;20&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2000&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;1000&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;size_x&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;size_y&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;Here, the MRO or &lt;code&gt;LimitSizeButton&lt;/code&gt; is &lt;code&gt;(&amp;lt;class '__main__.LimitSizeButton'&amp;gt;, &amp;lt;class '__main__.LimitSizeMixin'&amp;gt;, &amp;lt;class '__main__.Button'&amp;gt;, &amp;lt;class '__main__.GraphicalEntity'&amp;gt;, &amp;lt;class 'object'&amp;gt;)&lt;/code&gt;, which means that when we initialize it the &lt;code&gt;__init__&lt;/code&gt; method is first provided by &lt;code&gt;LimitSizeMixin&lt;/code&gt;, which then calls through &lt;code&gt;super&lt;/code&gt; the &lt;code&gt;__init__&lt;/code&gt; method of &lt;code&gt;Button&lt;/code&gt;, and through the latter the &lt;code&gt;__init__&lt;/code&gt; method of &lt;code&gt;GraphicalEntity&lt;/code&gt;.&lt;/p&gt;
-&lt;p&gt;Remember that in Python, you are never forced to call the parent's implementation of a method, so the mixin here might also stop the dispatching mechanism if that is the requirement of the business logic of the new object.&lt;/p&gt;
-&lt;h1 id="a-real-example-django-class-based-views"&gt;A real example: Django class-based views&lt;a class="headerlink" href="#a-real-example-django-class-based-views" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
-&lt;p&gt;Finally, let's get to the original source of inspiration for this post: the Django codebase. I will show you here how the Django programmers used multiple inheritance and mixin classes to promote code reuse, and you will now hopefully grasp all the reasons behind them.&lt;/p&gt;
-&lt;p&gt;The example I chose can be found in the &lt;a href="https://github.com/django/django/blob/3.0/django/views/generic/base.py#L117"&gt;code of generic views&lt;/a&gt;, and in particular in two classes: &lt;code&gt;TemplateResponseMixin&lt;/code&gt; and &lt;code&gt;TemplateView&lt;/code&gt;.&lt;/p&gt;
-&lt;p&gt;As you might know, Django &lt;code&gt;View&lt;/code&gt; class is the ancestor of all class-based views and provides a &lt;code&gt;dispatch&lt;/code&gt; method that converts HTTP request methods into Python function calls (&lt;a href="https://github.com/django/django/blob/3.0/django/views/generic/base.py#L89"&gt;CODE&lt;/a&gt;). Now, the &lt;code&gt;TemplateView&lt;/code&gt; is a view that answers to a GET request rendering a template with the data coming from a context passed when the view is called. Given the mechanism behind Django views, then, &lt;code&gt;TemplateView&lt;/code&gt; should implement a &lt;code&gt;get&lt;/code&gt; method and return the content of the HTTP response. The code of the class is&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;TemplateView&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;TemplateResponseMixin&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;ContextMixin&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;View&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-    &lt;span class="sd"&gt;&amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
-&lt;span class="sd"&gt;    Render a template. Pass keyword arguments from the URLconf to the context.&lt;/span&gt;
-&lt;span class="sd"&gt;    &amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
-    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;request&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;args&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;**&lt;/span&gt;&lt;span class="n"&gt;kwargs&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="n"&gt;context&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;get_context_data&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;**&lt;/span&gt;&lt;span class="n"&gt;kwargs&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;render_to_response&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;context&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;As you can see &lt;code&gt;TemplateView&lt;/code&gt; is a &lt;code&gt;View&lt;/code&gt;, but it uses two mixins to inject features. Let's have a look at &lt;code&gt;TemplateResponseMixin&lt;/code&gt;&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;TemplateResponseMixin&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-    &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="o"&gt;...&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
-
-    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;render_to_response&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;context&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;**&lt;/span&gt;&lt;span class="n"&gt;response_kwargs&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="o"&gt;...&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
-
-    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;get_template_names&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-        &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="o"&gt;...&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;[I removed the code of the class as it is not crucial for the present discussion, you can see the full class &lt;a href="https://github.com/django/django/blob/3.0/django/views/generic/base.py#L117"&gt;here&lt;/a&gt;]&lt;/p&gt;
-&lt;p&gt;It is clear that &lt;code&gt;TemplateResponseMixin&lt;/code&gt; just adds to any class the two methods &lt;code&gt;get_template_names&lt;/code&gt; and &lt;code&gt;render_to_response&lt;/code&gt;. The latter is called in the &lt;code&gt;get&lt;/code&gt; method of &lt;code&gt;TemplateView&lt;/code&gt; to create the response. Let's have a look at a simplified schema of the calls:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;GET request --&amp;gt; TemplateView.dispatch --&amp;gt; View.dispatch --&amp;gt; TemplateView.get --&amp;gt; TemplateResponseMixin.render_to_response
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;It might look complicated, but try to follow the code a couple of times and the whole picture will start to make sense. The important thing I want to stress is that the code in &lt;code&gt;TemplateResponseMixin&lt;/code&gt; is available for any class that wants to have the feature of rendering a template, for example &lt;code&gt;DetailView&lt;/code&gt; (&lt;a href="https://github.com/django/django/blob/3.0/django/views/generic/detail.py#L164"&gt;CODE&lt;/a&gt;), which receives the feature of showing the details of a single object by &lt;code&gt;SingleObjectTemplateResponseMixin&lt;/code&gt;, which inherits from &lt;code&gt;TemplateResponseMixin&lt;/code&gt;, overriding its method &lt;code&gt;get_template_names&lt;/code&gt; (&lt;a href="https://github.com/django/django/blob/3.0/django/views/generic/detail.py#L111"&gt;CODE&lt;/a&gt;).&lt;/p&gt;
-&lt;p&gt;As we discussed before, mixins cannot be too generic, and here we see a good example of a mixin designed to work on specific classes. &lt;code&gt;TemplateResponseMixin&lt;/code&gt; has to be applied to classes that contain &lt;code&gt;self.request&lt;/code&gt; (&lt;a href="https://github.com/django/django/blob/3.0/django/views/generic/base.py#L133"&gt;CODE&lt;/a&gt;), and while this doesn't mean exclusively classes derived from &lt;code&gt;View&lt;/code&gt;, it is clear that it has been designed to augment that specific type.&lt;/p&gt;
-&lt;h1 id="takeaway-points"&gt;Takeaway points&lt;a class="headerlink" href="#takeaway-points" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
-&lt;ul&gt;
-&lt;li&gt;Inheritance is designed to promote code reuse but can lead to the opposite result&lt;/li&gt;
-&lt;li&gt;Multiple inheritance allows us to keep the inheritance tree simple&lt;/li&gt;
-&lt;li&gt;Multiple inheritance leads to possible problems that are solved in Python through the MRO&lt;/li&gt;
-&lt;li&gt;Interfaces (either implicit or explicit) should be part of your design&lt;/li&gt;
-&lt;li&gt;Mixin classes are used to add simple changes to classes&lt;/li&gt;
-&lt;li&gt;Mixins are implemented in Python using multiple inheritance: they have great expressive power but require careful design.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h1 id="final-words"&gt;Final words&lt;a class="headerlink" href="#final-words" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
-&lt;p&gt;I hope this post helped you to understand a bit more how multiple inheritance works, and to be less scared by it. I also hope I managed to show you that classes have to be carefully designed and that there is a lot to consider when you create a class system. Once again, please don't forget composition, it's a powerful and too often forgotten tool.&lt;/p&gt;
-&lt;h1 id="updates"&gt;Updates&lt;a class="headerlink" href="#updates" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
-&lt;p&gt;2020-03-13: GitHub user &lt;a href="https://github.com/sureshvv"&gt;sureshvv&lt;/a&gt; noticed that the &lt;code&gt;LimitSizeMixin&lt;/code&gt; method &lt;code&gt;__init__&lt;/code&gt; had the wrong parameters &lt;code&gt;pos_x&lt;/code&gt; and &lt;code&gt;pos_y&lt;/code&gt;, instead of &lt;code&gt;size_x&lt;/code&gt; and &lt;code&gt;size_y&lt;/code&gt;. Thanks!&lt;/p&gt;
-&lt;h1 id="feedback"&gt;Feedback&lt;a class="headerlink" href="#feedback" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
-&lt;p&gt;Feel free to reach me on &lt;a href="https://twitter.com/thedigicat"&gt;Twitter&lt;/a&gt; if you have questions. The &lt;a href="https://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues"&gt;GitHub issues&lt;/a&gt; page is the best place to submit corrections.&lt;/p&gt;</content><category term="Programming"></category><category term="algorithms"></category><category term="Django"></category><category term="OOP"></category><category term="Python"></category><category term="Python3"></category></entry></feed>
+&lt;p&gt;Image by &lt;a href="https://pixabay.com/users/LoggaWiggler-15/?utm_source=link-attribution&amp;amp;utm_medium=referral&amp;amp;utm_campaign=image&amp;amp;utm_content=5236"&gt;LoggaWiggler&lt;/a&gt; from &lt;a href="https://pixabay.com/?utm_source=link-attribution&amp;amp;utm_medium=referral&amp;amp;utm_campaign=image&amp;amp;utm_content=5236"&gt;Pixabay&lt;/a&gt;&lt;/p&gt;</content><category term="Programming"></category><category term="metaclasses"></category><category term="metaprogramming"></category><category term="OOP"></category><category term="Python"></category><category term="Python3"></category></entry></feed>
