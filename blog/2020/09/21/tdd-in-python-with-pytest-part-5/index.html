@@ -122,16 +122,13 @@
 git checkout --track origin/develop
 </code></pre></div>
 
-
 <p>Create a virtual environment following your preferred process and install the requirements</p>
 <div class="highlight"><pre><span></span><code>pip install -r requirements/dev.txt
 </code></pre></div>
 
-
 <p>You should at this point be able to run</p>
 <div class="highlight"><pre><span></span><code>pytest -svv
 </code></pre></div>
-
 
 <p>and get an output like</p>
 <div class="highlight"><pre><span></span><code>=============================== test session starts ===============================
@@ -144,7 +141,6 @@ collected 0 items
 
 ============================== no tests ran in 0.02s ==============================
 </code></pre></div>
-
 
 <p>Let us start with a very simple example. Patching can be complex to grasp at the beginning so it is better to start learning it with trivial use cases. The purpose of this library is to develop a simple class that returns information about a given file. The class shall be instantiated with the file path, which can be relative.</p>
 <p>The starting point is the class with the method <code>__init__</code>. If you want you can develop the class using TDD, but for the sake of brevity I will not show here all the steps that I followed. This is the set of tests I have in <code>tests/test_fileinfo.py</code></p>
@@ -164,7 +160,6 @@ collected 0 items
     <span class="k">assert</span> <span class="n">fi</span><span class="o">.</span><span class="n">filename</span> <span class="o">==</span> <span class="n">filename</span>
 </code></pre></div>
 
-
 <p>and this is the code of the class <code>FileInfo</code> in the <code>fileinfo/fileinfo.py</code> file</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">os</span>
 
@@ -175,7 +170,6 @@ collected 0 items
         <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p><strong>Git tag:</strong> <a href="https://github.com/lgiordani/fileinfo/tree/first-version">first-version</a></p>
 <p>As you can see the class is extremely simple, and the tests are straightforward. So far I didn't add anything new to what we discussed in the previous posts.</p>
 <p>Now I want the method <code>get_info</code> to return a tuple with the file name, the original path the class was instantiated with, and the absolute path of the file. Pretending we are in the <code>/some/absolute/path</code> directory, the class should work as shown here</p>
@@ -184,7 +178,6 @@ collected 0 items
 <span class="p">(</span><span class="s1">&#39;book_list.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;../book_list.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;/some/absolute&#39;</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>You can immediately realise that you have a problem writing the test. There is no way to easily test something as "the absolute path", since the outcome of the function called in the test is supposed to vary with the path of the test itself. Let us try to write part of the test</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_get_info</span><span class="p">():</span>
     <span class="n">filename</span> <span class="o">=</span> <span class="s1">&#39;somefile.ext&#39;</span>
@@ -192,7 +185,6 @@ collected 0 items
     <span class="n">fi</span> <span class="o">=</span> <span class="n">FileInfo</span><span class="p">(</span><span class="n">original_path</span><span class="p">)</span>
     <span class="k">assert</span> <span class="n">fi</span><span class="o">.</span><span class="n">get_info</span><span class="p">()</span> <span class="o">==</span> <span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">original_path</span><span class="p">,</span> <span class="s1">&#39;???&#39;</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>where the <code>'???'</code> string highlights that I cannot put something sensible to test the absolute path of the file.</p>
 <p>Patching is the way to solve this problem. You know that the function will use some code to get the absolute path of the file. So, within the scope of this test only, you can replace that code with something different and perform the test. Since the replacement code has a known outcome writing the test is now possible.</p>
@@ -212,12 +204,10 @@ collected 0 items
         <span class="k">assert</span> <span class="n">fi</span><span class="o">.</span><span class="n">get_info</span><span class="p">()</span> <span class="o">==</span> <span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">original_path</span><span class="p">,</span> <span class="n">test_abspath</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>You clearly see the context in which the patching happens, as it is enclosed in a <code>with</code> statement. Inside this statement the module <code>os.path.abspath</code> will be replaced by a mock created by the function <code>patch</code> and called <code>abspath_mock</code>. So, while Python executes the lines of code enclosed by the <code>with</code> statement any call to <code>os.path.abspath</code> will return the object <code>abspath_mock</code>.</p>
 <p>The first thing we can do, then, is to give the mock a known <code>return_value</code>. This way we solve the issue that we had with the initial code, that is using an external component that returns an unpredictable result. The line</p>
 <div class="highlight"><pre><span></span><code>        <span class="n">abspath_mock</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="n">test_abspath</span>
 </code></pre></div>
-
 
 <p>instructs the patching mock to return the given string as a result, regardless of the real values of the file under consideration. </p>
 <p>The code that make the test pass is</p>
@@ -231,7 +221,6 @@ collected 0 items
             <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">original_path</span><span class="p">)</span>
         <span class="p">)</span>
 </code></pre></div>
-
 
 <p>When this code is executed by the test the <code>os.path.abspath</code> function is replaced at run time by the mock that we prepared there, which basically ignores the input value <code>self.filename</code> and returns the fixed value it was instructed to use.</p>
 <p><strong>Git tag:</strong> <a href="https://github.com/lgiordani/fileinfo/tree/patch-with-context-manager">patch-with-context-manager</a></p>
@@ -252,7 +241,6 @@ collected 0 items
     <span class="n">fi</span> <span class="o">=</span> <span class="n">FileInfo</span><span class="p">(</span><span class="n">original_path</span><span class="p">)</span>
     <span class="k">assert</span> <span class="n">fi</span><span class="o">.</span><span class="n">get_info</span><span class="p">()</span> <span class="o">==</span> <span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">original_path</span><span class="p">,</span> <span class="n">test_abspath</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p><strong>Git tag:</strong> <a href="https://github.com/lgiordani/fileinfo/tree/patch-with-function-decorator">patch-with-function-decorator</a></p>
 <p>As you can see the <code>patch</code> decorator works like a big <code>with</code> statement for the whole function. The <code>abspath_mock</code> argument passed to the test becomes internally the mock that replaces <code>os.path.abspath</code>. Obviously this way you replace <code>os.path.abspath</code> for the whole function, so you have to decide case by case which form of the <code>patch</code> function you need to use.</p>
@@ -275,7 +263,6 @@ collected 0 items
     <span class="k">assert</span> <span class="n">fi</span><span class="o">.</span><span class="n">get_info</span><span class="p">()</span> <span class="o">==</span> <span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">original_path</span><span class="p">,</span> <span class="n">test_abspath</span><span class="p">,</span> <span class="n">test_size</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>Please note that the decorator which is nearest to the function is applied first. Always remember that the decorator syntax with <code>@</code> is a shortcut to replace the function with the output of the decorator, so two decorators result in</p>
 <div class="highlight"><pre><span></span><code><span class="nd">@decorator1</span>
 <span class="nd">@decorator2</span>
@@ -283,13 +270,11 @@ collected 0 items
     <span class="k">pass</span>
 </code></pre></div>
 
-
 <p>which is a shorcut for</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">myfunction</span><span class="p">():</span>
     <span class="k">pass</span>
 <span class="n">myfunction</span> <span class="o">=</span> <span class="n">decorator1</span><span class="p">(</span><span class="n">decorator2</span><span class="p">(</span><span class="n">myfunction</span><span class="p">))</span>
 </code></pre></div>
-
 
 <p>This explains why, in the test code, the function receives first <code>abspath_mock</code> and then <code>getsize_mock</code>. The first decorator applied to the function is the patch of <code>os.path.abspath</code>, which appends the mock that we call <code>abspath_mock</code>. Then the patch of <code>os.path.getsize</code> is applied and this appends its own mock.</p>
 <p>The code that makes the test pass is</p>
@@ -304,7 +289,6 @@ collected 0 items
             <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
         <span class="p">)</span>
 </code></pre></div>
-
 
 <p><strong>Git tag:</strong> <a href="https://github.com/lgiordani/fileinfo/tree/multiple-patches">multiple-patches</a></p>
 <p>We can write the above test using two <code>with</code> statements as well</p>
@@ -328,7 +312,6 @@ collected 0 items
                 <span class="n">test_size</span>
             <span class="p">)</span>
 </code></pre></div>
-
 
 <p>Using more than one <code>with</code> statement, however, makes the code difficult to read, in my opinion, so in general I prefer to avoid complex <code>with</code> trees if I do not really need to use a limited scope of the patching.</p>
 <h2 id="checking-call-parameters">Checking call parameters<a class="headerlink" href="#checking-call-parameters" title="Permanent link">&para;</a></h2>
@@ -354,7 +337,6 @@ collected 0 items
     <span class="k">assert</span> <span class="n">info</span> <span class="o">==</span> <span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">original_path</span><span class="p">,</span> <span class="n">test_abspath</span><span class="p">,</span> <span class="n">test_size</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>As you can see, I first invoke <code>fi.get_info</code> storing the result in the variable <code>info</code>, check that the patched methods have been called witht the correct parameters, and then assert the format of its output.</p>
 <p>The test passes, confirming that we are passing the correct values.</p>
 <p><strong>Git tag:</strong> <a href="https://github.com/lgiordani/fileinfo/tree/addding-checks-for-input-values">addding-checks-for-input-values</a></p>
@@ -368,7 +350,6 @@ collected 0 items
   <span class="n">File</span> <span class="s2">&quot;&lt;stdin&gt;&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">1</span><span class="p">,</span> <span class="ow">in</span> <span class="o">&lt;</span><span class="n">module</span><span class="o">&gt;</span>
 <span class="ne">AttributeError</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="nb">object</span> <span class="n">attribute</span> <span class="s1">&#39;conjugate&#39;</span> <span class="ow">is</span> <span class="n">read</span><span class="o">-</span><span class="n">only</span>
 </code></pre></div>
-
 
 <p>Here I'm trying to replace a method with an integer, which is pointless per se, but clearly shows the issue we are facing.</p>
 <p>What has this immutability to do with patching? What <code>patch</code> does is actually to temporarily replace an attribute of an object (method of a class, class of a module, etc.), which also means that if we try to replace an attribute in an immutable object the patching action will fail.</p>
@@ -385,7 +366,6 @@ collected 0 items
     <span class="k">def</span> <span class="nf">log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(),</span> <span class="n">message</span><span class="p">))</span>
 </code></pre></div>
-
 
 <p>This is pretty simple, but testing this code is problematic, because the method <code>log</code> produces results that depend on the actual execution time. The call to <code>datetime.datetime.now</code> is however an outgoing query, and as such it can be replaced by a mock with <code>patch</code>.</p>
 <p>If we try to do it, however, we will have a bitter surprise. This is the test code, that you can put in <code>tests/test_logger.py</code></p>
@@ -405,11 +385,9 @@ collected 0 items
     <span class="k">assert</span> <span class="n">test_logger</span><span class="o">.</span><span class="n">messages</span> <span class="o">==</span> <span class="p">[(</span><span class="n">test_now</span><span class="p">,</span> <span class="n">test_message</span><span class="p">)]</span>
 </code></pre></div>
 
-
 <p>When you try to execute this test you will get the following error</p>
 <div class="highlight"><pre><span></span><code><span class="n">TypeError</span><span class="o">:</span> <span class="n">can</span><span class="s1">&#39;t set attributes of built-in/extension type &#39;</span><span class="n">datetime</span><span class="o">.</span><span class="na">datetime</span><span class="err">&#39;</span>
 </code></pre></div>
-
 
 <p>which is raised because patching tries to replace the <code>now</code> function in <code>datetime.datetime</code> with a mock, and since the module is immutable this operation fails.</p>
 <p><strong>Git tag:</strong> <a href="https://github.com/lgiordani/fileinfo/tree/initial-logger-not-working">initial-logger-not-working</a></p>
@@ -425,7 +403,6 @@ collected 0 items
     <span class="n">test_logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">test_message</span><span class="p">)</span>
     <span class="k">assert</span> <span class="n">test_logger</span><span class="o">.</span><span class="n">messages</span> <span class="o">==</span> <span class="p">[(</span><span class="n">test_now</span><span class="p">,</span> <span class="n">test_message</span><span class="p">)]</span>
 </code></pre></div>
-
 
 <p><strong>Git tag:</strong> <a href="https://github.com/lgiordani/fileinfo/tree/correct-patching">correct-patching</a></p>
 <p>If you run the test now, you can see that the patching works. What we did was to inject our mock in <code>fileinfo.logger.datetime.datetime</code> instead of <code>datetime.datetime.now</code>. Two things changed, thus, in our test. First, we are patching the module imported in the <code>logger.py</code> file and not the module provided globally by the Python interpreter. Second, we have to patch the whole module because this is what is imported by the <code>logger.py</code> file. If you try to patch <code>fileinfo.logger.datetime.datetime.now</code> you will find that it is still immutable.</p>

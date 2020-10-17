@@ -119,7 +119,6 @@
 <div class="highlight"><pre><span></span><code>black smallcalc/*.py tests/*.py
 </code></pre></div>
 
-
 <p>And added a configuration file <code>.flake8</code> for Flake8 to avoid the two tools to clash</p>
 <div class="highlight"><pre><span></span><code><span class="k">[flake8]</span>
 <span class="c1"># Recommend matching the black line length (default 88),</span>
@@ -127,7 +126,6 @@
 <span class="na">max-line-length</span> <span class="o">=</span> <span class="s">100</span>
 <span class="na">ignore</span> <span class="o">=</span> <span class="s">E231 E741</span>
 </code></pre></div>
-
 
 <h2 id="level-17-reserved-keywords-and-new-assignment">Level 17 - Reserved keywords and new assignment<a class="headerlink" href="#level-17-reserved-keywords-and-new-assignment" title="Permanent link">&para;</a></h2>
 <p>Since Pascal has reserved keywords, I need tokens that have the keyword itself as value (something similar to Erlang's atoms). For this reason I changed <code>test_empty_token_has_length_zero</code> into</p>
@@ -138,12 +136,10 @@
     <span class="k">assert</span> <span class="nb">bool</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span>
 </code></pre></div>
 
-
 <p>and modified the code in the class <code>Token</code> to pass it</p>
 <div class="highlight"><pre><span></span><code>   <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>The keywords I will introduce in this post are <code>BEGIN</code> and <code>END</code>, so I need a test that shows they are supported</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_get_tokens_understands_begin_and_end</span><span class="p">():</span>
@@ -159,7 +155,6 @@
     <span class="p">]</span>
 </code></pre></div>
 
-
 <p>The block <code>BEGIN ... END</code> is a generic compound block in Pascal (more on this later), and a Pascal program is made of that plus a final dot. Since the dot is already used for floats I need a test that shows it is correctly lexed.</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_get_tokens_understands_final_dot</span><span class="p">():</span>
     <span class="n">l</span> <span class="o">=</span> <span class="n">clex</span><span class="o">.</span><span class="n">CalcLexer</span><span class="p">()</span>
@@ -174,7 +169,6 @@
         <span class="n">token</span><span class="o">.</span><span class="n">Token</span><span class="p">(</span><span class="n">clex</span><span class="o">.</span><span class="n">EOF</span><span class="p">),</span>
     <span class="p">]</span>
 </code></pre></div>
-
 
 <p>Last, Pascal assignments are sligthly different from what we already implemented, as they use the symbol <code>:=</code> instead of just <code>=</code>. We face a choice here, as we have to decide where to put the logic of our programming language: shall the lexer identify <code>:</code> and <code>=</code> separately, and let the parser deal with the two tokens in sequence, or shall we make the lexer emit an <code>ASSIGNMENT</code> token directly? I went for the first one, so that the lexer can be kept simple (no lookahead in it), but you are obviously free to try something different. For me the test that checks the assignment is</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_get_tokens_understands_assignment_and_semicolon</span><span class="p">():</span>
@@ -193,7 +187,6 @@
     <span class="p">]</span>
 </code></pre></div>
 
-
 <p>You may have noticed I also decided to check for the semicolon in this test. Even here, we might discuss if it's meaningful to test two different things together, and generally speaking I'm in favour of a high granularity in tests, which however means that I try to avoid testing <em>unrelated</em> and <em>complicated</em> features together. In Pascal, the semicolon is used to separate statements, so it is likely be found at the end of something like an assignment. For this reason, and considering that it's a small feature, I put it in a context inside this test, and will extract it if more complex requirements arise in the future.</p>
 <p>The parser has to be changed to support the new assignment, and to do that we first need to change the tests. The symbol <code>=</code> has to be replaced with <code>:=</code> in the following tests: <code>test_parse_assignment</code>, <code>test_parse_assignment_with_expression</code>, <code>test_parse_assignment_expression_with_variables</code>, and <code>test_parse_line_supports_assigment</code>.</p>
 <h3 id="solution">Solution<a class="headerlink" href="#solution" title="Permanent link">&para;</a></h3>
@@ -203,7 +196,6 @@
 
 <span class="n">RESERVED_KEYWORDS</span> <span class="o">=</span> <span class="p">[</span><span class="n">BEGIN</span><span class="p">,</span> <span class="n">END</span><span class="p">]</span>
 </code></pre></div>
-
 
 <p>and changing the method <code>_process_name</code> in order to detect them</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">_process_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -224,12 +216,10 @@
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_current_token_and_skip</span><span class="p">(</span><span class="n">tok</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>I decided to put the logic in this method because after all reserved keywords are exactly names with a specific meaning. I might have created a dedicated method <code>_process_keyword</code> but it would basically have been a copy of <code>_process_name</code> so this solution makes sense to me.</p>
 <p>To support the final dot I added a token for it</p>
 <div class="highlight"><pre><span></span><code><span class="n">DOT</span> <span class="o">=</span> <span class="s2">&quot;DOT&quot;</span>
 </code></pre></div>
-
 
 <p>and a processing method</p>
 <div class="highlight"><pre><span></span><code>   <span class="k">def</span> <span class="nf">_process_dot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -240,7 +230,6 @@
         <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_current_token_and_skip</span><span class="p">(</span><span class="n">token</span><span class="o">.</span><span class="n">Token</span><span class="p">(</span><span class="n">DOT</span><span class="p">))</span>
 </code></pre></div>
-
 
 <p>which is then introduced with a high priority in <code>get_token</code></p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">get_token</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -271,7 +260,6 @@
             <span class="k">return</span> <span class="n">literal</span>
 </code></pre></div>
 
-
 <p>To pass the parser tests I just need to change the implementation of <code>parse_assignment</code></p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">parse_assignment</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">variable</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_variable</span><span class="p">()</span>
@@ -279,7 +267,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">lexer</span><span class="o">.</span><span class="n">discard</span><span class="p">(</span><span class="n">token</span><span class="o">.</span><span class="n">Token</span><span class="p">(</span><span class="n">clex</span><span class="o">.</span><span class="n">LITERAL</span><span class="p">,</span> <span class="s2">&quot;=&quot;</span><span class="p">))</span>
         <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_expression</span><span class="p">()</span>
 </code></pre></div>
-
 
 <h2 id="level-18-statements-and-compound-statements">Level 18 - Statements and compound statements<a class="headerlink" href="#level-18-statements-and-compound-statements" title="Permanent link">&para;</a></h2>
 <p>In Pascal a compound statement is a list of statements enclosed between <code>BEGIN</code> and <code>END</code>, so the final grammar we want to have in this post is</p>
@@ -292,7 +279,6 @@ statement : compound_statement | assignment_statement | empty
 assignment_statement : variable ASSIGN expr
 </code></pre></div>
 
-
 <p>As you can see this is a recursive definition, as the <code>statement_list</code> contains one or more <code>statement</code>, and each of them can be a <code>compound_statement</code>. The following is indeed a valid Pascal program</p>
 <div class="highlight"><pre><span></span><code><span class="k">BEGIN</span>
     <span class="k">BEGIN</span>
@@ -302,7 +288,6 @@ assignment_statement : variable ASSIGN expr
     <span class="k">END</span>
 <span class="k">END</span><span class="o">.</span>
 </code></pre></div>
-
 
 <p>Recursive algorithms are not simple, and it takes some time to tackle them properly. Let's try to implement one small feature at a time. The first test is that <code>parse_statement</code> should be able to parse assignments</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_parse_statement_assignment</span><span class="p">():</span>
@@ -318,7 +303,6 @@ assignment_statement : variable ASSIGN expr
     <span class="p">}</span>
 </code></pre></div>
 
-
 <p>In future, statements will be more than just assignments, so this test is the first of many others that we will eventually have for <code>parse_statement</code>. The second test we need is that a compound statement can contain an empty list of statements.</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_parse_empty_compound_statement</span><span class="p">():</span>
     <span class="n">p</span> <span class="o">=</span> <span class="n">cpar</span><span class="o">.</span><span class="n">CalcParser</span><span class="p">()</span>
@@ -328,7 +312,6 @@ assignment_statement : variable ASSIGN expr
 
     <span class="k">assert</span> <span class="n">node</span><span class="o">.</span><span class="n">asdict</span><span class="p">()</span> <span class="o">==</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;compound_statement&quot;</span><span class="p">,</span> <span class="s2">&quot;statements&quot;</span><span class="p">:</span> <span class="p">[]}</span>
 </code></pre></div>
-
 
 <p>After this is done, I want to test that the compound statement can contains one single statement</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_parse_compound_statement_one_statement</span><span class="p">():</span>
@@ -348,7 +331,6 @@ assignment_statement : variable ASSIGN expr
         <span class="p">],</span>
     <span class="p">}</span>
 </code></pre></div>
-
 
 <p>and multiple statements separated by semicolon</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_parse_compound_statement_multiple_statements</span><span class="p">():</span>
@@ -379,14 +361,12 @@ assignment_statement : variable ASSIGN expr
     <span class="p">}</span>
 </code></pre></div>
 
-
 <h3 id="solution_1">Solution<a class="headerlink" href="#solution_1" title="Permanent link">&para;</a></h3>
 <p>To pass the first test it is sufficient to add a method <code>parse_statement</code> that calls <code>parse_assignment</code></p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">parse_statement</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">lexer</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_assignment</span><span class="p">()</span>
 </code></pre></div>
-
 
 <p>The second test requires a bit more code. I need to define a method <code>parse_compound_statement</code> and this has to return a specific new type of node. A compound statement is s list of statements that have to be executed in order, so it's time to define a class <code>CompoundStatementNode</code></p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">CompoundStatementNode</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
@@ -403,7 +383,6 @@ assignment_statement : variable ASSIGN expr
         <span class="p">}</span>
 </code></pre></div>
 
-
 <p>and at this point <code>parse_compound_statement</code> is trivial, at least for now</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">parse_compound_statement</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lexer</span><span class="o">.</span><span class="n">discard</span><span class="p">(</span><span class="n">token</span><span class="o">.</span><span class="n">Token</span><span class="p">(</span><span class="n">clex</span><span class="o">.</span><span class="n">BEGIN</span><span class="p">))</span>
@@ -411,7 +390,6 @@ assignment_statement : variable ASSIGN expr
 
         <span class="k">return</span> <span class="n">CompoundStatementNode</span><span class="p">()</span>
 </code></pre></div>
-
 
 <p>With the third test we have to add the processing of a single statement. As this is optional, it's a good use case for our lexer as a context manager</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">parse_compound_statement</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -428,7 +406,6 @@ assignment_statement : variable ASSIGN expr
 
         <span class="k">return</span> <span class="n">CompoundStatementNode</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>And finally, for the fourth test, I have to process optional further statements separated by semicolons. For this, I make use of the method <code>peek_token</code> to look ahead and see if there is another statement to process</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">parse_compound_statement</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -453,7 +430,6 @@ assignment_statement : variable ASSIGN expr
 
         <span class="k">return</span> <span class="n">CompoundStatementNode</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span>
 </code></pre></div>
-
 
 <h2 id="level-19-recursive-compound-statements">Level 19 - Recursive compound statements<a class="headerlink" href="#level-19-recursive-compound-statements" title="Permanent link">&para;</a></h2>
 <p>To verify that compound statements are actually recursive, we can add this test</p>
@@ -490,7 +466,6 @@ assignment_statement : variable ASSIGN expr
     <span class="p">}</span>
 </code></pre></div>
 
-
 <p>where the second statement is a compound statement itself. After this is done we can test the visitor (<code>tests/test_calc_visitor.py</code>) and see if we can process single statements</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_visitor_compound_statement_one_statement</span><span class="p">():</span>
     <span class="n">ast</span> <span class="o">=</span> <span class="p">{</span>
@@ -510,7 +485,6 @@ assignment_statement : variable ASSIGN expr
     <span class="k">assert</span> <span class="n">v</span><span class="o">.</span><span class="n">valueof</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">5</span>
     <span class="k">assert</span> <span class="n">v</span><span class="o">.</span><span class="n">typeof</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;integer&quot;</span>
 </code></pre></div>
-
 
 <p>Multiple statements</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_visitor_compound_statement_multiple_statements</span><span class="p">():</span>
@@ -550,7 +524,6 @@ assignment_statement : variable ASSIGN expr
     <span class="k">assert</span> <span class="n">v</span><span class="o">.</span><span class="n">valueof</span><span class="p">(</span><span class="s2">&quot;z&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">7</span>
     <span class="k">assert</span> <span class="n">v</span><span class="o">.</span><span class="n">typeof</span><span class="p">(</span><span class="s2">&quot;z&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;integer&quot;</span>
 </code></pre></div>
-
 
 <p>and recursive compound statements</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_visitor_compound_statement_multiple_statements_with_compund_statement</span><span class="p">():</span>
@@ -596,7 +569,6 @@ assignment_statement : variable ASSIGN expr
     <span class="k">assert</span> <span class="n">v</span><span class="o">.</span><span class="n">typeof</span><span class="p">(</span><span class="s2">&quot;z&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;integer&quot;</span>
 </code></pre></div>
 
-
 <h3 id="solution_2">Solution<a class="headerlink" href="#solution_2" title="Permanent link">&para;</a></h3>
 <p>Before I added the first test I quickly refactored the code to follow the grammar a bit more closely, introducing <code>parse_statement_list</code> and calling it from <code>parse_compound_statement</code>. This is just a matter of isolating the part of the code that deals with the list of statements in its own method</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">parse_statement_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -629,7 +601,6 @@ assignment_statement : variable ASSIGN expr
         <span class="k">return</span> <span class="n">CompoundStatementNode</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>after this I introduce the new test, and to pass it I need to change <code>parse_statement</code> so that it parses either an assignment or a compound statement</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">parse_statement</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">lexer</span><span class="p">:</span>
@@ -637,7 +608,6 @@ assignment_statement : variable ASSIGN expr
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_compound_statement</span><span class="p">()</span>
 </code></pre></div>
-
 
 <p>Before I move to the visitor, I want to discuss a choice that I have here. The current version of the method <code>parse_statement_list</code></p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">parse_statement_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -658,7 +628,6 @@ assignment_statement : variable ASSIGN expr
         <span class="k">return</span> <span class="n">nodes</span>
 </code></pre></div>
 
-
 <p>might be easily written in a recursive way, to better match the grammar, becoming</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">parse_statement_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">nodes</span> <span class="o">=</span> <span class="p">[]</span>
@@ -674,13 +643,11 @@ assignment_statement : variable ASSIGN expr
         <span class="k">return</span> <span class="n">nodes</span>
 </code></pre></div>
 
-
 <p>As you can see if you replace the code all the test pass, so the solution is technically correct. While recursive algorithms are elegant and compact, however, in this case I will stick to the first version. Using a recursive approach introduces a limit to the number of calls, and while in this little project we won't probably have this issue, I think it is worth mentioning it. Both solutions are correct, though, so feel free to choose the recursive path if you happen to like it more.</p>
 <p>The tests for the visitor can be passed with a minimal change, as the visitor itself just needs to be aware of <code>compound_statement</code> nodes and to know how to process them. So, I added a new condition to the method <code>visit</code></p>
 <div class="highlight"><pre><span></span><code>        <span class="k">if</span> <span class="n">node</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;compound_statement&quot;</span><span class="p">:</span>
             <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">node</span><span class="p">)</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">node</span><span class="p">[</span><span class="s2">&quot;statements&quot;</span><span class="p">]]</span>
 </code></pre></div>
-
 
 <p>which passes all the three new tests added for the visitor.</p>
 <h2 id="level-20-pascal-programs-and-case-insensitive-names">Level 20 - Pascal programs and case insensitive names<a class="headerlink" href="#level-20-pascal-programs-and-case-insensitive-names" title="Permanent link">&para;</a></h2>
@@ -693,7 +660,6 @@ assignment_statement : variable ASSIGN expr
 
     <span class="k">assert</span> <span class="n">node</span><span class="o">.</span><span class="n">asdict</span><span class="p">()</span> <span class="o">==</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;compound_statement&quot;</span><span class="p">,</span> <span class="s2">&quot;statements&quot;</span><span class="p">:</span> <span class="p">[]}</span>
 </code></pre></div>
-
 
 <p>and the second tests that the final dot can't be missing</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">pytest</span>
@@ -708,7 +674,6 @@ assignment_statement : variable ASSIGN expr
     <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="n">TokenError</span><span class="p">):</span>
         <span class="n">p</span><span class="o">.</span><span class="n">parse_program</span><span class="p">()</span>
 </code></pre></div>
-
 
 <p>Notice that I imported <code>pytest</code> and the <code>TokenError</code> exception to build a negative test (i.e. to test something that fails). The last test verifies a non-empty program can be parsed</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_parse_program_with_nested_statements</span><span class="p">():</span>
@@ -744,7 +709,6 @@ assignment_statement : variable ASSIGN expr
     <span class="p">}</span>
 </code></pre></div>
 
-
 <p>When all these tests pass we are almost done for this post, and we just need to make the parser treat names in a case insensitive way. In Pascal, both variables and keywords are case-insensitive, so <code>BEGIN</code> and <code>begin</code> are the same keyword (or <code>BeGiN</code>, though I think this might be a misinterpretation of the concept of "snake case" =) ), and the same is valid for variables: you can define <code>MYVAR</code> and use <code>myvar</code>.</p>
 <p>To test this behaviour I changed the test <code>test_get_tokens_understands_uppercase_letters</code> into <code>test_get_tokens_is_case_insensitive</code></p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_get_tokens_is_case_insensitive</span><span class="p">():</span>
@@ -758,7 +722,6 @@ assignment_statement : variable ASSIGN expr
         <span class="n">token</span><span class="o">.</span><span class="n">Token</span><span class="p">(</span><span class="n">clex</span><span class="o">.</span><span class="n">EOF</span><span class="p">),</span>
     <span class="p">]</span>
 </code></pre></div>
-
 
 <p>and added the test for the two keywords we defined so far</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_get_tokens_understands_begin_and_end_case_insensitive</span><span class="p">():</span>
@@ -774,7 +737,6 @@ assignment_statement : variable ASSIGN expr
     <span class="p">]</span>
 </code></pre></div>
 
-
 <h3 id="solution_3">Solution<a class="headerlink" href="#solution_3" title="Permanent link">&para;</a></h3>
 <p>To parse a program we need to introduce the aptly named endpoint <code>parse_program</code>, which just parses a compound statement (the program) and the final dot.</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">parse_program</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -783,7 +745,6 @@ assignment_statement : variable ASSIGN expr
 
         <span class="k">return</span> <span class="n">compound_statement</span>
 </code></pre></div>
-
 
 <p>As for the case insensitive names, it's just a matter of changing the method <code>_process_name</code></p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">_process_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -803,7 +764,6 @@ assignment_statement : variable ASSIGN expr
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_current_token_and_skip</span><span class="p">(</span><span class="n">tok</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>Note that I decided to keep internally keywords with uppercase names and variables with lowercase ones. This is really just a matter of personal taste at this point of the project (and probably will always be), so feel free to follow the structure you like the most.</p>
 <h2 id="final-words">Final words<a class="headerlink" href="#final-words" title="Permanent link">&para;</a></h2>

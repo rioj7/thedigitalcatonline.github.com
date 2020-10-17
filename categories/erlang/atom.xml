@@ -18,16 +18,13 @@
 &lt;span class="p"&gt;-&lt;/span&gt;&lt;span class="ni"&gt;endif&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;This converts the line&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="o"&gt;?&lt;/span&gt;&lt;span class="nv"&gt;DEBUG&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;A message&lt;/span&gt;&lt;span class="si"&gt;~n&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;[]).&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;to&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&amp;lt;&lt;span class="m"&gt;0&lt;/span&gt;.44.0&amp;gt;: A message
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;where &lt;code&gt;&amp;lt;0.44.0&amp;gt;&lt;/code&gt; is the pid of the message calling &lt;code&gt;?DEBUG&lt;/code&gt; (only if &lt;code&gt;-define(debug, true).&lt;/code&gt; is in the file).&lt;/p&gt;
 &lt;h2 id="the-master-process-solution"&gt;The “master process” solution&lt;a class="headerlink" href="#the-master-process-solution" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
@@ -80,7 +77,6 @@
     &lt;span class="n"&gt;loop&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;NextProcess&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;&lt;a href="/code/erlang-rings/ring_master_no_messages.erl"&gt;source code&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;Note that the first spawn cannot directly call &lt;code&gt;create/2&lt;/code&gt; passing &lt;code&gt;self()&lt;/code&gt; since at that moment &lt;code&gt;self()&lt;/code&gt; is the pid of the calling process (e.g. the Erlang shell) and not the pid of the first process of the ring, which is what we want. So we have to bypass this by spawning a process which executes &lt;code&gt;create/1&lt;/code&gt;, which in turn calls &lt;code&gt;create/2&lt;/code&gt; with the pid the process extracted with &lt;code&gt;self()&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;This first program spawns a set of processes that sit down and do nothing. Since they are all linked together (through the link with the master process), you can terminate the whole set by sending an exit signal to one of them. You can get the list of pid and names through the shell function &lt;code&gt;i()&lt;/code&gt;. Otherwise, you can get and use the pid returned by the function &lt;code&gt;start/1&lt;/code&gt;.&lt;/p&gt;
@@ -88,7 +84,6 @@
 &lt;span class="p"&gt;[...]&lt;/span&gt;
 &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="nb"&gt;exit&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;pid&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;44&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="n"&gt;boom&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;h4 id="sending-a-single-message"&gt;Sending a single message&lt;a class="headerlink" href="#sending-a-single-message" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
 &lt;p&gt;Now I am going to develop further the solution by making a single message travel the whole ring.&lt;/p&gt;
@@ -153,7 +148,6 @@
             &lt;span class="n"&gt;ok&lt;/span&gt;
     &lt;span class="k"&gt;end&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;&lt;a href="/code/erlang-rings/ring_master_single_message.erl"&gt;source code&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;Beware that a subtle mechanism conceals here: in Erlang, you can always send a message to a pid, even if it the relative process does not exist; in the latter case the message is simply discarded. This feature allows us to make the first process send the message and terminate without having the last process crash by sending a message to it. Remember that you cannot do this with registered processes alias, only with pids.&lt;/p&gt;
@@ -229,7 +223,6 @@
     &lt;span class="k"&gt;end&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;&lt;a href="/code/erlang-rings/ring_master_multiple_messages.erl"&gt;source code&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;As before, we are here relying on the possibility of sending a message to a non existent process.&lt;/p&gt;
 &lt;h4 id="exposing-a-functional-interface"&gt;Exposing a functional interface&lt;a class="headerlink" href="#exposing-a-functional-interface" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
@@ -243,7 +236,6 @@
 &lt;p&gt;To expose a functional interface you need to register one or more processes, to get a global access point for your functions, so the first change to the code is that the spawned process is registered. Note that &lt;code&gt;Message&lt;/code&gt; and &lt;code&gt;NumberProcesses&lt;/code&gt; are no more passed to the &lt;code&gt;create()&lt;/code&gt; function.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nb"&gt;register&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;ring_master_functional&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;spawn&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;?&lt;/span&gt;&lt;span class="nv"&gt;MODULE&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;create&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nv"&gt;NumberProcesses&lt;/span&gt;&lt;span class="p"&gt;])),&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;This is not enough. We have to be sure that the whole ring is ready before giving control back to the user issuing &lt;code&gt;start()&lt;/code&gt;. Until now the message was sent by the master process just after the creation of the last ring process, so there was no need to synchronize the return of the start function with the spawned processes. Now we need it, so just after registering the master process we wait for a ready message coming from the ring. To allow the ring to send the message to the initial caller we have to pass &lt;code&gt;self()&lt;/code&gt; to &lt;code&gt;create()&lt;/code&gt;. Pay attention that &lt;code&gt;self()&lt;/code&gt; passed to the spawned process is the pid of the external process (e.g. the Erlang shell) while &lt;code&gt;self()&lt;/code&gt; passed to &lt;code&gt;create()&lt;/code&gt; is the pid of the master ring process.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c"&gt;%%% Author:  Leonardo Giordani &amp;lt;giordani.leonardo@gmail.com&amp;gt;&lt;/span&gt;
@@ -348,7 +340,6 @@
     &lt;span class="k"&gt;end&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;&lt;a href="/code/erlang-rings/ring_master_functional.erl"&gt;source code&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;The exposed functions are very simple. As you can see they use two different messages: &lt;code&gt;{command, stop}&lt;/code&gt; and &lt;code&gt;{command, message, [Message, Times]}&lt;/code&gt;. One of the advantages of exposing a functional API is that you are free to format your messages according to the current status of the software and change the format if it does no more suit the application needs.&lt;/p&gt;
 &lt;p&gt;The &lt;code&gt;loop()&lt;/code&gt; function has been splitted in two different functions now: &lt;code&gt;loop/1&lt;/code&gt; rules the behaviour of the standard ring process, while &lt;code&gt;loop_master/1&lt;/code&gt; rules the behaviour of the master process.&lt;/p&gt;
@@ -424,7 +415,6 @@
     &lt;span class="n"&gt;loop&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;NextProcess&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;&lt;a href="/code/erlang-rings/ring_recursion_no_messages.erl"&gt;source code&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;The recursive ring with a single message travelling.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c"&gt;%%% Author:  Leonardo Giordani &amp;lt;giordani.leonardo@gmail.com&amp;gt;&lt;/span&gt;
@@ -476,7 +466,6 @@
             &lt;span class="n"&gt;ok&lt;/span&gt;
     &lt;span class="k"&gt;end&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;&lt;a href="/code/erlang-rings/ring_recursion_single_message.erl"&gt;source code&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;The recursive ring with support for multiple message travels.&lt;/p&gt;
@@ -546,7 +535,6 @@
             &lt;span class="n"&gt;loop&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;NextProcess&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nv"&gt;NumberMessages&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
     &lt;span class="k"&gt;end&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;&lt;a href="/code/erlang-rings/ring_recursion_multiple_messages.erl"&gt;source code&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;The recursive ring exposing the functional API.&lt;/p&gt;
@@ -648,7 +636,6 @@
     &lt;span class="k"&gt;end&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;&lt;a href="/code/erlang-rings/ring_recursion_functional.erl"&gt;source code&lt;/a&gt;&lt;/p&gt;
 &lt;h2 id="conclusions"&gt;Conclusions&lt;a class="headerlink" href="#conclusions" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;The process ring is an exercise that can be solved in many ways (I just presented the two more straightforward ones) but makes the programmer face problems that may later rise in real-world applications. For this reason, it is an invaluable sandbox where the Erlang programmer can try different approaches to solve both the concurrency and the topology problems.&lt;/p&gt;
@@ -670,7 +657,6 @@
 &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt; 
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;As you can see Erlang does not get mad at your provocation and simply &lt;strong&gt;raises and exception&lt;/strong&gt;, i.e. signals that something went wrong, giving some details about why and where it happened. This is not different from what other languages, like Python, do.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;
 &lt;span class="go"&gt;Traceback  (most recent call last):&lt;/span&gt;
@@ -678,7 +664,6 @@
 &lt;span class="go"&gt;ZeroDivisionError: integer division or modulo by zero&lt;/span&gt;
 &lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;So exceptions are in Erlang, as in other languages, a "reserved channel" the language uses to propagate errors. If you code in C, you cannot leverage something like exceptions and must rely on return values. This means that you have to format the results of your functions so that they can host a wrong result too and end up returning an &lt;code&gt;int&lt;/code&gt; with the error code while functions results are managed by reference.&lt;/p&gt;
 &lt;p&gt;Back to Erlang. Exceptions crash you program, i.e. they make your program immediately stop, reporting the error to the system process that executed it (usually the OS GUI or a textual shell). Indeed the Erlang shell crashed when you tried to reach for the infinity.&lt;/p&gt;
@@ -692,7 +677,6 @@
 &lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="mi"&gt;35&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;
 &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt; 
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;Remember that in Erlang &lt;code&gt;self()&lt;/code&gt; gives you the Erlang PID of the process (not the operating system's one). As you can see the Eshell process crashed and was restarted by some magic behind the scenes.&lt;/p&gt;
 &lt;p&gt;I hear you mumble that, well, world is not perfect, and errors happen. So how do we deal with this? Shall we crash every time something wrong occurs in our code or is there some way to unravel the knot and happily continue running the code?&lt;/p&gt;
@@ -715,7 +699,6 @@
 &lt;span class="k"&gt;end&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;The large part of this structure is well known. Here, &lt;code&gt;&amp;lt;expressions&amp;gt;&lt;/code&gt; is a series of Erlang expressions, comma-separated as usual; the &lt;code&gt;&amp;lt;result_pattern_matching&amp;gt;&lt;/code&gt; part is a classical Erlang pattern matching structure, just like that you write in a case construct; last, the &lt;code&gt;&amp;lt;after_expressions&amp;gt;&lt;/code&gt; is a series of Erlang expressions. The &lt;code&gt;&amp;lt;exception_pattern_matching&amp;gt;&lt;/code&gt; part has a slightly new syntax we will cover in a moment.&lt;/p&gt;
 &lt;p&gt;The structure works like in other languages: the &lt;code&gt;&amp;lt;expressions&amp;gt;&lt;/code&gt; code is evaluated and the result is pattern matched against &lt;code&gt;&amp;lt;result_pattern_matching&amp;gt;&lt;/code&gt; and the result is returned by the whole &lt;code&gt;try&lt;/code&gt; statement. If an exception is raised when evaluating &lt;code&gt;&amp;lt;expressions&amp;gt;&lt;/code&gt;, it is pattern matched against the code listed in &lt;code&gt;&amp;lt;exception_pattern_matching&amp;gt;&lt;/code&gt; and the relative code is executed. Regardless of what happens in the try/catch part the code in &lt;code&gt;&amp;lt;after_expressions&amp;gt;&lt;/code&gt; is executed, and its result is not returned.&lt;/p&gt;
 &lt;p&gt;The exception matching code has a syntax that is very similar to that of the usual pattern matching, but exceptions are listed in the new form &lt;code&gt;ExceptionType:Reason&lt;/code&gt;, where type and reason have been already described in the previous section. When the exception is a run-time error the reason is one of the values listed &lt;a href="http://erlang.org/doc/reference_manual/errors.html#exit_reasons"&gt;here&lt;/a&gt;.&lt;/p&gt;
@@ -735,14 +718,12 @@
 &lt;span class="k"&gt;end&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Exceptions pattern matching allows the use of the do-not-care variable &lt;code&gt;_&lt;/code&gt; not only for reasons but for also for types. So the following syntax catches all exceptions of type ExceptionType&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="p"&gt;...&lt;/span&gt;
 &lt;span class="k"&gt;catch&lt;/span&gt;
   &lt;span class="nv"&gt;ExceptionType&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;_&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="nv"&gt;ExceptionExpressions1&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 &lt;span class="k"&gt;end&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;while the following catches all exceptions&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="p"&gt;...&lt;/span&gt;
@@ -751,13 +732,11 @@
 &lt;span class="k"&gt;end&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;I will not cover here the old-style error handling mechanism with &lt;code&gt;catch&lt;/code&gt;; the interested reader can find it documented &lt;a href="http://erlang.org/doc/reference_manual/expressions.html#id79206"&gt;here&lt;/a&gt;.&lt;/p&gt;
 &lt;h2 id="returning-values-from-trycatch-statements"&gt;Returning values from try/catch statements&lt;a class="headerlink" href="#returning-values-from-trycatch-statements" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;Try/catch statements return the value of the last expression executed, that is one of &lt;code&gt;PatternExpression1&lt;/code&gt;,...,&lt;code&gt;PatternExpressionN&lt;/code&gt; if no exception is raised, or one of &lt;code&gt;ExceptionExpressions1&lt;/code&gt;,...,&lt;code&gt;ExceptionExpressionsN&lt;/code&gt;. This means that we can assign the value of the whole expression to a variable &lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nv"&gt;Result&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="k"&gt;try&lt;/span&gt; &lt;span class="nv"&gt;Expression&lt;/span&gt; &lt;span class="k"&gt;of&lt;/span&gt; &lt;span class="p"&gt;...&lt;/span&gt; &lt;span class="k"&gt;end&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;Remember that &lt;code&gt;AfterExpressions&lt;/code&gt; are always executed, but their final value is not returned by the statement.&lt;/p&gt;
 &lt;p&gt;Since a lot of times you want to return the result of the expression after the &lt;code&gt;try&lt;/code&gt; keyword, you can omit the &lt;code&gt;of&lt;/code&gt; part&lt;/p&gt;
@@ -767,13 +746,11 @@
 &lt;span class="k"&gt;end&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;h2 id="raising-exceptions"&gt;Raising exceptions&lt;a class="headerlink" href="#raising-exceptions" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;Erlang provides three different BIFs to raise exceptions, profitably called like the exception type they raise: &lt;code&gt;throw/1&lt;/code&gt;, &lt;code&gt;erlang:error/1&lt;/code&gt;, and &lt;code&gt;exit/1&lt;/code&gt;. As you see, &lt;code&gt;error/1&lt;/code&gt; is not automatically imported by the system and must be called in its full form. This is a hint for us programmers: &lt;code&gt;error/1&lt;/code&gt; is there and can be used, but it is not something you should need often; otherwise, you misunderstood what an error exception is in Erlang.&lt;/p&gt;
 &lt;p&gt;So in most cases, if your code encounters an error condition and you need to raise an exception, you end up using &lt;code&gt;throw/1&lt;/code&gt; or &lt;code&gt;exit/1&lt;/code&gt;. The argument of these functions is the reason of the exception: remember that you can format the reason you attach to your exception to match your needs, you only need to document it.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nf"&gt;my_function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;Somebadvalue&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;throw&lt;/span&gt;&lt;span class="p"&gt;({&lt;/span&gt;&lt;span class="n"&gt;badvalue&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nv"&gt;Somebadvalue&lt;/span&gt;&lt;span class="p"&gt;}).&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;Pay attention, however, that exceptions are a double-edged sword; the fact that they return values through a reserved channel is powerful, but can lead to subtle bugs and to long debug sessions. The advice in Erlang is to spare throw() for some special cases and to try always to communicate the failure through standard function results. This is, however, part of a coding philosophy that cannot be examined in depth here.&lt;/p&gt;
 &lt;h2 id="exceptions-and-exit-signals"&gt;Exceptions and exit signals&lt;a class="headerlink" href="#exceptions-and-exit-signals" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;

@@ -132,7 +132,6 @@
     <span class="k">return</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">alist</span> <span class="k">if</span> <span class="n">i</span><span class="o">%</span><span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span>
 </code></pre></div>
 
-
 <p>The example is very trivial, but, as code naturally tends to become more complicated, it's better to start with simple examples. A class version of this function could be written as</p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">EvenExtractor</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alist</span><span class="p">):</span>
@@ -141,7 +140,6 @@
     <span class="k">def</span> <span class="nf">extract</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">l</span> <span class="k">if</span> <span class="n">i</span><span class="o">%</span><span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span>
 </code></pre></div>
-
 
 <p>The two are very similar, and it might look like we haven't changed anything. Indeed, the difference is subtle but remarkable. Now the <code>EvenExtractor</code> class has two parts, the first being the initialization and the second being the actual extraction, and we can have the class in one of three states: before initialization (<code>EvenExtractor</code>), after initialization (<code>e = EvenExtractor([1,4,5,7,12])</code>), and after extraction (<code>l = e.extract()</code>).</p>
 <p>Converting the procedure to a class, then, we obtained a rich tool that can execute its job step by step and, in general, can work in a non linear way, as we might add further methods, and thus more states.</p>
@@ -157,13 +155,11 @@
         <span class="k">return</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">l</span> <span class="k">if</span> <span class="n">i</span><span class="o">%</span><span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span>
 </code></pre></div>
 
-
 <p>Now the class performs an important action in its initialization phase, converting all elements of the input to integers. Some days after this change, however, we might realise that we could also profitably use a class that extracts odd elements from a list. Being responsible object oriented programmers we write</p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">OddExtractor</span><span class="p">(</span><span class="n">EvenExtractor</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">extract</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">l</span> <span class="k">if</span> <span class="n">i</span><span class="o">%</span><span class="mi">2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">]</span>
 </code></pre></div>
-
 
 <p>and call it a day. Through the inheritance mechanism expressed by that <code>(EvenExtractor)</code> signature of the new class, we first defined something that is exactly the same thing as <code>EvenExtractor</code>, with the same methods and attributes, but with a different name. Then we changed the behaviour of the new class but only for the extraction part by overriding the method.</p>
 <p>To summarise the lesson: using classes and delegation you can build finite-state machines that are easily customizable to suit your exact needs. This obviously is just one of the many points of view under which you can consider classes, but it is the one we need to understand Django CBVs.</p>
@@ -179,7 +175,6 @@
 
     <span class="n">model</span> <span class="o">=</span> <span class="n">Article</span>
 </code></pre></div>
-
 
 <p>This example assumes that <code>articles</code> is your application and <code>Article</code> is one of its models.</p>
 <p>You can see here the full power of inheritance. We just derived <code>ArticleListView</code> from <code>ListView</code>, and changed the <code>model</code> class attribute. How can this work? How can this class process incoming requests and what are the outputs? The official documentation states "While this view is executing, <code>object_list</code> will contain the list of objects (usually, but not necessarily a queryset) that the view is operating upon."; this leaves many dark corners, however, and if you are a novice, chances are that you are already lost.</p>
@@ -200,7 +195,6 @@
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">dispatch</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>the class does not change its behaviour. What we did was to override the <code>dispatch</code> method with a call to the parent's method, i.e. we explicitly wrote what Python does by default. You can find detailed information about <code>super</code> in the <a href="https://docs.python.org/3/library/functions.html#super">official documentation</a> and in <a href="https://www.thedigitalcatonline.com/blog/2014/08/20/python-3-oop-part-3-delegation-composition-and-inheritance/">this post</a> on the blog. Please be sure you understand the star and double star notation to define variable number of arguments; the official documentation is <a href="https://docs.python.org/3.8/tutorial/controlflow.html#positional-or-keyword-arguments">here</a>.</p>
 <p>Since views are automatically called by the framework, the latter expects them to comply with a very specific API, so when overriding a method you have to provide the same signature of the original one. The signature of <code>dispatch</code> can be found <a href="https://docs.djangoproject.com/en/3.0/ref/class-based-views/base/#django.views.generic.base.View.dispatch">here</a>.</p>
 <p>The <code>dispatch</code> method receives a <code>request</code> argument, which type is <code>HttpRequest</code> (<a href="https://docs.djangoproject.com/en/3.0/ref/request-response/#httprequest-objects">documentation</a>), so we can print it on the console with the standard <code>print</code> function</p>
@@ -216,7 +210,6 @@
         <span class="nb">print</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">dispatch</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>This prints the content of the <code>request</code> object on the standard output of the server that is running the Django project. If you are running the Django development server, you will find the output on the text console where you issued the command <code>python manage.py runserver</code>.</p>
 <p>This, in a nutshell, is the standard way of dealing with Django CBGVs: inherit from a predefined class, identify which methods you need to change, override them complying with their signature and calling the parent's code somewhere in the new code.</p>
@@ -239,7 +232,6 @@
     <span class="n">template_name</span> <span class="o">=</span> <span class="s1">&#39;sometemplate.html&#39;</span>
 </code></pre></div>
 
-
 <p>Let's review what this does step by step. When the response is created, Django runs the code of <code>render_to_response</code> (<a href="https://github.com/django/django/blob/stable/3.0.x/django/views/generic/base.py#L124">CODE</a>), which in turn calls <code>get_template_names</code>. Pay attention that this method returns a list of names, as Django will use the first available among them, scanning them in order. This method is overridden in <code>ListView</code> by its superclass <code>MultipleObjectTemplateResponseMixin</code> (<a href="https://github.com/django/django/blob/stable/3.0.x/django/views/generic/list.py#L165">CODE</a>). This calls the same method of its own superclass <code>TemplateResponseMixin</code> (<a href="https://github.com/django/django/blob/stable/3.0.x/django/views/generic/base.py#L140">CODE</a>), which returns the attribute we set in the <code>ArticleListView</code> class (<a href="https://github.com/django/django/blob/stable/3.0.x/django/views/generic/base.py#L150">CODE</a>). The mixing goes on and appends to the list the template file name derived from the model (<a href="https://github.com/django/django/blob/stable/3.0.x/django/views/generic/list.py#L181">CODE</a>) and finally returns the list, which at this point is <code>['sometemplate.html', 'article_list.html']</code>.</p>
 <p>As for the context, remember that it is only a dictionary of values you want to be able to access when compiling the template. Variable names inside the context, data format, and data content are completely up to you. When using CBGVs, however, you will find in your context some variables that have been created by the ancestors of your view, as happens for <code>object_list</code>. What if you want to show a page with the list of all articles, but you want to add a value to the context?</p>
 <p>Easy task: you just need to override the function that produces the context and change its behaviour. Say, for example, that we want to show the number of total readers of our site, along with the list of articles. Assuming that a <code>Reader</code> model is available we can write</p>
@@ -255,7 +247,6 @@
         <span class="n">context</span><span class="p">[</span><span class="s1">&#39;readers&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Reader</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">context</span>
 </code></pre></div>
-
 
 <p>As always, when overriding a method we need to ask ourselves if we need to call the original method. In this case, we want to merely augment the content of the context and not replace it, so we call <code>super().get_context_data(**kwargs)</code> first, and we add the value that we need to that. pay attention that this might not be always the case, as it depends on the logic of your override.</p>
 <h1 id="final-words">Final words<a class="headerlink" href="#final-words" title="Permanent link">&para;</a></h1>

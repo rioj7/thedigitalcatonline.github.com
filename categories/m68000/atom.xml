@@ -22,7 +22,6 @@
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;cmpi.w  #0x1111,d1&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;                           Compare&lt;/span&gt;
 &lt;span class="err"&gt;                        +----------+&lt;/span&gt;
 &lt;span class="err"&gt;                        |  0x1111  |&lt;/span&gt;
@@ -30,7 +29,6 @@
 &lt;span class="err"&gt;d1 0x12ca ------------&amp;gt; |  0x12ca  |&lt;/span&gt;
 &lt;span class="err"&gt;                        +----------+&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;h3 id="address-register-direct-mode"&gt;Address Register Direct Mode&lt;a class="headerlink" href="#address-register-direct-mode" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h3&gt;
 &lt;ul&gt;
@@ -43,7 +41,6 @@
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;cmpi.w  #0x1111,a1&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;                           Compare&lt;/span&gt;
 &lt;span class="err"&gt;                        +------------+&lt;/span&gt;
 &lt;span class="err"&gt;                        |  0x1111    |&lt;/span&gt;
@@ -51,7 +48,6 @@
 &lt;span class="err"&gt;a1 0xfc1d28 ----------&amp;gt; |  0xfc1d28  |&lt;/span&gt;
 &lt;span class="err"&gt;                        +------------+&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;h2 id="register-indirect"&gt;Register Indirect&lt;a class="headerlink" href="#register-indirect" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;As the name of this mode suggests, the addressing is performed using a register, but the data is accessed indirectly. The register doesn't contain the data we want to use, but the address in memory of the data. This is what higher level languages like C call &lt;em&gt;memory pointer&lt;/em&gt;.&lt;/p&gt;
@@ -67,7 +63,6 @@
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;cmpi.w  #0x1111,(a1)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;a1 0xfc1d28&lt;/span&gt;
 &lt;span class="err"&gt;      |              0xfc1d24  |         |                Compare&lt;/span&gt;
 &lt;span class="err"&gt;      |                        +---------+              +----------+&lt;/span&gt;
@@ -80,7 +75,6 @@
 &lt;span class="err"&gt;                     0xfc1d2c  |         |&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;h3 id="address-register-indirect-with-postincrement"&gt;Address Register Indirect with Postincrement&lt;a class="headerlink" href="#address-register-indirect-with-postincrement" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h3&gt;
 &lt;ul&gt;
 &lt;li&gt;Assembly syntax: &lt;code&gt;(An)+&lt;/code&gt;&lt;/li&gt;
@@ -91,7 +85,6 @@
 &lt;p&gt;This addressing mode is another of the high-level languages constructs that the MC68000 provides directly in its Assembly language. This mode works exactly like the Address Register Indirect, but &lt;em&gt;after&lt;/em&gt; the data has been fetched from memory the address register is incremented by the size of the data itself. So, this addressing mode is perfectly suited for algorithms that need to read consecutive arrays from memory, as there is no need to add instructions that increment the pointer.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;cmpi.w  #0x1111,(a1)+&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;    a1 0xfc1d28&lt;/span&gt;
 &lt;span class="err"&gt;     ^       |              0xfc1d24  |         |                Compare&lt;/span&gt;
@@ -105,7 +98,6 @@
 &lt;span class="err"&gt;                            0xfc1d2c  |         |&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;The standard syntax is &lt;code&gt;(An)+&lt;/code&gt;, and for this mode, the EA Mode field is &lt;code&gt;011&lt;/code&gt;, while the EA Register field contains the register number.  No extension words are used.&lt;/p&gt;
 &lt;p&gt;This mode and the following one are very powerful, as they automatically add to the address the size of the data that has been read, so 1 for a byte read, 2 for a word, and 4 for a long word. The only exception to this rule is when the register is &lt;code&gt;a7&lt;/code&gt;, which is an alias for &lt;code&gt;sp&lt;/code&gt;, the system Stack Pointer. In that case the pointer is always kept aligned to a word boundary, so the increment is 2 even for a byte read.&lt;/p&gt;
 &lt;h3 id="address-register-indirect-with-predecrement"&gt;Address Register Indirect with Predecrement&lt;a class="headerlink" href="#address-register-indirect-with-predecrement" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h3&gt;
@@ -118,7 +110,6 @@
 &lt;p&gt;This is the specular version of the previous mode, where the address register used to point to the data is decremented &lt;em&gt;before&lt;/em&gt; the addressing is performed. The standard syntax is &lt;code&gt;-(An)&lt;/code&gt;; the EA Mode field is &lt;code&gt;100&lt;/code&gt; and the EA Register field contains the register number. No extension words are used.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;cmpi.w  #0x1111,-(a1)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;   a1 0xfc1d28&lt;/span&gt;
 &lt;span class="err"&gt;    ^       |&lt;/span&gt;
@@ -135,7 +126,6 @@
 &lt;span class="err"&gt;                         0xfc1d2a  |         |&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;h3 id="address-register-indirect-with-displacement"&gt;Address Register Indirect with Displacement&lt;a class="headerlink" href="#address-register-indirect-with-displacement" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h3&gt;
 &lt;ul&gt;
 &lt;li&gt;Assembly syntax: &lt;code&gt;(d16,An) / d16(An)&lt;/code&gt;&lt;/li&gt;
@@ -146,7 +136,6 @@
 &lt;p&gt;The natural evolution of the previous two addressing modes is to use an arbitrary offset that is added to the base address contained in the register. The standard syntax for this mode is &lt;code&gt;(d16,An)&lt;/code&gt; or &lt;code&gt;d16(An)&lt;/code&gt;, where &lt;code&gt;d16&lt;/code&gt; is a 16-bit signed integer. So for example &lt;code&gt;0xf(a1)&lt;/code&gt; is the data contained in memory at the address &lt;code&gt;a1 + 0xf&lt;/code&gt;. The EA Mode field is &lt;code&gt;101&lt;/code&gt; and the EA register fields is the number of the address register used. This address mode requires 1 extension word that contains the 16-bit displacement.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;cmpi.w  #0x1111,0x140(a1)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;     a1 0xfc1d28&lt;/span&gt;
 &lt;span class="err"&gt;           |&lt;/span&gt;
@@ -163,7 +152,6 @@
 &lt;span class="err"&gt;                          0xfc1e6c  |         |&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Please note that the displacement is fixed to 16-bit, so its value limited in the range &lt;code&gt;(-32768,32767)&lt;/code&gt;; the displacement is however sign-extended to 32-bit before being added to the base address.&lt;/p&gt;
 &lt;p&gt;Note: this mode is sometimes called "Register Indirect with Offset".&lt;/p&gt;
 &lt;h3 id="address-register-indirect-with-index"&gt;Address Register Indirect with Index&lt;a class="headerlink" href="#address-register-indirect-with-index" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h3&gt;
@@ -176,7 +164,6 @@
 &lt;p&gt;Besides an addressing mode that mimics C-style loops and a way to perform random access of arrays through a 16-bit displacement, the MC68000 provides a double-indexed array access with this addressing mode. The base address contained in one of the address registers is added to the content of a 16/32-bit register and an 8-bit index. This address mode requires 1 extension word that contains the 8-bit index; only the 8 least significant bits of the extension words are kept and sign-extended to 32-bits before any calculation.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;cmpi.w  #0x1111,(0x4,d0,a1)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;    a1 0xfc1d28   d0 0x140&lt;/span&gt;
 &lt;span class="err"&gt;          |            |&lt;/span&gt;
@@ -197,7 +184,6 @@
 &lt;span class="err"&gt;                                   +----------+&lt;/span&gt;
 &lt;span class="err"&gt;                         0xfc1e70  |          |&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;For this mode the EA Mode field is set to &lt;code&gt;110&lt;/code&gt; and the EA Register field contains the number of the address register in use. The standard syntax used by manuals is &lt;code&gt;(d8, An, Dn.SIZE)&lt;/code&gt;, where &lt;code&gt;SIZE&lt;/code&gt; can be either &lt;code&gt;w&lt;/code&gt; or &lt;code&gt;l&lt;/code&gt;. This addressing mode can provide an invaluable way to access two-dimensional arrays, and once again shows how powerful this microprocessor is.&lt;/p&gt;
 &lt;p&gt;Note: this mode is sometimes called "Indexed Register Indirect with Offset"&lt;/p&gt;
@@ -358,13 +344,11 @@
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;0280 0003 ffff          andi.l  #0x3ffff,d0&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;This instruction uses the the Data Register Direct mode to address register &lt;code&gt;d0&lt;/code&gt;. The instruction format of &lt;code&gt;andi&lt;/code&gt; is the following&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;| 15 | 14 | 13 | 12 | 11 | 10 | 09 | 08 | 07 | 06 | 05 | 04 | 03 | 02 | 01 | 00 |&lt;/span&gt;
 &lt;span class="err"&gt;| 0  | 0  | 0  | 0  | 0  | 0  | 1  | 0  | SIZE    | EFFECTIVE ADDRESS           |&lt;/span&gt;
 &lt;span class="err"&gt;|                                       |         | MODE         | REGISTER     |&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;which in the example shown above translates to&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;00000010  10    000  000 0000000000000011 1111111111111111&lt;/span&gt;
@@ -372,12 +356,10 @@
 &lt;span class="err"&gt;andi      long  Dn   d0  &lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;So the microprocessor expects the instruction to be followed by two extension words (long), that will contain the immediate data that will be added to the register. The register is selected among the data ones because the EA Mode field is &lt;code&gt;000&lt;/code&gt;, and the EA Register field selects register number 0. The two following extension words are &lt;code&gt;0003&lt;/code&gt; and &lt;code&gt;ffff&lt;/code&gt;, so the number &lt;code&gt;0x3ffff&lt;/code&gt; is added to the register.&lt;/p&gt;
 &lt;h2 id="example-2"&gt;Example 2&lt;a class="headerlink" href="#example-2" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;2052                    movea.l (a2),a0&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;The &lt;code&gt;movea&lt;/code&gt; instruction moves data into an address register, but in this case uses the Address Register Indirect mode to specify the source. The instruction format is&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;| 15 | 14 | 13 | 12 | 11 | 10 | 09 | 08 | 07 | 06 | 05 | 04 | 03 | 02 | 01 | 00 |&lt;/span&gt;
@@ -385,18 +367,15 @@
 &lt;span class="err"&gt;|         |         |              |              | MODE         | REGISTER     |&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;so in this case the hexadecimal code &lt;code&gt;2052&lt;/code&gt; becomes&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;00  10    000  001  010   010&lt;/span&gt;
 &lt;span class="err"&gt;    ^     ^         ^     ^&lt;/span&gt;
 &lt;span class="err"&gt;    long  a0        (An)  a2&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;h2 id="example-3"&gt;Example 3&lt;a class="headerlink" href="#example-3" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;397c 0200 0100          move.w  #0x200,0x100(a4)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;This &lt;code&gt;move&lt;/code&gt; instruction puts a word with the value &lt;code&gt;0x200&lt;/code&gt; into an address which is &lt;code&gt;0x100&lt;/code&gt; above the address pointed by &lt;code&gt;a4&lt;/code&gt;. It uses Immediate Data for the source and Address Register Indirect with Displacement for the destination. The format of the &lt;code&gt;move&lt;/code&gt; instruction is&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;| 15 | 14 | 13 | 12 | 11 | 10 | 09 | 08 | 07 | 06 | 05 | 04 | 03 | 02 | 01 | 00 |&lt;/span&gt;
@@ -404,14 +383,12 @@
 &lt;span class="err"&gt;|         |         | REGISTER     | MODE         | MODE         | REGISTER     |&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;(please note that register and mode are swapped in the destination part)&lt;/p&gt;
 &lt;p&gt;In this case we have&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;00    11    100  101       111100&lt;/span&gt;
 &lt;span class="err"&gt;^     ^     ^    ^         ^    &lt;/span&gt;
 &lt;span class="err"&gt;move  word  a4   (d16,An)  Immediate Data&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;It is interesting to note that the word for the source is given with Immediate Data, and is indeed just after the instruction (&lt;code&gt;0x0200&lt;/code&gt;), followed by the 16-bit displacement for Address Register Indirect with Displacement (&lt;code&gt;0x0100&lt;/code&gt;).&lt;/p&gt;
 &lt;h1 id="lea-load-effective-address"&gt;LEA: Load Effective Address&lt;a class="headerlink" href="#lea-load-effective-address" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
@@ -428,14 +405,12 @@
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="mi"&gt;00000364&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;41&lt;/span&gt;&lt;span class="n"&gt;fa&lt;/span&gt; &lt;span class="n"&gt;ffa6&lt;/span&gt;         &lt;span class="n"&gt;lea&lt;/span&gt;     &lt;span class="mh"&gt;0x30c&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;pc&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt;&lt;span class="n"&gt;a0&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;This &lt;code&gt;lea&lt;/code&gt; instruction stores the address &lt;code&gt;0x30c&lt;/code&gt; into &lt;code&gt;a0&lt;/code&gt;, but it's pretty evident that this address mode doesn't work like the traditional Address Register Indirect with Displacement. The instruction is at address &lt;code&gt;0x364&lt;/code&gt; and if we read the displacement as usual we would expect the effective address to be at &lt;code&gt;0x364 + 0x30c&lt;/code&gt;. It is important to understand that this is what the Assembler (or the disassembler) shows, and that the proper meaning of &lt;code&gt;0x30c(pc)&lt;/code&gt; is "the address &lt;code&gt;0x30c&lt;/code&gt; knowing that this instruction is at &lt;code&gt;0x364&lt;/code&gt;". I believe this clearly shows why relocatable code makes use of this addressing mode. The address that we identify with &lt;code&gt;0x364&lt;/code&gt; might actually be anywhere in memory, as this number means only &lt;code&gt;0x364&lt;/code&gt; words after the first instruction (which is at &lt;code&gt;0x0&lt;/code&gt; in our relative space).&lt;/p&gt;
 &lt;p&gt;The binary representation of the instruction is actually revealing. The hexadecimal values of the two words &lt;code&gt;41fa ffa6&lt;/code&gt; become &lt;code&gt;01000001111110101111111110100110&lt;/code&gt; which can be split as follows&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;0100  000  111  111010    1111111110100110&lt;/span&gt;
 &lt;span class="err"&gt;^     ^         ^         ^&lt;/span&gt;
 &lt;span class="err"&gt;lea   a0        (d16,PC)  extension word&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;According to the documentation of the addressing mode, the extension word &lt;code&gt;1111111110100110&lt;/code&gt; is a signed 16-bit displacement, so it is a number expressed in two's complement notation. The conversion gives &lt;code&gt;-0x5a&lt;/code&gt;, which added to the instruction relative address &lt;code&gt;0x364&lt;/code&gt; surprisingly gives &lt;code&gt;0x30a&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;The documentation of the addressing mode, however, states that&lt;/p&gt;

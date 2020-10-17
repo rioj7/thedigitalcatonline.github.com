@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>The Digital Cat - Postgres</title><link href="https://www.thedigitalcatonline.com/" rel="alternate"></link><link href="https://www.thedigitalcatonline.com/categories/postgres/atom.xml" rel="self"></link><id>https://www.thedigitalcatonline.com/</id><updated>2020-07-13T00:10:00+01:00</updated><subtitle>Adventures of a curious cat in the land of programming</subtitle><entry><title>Flask project setup: TDD, Docker, Postgres and more - Part 3</title><link href="https://www.thedigitalcatonline.com/blog/2020/07/07/flask-project-setup-tdd-docker-postgres-and-more-part-3/" rel="alternate"></link><published>2020-07-07T13:00:00+01:00</published><updated>2020-07-07T13:00:00+01:00</updated><author><name>Leonardo Giordani</name></author><id>tag:www.thedigitalcatonline.com,2020-07-07:/blog/2020/07/07/flask-project-setup-tdd-docker-postgres-and-more-part-3/</id><summary type="html">&lt;p&gt;A step-by-step tutorial on how to setup a Flask project with TDD, Docker and Postgres&lt;/p&gt;</summary><content type="html">&lt;p&gt;In this series of posts I explore the development of a Flask project with a setup that is built with efficiency and tidiness in mind, using TDD, Docker and Postgres.&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>The Digital Cat - Postgres</title><link href="https://www.thedigitalcatonline.com/" rel="alternate"></link><link href="https://www.thedigitalcatonline.com/categories/postgres/atom.xml" rel="self"></link><id>https://www.thedigitalcatonline.com/</id><updated>2020-10-17T14:00:00+01:00</updated><subtitle>Adventures of a curious cat in the land of programming</subtitle><entry><title>Flask project setup: TDD, Docker, Postgres and more - Part 3</title><link href="https://www.thedigitalcatonline.com/blog/2020/07/07/flask-project-setup-tdd-docker-postgres-and-more-part-3/" rel="alternate"></link><published>2020-07-07T13:00:00+01:00</published><updated>2020-10-17T14:00:00+01:00</updated><author><name>Leonardo Giordani</name></author><id>tag:www.thedigitalcatonline.com,2020-07-07:/blog/2020/07/07/flask-project-setup-tdd-docker-postgres-and-more-part-3/</id><summary type="html">&lt;p&gt;A step-by-step tutorial on how to setup a Flask project with TDD, Docker and Postgres&lt;/p&gt;</summary><content type="html">&lt;p&gt;In this series of posts I explore the development of a Flask project with a setup that is built with efficiency and tidiness in mind, using TDD, Docker and Postgres.&lt;/p&gt;
 &lt;h2 id="catch-up"&gt;Catch-up&lt;a class="headerlink" href="#catch-up" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;In the &lt;a href="https://www.thedigitalcatonline.com/blog/2020/07/05/flask-project-setup-tdd-docker-postgres-and-more-part-1/"&gt;first&lt;/a&gt; and &lt;a href="https://www.thedigitalcatonline.com/blog/2020/07/06/flask-project-setup-tdd-docker-postgres-and-more-part-2/"&gt;second&lt;/a&gt; posts I created a Flask project with a tidy setup, using Docker to run the development environment and the tests, and mapping important commands in a management script, so that the configuration can be in a single file and drive the whole system.&lt;/p&gt;
 &lt;p&gt;In this post I will show you how to easily create scenarios, that is databases created on the fly with custom data, so that it is possible to test queries in isolation, either with the Flask application or with the command line. I will also show you how to define a configuration for production and give some hints for the deployment.&lt;/p&gt;
@@ -253,7 +253,6 @@
     &lt;span class="n"&gt;cli&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;where I added the &lt;code&gt;scenario up&lt;/code&gt; and &lt;code&gt;scenario down&lt;/code&gt; commands. As you can see the function &lt;code&gt;up&lt;/code&gt; first copies the &lt;code&gt;config/scenario.json&lt;/code&gt; and the &lt;code&gt;docker/scenario.yml&lt;/code&gt; files (that I still have to create) into files named after the scenario.&lt;/p&gt;
 &lt;p&gt;Then I run the &lt;code&gt;up -d&lt;/code&gt; command and wait for the database to be ready, as I already do for tests. After that, it's time to extract the port of the container with some very simple Python string processing and to initialise the correct environment variable.&lt;/p&gt;
 &lt;p&gt;Last, I import and execute the Python file containing the code of the scenario itself and print a friendly message with the command line to run &lt;code&gt;psql&lt;/code&gt; to have a Postgres shell into the newly created database.&lt;/p&gt;
@@ -275,7 +274,7 @@
   &lt;span class="nt"&gt;web&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
     &lt;span class="nt"&gt;build&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
       &lt;span class="nt"&gt;context&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${PWD}&lt;/span&gt;
-      &lt;span class="nt"&gt;dockerfile&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;docker/web/Dockerfile&lt;/span&gt;
+      &lt;span class="nt"&gt;dockerfile&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;docker/Dockerfile&lt;/span&gt;
     &lt;span class="nt"&gt;environment&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
       &lt;span class="nt"&gt;FLASK_ENV&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${FLASK_ENV}&lt;/span&gt;
       &lt;span class="nt"&gt;FLASK_CONFIG&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${FLASK_CONFIG}&lt;/span&gt;
@@ -283,14 +282,12 @@
       &lt;span class="nt"&gt;POSTGRES_USER&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${POSTGRES_USER}&lt;/span&gt;
       &lt;span class="nt"&gt;POSTGRES_HOSTNAME&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${POSTGRES_HOSTNAME}&lt;/span&gt;
       &lt;span class="nt"&gt;POSTGRES_PASSWORD&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${POSTGRES_PASSWORD}&lt;/span&gt;
-      &lt;span class="nt"&gt;POSTGRES_PORT&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${POSTGRES_PORT}&lt;/span&gt;
     &lt;span class="nt"&gt;command&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;flask run --host 0.0.0.0&lt;/span&gt;
     &lt;span class="nt"&gt;volumes&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
       &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${PWD}:/opt/code&lt;/span&gt;
     &lt;span class="nt"&gt;ports&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
       &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;5000&amp;quot;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;Here you can see that the database is ephemeral, that the port on the host is automatically assigned, and that I also spin up the application (mapping it to a random port as well to avoid clashing with the development one).&lt;/p&gt;
 &lt;p&gt;The configuration file is&lt;/p&gt;
@@ -327,8 +324,9 @@
 &lt;span class="p"&gt;]&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;which doesn't add anything new to what I already did for development and testing. &lt;/p&gt;
+&lt;h4 id="git-commit"&gt;Git commit&lt;a class="headerlink" href="#git-commit" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
+&lt;p&gt;You can see the changes made in this step through &lt;a href="https://github.com/lgiordani/flask_project_setup/commit/7f88f82a8cd6aea0519962326cb3a27d393e6cfb"&gt;this Git commit&lt;/a&gt; or &lt;a href="https://github.com/lgiordani/flask_project_setup/tree/7f88f82a8cd6aea0519962326cb3a27d393e6cfb"&gt;browse the files&lt;/a&gt;.&lt;/p&gt;
 &lt;h4 id="resources"&gt;Resources&lt;a class="headerlink" href="#resources" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://docs.docker.com/compose/compose-file/#ports"&gt;Expose ports in docker-compose&lt;/a&gt;&lt;/li&gt;
@@ -345,7 +343,6 @@
     &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;HEY! This is scenario&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;environ&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;APPLICATION_SCENARIO_NAME&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;When I run the scenario I get the following output&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ ./manage.py scenario up foo
 Creating network &lt;span class="s2"&gt;&amp;quot;scenario_foo_default&amp;quot;&lt;/span&gt; with the default driver
@@ -356,7 +353,6 @@ Your scenario is ready. If you want to open a SQL shell run
 docker-compose -p scenario_foo -f docker/scenario_foo.yml &lt;span class="nb"&gt;exec&lt;/span&gt; db psql -U postgres -d application
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;The command &lt;code&gt;docker ps&lt;/code&gt; shows that my development environment is happily running alongside with the scenario&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ docker ps
 CONTAINER ID  IMAGE             COMMAND                 &lt;span class="o"&gt;[&lt;/span&gt;...&lt;span class="o"&gt;]&lt;/span&gt;  PORTS                    NAMES
@@ -366,30 +362,30 @@ a031b6429e07  postgres          &lt;span class="s2"&gt;&amp;quot;docker-entrypoi
 28aa566321b5  postgres          &lt;span class="s2"&gt;&amp;quot;docker-entrypoint.s…&amp;quot;&lt;/span&gt;  &lt;span class="o"&gt;[&lt;/span&gt;...&lt;span class="o"&gt;]&lt;/span&gt;  &lt;span class="m"&gt;0&lt;/span&gt;.0.0.0:5432-&amp;gt;5432/tcp   development_db_1
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;And the output of the &lt;code&gt;scenario up foo&lt;/code&gt; command contains the string &lt;code&gt;HEY! This is scenario foo&lt;/code&gt; that was printed by the file &lt;code&gt;foo.py&lt;/code&gt;. We can also successfully run the suggested command&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ docker-compose -p scenario_foo -f docker/scenario_foo.yml &lt;span class="nb"&gt;exec&lt;/span&gt; db psql -U postgres -d application
-psql &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="m"&gt;12&lt;/span&gt;.3 &lt;span class="o"&gt;(&lt;/span&gt;Debian &lt;span class="m"&gt;12&lt;/span&gt;.3-1.pgdg100+1&lt;span class="o"&gt;))&lt;/span&gt;
-Type &lt;span class="s2"&gt;&amp;quot;help&amp;quot;&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; help.
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ docker-compose -p scenario_foo -f docker/scenario_foo.yml exec db psql -U postgres -d application
+psql (12.3 (Debian 12.3-1.pgdg100+1))
+Type &amp;quot;help&amp;quot; for help.
 
-&lt;span class="nv"&gt;application&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="c1"&gt;# \l&lt;/span&gt;
+application=# \l
                                   List of databases
-    Name     &lt;span class="p"&gt;|&lt;/span&gt;  Owner   &lt;span class="p"&gt;|&lt;/span&gt; Encoding &lt;span class="p"&gt;|&lt;/span&gt;  Collate   &lt;span class="p"&gt;|&lt;/span&gt;   Ctype    &lt;span class="p"&gt;|&lt;/span&gt;   Access privileges   
+    Name     |  Owner   | Encoding |  Collate   |   Ctype    |   Access privileges   
 -------------+----------+----------+------------+------------+-----------------------
- application &lt;span class="p"&gt;|&lt;/span&gt; postgres &lt;span class="p"&gt;|&lt;/span&gt; UTF8     &lt;span class="p"&gt;|&lt;/span&gt; en_US.utf8 &lt;span class="p"&gt;|&lt;/span&gt; en_US.utf8 &lt;span class="p"&gt;|&lt;/span&gt; 
- postgres    &lt;span class="p"&gt;|&lt;/span&gt; postgres &lt;span class="p"&gt;|&lt;/span&gt; UTF8     &lt;span class="p"&gt;|&lt;/span&gt; en_US.utf8 &lt;span class="p"&gt;|&lt;/span&gt; en_US.utf8 &lt;span class="p"&gt;|&lt;/span&gt; 
- template0   &lt;span class="p"&gt;|&lt;/span&gt; postgres &lt;span class="p"&gt;|&lt;/span&gt; UTF8     &lt;span class="p"&gt;|&lt;/span&gt; en_US.utf8 &lt;span class="p"&gt;|&lt;/span&gt; en_US.utf8 &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt;c/postgres          +
-             &lt;span class="p"&gt;|&lt;/span&gt;          &lt;span class="p"&gt;|&lt;/span&gt;          &lt;span class="p"&gt;|&lt;/span&gt;            &lt;span class="p"&gt;|&lt;/span&gt;            &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="nv"&gt;postgres&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;CTc/postgres
- template1   &lt;span class="p"&gt;|&lt;/span&gt; postgres &lt;span class="p"&gt;|&lt;/span&gt; UTF8     &lt;span class="p"&gt;|&lt;/span&gt; en_US.utf8 &lt;span class="p"&gt;|&lt;/span&gt; en_US.utf8 &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt;c/postgres          +
-             &lt;span class="p"&gt;|&lt;/span&gt;          &lt;span class="p"&gt;|&lt;/span&gt;          &lt;span class="p"&gt;|&lt;/span&gt;            &lt;span class="p"&gt;|&lt;/span&gt;            &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="nv"&gt;postgres&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;CTc/postgres
-&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="m"&gt;4&lt;/span&gt; rows&lt;span class="o"&gt;)&lt;/span&gt;
+ application | postgres | UTF8     | en_US.utf8 | en_US.utf8 | 
+ postgres    | postgres | UTF8     | en_US.utf8 | en_US.utf8 | 
+ template0   | postgres | UTF8     | en_US.utf8 | en_US.utf8 | =c/postgres          +
+             |          |          |            |            | postgres=CTc/postgres
+ template1   | postgres | UTF8     | en_US.utf8 | en_US.utf8 | =c/postgres          +
+             |          |          |            |            | postgres=CTc/postgres
+(4 rows)
 
-&lt;span class="nv"&gt;application&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="c1"&gt;#&lt;/span&gt;
+application=#
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;And inside the database we find the &lt;code&gt;application&lt;/code&gt; database created explicitly for the scenario (the name is specified in &lt;code&gt;config/scenario.json&lt;/code&gt;). If you don't know &lt;code&gt;psql&lt;/code&gt; you can exit with &lt;code&gt;\q&lt;/code&gt; or &lt;code&gt;Ctrl-d&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;Before tearing down the scenario have a look at the two files &lt;code&gt;config/scenario_foo.json&lt;/code&gt; and &lt;code&gt;docker/scenario_foo.yml&lt;/code&gt;. They are just copies of &lt;code&gt;config/scenario.json&lt;/code&gt; and &lt;code&gt;docker/scenario.yml&lt;/code&gt; but I think seeing them there might help to understand how the whole thing works. When you are done run &lt;code&gt;./manage.py scenario down foo&lt;/code&gt;.&lt;/p&gt;
+&lt;h4 id="git-commit_1"&gt;Git commit&lt;a class="headerlink" href="#git-commit_1" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
+&lt;p&gt;You can see the changes made in this step through &lt;a href="https://github.com/lgiordani/flask_project_setup/commit/16330e0e7c8e842f2afb474fb2045c735ff194b2"&gt;this Git commit&lt;/a&gt; or &lt;a href="https://github.com/lgiordani/flask_project_setup/tree/16330e0e7c8e842f2afb474fb2045c735ff194b2"&gt;browse the files&lt;/a&gt;.&lt;/p&gt;
 &lt;h3 id="scenario-example-2"&gt;Scenario example 2&lt;a class="headerlink" href="#scenario-example-2" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h3&gt;
 &lt;p&gt;Let's do something a bit more interesting. The new scenario is contained in &lt;code&gt;scenarios/users.py&lt;/code&gt;&lt;/p&gt;
 &lt;p&gt;File: &lt;code&gt;scenarios/users.py&lt;/code&gt;&lt;/p&gt;
@@ -420,37 +416,36 @@ Type &lt;span class="s2"&gt;&amp;quot;help&amp;quot;&lt;/span&gt; &lt;span class
         &lt;span class="n"&gt;db&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;session&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;commit&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;I decided to be as agnostic as possible in the scenarios, to avoid creating something too specific that eventually would not give me enough flexibility to test what I need. This means that the scenario has to create the app and to use the database session explicitly, as I do in this example. The application is created with the &lt;code&gt;"development"&lt;/code&gt; configuration. Remember that this is the Flask configuration that you find in &lt;code&gt;application/config.py&lt;/code&gt;, not the one that is in &lt;code&gt;config/development.json&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;I can run the scenario with&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ ./manage.py scenario up users
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;and then connect to the database to find my users&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ docker-compose -p scenario_users -f docker/scenario_users.yml &lt;span class="nb"&gt;exec&lt;/span&gt; db psql -U postgres -d application
-psql &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="m"&gt;12&lt;/span&gt;.3 &lt;span class="o"&gt;(&lt;/span&gt;Debian &lt;span class="m"&gt;12&lt;/span&gt;.3-1.pgdg100+1&lt;span class="o"&gt;))&lt;/span&gt;
-Type &lt;span class="s2"&gt;&amp;quot;help&amp;quot;&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; help.
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ docker-compose -p scenario_users -f docker/scenario_users.yml exec db psql -U postgres -d application
+psql (12.3 (Debian 12.3-1.pgdg100+1))
+Type &amp;quot;help&amp;quot; for help.
 
-&lt;span class="nv"&gt;application&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="c1"&gt;# \dt&lt;/span&gt;
+application=# \dt
          List of relations
- Schema &lt;span class="p"&gt;|&lt;/span&gt; Name  &lt;span class="p"&gt;|&lt;/span&gt; Type  &lt;span class="p"&gt;|&lt;/span&gt;  Owner
+ Schema | Name  | Type  |  Owner
 --------+-------+-------+----------
- public &lt;span class="p"&gt;|&lt;/span&gt; users &lt;span class="p"&gt;|&lt;/span&gt; table &lt;span class="p"&gt;|&lt;/span&gt; postgres
-&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt; row&lt;span class="o"&gt;)&lt;/span&gt;
+ public | users | table | postgres
+(1 row)
 
-&lt;span class="nv"&gt;application&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="c1"&gt;# select * from users;&lt;/span&gt;
- id &lt;span class="p"&gt;|&lt;/span&gt;      email
+application=# select * from users;
+ id |      email
 ----+------------------
-  &lt;span class="m"&gt;1&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt; admin@server.com
-  &lt;span class="m"&gt;2&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt; user1@server.com
-  &lt;span class="m"&gt;3&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt; user2@server.com
-&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="m"&gt;3&lt;/span&gt; rows&lt;span class="o"&gt;)&lt;/span&gt;
+  1 | admin@server.com
+  2 | user1@server.com
+  3 | user2@server.com
+(3 rows)
 
-&lt;span class="nv"&gt;application&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="c1"&gt;# \q&lt;/span&gt;
+application=# \q
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
+&lt;h4 id="git-commit_2"&gt;Git commit&lt;a class="headerlink" href="#git-commit_2" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
+&lt;p&gt;You can see the changes made in this step through &lt;a href="https://github.com/lgiordani/flask_project_setup/commit/2e65ebd1336a6ba4635f5d4dd0048bb7c1903318"&gt;this Git commit&lt;/a&gt; or &lt;a href="https://github.com/lgiordani/flask_project_setup/tree/2e65ebd1336a6ba4635f5d4dd0048bb7c1903318"&gt;browse the files&lt;/a&gt;.&lt;/p&gt;
 &lt;h2 id="step-2-simulating-the-production-environment"&gt;Step 2 - Simulating the production environment&lt;a class="headerlink" href="#step-2-simulating-the-production-environment" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;As I stated at the very beginning of this mini series of posts, one of my goals was to run in development the same database that I run in production, and for this reason I went through the configuration steps that allowed me to have a Postgres container running both in development and during tests. In a real production scenario Postgres would probably run in a separate instance, for example on the RDS service in AWS, but as long as you have the connection parameters nothing changes in the configuration.&lt;/p&gt;
 &lt;p&gt;Docker actually allows us to easily simulate the production environment as well. Well, if our notebook was connected 24/7 we might as well host the production there directly. Not that I recommend this nowadays, but this is how many important companies begun many years ago when cloud computing had not been here yet. Instead of installing a LAMP stack we configure containers, but the idea doesn't change.&lt;/p&gt;
@@ -463,7 +458,6 @@ psycopg2
 flask-migrate
 gunicorn
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;Then I need to create a docker-compose configuration for production&lt;/p&gt;
 &lt;p&gt;File: &lt;code&gt;docker/production.yml&lt;/code&gt;&lt;/p&gt;
@@ -484,7 +478,7 @@ gunicorn
   &lt;span class="nt"&gt;web&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
     &lt;span class="nt"&gt;build&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
       &lt;span class="nt"&gt;context&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${PWD}&lt;/span&gt;
-      &lt;span class="nt"&gt;dockerfile&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;docker/web/Dockerfile.production&lt;/span&gt;
+      &lt;span class="nt"&gt;dockerfile&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;docker/Dockerfile.production&lt;/span&gt;
     &lt;span class="nt"&gt;environment&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
       &lt;span class="nt"&gt;FLASK_ENV&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${FLASK_ENV}&lt;/span&gt;
       &lt;span class="nt"&gt;FLASK_CONFIG&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${FLASK_CONFIG}&lt;/span&gt;
@@ -503,10 +497,9 @@ gunicorn
   &lt;span class="nt"&gt;pgdata&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;As you can see here the command that runs the application is slightly different, &lt;code&gt;gunicorn -w 4 -b 0.0.0.0 wsgi:app&lt;/code&gt;. It exposes 4 processes (&lt;code&gt;-w 4&lt;/code&gt;) on the container's address 0.0.0.0 loading the &lt;code&gt;app&lt;/code&gt; object from the &lt;code&gt;wsgi.py&lt;/code&gt; file (&lt;code&gt;wsgi:app&lt;/code&gt;). As by default Gunicorn exposes port 8000 I mapped that to the same port in the host.&lt;/p&gt;
-&lt;p&gt;As the production image need to install the production requirements I also took the opportunity to create the &lt;code&gt;docker/web&lt;/code&gt; subdirectory and move the web &lt;code&gt;Dockerfile&lt;/code&gt; there. Then I created the &lt;code&gt;Dockerfile.production&lt;/code&gt; one&lt;/p&gt;
-&lt;p&gt;File: &lt;code&gt;docker/web/Dockerfile.production&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Then I created the &lt;code&gt;Dockerfile.production&lt;/code&gt; that defines the production image of the web application&lt;/p&gt;
+&lt;p&gt;File: &lt;code&gt;docker/Dockerfile.production&lt;/code&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;FROM python:3
 
 ENV PYTHONUNBUFFERED 1
@@ -518,12 +511,6 @@ WORKDIR /opt/code
 ADD requirements /opt/requirements
 RUN pip install -r /opt/requirements/production.txt
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;Having moved the development &lt;code&gt;Dockerfile&lt;/code&gt; into the subdirectory I also fixed the other docker-compose files to match the new configuration. I can now build the image with&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ &lt;span class="nv"&gt;APPLICATION_CONFIG&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;production&amp;quot;&lt;/span&gt; ./manage.py compose build web
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;The last thing I need is a configuration file&lt;/p&gt;
 &lt;p&gt;File: &lt;code&gt;config/production.json&lt;/code&gt;&lt;/p&gt;
@@ -563,9 +550,14 @@ RUN pip install -r /opt/requirements/production.txt
 &lt;span class="p"&gt;]&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;as you can notice this is not very different from the development one, as I just changed the values of &lt;code&gt;FLASK_ENV&lt;/code&gt; and &lt;code&gt;FLASK_CONFIG&lt;/code&gt;. Clearly this contains a secret that shouldn't be written in plain text, &lt;code&gt;POSTGRES_PASSWORD&lt;/code&gt;, but after all this is a simulation of production. In a real environment secrets should be kept in an encrypted manager such as AWS Secret Manager.&lt;/p&gt;
 &lt;p&gt;Remember that &lt;code&gt;FLASK_ENV&lt;/code&gt; changes the internal settings of Flask, most notably disabling the debugger, and the &lt;code&gt;FLASK_CONFIG=production&lt;/code&gt; loads the &lt;code&gt;ProductionConfig&lt;/code&gt; object from &lt;code&gt;application/config.py&lt;/code&gt;. That object is empty for the moment, but it might contain public configuration for the production server.&lt;/p&gt;
+&lt;p&gt;I can now build the image with&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ &lt;span class="nv"&gt;APPLICATION_CONFIG&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;production&amp;quot;&lt;/span&gt; ./manage.py compose build web
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h4 id="git-commit_3"&gt;Git commit&lt;a class="headerlink" href="#git-commit_3" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
+&lt;p&gt;You can see the changes made in this step through &lt;a href="https://github.com/lgiordani/flask_project_setup/commit/66fe80edb61f3f8ca3303856f29d70f76923c30b"&gt;this Git commit&lt;/a&gt; or &lt;a href="https://github.com/lgiordani/flask_project_setup/tree/66fe80edb61f3f8ca3303856f29d70f76923c30b"&gt;browse the files&lt;/a&gt;.&lt;/p&gt;
 &lt;h4 id="resources_1"&gt;Resources&lt;a class="headerlink" href="#resources_1" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://gunicorn.org/"&gt;Gunicorn&lt;/a&gt; - A Python WSGI HTTP Server&lt;/li&gt;
@@ -591,7 +583,7 @@ RUN pip install -r /opt/requirements/production.txt
   &lt;span class="nt"&gt;web&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
     &lt;span class="nt"&gt;build&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
       &lt;span class="nt"&gt;context&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${PWD}&lt;/span&gt;
-      &lt;span class="nt"&gt;dockerfile&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;docker/web/Dockerfile.production&lt;/span&gt;
+      &lt;span class="nt"&gt;dockerfile&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;docker/Dockerfile.production&lt;/span&gt;
     &lt;span class="nt"&gt;environment&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
       &lt;span class="nt"&gt;FLASK_ENV&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${FLASK_ENV}&lt;/span&gt;
       &lt;span class="nt"&gt;FLASK_CONFIG&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;${FLASK_CONFIG}&lt;/span&gt;
@@ -613,7 +605,6 @@ RUN pip install -r /opt/requirements/production.txt
 &lt;span class="nt"&gt;volumes&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
   &lt;span class="nt"&gt;pgdata&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;As you can see I added a service &lt;code&gt;nginx&lt;/code&gt; that runs the default Nginx image, mapping a custom configuration file that I will create in a minute. The application container doesn't need any port mapping, as I won't access it directly from the host anymore. The Nginx configuration file is&lt;/p&gt;
 &lt;p&gt;File: &lt;code&gt;docker/nginx/nginx.conf&lt;/code&gt;&lt;/p&gt;
@@ -644,7 +635,6 @@ RUN pip install -r /opt/requirements/production.txt
 &lt;span class="p"&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;This is a pretty standard configuration, and in a real production environment I would add many other configuration values (most notably serving HTTPS instead of HTTP). The &lt;code&gt;upstream&lt;/code&gt; section leverages docker-compose networking referring to &lt;code&gt;web&lt;/code&gt;, which in the internal DNS directly maps to the IPs of the service with the same name. The port 8000 comes from the default Gunicorn port that I already mentioned before. I won't run the nginx container as root on my notebook, so I will expose port 8080 instead of the traditional 80 for HTTP, and this is also something that would be different in a real production environment.&lt;/p&gt;
 &lt;p&gt;I can at this point run&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ &lt;span class="nv"&gt;APPLICATION_CONFIG&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;production&amp;quot;&lt;/span&gt; ./manage.py compose up -d
@@ -653,14 +643,12 @@ Starting production_nginx_1 ... &lt;span class="k"&gt;done&lt;/span&gt;
 Starting production_web_1   ... &lt;span class="k"&gt;done&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;It's interesting to have a look at the logs of the nginx container, as Nginx by default prints all the incoming requests&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ &lt;span class="nv"&gt;APPLICATION_CONFIG&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;production&amp;quot;&lt;/span&gt; ./manage.py compose logs -f nginx
 Attaching to production_nginx_1
 &lt;span class="o"&gt;[&lt;/span&gt;...&lt;span class="o"&gt;]&lt;/span&gt;
 nginx_1  &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="m"&gt;172&lt;/span&gt;.30.0.1 - - &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;05&lt;/span&gt;/Jul/2020:10:40:44 +0000&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;GET / HTTP/1.1&amp;quot;&lt;/span&gt; &lt;span class="m"&gt;200&lt;/span&gt; &lt;span class="m"&gt;13&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;-&amp;quot;&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0&amp;quot;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;The last line is what I get when I visit &lt;a href="http://localhost:8080"&gt;localhost:8080&lt;/a&gt; while the production setup is up and running.&lt;/p&gt;
 &lt;p&gt;Scaling up and down the service is now a breeze&lt;/p&gt;
@@ -672,7 +660,8 @@ Creating production_web_2 ... &lt;span class="k"&gt;done&lt;/span&gt;
 Creating production_web_3 ... &lt;span class="k"&gt;done&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
+&lt;h4 id="git-commit_4"&gt;Git commit&lt;a class="headerlink" href="#git-commit_4" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
+&lt;p&gt;You can see the changes made in this step through &lt;a href="https://github.com/lgiordani/flask_project_setup/commit/56278af7d3af1650b691b15c268cfa112d031657"&gt;this Git commit&lt;/a&gt; or &lt;a href="https://github.com/lgiordani/flask_project_setup/tree/56278af7d3af1650b691b15c268cfa112d031657"&gt;browse the files&lt;/a&gt;.&lt;/p&gt;
 &lt;h4 id="resources_2"&gt;Resources&lt;a class="headerlink" href="#resources_2" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://nginx.org/en/"&gt;Nginx&lt;/a&gt; - An HTTP and reverse proxy server (and more)&lt;/li&gt;
@@ -686,11 +675,9 @@ Creating production_web_3 ... &lt;span class="k"&gt;done&lt;/span&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ &lt;span class="nv"&gt;APPLICATION_CONFIG&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;production&amp;quot;&lt;/span&gt; ./manage.py compose &lt;span class="nb"&gt;exec&lt;/span&gt; nginx bash
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Once inside I can see my configuration file at &lt;code&gt;/etc/nginx/nginx.conf&lt;/code&gt;, but this has not changed. Remember that Docker networking doesn't work as a templating engine, but with a local DNS. This means that if we try to resolve &lt;code&gt;web&lt;/code&gt; from inside the container we should see multiple IPs. The command &lt;code&gt;dig&lt;/code&gt; is a good tool to investigate the DNS, but it doesn't come preinstalled in the nginx container, so I need to run&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@33cbaea369be:/# apt update &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; apt install dnsutils
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;and at this point I can run it&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@33cbaea369be:/# dig web
@@ -717,11 +704,9 @@ web.                    &lt;span class="m"&gt;600&lt;/span&gt;     IN      A    
 root@33cbaea369be:/#
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;The command outputs 3 IPs, which correspond to the 3 containers of the &lt;code&gt;web&lt;/code&gt; service that I am currently running. If I scale down (from outside the container)&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ &lt;span class="nv"&gt;APPLICATION_CONFIG&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;production&amp;quot;&lt;/span&gt; ./manage.py compose up -d --scale &lt;span class="nv"&gt;web&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;then the output of &lt;code&gt;dig&lt;/code&gt; becomes&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@33cbaea369be:/# dig web
@@ -746,7 +731,6 @@ web.                    &lt;span class="m"&gt;600&lt;/span&gt;     IN      A    
 root@33cbaea369be:/#
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;h2 id="how-to-create-the-production-infrastructure"&gt;How to create the production infrastructure&lt;a class="headerlink" href="#how-to-create-the-production-infrastructure" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;This will be a very short section, as creating infrastructure and deploying in production are complex topics, so I want to just give some hints to stimulate your research.&lt;/p&gt;
 &lt;p&gt;&lt;a href="https://aws.amazon.com/ecs/"&gt;AWS ECS&lt;/a&gt; is basically Docker in the cloud, and the whole structure can map almost 1 to 1 to the docker-compose setup, so it is worth learning. ECS can work on explicit EC2 instances that you manage, or in &lt;a href="https://aws.amazon.com/fargate/"&gt;Fargate&lt;/a&gt;, which means that the EC2 instances running the containers are transparently managed by AWS itself.&lt;/p&gt;
@@ -756,7 +740,7 @@ root@33cbaea369be:/#
 &lt;h2 id="final-words"&gt;Final words&lt;a class="headerlink" href="#final-words" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;This is the last post of this short series. I hope you learned something useful, and that it encouraged you to properly setup your projects and to investigate technologies like Docker. As always, feel free to send me feedback or questions, and if you find my posts useful please share them with whoever you thing might be interested.&lt;/p&gt;
 &lt;h2 id="feedback"&gt;Feedback&lt;a class="headerlink" href="#feedback" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
-&lt;p&gt;Feel free to reach me on &lt;a href="https://twitter.com/thedigicat"&gt;Twitter&lt;/a&gt; if you have questions. The &lt;a href="https://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues"&gt;GitHub issues&lt;/a&gt; page is the best place to submit corrections.&lt;/p&gt;</content><category term="Programming"></category><category term="AWS"></category><category term="Docker"></category><category term="Flask"></category><category term="HTTP"></category><category term="Postgres"></category><category term="pytest"></category><category term="Python"></category><category term="Python3"></category><category term="TDD"></category><category term="testing"></category><category term="WWW"></category></entry><entry><title>Flask project setup: TDD, Docker, Postgres and more - Part 2</title><link href="https://www.thedigitalcatonline.com/blog/2020/07/06/flask-project-setup-tdd-docker-postgres-and-more-part-2/" rel="alternate"></link><published>2020-07-06T13:00:00+01:00</published><updated>2020-07-13T00:10:00+01:00</updated><author><name>Leonardo Giordani</name></author><id>tag:www.thedigitalcatonline.com,2020-07-06:/blog/2020/07/06/flask-project-setup-tdd-docker-postgres-and-more-part-2/</id><summary type="html">&lt;p&gt;A step-by-step tutorial on how to setup a Flask project with TDD, Docker and Postgres&lt;/p&gt;</summary><content type="html">&lt;p&gt;In this series of posts I explore the development of a Flask project with a setup that is built with efficiency and tidiness in mind, using TDD, Docker and Postgres.&lt;/p&gt;
+&lt;p&gt;Feel free to reach me on &lt;a href="https://twitter.com/thedigicat"&gt;Twitter&lt;/a&gt; if you have questions. The &lt;a href="https://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues"&gt;GitHub issues&lt;/a&gt; page is the best place to submit corrections.&lt;/p&gt;</content><category term="Programming"></category><category term="AWS"></category><category term="Docker"></category><category term="Flask"></category><category term="HTTP"></category><category term="Postgres"></category><category term="pytest"></category><category term="Python"></category><category term="Python3"></category><category term="TDD"></category><category term="testing"></category><category term="WWW"></category></entry><entry><title>Flask project setup: TDD, Docker, Postgres and more - Part 2</title><link href="https://www.thedigitalcatonline.com/blog/2020/07/06/flask-project-setup-tdd-docker-postgres-and-more-part-2/" rel="alternate"></link><published>2020-07-06T13:00:00+01:00</published><updated>2020-10-17T14:00:00+01:00</updated><author><name>Leonardo Giordani</name></author><id>tag:www.thedigitalcatonline.com,2020-07-06:/blog/2020/07/06/flask-project-setup-tdd-docker-postgres-and-more-part-2/</id><summary type="html">&lt;p&gt;A step-by-step tutorial on how to setup a Flask project with TDD, Docker and Postgres&lt;/p&gt;</summary><content type="html">&lt;p&gt;In this series of posts I explore the development of a Flask project with a setup that is built with efficiency and tidiness in mind, using TDD, Docker and Postgres.&lt;/p&gt;
 &lt;h2 id="catch-up"&gt;Catch-up&lt;a class="headerlink" href="#catch-up" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;In the &lt;a href="https://www.thedigitalcatonline.com/blog/2020/07/05/flask-project-setup-tdd-docker-postgres-and-more-part-1/"&gt;previous post&lt;/a&gt; we started from an empty project and learned how to add the minimal code to run a Flask project. Then we created a static configuration file and a management script that wraps the &lt;code&gt;flask&lt;/code&gt; and &lt;code&gt;docker-compose&lt;/code&gt; commands to run the application with a specific configuration&lt;/p&gt;
 &lt;p&gt;In this post I will show you how to run a production-ready database alongside your code in a Docker container, both in your development setup and for the tests.&lt;/p&gt;
@@ -794,7 +778,6 @@ root@33cbaea369be:/#
   &lt;span class="nt"&gt;pgdata&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;The variables starting with &lt;code&gt;POSTGRES_&lt;/code&gt; are requested by the PostgreSQL Docker image. In particular, remember that &lt;code&gt;POSTGRESQL_DB&lt;/code&gt; is the database that gets created by default when you create the image, and also the one that contains data on other databases as well, so for the application we usually want to use a different one.&lt;/p&gt;
 &lt;p&gt;Notice also that for the &lt;code&gt;db&lt;/code&gt; service I'm creating a persistent volume, so that the content of the database is not lost when we tear down the container. For this service I'm using the default image, so no build step is needed.&lt;/p&gt;
 &lt;p&gt;To orchestrate this setup we need to add those variables to the JSON configuration&lt;/p&gt;
@@ -831,14 +814,12 @@ root@33cbaea369be:/#
 &lt;span class="p"&gt;]&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;These are all development variables so there are no secrets. In production we will need a way to keep the secrets in a safe place and convert them into environment variables. The AWS Secret Manager for example can directly map secrets into environment variables passed to the containers, saving you from having to explicitly connect to the service with the API.&lt;/p&gt;
-&lt;p&gt;We can run the &lt;code&gt;./manage.py compose up -d&lt;/code&gt; and &lt;code&gt;./manage.py compose down&lt;/code&gt; here to check that the database container works properly.&lt;/p&gt;
+&lt;p&gt;We can run the &lt;code&gt;./manage.py compose up -d&lt;/code&gt; and &lt;code&gt;./manage.py compose down&lt;/code&gt; here to check that the database container works properly. Please note that the first time you run the command &lt;code&gt;compose -d&lt;/code&gt; Docker will create the volume and build the Postgres image, and this might take some time.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;CONTAINER ID  IMAGE       COMMAND                 ...  PORTS                   NAMES
 9b5828dccd1c  docker_web  &amp;quot;flask run --host 0.…&amp;quot;  ...  0.0.0.0:5000-&amp;gt;5000/tcp  docker_web_1
 4440a18a1527  postgres    &amp;quot;docker-entrypoint.s…&amp;quot;  ...  0.0.0.0:5432-&amp;gt;5432/tcp  docker_db_1
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;Now we need to connect the application to the database and to do this we can leverage flask-postgresql. As we will use this at every stage of the life of the application, the requirement goes among the production ones. We also need psycopg2 as it is the library used to connect to Postgres.&lt;/p&gt;
 &lt;p&gt;File: &lt;code&gt;requirements/production.txt&lt;/code&gt;&lt;/p&gt;
@@ -846,7 +827,6 @@ root@33cbaea369be:/#
 flask-sqlalchemy
 psycopg2
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;Remember to run &lt;code&gt;pip install -r requirements/development.txt&lt;/code&gt; to install the requirements locally and &lt;code&gt;./manage.py compose build web&lt;/code&gt; to rebuild the image.&lt;/p&gt;
 &lt;p&gt;At this point I need to create a connection string in the configuration of the application. The connection string parameters come fromt he same environment variables used to spin up the &lt;code&gt;db&lt;/code&gt; container&lt;/p&gt;
@@ -884,7 +864,6 @@ psycopg2
 
     &lt;span class="n"&gt;TESTING&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kc"&gt;True&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;As you can see, here I use the variable &lt;code&gt;APPLICATION_DB&lt;/code&gt; and not &lt;code&gt;POSTGRES_DB&lt;/code&gt;, so I need to specify that as well in the config file&lt;/p&gt;
 &lt;p&gt;File: &lt;code&gt;config/development.json&lt;/code&gt;&lt;/p&gt;
@@ -924,7 +903,6 @@ psycopg2
 &lt;span class="p"&gt;]&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;At this point the application container needs to access some of the Postgres environment variables and the &lt;code&gt;APPLICATION_DB&lt;/code&gt; one&lt;/p&gt;
 &lt;p&gt;File: &lt;code&gt;docker/development.yml&lt;/code&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nt"&gt;version&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s"&gt;&amp;#39;3.4&amp;#39;&lt;/span&gt;
@@ -963,8 +941,35 @@ psycopg2
   &lt;span class="nt"&gt;pgdata&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Running compose now spins up both Flask and Postgres but the application is not properly connected to the database yet.&lt;/p&gt;
+&lt;p&gt;Let's have a look inside the DB to see what our configuration created. First run &lt;code&gt;./manage.py compose up -d&lt;/code&gt; then connect to the Postgres DB with &lt;code&gt;./manage.py compose exec db psql -U postgres&lt;/code&gt;. Please note that we have to specify the user with &lt;code&gt;-U&lt;/code&gt; because the default value is &lt;code&gt;root&lt;/code&gt;, but we changed it to &lt;code&gt;postgres&lt;/code&gt; with the variable &lt;code&gt;POSTGRES_USER&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;You should see a command line like&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ ./manage.py compose exec db psql -U postgres
+psql (13.0 (Debian 13.0-1.pgdg100+1))
+Type &amp;quot;help&amp;quot; for help.
+
+postgres=#
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Also note that by default we are logging into the database called &lt;code&gt;postgres&lt;/code&gt;, which was configured by the variable &lt;code&gt;POSTGRES_DB&lt;/code&gt;. We can list the databases with &lt;code&gt;\l&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;postgres=# \l
+                                 List of databases
+   Name    |  Owner   | Encoding |  Collate   |   Ctype    |   Access privileges   
+-----------+----------+----------+------------+------------+-----------------------
+ postgres  | postgres | UTF8     | en_US.utf8 | en_US.utf8 | 
+ template0 | postgres | UTF8     | en_US.utf8 | en_US.utf8 | =c/postgres          +
+           |          |          |            |            | postgres=CTc/postgres
+ template1 | postgres | UTF8     | en_US.utf8 | en_US.utf8 | =c/postgres          +
+           |          |          |            |            | postgres=CTc/postgres
+(3 rows)
+
+postgres=# 
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Last, note that the application database configured with &lt;code&gt;APPLICATION_DB&lt;/code&gt; is not present because we haven't created it yet. All the environment variables prefixed by &lt;code&gt;POSTGRES_&lt;/code&gt; are used automatically by the Docker image to perform the initial configuration, which is why the database &lt;code&gt;postgres&lt;/code&gt; is already there.&lt;/p&gt;
+&lt;p&gt;You can exit &lt;code&gt;psql&lt;/code&gt; with Ctrl-D or &lt;code&gt;exit&lt;/code&gt;.&lt;/p&gt;
+&lt;h4 id="git-commit"&gt;Git commit&lt;a class="headerlink" href="#git-commit" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
+&lt;p&gt;You can see the changes made in this step through &lt;a href="https://github.com/lgiordani/flask_project_setup/commit/813aec4b5fc0aa18a9924dd696594b0e40deddfa"&gt;this Git commit&lt;/a&gt; or &lt;a href="https://github.com/lgiordani/flask_project_setup/tree/813aec4b5fc0aa18a9924dd696594b0e40deddfa"&gt;browse the files&lt;/a&gt;.&lt;/p&gt;
 &lt;h4 id="resources"&gt;Resources&lt;a class="headerlink" href="#resources" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://hub.docker.com/_/postgres"&gt;Postgres Docker image&lt;/a&gt;&lt;/li&gt;
@@ -978,7 +983,6 @@ psycopg2
 
 &lt;span class="n"&gt;db&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;SQLAlchemy&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;File: &lt;code&gt;application/app.py&lt;/code&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;flask&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;Flask&lt;/span&gt;
@@ -1003,7 +1007,6 @@ psycopg2
     &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;app&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;A pretty standard way to manage the database in Flask is to use flask-migrate, that adds some commands that allow us to create migrations and apply them.&lt;/p&gt;
 &lt;p&gt;With flask-migrate you have to create the migrations folder once and for all with &lt;code&gt;flask db init&lt;/code&gt; and then, every time you change your models, run &lt;code&gt;flask db migrate -m "Some message"&lt;/code&gt; and &lt;code&gt;flask db upgrade&lt;/code&gt;. As both &lt;code&gt;db init&lt;/code&gt; and &lt;code&gt;db migrate&lt;/code&gt; create files in the current directory we now face a problem that every Docker-based setup has to face: file permissions.&lt;/p&gt;
 &lt;p&gt;The situation is the following: the application is running in the Docker container as root, and there is no connection between the users namespace in the container and that of the host. The result is that if the Docker container creates files in a directory that is mounted from the host (like the one that contains the application code in our example), those files will result as belonging to &lt;code&gt;root&lt;/code&gt;. While this doesn't make impossible to work (we usually can become &lt;code&gt;root&lt;/code&gt; on our devlopment machines), it is annoying to say the least. The solution is to run those commands from outside the container, but this requires the Flask application to be configured.&lt;/p&gt;
@@ -1015,8 +1018,7 @@ psycopg2
 flask-migrate
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
-&lt;p&gt;Remember to run &lt;code&gt;pip install -r requirements/development.txt&lt;/code&gt; to install the requirements locally and &lt;code&gt;./manage.py compose build web&lt;/code&gt; to rebuild the image.&lt;/p&gt;
+&lt;p&gt;Remember to run &lt;code&gt;pip install -r requirements/development.txt&lt;/code&gt; to install the requirements locally and &lt;code&gt;./manage.py compose build web&lt;/code&gt; to rebuild the image. Please note that you need the &lt;code&gt;pg_config&lt;/code&gt; executable and some other development tools installed in your system. If you get an error message from &lt;code&gt;pip&lt;/code&gt; please check the documentation of your operating system to find out what to do to install the required packages. For Ubuntu Linux I had to run &lt;code&gt;sudo apt install build-essential python3-dev libpq-dev&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;Now we can initialise a &lt;code&gt;Migrate&lt;/code&gt; object and add it to the application factory&lt;/p&gt;
 &lt;p&gt;File: &lt;code&gt;application/models.py&lt;/code&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;flask_sqlalchemy&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;SQLAlchemy&lt;/span&gt;
@@ -1025,7 +1027,6 @@ flask-migrate
 &lt;span class="n"&gt;db&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;SQLAlchemy&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
 &lt;span class="n"&gt;migrate&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Migrate&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;File: &lt;code&gt;application/app.py&lt;/code&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;flask&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;Flask&lt;/span&gt;
@@ -1051,9 +1052,8 @@ flask-migrate
     &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;app&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;I can now run the database initialisation script&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ ./manage.py flask db init&lt;span class="sb"&gt;`&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ ./manage.py flask db init
   Creating directory /home/leo/devel/flask-tutorial/migrations ...  &lt;span class="k"&gt;done&lt;/span&gt;
   Creating directory /home/leo/devel/flask-tutorial/migrations/versions ...  &lt;span class="k"&gt;done&lt;/span&gt;
   Generating /home/leo/devel/flask-tutorial/migrations/env.py ...  &lt;span class="k"&gt;done&lt;/span&gt;
@@ -1063,8 +1063,10 @@ flask-migrate
   Please edit configuration/connection/logging settings in &lt;span class="s1"&gt;&amp;#39;/home/leo/devel/flask-tutorial/migrations/alembic.ini&amp;#39;&lt;/span&gt; before proceeding.
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;And, when we will start creating models we will use the commands &lt;code&gt;./manage.py flask db migrate&lt;/code&gt; and &lt;code&gt;./manage.py flask db upgrade&lt;/code&gt;. You will find a complete example at the end of this post.&lt;/p&gt;
+&lt;p&gt;For the time being let's have a brief look at what was created here. The command &lt;code&gt;db init&lt;/code&gt; created the directory &lt;code&gt;migrations&lt;/code&gt; and inside it some default configuration files and templates. The migration scripts will be created in the directory &lt;code&gt;migrations/versions&lt;/code&gt; but at the moment that directory is empty, as we have no models and we run no migrations (only the initialization of the system). No changes have been made to the database. The command &lt;code&gt;db init&lt;/code&gt; can be run even without running containers (you can remove the directory &lt;code&gt;migrations&lt;/code&gt; and try it).&lt;/p&gt;
+&lt;h4 id="git-commit_1"&gt;Git commit&lt;a class="headerlink" href="#git-commit_1" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
+&lt;p&gt;You can see the changes made in this step through &lt;a href="https://github.com/lgiordani/flask_project_setup/commit/1060f782b69cb4f0ca188455164d91403d983c5e"&gt;this Git commit&lt;/a&gt; or &lt;a href="https://github.com/lgiordani/flask_project_setup/tree/1060f782b69cb4f0ca188455164d91403d983c5e"&gt;browse the files&lt;/a&gt;.&lt;/p&gt;
 &lt;h4 id="resources_1"&gt;Resources&lt;a class="headerlink" href="#resources_1" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://flask-sqlalchemy.palletsprojects.com/en/2.x/"&gt;Flask-SQLAlchemy&lt;/a&gt; - A Flask extension to work with SQLAlchemy&lt;/li&gt;
@@ -1090,8 +1092,8 @@ flask-migrate
 &lt;span class="n"&gt;pytest&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;cov&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;As you can see I also use the coverage plugin to keep an eye on how well I cover the code with the tests. Remember to run &lt;code&gt;pip install -r requirements/development.txt&lt;/code&gt; to install the requirements locally and &lt;code&gt;./manage.py compose build web&lt;/code&gt; to rebuild the image.&lt;/p&gt;
+&lt;p&gt;Warning: before you change the script &lt;code&gt;manage.py&lt;/code&gt; make sure you terminate all the running containers running &lt;code&gt;./manage.py compose down&lt;/code&gt;. The next version will change the naming convention for containers and you might end up with some stale containers and run into issues with the database.&lt;/p&gt;
 &lt;p&gt;File: &lt;code&gt;manage.py&lt;/code&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="ch"&gt;#! /usr/bin/env python&lt;/span&gt;
 
@@ -1200,7 +1202,6 @@ flask-migrate
     &lt;span class="n"&gt;cli&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Notable changes are&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;The environment configuration code is now in the function &lt;code&gt;configure_app&lt;/code&gt;. This allows me to force the variable &lt;code&gt;APPLICATION_CONFIG&lt;/code&gt; inside the script and then configure the environment, which saves me from having to call tests with &lt;code&gt;APPLICATION_CONFIG=testing flask test&lt;/code&gt;.&lt;/li&gt;
@@ -1245,7 +1246,6 @@ flask-migrate
 &lt;span class="p"&gt;]&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Note that here I specified &lt;code&gt;5433&lt;/code&gt; for the &lt;code&gt;POSTGRES_PORT&lt;/code&gt;. This allows us to spin up the test database container while the development one is running, as that will use port &lt;code&gt;5432&lt;/code&gt; and you can't have two different containers using the same port on the host. A more general solution could be to leave Docker pick a random host port for the container and then use that, but this requires a bit more code to be properly implemented, so I will come back to this problem when setting up the scenarios.&lt;/p&gt;
 &lt;p&gt;The last piece of setup that we need is the orchestration configuration for docker-compose&lt;/p&gt;
 &lt;p&gt;File: &lt;code&gt;docker/testing.yml&lt;/code&gt;&lt;/p&gt;
@@ -1262,7 +1262,6 @@ flask-migrate
     &lt;span class="nt"&gt;ports&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
       &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;${POSTGRES_PORT}:5432&amp;quot;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;Now we can run &lt;code&gt;./manage.py test&lt;/code&gt; and get&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;Creating&lt;/span&gt; &lt;span class="n"&gt;network&lt;/span&gt; &lt;span class="ss"&gt;&amp;quot;testing_default&amp;quot;&lt;/span&gt; &lt;span class="k"&gt;with&lt;/span&gt; &lt;span class="n"&gt;the&lt;/span&gt; &lt;span class="k"&gt;default&lt;/span&gt; &lt;span class="n"&gt;driver&lt;/span&gt;
@@ -1292,7 +1291,9 @@ flask-migrate
 &lt;span class="n"&gt;Removing&lt;/span&gt; &lt;span class="n"&gt;network&lt;/span&gt; &lt;span class="n"&gt;testing_default&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
+&lt;p&gt;Note that the command first creates the testing database container &lt;code&gt;testing_db_1&lt;/code&gt;, then runs pytest, and finally stops and remove the container. This is exactly what we wanted to achieve to run tests in isolation. At the moment, however there are no tests, and the testing database is empty.&lt;/p&gt;
+&lt;h4 id="git-commit_2"&gt;Git commit&lt;a class="headerlink" href="#git-commit_2" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
+&lt;p&gt;You can see the changes made in this step through &lt;a href="https://github.com/lgiordani/flask_project_setup/commit/778e41361bc14df2f75c858b39901bf3fc6df657"&gt;this Git commit&lt;/a&gt; or &lt;a href="https://github.com/lgiordani/flask_project_setup/tree/778e41361bc14df2f75c858b39901bf3fc6df657"&gt;browse the files&lt;/a&gt;.&lt;/p&gt;
 &lt;h4 id="resources_2"&gt;Resources&lt;a class="headerlink" href="#resources_2" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://docs.pytest.org/en/latest/"&gt;pytest&lt;/a&gt; - A full-featured Python testing framework&lt;/li&gt;
@@ -1443,7 +1444,6 @@ flask-migrate
 &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="vm"&gt;__name__&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;__main__&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
     &lt;span class="n"&gt;cli&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;As you can see I took the opportunity to write the &lt;code&gt;create_initial_db&lt;/code&gt; command as well, that just runs the very same SQL command that creates the testing database, but in any configuration I will use. &lt;/p&gt;
 &lt;p&gt;Before moving on I think it's time to refactor the &lt;code&gt;manage.py&lt;/code&gt; file. Refactoring is not mandatory, but I feel like some parts of the script are not generic enough, and when I will add the scenarios I will definitely need my functions to be flexible.&lt;/p&gt;
@@ -1611,13 +1611,14 @@ flask-migrate
     &lt;span class="n"&gt;cli&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Notable changes:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;I created two new functions &lt;code&gt;app_config_file&lt;/code&gt; and &lt;code&gt;docker_compose_file&lt;/code&gt; that encapsulate the creation of the file paths.&lt;/li&gt;
 &lt;li&gt;I isolated the code that waits for a message in the database container logs, creating the &lt;code&gt;wait_for_logs&lt;/code&gt; function.&lt;/li&gt;
 &lt;li&gt;The &lt;code&gt;docker_compose_cmdline&lt;/code&gt; now receives a string and converts it into a list internally. This way expressing commands is more natural, as it doesn't require the ugly list syntax that subprocess works with.&lt;/li&gt;
 &lt;/ul&gt;
+&lt;h4 id="git-commit_3"&gt;Git commit&lt;a class="headerlink" href="#git-commit_3" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
+&lt;p&gt;You can see the changes made in this step through &lt;a href="https://github.com/lgiordani/flask_project_setup/commit/2ece6780955de7694d7b31ab31151181044440a9"&gt;this Git commit&lt;/a&gt; or &lt;a href="https://github.com/lgiordani/flask_project_setup/tree/2ece6780955de7694d7b31ab31151181044440a9"&gt;browse the files&lt;/a&gt;.&lt;/p&gt;
 &lt;h4 id="resources_3"&gt;Resources&lt;a class="headerlink" href="#resources_3" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://www.psycopg.org/docs/"&gt;Psycopg&lt;/a&gt; – PostgreSQL database adapter for Python&lt;/li&gt;
@@ -1632,7 +1633,6 @@ coverage
 pytest-cov
 pytest-flask
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;Then add the &lt;code&gt;app&lt;/code&gt; and the &lt;code&gt;database&lt;/code&gt; fixtures to the &lt;code&gt;tests/conftest.py&lt;/code&gt; file. The first is required by pytest-flask itself (it's used by other fixtures) and the second one is useful every time you need to interact with the database itself.&lt;/p&gt;
 &lt;p&gt;File: &lt;code&gt;tests/conftest.py&lt;/code&gt;&lt;/p&gt;
@@ -1658,8 +1658,10 @@ pytest-flask
     &lt;span class="k"&gt;yield&lt;/span&gt; &lt;span class="n"&gt;db&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
+&lt;p&gt;Remember to create the empty file &lt;code&gt;tests/__init__.py&lt;/code&gt; to make pytest correctly load the code.&lt;/p&gt;
 &lt;p&gt;As you can see, the &lt;code&gt;database&lt;/code&gt; fixture uses the &lt;code&gt;drop_all&lt;/code&gt; and &lt;code&gt;create_all&lt;/code&gt; methods to reset the database. The reason is that this fixture is recreated for each function, and we can't be sure a previous function left the database clean. As a matter of fact, we might be almost sure of the opposite.&lt;/p&gt;
+&lt;h4 id="git-commit_4"&gt;Git commit&lt;a class="headerlink" href="#git-commit_4" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
+&lt;p&gt;You can see the changes made in this step through &lt;a href="https://github.com/lgiordani/flask_project_setup/commit/ea2702fc9805bbe99687561161d04691a4b4be13"&gt;this Git commit&lt;/a&gt; or &lt;a href="https://github.com/lgiordani/flask_project_setup/tree/ea2702fc9805bbe99687561161d04691a4b4be13"&gt;browse the files&lt;/a&gt;.&lt;/p&gt;
 &lt;h4 id="resources_4"&gt;Resources&lt;a class="headerlink" href="#resources_4" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://docs.pytest.org/en/stable/fixture.html"&gt;pytest fixtures&lt;/a&gt; - One of the most powerful features of pytest&lt;/li&gt;
@@ -1683,7 +1685,6 @@ pytest-flask
 
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;user&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;email&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;email&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;Running this test results in an error, because the &lt;code&gt;User&lt;/code&gt; model does not exist&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ ./manage.py &lt;span class="nb"&gt;test&lt;/span&gt;
@@ -1731,7 +1732,6 @@ Removing network testing_default
 $ 
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;I won't show here all the steps of the strict TDD methodology, and implement directly the final solution, which is&lt;/p&gt;
 &lt;p&gt;File: &lt;code&gt;application/models.py&lt;/code&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;flask_sqlalchemy&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;SQLAlchemy&lt;/span&gt;
@@ -1746,7 +1746,6 @@ $
     &lt;span class="nb"&gt;id&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;db&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Column&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;db&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Integer&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;primary_key&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="kc"&gt;True&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
     &lt;span class="n"&gt;email&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;db&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Column&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;db&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;String&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;unique&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="kc"&gt;True&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;nullable&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="kc"&gt;False&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;With this model the test passes&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ ./manage.py &lt;span class="nb"&gt;test&lt;/span&gt;
@@ -1779,31 +1778,16 @@ Removing network testing_default
 $ 
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Please not that this is a very simple example and that in a real case I would add some other tests before accepting this code. In particular we should check that the &lt;code&gt;email&lt;/code&gt; field can be empty, and maybe also test some validation on that field.&lt;/p&gt;
 &lt;p&gt;Once we are satisfied by the code we can generate the migration in the database. Spin up the development environment with&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ ./manage.py compose up -d
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;If this is the first time I spin up the environment I have to create the application database and to initialise the migrations, so I run&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ ./manage.py create-initial-db
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
-&lt;p&gt;which returns no output, and&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ ./manage.py flask db init
-  Creating directory /home/leo/devel/flask-tutorial/migrations ...  done
-  Creating directory /home/leo/devel/flask-tutorial/migrations/versions ...  done
-  Generating /home/leo/devel/flask-tutorial/migrations/env.py ...  done
-  Generating /home/leo/devel/flask-tutorial/migrations/README ...  done
-  Generating /home/leo/devel/flask-tutorial/migrations/script.py.mako ...  done
-  Generating /home/leo/devel/flask-tutorial/migrations/alembic.ini ...  done
-  Please edit configuration/connection/logging settings in &amp;#39;/home/leo/devel/flask-tutorial/migrations/alembic.ini&amp;#39; before proceeding.
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;Once this is done (or if that was already done), I can create the migration with&lt;/p&gt;
+&lt;p&gt;As we already initialised Alembic before we don't need to run the command &lt;code&gt;db init&lt;/code&gt;. If you do, it will return &lt;code&gt;Error: Directory migrations already exists and is not empty&lt;/code&gt;. Now I can create the migration with&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ ./manage.py flask db migrate -m &amp;quot;Initial user model&amp;quot;
 INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
 INFO  [alembic.runtime.migration] Will assume transactional DDL.
@@ -1811,22 +1795,73 @@ INFO  [alembic.autogenerate.compare] Detected added table &amp;#39;users&amp;#39
   Generating /home/leo/devel/flask-tutorial/migrations/versions/7a09d7f8a8fa_initial_user_model.py ...  done
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
-&lt;p&gt;and finally apply the migration with&lt;/p&gt;
+&lt;p&gt;As you can see from the output, this created the file &lt;code&gt;migrations/versions/7a09d7f8a8fa_initial_user_model.py&lt;/code&gt;. The number &lt;code&gt;7a09d7f8a8fa&lt;/code&gt; is just an hex version of a UUID ,so it will be different for you, while the name comes from the commit message. The file itself contains SQLAlchemy code that changes the DB according to the code that we wrote in the application.&lt;/p&gt;
+&lt;p&gt;Finally I can apply the migration with&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ ./manage.py flask db upgrade
 INFO  &lt;span class="o"&gt;[&lt;/span&gt;alembic.runtime.migration&lt;span class="o"&gt;]&lt;/span&gt; Context impl PostgresqlImpl.
 INFO  &lt;span class="o"&gt;[&lt;/span&gt;alembic.runtime.migration&lt;span class="o"&gt;]&lt;/span&gt; Will assume transactional DDL.
 INFO  &lt;span class="o"&gt;[&lt;/span&gt;alembic.runtime.migration&lt;span class="o"&gt;]&lt;/span&gt; Running upgrade  -&amp;gt; 7a09d7f8a8fa, Initial user model
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
+&lt;p&gt;At this point we can run &lt;code&gt;`./manage.py compose exec db psql -U postgres&lt;/code&gt; again and see what happened to the database.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ ./manage.py compose exec db psql -U postgres
+psql (13.0 (Debian 13.0-1.pgdg100+1))
+Type &amp;quot;help&amp;quot; for help.
+
+postgres=# \l
+                                  List of databases
+    Name     |  Owner   | Encoding |  Collate   |   Ctype    |   Access privileges   
+-------------+----------+----------+------------+------------+-----------------------
+ application | postgres | UTF8     | en_US.utf8 | en_US.utf8 | 
+ postgres    | postgres | UTF8     | en_US.utf8 | en_US.utf8 | 
+ template0   | postgres | UTF8     | en_US.utf8 | en_US.utf8 | =c/postgres          +
+             |          |          |            |            | postgres=CTc/postgres
+ template1   | postgres | UTF8     | en_US.utf8 | en_US.utf8 | =c/postgres          +
+             |          |          |            |            | postgres=CTc/postgres
+(4 rows)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;You see here that the database &lt;code&gt;application&lt;/code&gt; configured with &lt;code&gt;APPLICATION_DB&lt;/code&gt; has beed created. You can now connect to it and list the tables&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;postgres=# \c application
+You are now connected to database &amp;quot;application&amp;quot; as user &amp;quot;postgres&amp;quot;.
+application=# \dt
+              List of relations
+ Schema |      Name       | Type  |  Owner   
+--------+-----------------+-------+----------
+ public | alembic_version | table | postgres
+ public | users           | table | postgres
+(2 rows)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;The content of the table &lt;code&gt;alembic_version&lt;/code&gt; shouldn't be surprising, as it's the UUID used for the migration&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;application=# select * from alembic_version;
+ version_num  
+--------------
+ 7a09d7f8a8fa
+(1 row)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;The table &lt;code&gt;users&lt;/code&gt; contains the fields &lt;code&gt;id&lt;/code&gt; and &lt;code&gt;email&lt;/code&gt; according to the model that we wrote in Python&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;application=# \d users
+                                 Table &amp;quot;public.users&amp;quot;
+ Column |       Type        | Collation | Nullable |              Default              
+--------+-------------------+-----------+----------+-----------------------------------
+ id     | integer           |           | not null | nextval(&amp;#39;users_id_seq&amp;#39;::regclass)
+ email  | character varying |           | not null | 
+Indexes:
+    &amp;quot;users_pkey&amp;quot; PRIMARY KEY, btree (id)
+    &amp;quot;users_email_key&amp;quot; UNIQUE CONSTRAINT, btree (email)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;After this I can safely commit my code and move on with the next requirement.&lt;/p&gt;
+&lt;h4 id="git-commit_5"&gt;Git commit&lt;a class="headerlink" href="#git-commit_5" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
+&lt;p&gt;You can see the changes made in this step through &lt;a href="https://github.com/lgiordani/flask_project_setup/commit/20a398ea9181af6c445e6339a5a574d236c514a7"&gt;this Git commit&lt;/a&gt; or &lt;a href="https://github.com/lgiordani/flask_project_setup/tree/20a398ea9181af6c445e6339a5a574d236c514a7"&gt;browse the files&lt;/a&gt;.&lt;/p&gt;
 &lt;h2 id="final-words"&gt;Final words&lt;a class="headerlink" href="#final-words" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;I hope this post already showed you why a good setup can make the difference. The project is clean and wrapping the command in the management script plus the centralised config proved to be a good choice as it allowed me to solve the problem of migrations and testing in (what I think is) an elegant way. In the next post I'll show you how to easily create scenarios where you can test queries with only specific data in the database. If you find my posts useful please share them with whoever you thing might be interested.&lt;/p&gt;
 &lt;h2 id="updates"&gt;Updates&lt;a class="headerlink" href="#updates" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;2020-07-13 [Vlad Pavlichek}(https://github.com/Alladin9393) found and fixed a typo in the post, where &lt;code&gt;manage.py&lt;/code&gt; was missing the &lt;code&gt;.py&lt;/code&gt; extension. Thanks Vlad!&lt;/p&gt;
 &lt;h2 id="feedback"&gt;Feedback&lt;a class="headerlink" href="#feedback" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
-&lt;p&gt;Feel free to reach me on &lt;a href="https://twitter.com/thedigicat"&gt;Twitter&lt;/a&gt; if you have questions. The &lt;a href="https://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues"&gt;GitHub issues&lt;/a&gt; page is the best place to submit corrections.&lt;/p&gt;</content><category term="Programming"></category><category term="AWS"></category><category term="Docker"></category><category term="Flask"></category><category term="HTTP"></category><category term="Postgres"></category><category term="pytest"></category><category term="Python"></category><category term="Python3"></category><category term="TDD"></category><category term="testing"></category><category term="WWW"></category></entry><entry><title>Flask project setup: TDD, Docker, Postgres and more - Part 1</title><link href="https://www.thedigitalcatonline.com/blog/2020/07/05/flask-project-setup-tdd-docker-postgres-and-more-part-1/" rel="alternate"></link><published>2020-07-05T13:00:00+01:00</published><updated>2020-07-05T13:00:00+01:00</updated><author><name>Leonardo Giordani</name></author><id>tag:www.thedigitalcatonline.com,2020-07-05:/blog/2020/07/05/flask-project-setup-tdd-docker-postgres-and-more-part-1/</id><summary type="html">&lt;p&gt;A step-by-step tutorial on how to setup a Flask project with TDD, Docker and Postgres&lt;/p&gt;</summary><content type="html">&lt;p&gt;There are tons of tutorials on Internet that tech you how to use a web framework and how to create Web applications, and many of these cover Flask, first of all the impressive &lt;a href="https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-i-hello-world"&gt;Flask Mega-Tutorial&lt;/a&gt; by Miguel Grinberg (thanks Miguel!). &lt;/p&gt;
+&lt;p&gt;Feel free to reach me on &lt;a href="https://twitter.com/thedigicat"&gt;Twitter&lt;/a&gt; if you have questions. The &lt;a href="https://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues"&gt;GitHub issues&lt;/a&gt; page is the best place to submit corrections.&lt;/p&gt;</content><category term="Programming"></category><category term="AWS"></category><category term="Docker"></category><category term="Flask"></category><category term="HTTP"></category><category term="Postgres"></category><category term="pytest"></category><category term="Python"></category><category term="Python3"></category><category term="TDD"></category><category term="testing"></category><category term="WWW"></category></entry><entry><title>Flask project setup: TDD, Docker, Postgres and more - Part 1</title><link href="https://www.thedigitalcatonline.com/blog/2020/07/05/flask-project-setup-tdd-docker-postgres-and-more-part-1/" rel="alternate"></link><published>2020-07-05T13:00:00+01:00</published><updated>2020-10-17T14:00:00+01:00</updated><author><name>Leonardo Giordani</name></author><id>tag:www.thedigitalcatonline.com,2020-07-05:/blog/2020/07/05/flask-project-setup-tdd-docker-postgres-and-more-part-1/</id><summary type="html">&lt;p&gt;A step-by-step tutorial on how to setup a Flask project with TDD, Docker and Postgres&lt;/p&gt;</summary><content type="html">&lt;p&gt;There are tons of tutorials on Internet that tech you how to use a web framework and how to create Web applications, and many of these cover Flask, first of all the impressive &lt;a href="https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-i-hello-world"&gt;Flask Mega-Tutorial&lt;/a&gt; by Miguel Grinberg (thanks Miguel!). &lt;/p&gt;
 &lt;p&gt;Why another tutorial, then? Recently I started working on a small personal project and decided that it was a good chance to refresh my knowledge of the framework. For this reason I temporarily dropped the &lt;a href=""&gt;clean architecture&lt;/a&gt; I often recommend, and started from scratch following some tutorials. My development environment quickly became very messy, and after a while I realised I was very unsatisfied by the global setup.&lt;/p&gt;
 &lt;p&gt;So, I decided to start from scratch again, this time writing down some requirements I want from my development setup. I also know very well how complicated the deploy of an application in production can be, so I want my setup to be "deploy-friendly" as much as possible. Having seen too many project suffer from legacy setups, and knowing that many times such issues can be avoided with a minimum amount of planning, I thought this might be interesting for other developers as well. I consider this setup by no means &lt;em&gt;better&lt;/em&gt; than others, it simply addresses different concerns.&lt;/p&gt;
 &lt;h2 id="what-you-will-learn"&gt;What you will learn&lt;a class="headerlink" href="#what-you-will-learn" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
@@ -1853,22 +1888,18 @@ INFO  &lt;span class="o"&gt;[&lt;/span&gt;alembic.runtime.migration&lt;span clas
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;## This file is currently empty
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;File: &lt;code&gt;requirements/testing.txt&lt;/code&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;-r production.txt
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;File: &lt;code&gt;requirements/development.txt&lt;/code&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;-r testing.txt
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;There is also a final &lt;code&gt;requirements.txt&lt;/code&gt; file that points to the production one.&lt;/p&gt;
 &lt;p&gt;File: &lt;code&gt;requirements.txt&lt;/code&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;-r requirements/production.txt
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;As you can see this allows me to separate the requirements to avoid installing unneeded packages, which greatly speeds up the deploy in production and keeps things as essential as possible. Production contains the minimum requirements needed to run the project, testing adds to those the packages used to test the code, and development adds to the latter the tools needed during development. A minor shortcoming of this setup is that I might not need in development everything I need in production, for example the HTTP server. I don't think this is significantly affecting my local setup, though, and if I have to decide between production and development, I prefer to keep the former lean and tidy.&lt;/p&gt;
 &lt;p&gt;I have my linters already installed system-wide, but as I'm using black to format the code I have to configure flake8 to accept what I'm doing&lt;/p&gt;
@@ -1880,9 +1911,10 @@ INFO  &lt;span class="o"&gt;[&lt;/span&gt;alembic.runtime.migration&lt;span clas
 &lt;span class="na"&gt;ignore&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s"&gt;E231&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;This is clearly a very personal choice, and you might have different requirements. Take your time to properly configure the editor and the linter(s). Remember that the editor for a programmer is like the violin for the violinist. You need to know it, and to take care of it. So, set it up properly.&lt;/p&gt;
 &lt;p&gt;At this point I also create my virtual environment and activate it.&lt;/p&gt;
+&lt;h4 id="git-commit"&gt;Git commit&lt;a class="headerlink" href="#git-commit" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
+&lt;p&gt;You can see the changes made in this step through &lt;a href="https://github.com/lgiordani/flask_project_setup/commit/a6c8e7acde7d5d5d89fad22224fff707d625ebe3"&gt;this Git commit&lt;/a&gt; or &lt;a href="https://github.com/lgiordani/flask_project_setup/tree/a6c8e7acde7d5d5d89fad22224fff707d625ebe3"&gt;browse the files&lt;/a&gt;.&lt;/p&gt;
 &lt;h4 id="resources"&gt;Resources&lt;a class="headerlink" href="#resources" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://packaging.python.org/tutorials/installing-packages/"&gt;Installing packages in Python&lt;/a&gt;&lt;/li&gt;
@@ -1895,11 +1927,9 @@ INFO  &lt;span class="o"&gt;[&lt;/span&gt;alembic.runtime.migration&lt;span clas
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;Flask
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Now, install the development requirements with&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ pip install -r requirements/development.txt
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;As we saw before, that file automatically installs the testing and production requirements as well.&lt;/p&gt;
 &lt;p&gt;Then we need a directory where to keep all the code that is directly connected with the Flask framework, and where we will start creating the configuration for the application. Create the &lt;code&gt;application&lt;/code&gt; directory and the file &lt;code&gt;config.py&lt;/code&gt; in it.&lt;/p&gt;
@@ -1926,7 +1956,6 @@ INFO  &lt;span class="o"&gt;[&lt;/span&gt;alembic.runtime.migration&lt;span clas
 
     &lt;span class="n"&gt;TESTING&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kc"&gt;True&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;There are many ways to configure a Flask application, one of which is using Python objects. This allows me to leverage inheritance to avoid duplication (which is always good), so it's my method of choice.&lt;/p&gt;
 &lt;p&gt;It's important to understand the variables and the parameters involved in the configuration. As the documentation clearly states, &lt;code&gt;FLASK_ENV&lt;/code&gt; and &lt;code&gt;FLASK_DEBUG&lt;/code&gt; have to be initialised outside the application as the code might misbehave if they are changed once the engine has been started. Furthermore the &lt;code&gt;FLASK_ENV&lt;/code&gt; variable can have only the two values &lt;code&gt;development&lt;/code&gt; and &lt;code&gt;production&lt;/code&gt;, and the main difference is in performances. The most important thing we need to be aware of is that if &lt;code&gt;FLASK_ENV&lt;/code&gt; is &lt;code&gt;development&lt;/code&gt;, then &lt;code&gt;FLASK_DEBUG&lt;/code&gt; becomes automatically &lt;code&gt;True&lt;/code&gt;. To sum up we have the following guidelines:&lt;/p&gt;
@@ -1955,7 +1984,6 @@ INFO  &lt;span class="o"&gt;[&lt;/span&gt;alembic.runtime.migration&lt;span clas
     &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;app&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;I also added the standard "Hello, world!" route to have a quick way to see if the server is working or not.&lt;/p&gt;
 &lt;p&gt;Last, we need something that initializes the application running the application factory and passing the correct value for the &lt;code&gt;config_name&lt;/code&gt; parameter. The Flask development server can automatically use any file named &lt;code&gt;wsgi.py&lt;/code&gt; in the root directory, and since WSGI is a standard specification using that makes me sure that any HTTP server we will use in production (for example Gunicorn or uWSGI) will be immediately working.&lt;/p&gt;
 &lt;p&gt;File: &lt;code&gt;wsgi.py&lt;/code&gt;&lt;/p&gt;
@@ -1965,7 +1993,6 @@ INFO  &lt;span class="o"&gt;[&lt;/span&gt;alembic.runtime.migration&lt;span clas
 
 &lt;span class="n"&gt;app&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;create_app&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;environ&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;FLASK_CONFIG&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;Here, I decided to read the value of &lt;code&gt;config_name&lt;/code&gt; from the &lt;code&gt;FLASK_CONFIG&lt;/code&gt; variable. This is not a variable requested by the framework, but I decided to use the &lt;code&gt;FLASK_&lt;/code&gt; prefix anyway because it is tightly connected with the structure of the Flask application.&lt;/p&gt;
 &lt;p&gt;At this point we can happily run the Flask development server with&lt;/p&gt;
@@ -1977,8 +2004,9 @@ INFO  &lt;span class="o"&gt;[&lt;/span&gt;alembic.runtime.migration&lt;span clas
  * Running on http://127.0.0.1:5000/ &lt;span class="o"&gt;(&lt;/span&gt;Press CTRL+C to quit&lt;span class="o"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Please note that it says &lt;code&gt;Environment: production&lt;/code&gt; because we haven't configured &lt;code&gt;FLASK_ENV&lt;/code&gt; yet. If you head to http://127.0.0.1:5000/ with your browser you can see the greetings message.&lt;/p&gt;
+&lt;h4 id="git-commit_1"&gt;Git commit&lt;a class="headerlink" href="#git-commit_1" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
+&lt;p&gt;You can see the changes made in this step through &lt;a href="https://github.com/lgiordani/flask_project_setup/commit/656621980f6f2c2aac3c526b37dca6ac32363bd5"&gt;this Git commit&lt;/a&gt; or &lt;a href="https://github.com/lgiordani/flask_project_setup/tree/656621980f6f2c2aac3c526b37dca6ac32363bd5"&gt;browse the files&lt;/a&gt;.&lt;/p&gt;
 &lt;h4 id="resources_1"&gt;Resources&lt;a class="headerlink" href="#resources_1" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://flask.palletsprojects.com/en/1.1.x/config/"&gt;Flask configuration documentation&lt;/a&gt;&lt;/li&gt;
@@ -1993,10 +2021,13 @@ INFO  &lt;span class="o"&gt;[&lt;/span&gt;alembic.runtime.migration&lt;span clas
   &lt;span class="p"&gt;{&lt;/span&gt;
     &lt;span class="nt"&gt;&amp;quot;name&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;FLASK_ENV&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
     &lt;span class="nt"&gt;&amp;quot;value&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;development&amp;quot;&lt;/span&gt;
+  &lt;span class="p"&gt;},&lt;/span&gt;
+  &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;name&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;FLASK_CONFIG&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;value&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;development&amp;quot;&lt;/span&gt;
   &lt;span class="p"&gt;}&lt;/span&gt;
 &lt;span class="p"&gt;]&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;I obviously need a script that extracts variables from the JSON file and converts them into environment variables, so it's time to start writing my own &lt;code&gt;manage.py&lt;/code&gt; file. This is a pretty standard concept in the world of Python web frameworks, a tradition initiated by Django. The idea is to centralise all the management functions like starting/stopping the development server or managing database migrations. As in flask this is partially done by the &lt;code&gt;flask&lt;/code&gt; command itself, for the time being I just need to wrap it providing suitable environment variables.&lt;/p&gt;
 &lt;p&gt;File: &lt;code&gt;manage.py&lt;/code&gt;&lt;/p&gt;
@@ -2053,11 +2084,9 @@ INFO  &lt;span class="o"&gt;[&lt;/span&gt;alembic.runtime.migration&lt;span clas
     &lt;span class="n"&gt;cli&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Remember to give make the script executables with&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ chmod &lt;span class="m"&gt;775&lt;/span&gt; manage.py
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;As you can see I'm using &lt;code&gt;click&lt;/code&gt;, which is the recommended way to implement Flask commands. As I might use it to customise subcommands of the flask main script, I decided to stick to one tool and use it for the &lt;code&gt;manage.py&lt;/code&gt; script as well.&lt;/p&gt;
 &lt;p&gt;The &lt;code&gt;APPLICATION_CONFIG&lt;/code&gt; variable is the only one that I need to specify, and its default value is &lt;code&gt;development&lt;/code&gt;. From that variable I infer the name of the JSON file with the full configuration and load environment variables from that. The &lt;code&gt;flask&lt;/code&gt; function simply wraps the &lt;code&gt;flask&lt;/code&gt; command provided by Flask so that I can run &lt;code&gt;./manage.py flask &amp;lt;subcommand&amp;gt;&lt;/code&gt; to run it using the &lt;code&gt;development&lt;/code&gt; configuration or &lt;code&gt;APPLICATION_CONFIG="foobar" ./manage.py flask &amp;lt;subcommand&amp;gt;&lt;/code&gt; to use the &lt;code&gt;foobar&lt;/code&gt; one.&lt;/p&gt;
@@ -2077,8 +2106,9 @@ INFO  &lt;span class="o"&gt;[&lt;/span&gt;alembic.runtime.migration&lt;span clas
  * Debugger PIN: &lt;span class="m"&gt;172&lt;/span&gt;-719-201
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Note that it now says &lt;code&gt;Environment: development&lt;/code&gt; because of &lt;code&gt;FLASK_ENV&lt;/code&gt; has been set to &lt;code&gt;development&lt;/code&gt; in the configuration. As we did before, a quick visit to &lt;a href="http://127.0.0.1:5000/"&gt;http://127.0.0.1:5000/&lt;/a&gt; shows us that everything is up and running.&lt;/p&gt;
+&lt;h4 id="git-commit_2"&gt;Git commit&lt;a class="headerlink" href="#git-commit_2" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
+&lt;p&gt;You can see the changes made in this step through &lt;a href="https://github.com/lgiordani/flask_project_setup/commit/8330e792aa55d2903fd4846487c64de12530c0d3"&gt;this Git commit&lt;/a&gt; or &lt;a href="https://github.com/lgiordani/flask_project_setup/tree/8330e792aa55d2903fd4846487c64de12530c0d3"&gt;browse the files&lt;/a&gt;.&lt;/p&gt;
 &lt;h4 id="resources_2"&gt;Resources:&lt;a class="headerlink" href="#resources_2" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://docs.djangoproject.com/en/3.0/ref/django-admin/"&gt;Django's management script&lt;/a&gt;&lt;/li&gt;
@@ -2103,7 +2133,6 @@ INFO  &lt;span class="o"&gt;[&lt;/span&gt;alembic.runtime.migration&lt;span clas
 &lt;span class="k"&gt;RUN&lt;/span&gt; pip install -r /opt/requirements/development.txt
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;As you can see the requirements directory is copied into the image, so that Docker can run the &lt;code&gt;pip install&lt;/code&gt; command at creation time. The whole code directory will be mounted live into the image at run time.&lt;/p&gt;
 &lt;p&gt;This clearly means that every time we change the development requirements we need to rebuild the image. This is not a complicated process, so I will keep it as a manual process for now. To run the image we can create a configuration file for docker-compose.&lt;/p&gt;
 &lt;p&gt;File: &lt;code&gt;docker/development.yml&lt;/code&gt;&lt;/p&gt;
@@ -2124,7 +2153,6 @@ INFO  &lt;span class="o"&gt;[&lt;/span&gt;alembic.runtime.migration&lt;span clas
       &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;5000:5000&amp;quot;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;As you can see, the docker-compose configuration file can read environment variables natively. To run it we first need to add docker-compose itself to the development requirements.&lt;/p&gt;
 &lt;p&gt;File: &lt;code&gt;requirements/development.txt&lt;/code&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="n"&gt;testing&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;txt&lt;/span&gt;
@@ -2132,18 +2160,16 @@ INFO  &lt;span class="o"&gt;[&lt;/span&gt;alembic.runtime.migration&lt;span clas
 &lt;span class="n"&gt;docker&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;compose&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Install it with &lt;code&gt;pip install -r requirements/development.txt&lt;/code&gt;, then build the image with&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ &lt;span class="nv"&gt;FLASK_ENV&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;development&amp;quot;&lt;/span&gt; &lt;span class="nv"&gt;FLASK_CONFIG&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;development&amp;quot;&lt;/span&gt; docker-compose -f docker/development.yml build web
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
+&lt;p&gt;This will take some time, as Docker has to download all the required layers and install the requirements.&lt;/p&gt;
 &lt;p&gt;We are explicitly passing environment variables here, as we have not wrapped docker-compose in the manage script yet. Once the image has been build, we can run it with the &lt;code&gt;up&lt;/code&gt; command&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ &lt;span class="nv"&gt;FLASK_ENV&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;development&amp;quot;&lt;/span&gt; &lt;span class="nv"&gt;FLASK_CONFIG&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;development&amp;quot;&lt;/span&gt; docker-compose -f docker/development.yml up
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
-&lt;p&gt;This command should give us the following output&lt;/p&gt;
+&lt;p&gt;This command gives us the following output&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;Creating network &amp;quot;docker_default&amp;quot; with the default driver
 Creating docker_web_1 ... done
 Attaching to docker_web_1
@@ -2155,28 +2181,23 @@ web_1  |  * Debugger is active!
 web_1  |  * Debugger PIN: 234-361-737
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;You can stop the containers pressing &lt;code&gt;Ctrl-C&lt;/code&gt;, which gracefully tears down the system. If you run the command &lt;code&gt;up -d&lt;/code&gt; docker-compose will run as a daemon, leaving you the control of the current terminal. If docker-compose is running you can &lt;code&gt;docker ps&lt;/code&gt; and you should see an output similar to this&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;CONTAINER ID  IMAGE       COMMAND                 ...   PORTS                   NAMES
 c98f35635625  docker_web  &amp;quot;flask run --host 0.…&amp;quot;  ...   0.0.0.0:5000-&amp;gt;5000/tcp  docker_web_1
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;If you need to explore the container you can login directly with &lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ docker &lt;span class="nb"&gt;exec&lt;/span&gt; -it docker_web_1 bash
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;or with&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ &lt;span class="nv"&gt;FLASK_ENV&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;development&amp;quot;&lt;/span&gt; &lt;span class="nv"&gt;FLASK_CONFIG&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;development&amp;quot;&lt;/span&gt; docker-compose -f docker/development.yml &lt;span class="nb"&gt;exec&lt;/span&gt; web bash
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;In either case, you will end up in the &lt;code&gt;/opt/code&lt;/code&gt; directory (which is the &lt;code&gt;WORKDIR&lt;/code&gt; of the image), where the current directory in the host is mounted.&lt;/p&gt;
 &lt;p&gt;To tear down the containers, when running as daemon, you can run&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ &lt;span class="nv"&gt;FLASK_ENV&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;development&amp;quot;&lt;/span&gt; &lt;span class="nv"&gt;FLASK_CONFIG&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;development&amp;quot;&lt;/span&gt; docker-compose -f docker/development.yml down
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;Notice that the server now says &lt;code&gt;Running on http://0.0.0.0:5000/&lt;/code&gt;, as the Docker container is using that network interface to communicate with the outside world. Since the ports are mapped, however, you can head to either &lt;a href="http://localhost:5000"&gt;http://localhost:5000&lt;/a&gt; or &lt;a href="http://0.0.0.0:5000"&gt;http://0.0.0.0:5000&lt;/a&gt; with your browser.&lt;/p&gt;
 &lt;p&gt;To simplify the usage of docker-compose, I want to wrap it in the &lt;code&gt;manage.py&lt;/code&gt; script, so that it automatically receives environment variables, as their number is going to increase soon when we will add a database.&lt;/p&gt;
@@ -2248,24 +2269,10 @@ c98f35635625  docker_web  &amp;quot;flask run --host 0.…&amp;quot;  ...   0.0.
     &lt;span class="n"&gt;cli&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;You might have noticed that the two functions &lt;code&gt;flask&lt;/code&gt; and &lt;code&gt;compose&lt;/code&gt; are basically the same code, but I resisted the temptation to refactor them because I know that the &lt;code&gt;compose&lt;/code&gt; command will need some changes as soon as I add a database.&lt;/p&gt;
-&lt;p&gt;The last change we need in order to make everything work properly is adding the &lt;code&gt;FLASK_CONFIG&lt;/code&gt; variable to the config file&lt;/p&gt;
-&lt;p&gt;File: &lt;code&gt;config/development.json&lt;/code&gt;&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="p"&gt;[&lt;/span&gt;
-  &lt;span class="p"&gt;{&lt;/span&gt;
-    &lt;span class="nt"&gt;&amp;quot;name&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;FLASK_ENV&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
-    &lt;span class="nt"&gt;&amp;quot;value&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;development&amp;quot;&lt;/span&gt;
-  &lt;span class="p"&gt;},&lt;/span&gt;
-  &lt;span class="p"&gt;{&lt;/span&gt;
-    &lt;span class="nt"&gt;&amp;quot;name&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;FLASK_CONFIG&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
-    &lt;span class="nt"&gt;&amp;quot;value&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;development&amp;quot;&lt;/span&gt;
-  &lt;span class="p"&gt;}&lt;/span&gt;
-&lt;span class="p"&gt;]&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-
 &lt;p&gt;Now I can run &lt;code&gt;./manage.py compose up -d&lt;/code&gt; and &lt;code&gt;./manage.py compose down&lt;/code&gt; and have the environment variables automatically passed to the system.&lt;/p&gt;
+&lt;h4 id="git-commit_3"&gt;Git commit&lt;a class="headerlink" href="#git-commit_3" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
+&lt;p&gt;You can see the changes made in this step through &lt;a href="https://github.com/lgiordani/flask_project_setup/commit/9e08735af6177760cd750230122a507b15c9c112"&gt;this Git commit&lt;/a&gt; or &lt;a href="https://github.com/lgiordani/flask_project_setup/tree/9e08735af6177760cd750230122a507b15c9c112"&gt;browse the files&lt;/a&gt;.&lt;/p&gt;
 &lt;h4 id="resources_3"&gt;Resources&lt;a class="headerlink" href="#resources_3" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://docs.docker.com/compose/"&gt;Docker compose&lt;/a&gt; - A tool for defining and running multi-container Docker applications&lt;/li&gt;

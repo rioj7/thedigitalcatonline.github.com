@@ -129,7 +129,6 @@
             <span class="k">yield</span> <span class="mi">1</span>
 </code></pre></div>
 
-
 <p>An instance of this object exposes a <code>main()</code> method that, when called, returns a generator. The latter, at each call of its <code>next()</code> method simply returns <code>1</code>, freezing at the same time its execution just after the <code>yield</code> statement, still inside the infinite while loop.</p>
 <p>The object can be directly tested</p>
 <div class="highlight"><pre><span></span><code>&gt;&gt;&gt; <span class="nv">mt</span> <span class="o">=</span> MicroThread<span class="o">()</span>
@@ -139,7 +138,6 @@
 &gt;&gt;&gt; g.next<span class="o">()</span>
 <span class="m">1</span>
 </code></pre></div>
-
 
 <p>To make the object more easily inheritable and extendable we can refactor it a little</p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">MicroThread</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -156,7 +154,6 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
             <span class="k">yield</span> <span class="mi">1</span>
 </code></pre></div>
-
 
 <p><a href="/code/python-generators/mthread.py">source code</a></p>
 <p>Such changes let us inherit the class and extend it simply by overriding the <code>create()</code> and <code>step()</code> methods; the first is called as soon as <code>main()</code> is called, acting as a delayed initializer, while the second is executed at each call of <code>next()</code>, just before freezing the code with <code>yield</code>. Pay attention that since <code>create()</code> is called inside the generator function, you have to call <code>next()</code> once to run it after the genrator has been created. So the standard workflow with this object is</p>
@@ -175,7 +172,6 @@
 <span class="o">...</span>
 </code></pre></div>
 
-
 <p>Since <code>main()</code> is a generator function it must act as any generator and signal its exhaustion rising a <code>StopIteration</code> exception. The overridden <code>step()</code> method, thus, may raise this exception at any point (even multiple ones) to terminate the microthread.</p>
 <h4 id="scheduler">Scheduler<a class="headerlink" href="#scheduler" title="Permanent link">&para;</a></h4>
 <p>Now we need a scheduler, i.e. the system component that manages running tasks. While in a true multitasking system the scheduler is a big and complex component, in a cooperative environment it can be rather simple: its job is to execute each task and wait till they give control back. In between a task and the following the scheduler can execute other functions, but its basic workflow is very straightforward. Obviously the scheduler shall handle the <code>StopIteration</code> exception possibly raised by a task, removing it from the list of running microthreads.</p>
@@ -190,7 +186,6 @@
 <span class="n">active_microthreads</span> <span class="o">=</span> <span class="n">scheduled_microthreads</span>
 <span class="n">scheduled_microthreads</span> <span class="o">=</span> <span class="p">[]</span>
 </code></pre></div>
-
 
 <p>This snippet encompasses the behaviour described above. We have two lists, <code>active_microthreads</code> with all the tasks that shall be executed in the current loop and <code>scheduled_microthreads</code> with all the tasks that are goig to be executed in the next loop. At each loop of the scheduler all microthreads in <code>active_microthreads</code> are executed, that is they are granted one execution of their <code>next()</code> function. After this the thread is scheduled again, i.e. it is appended to the <code>scheduled_microthreads</code> list. If the thread raises the <code>StopIteration</code> exception during its execution it is simply not scheduled again. When the <code>active_microthreads</code> list is exhausted the loop ends and the scheduled threads list is transferred in the <code>active_threads</code> one; after this the loop starts again.</p>
 <p>So the first implementation of the scheduler is the following:</p>
@@ -216,7 +211,6 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">active_microthreads</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scheduled_microthreads</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">scheduled_microthreads</span> <span class="o">=</span> <span class="p">[]</span>
 </code></pre></div>
-
 
 <p><a href="/code/python-generators/scheduler.py">source code</a></p>
 <p>The <code>__init__()</code> method initializes the two internal lists we talked about above. The <code>add_microthread()</code> method allows us to add a microthread to the scheduler; the method calls <code>main()</code> on each microthread we add to obtain its generator, then calls <code>next()</code> once on the latter to initialize it and finally adds it to the list of scheduled tasks.</p>
@@ -246,7 +240,6 @@
 <span class="n">ms</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 </code></pre></div>
 
-
 <p><a href="/code/python-generators/test_scheduler.py">source code</a></p>
 <p>Here the <code>TestMicroThread</code> is a microthread but the <code>step()</code> method was reimplemented to print a number and wait 1 second. Three microthreads are instanced and added to the scheduler and the <code>run()</code> method of the scheduler is executed. Not surprisingly the result is the following</p>
 <div class="highlight"><pre><span></span><code>$ python test_scheduler.py
@@ -258,7 +251,6 @@ Number: <span class="m">2</span>
 Number: <span class="m">3</span>
 <span class="o">[</span>...<span class="o">]</span>
 </code></pre></div>
-
 
 <p>The three microthreads are executed in a round-robin fashion, as expected from a cooperative multitasking system.</p>
 <p>Note: while all microthreads showed in this article just execute <code>yield 1</code> to freeze the code, <code>yield</code> can return any object, just like the <code>return</code> statement does, and this could be exploited to enhance the communication between microthreads and scheduler.</p>
@@ -291,7 +283,6 @@ Number: <span class="m">3</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">scheduled_microthreads</span> <span class="o">=</span> <span class="p">[]</span>
 </code></pre></div>
 
-
 <p><a href="/code/python-generators/mscheduler.py">source code</a></p>
 <p>It is sufficient to rename <code>run()</code> to <code>main()</code>, to match our arbitrary microthread interface, and add some <code>yield</code> statements. The first <code>yield</code> at the beginning of <code>main()</code> terminates the creation part: this scheduler has no <code>create()</code> method, but if present it should be called here. The second <code>yield</code> is called if the scheduler contains no microthreads, since it has nothing to do. The third <code>yield</code> is called after each loop of the microthread running part.</p>
 <p>These little changes allow the scheduler to be run into another scheduler, thus enabling us to create a hierarchy to easily build complex systems. At the same time the scheduler can be used as usual simply calling its <code>next()</code> method in a for loop.</p>
@@ -319,7 +310,6 @@ Number: <span class="m">3</span>
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ms</span><span class="o">.</span><span class="n">main</span><span class="p">():</span>
     <span class="k">pass</span>
 </code></pre></div>
-
 
 <p><a href="/code/python-generators/test_mscheduler.py">source code</a></p>
 <p>This example is obviously very simple. However it shows how simple it is to build components of a cooperative system and let them live together in an execution space. Executing the scheduler in a different way, for example inside another generator, new microthreads can also be added live. This allows to instance system components on the fly to manage specific needs, such as incoming service requests.</p>

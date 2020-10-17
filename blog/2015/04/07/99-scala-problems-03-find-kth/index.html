@@ -122,7 +122,6 @@ By convention, the first element in the list is element 0.</p>
 <span class="n">res0</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">2</span>
 </code></pre></div>
 
-
 <h1 id="initial-thoughts">Initial thoughts<a class="headerlink" href="#initial-thoughts" title="Permanent link">&para;</a></h1>
 <p>I expect the solution to be trivial using the indexing capabilities of <code>List</code> types, such as in any language that supports indexed lists. The functional solution cannot use indexing and shall reduce the list element by element.</p>
 <h1 id="the-procedural-solution">The procedural solution<a class="headerlink" href="#the-procedural-solution" title="Permanent link">&para;</a></h1>
@@ -131,7 +130,6 @@ By convention, the first element in the list is element 0.</p>
     <span class="k">else</span> <span class="k">throw</span> <span class="k">new</span> <span class="nc">NoSuchElementException</span>
 <span class="o">}</span>
 </code></pre></div>
-
 
 <p>Since indexing out of bounds (in both directions) throws <code>IndexOutOfBoundsException</code> we first check if the index is safe. The logical AND operation is expressed in Scala by <code>&amp;&amp;</code>.</p>
 <p>Knowing that a wrong indexing throws an exception we could also catch it and throw the 'right' one. This results in </p>
@@ -143,26 +141,23 @@ By convention, the first element in the list is element 0.</p>
 <span class="o">}</span>
 </code></pre></div>
 
-
 <p>which probably states more clearly that the main job of the function is to replace one exception with another one.</p>
 <h1 id="the-recursive-solution">The recursive solution<a class="headerlink" href="#the-recursive-solution" title="Permanent link">&para;</a></h1>
 <p>A recursive solution is pretty straightforward. We just repeatedly remove the first element and decrease the given index until it reaches 0. Using a couple of methods from the <code>List</code> type the solution is</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="n">findKth</span><span class="o">[</span><span class="kt">A</span><span class="o">](</span><span class="n">k</span><span class="k">:</span><span class="kt">Int</span><span class="o">,</span> <span class="n">l</span><span class="k">:</span><span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">])</span><span class="k">:</span><span class="kt">A</span> <span class="o">=</span> <span class="n">k</span> <span class="k">match</span> <span class="o">{</span>
-    <span class="k">case</span> <span class="mi">0</span> <span class="k">=&gt;</span> <span class="n">l</span><span class="o">.</span><span class="n">head</span>
-    <span class="k">case</span> <span class="n">k</span> <span class="k">if</span> <span class="n">k</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">=&gt;</span> <span class="n">findKth</span><span class="o">(</span><span class="n">k</span> <span class="o">-</span> <span class="mi">1</span><span class="o">,</span> <span class="n">l</span><span class="o">.</span><span class="n">tail</span><span class="o">)</span>
-    <span class="k">case</span> <span class="k">_</span> <span class="k">=&gt;</span> <span class="k">throw</span> <span class="k">new</span> <span class="nc">NoSuchElementException</span>  
+    <span class="k">case</span> <span class="mi">0</span> <span class="o">=&gt;</span> <span class="n">l</span><span class="o">.</span><span class="n">head</span>
+    <span class="k">case</span> <span class="n">k</span> <span class="k">if</span> <span class="n">k</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">=&gt;</span> <span class="n">findKth</span><span class="o">(</span><span class="n">k</span> <span class="o">-</span> <span class="mi">1</span><span class="o">,</span> <span class="n">l</span><span class="o">.</span><span class="n">tail</span><span class="o">)</span>
+    <span class="k">case</span> <span class="k">_</span> <span class="o">=&gt;</span> <span class="k">throw</span> <span class="k">new</span> <span class="nc">NoSuchElementException</span>  
 <span class="o">}</span>
 </code></pre></div>
-
 
 <p>If however we try to avoid the use of methods, just to see if we may solve it with a pure recursive approach, we need to match two things together, which leads to</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="n">findKth</span><span class="o">[</span><span class="kt">A</span><span class="o">](</span><span class="n">k</span><span class="k">:</span><span class="kt">Int</span><span class="o">,</span> <span class="n">l</span><span class="k">:</span><span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">])</span><span class="k">:</span><span class="kt">A</span> <span class="o">=</span> <span class="o">(</span><span class="n">k</span><span class="o">,</span><span class="n">l</span><span class="o">)</span> <span class="k">match</span> <span class="o">{</span>
-    <span class="k">case</span> <span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="n">h</span><span class="o">::</span><span class="k">_</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="n">h</span>
-    <span class="k">case</span> <span class="o">(</span><span class="n">k</span><span class="o">,</span> <span class="k">_</span><span class="o">::</span><span class="n">tail</span><span class="o">)</span> <span class="k">if</span> <span class="n">k</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">=&gt;</span> <span class="n">findKth</span><span class="o">(</span><span class="n">k</span> <span class="o">-</span> <span class="mi">1</span><span class="o">,</span> <span class="n">tail</span><span class="o">)</span>
-    <span class="k">case</span> <span class="k">_</span> <span class="k">=&gt;</span> <span class="k">throw</span> <span class="k">new</span> <span class="nc">NoSuchElementException</span>
+    <span class="k">case</span> <span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="n">h</span><span class="o">::</span><span class="k">_</span><span class="o">)</span> <span class="o">=&gt;</span> <span class="n">h</span>
+    <span class="k">case</span> <span class="o">(</span><span class="n">k</span><span class="o">,</span> <span class="k">_</span><span class="o">::</span><span class="n">tail</span><span class="o">)</span> <span class="k">if</span> <span class="n">k</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">=&gt;</span> <span class="n">findKth</span><span class="o">(</span><span class="n">k</span> <span class="o">-</span> <span class="mi">1</span><span class="o">,</span> <span class="n">tail</span><span class="o">)</span>
+    <span class="k">case</span> <span class="k">_</span> <span class="o">=&gt;</span> <span class="k">throw</span> <span class="k">new</span> <span class="nc">NoSuchElementException</span>
 <span class="o">}</span>
 </code></pre></div>
-
 
 <p>The "new" thing here is that we are pattern matching a tuple of values (which is, after all, one value of a given type). Moreover, Scala pattern matching shows us another strength point in that it can match a case and simultaneously operate on the variables (in this case splitting the list).</p>
 <p>The first case is the exit case, where the counter reached 0 and the list has an head to return, which is the nth element. Otherwise the first element of the list is removed and the function called with a decremented index. The last line covers the empty list case.</p>

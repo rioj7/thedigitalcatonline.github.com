@@ -47,7 +47,6 @@
 &lt;span class="na"&gt;Accept&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="l"&gt;*/*&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;As you can see, the client is sending a pure text message to the server, with the format specified by the HTTP protocol. The first line contains the method name (&lt;code&gt;GET&lt;/code&gt;), the URL (&lt;code&gt;/&lt;/code&gt;) and the protocol we are using, including its version (&lt;code&gt;HTTP/1.1&lt;/code&gt;). The remaining lines are called &lt;em&gt;headers&lt;/em&gt; and contain metadata that can help the server to manage the request. The complete value of the &lt;code&gt;Host&lt;/code&gt; header is in this case &lt;code&gt;localhost:80&lt;/code&gt;, but as the standard port for HTTP services is 80, we don't need to specify it.&lt;/p&gt;
 &lt;p&gt;If the server &lt;code&gt;localhost&lt;/code&gt; is &lt;em&gt;serving&lt;/em&gt; HTTP (i.e. running some software that understands HTTP) on port 80 the response we might get is something similar to&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;HTTP/1.0 200 OK
@@ -61,7 +60,6 @@ Last-Modified: Mon, 10 Feb 2020 08:41:27 GMT
 ...
 &lt;span class="p"&gt;&amp;lt;/&lt;/span&gt;&lt;span class="nt"&gt;html&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;As happened for the request, the response is a text message, formatted according to the standard. The first line mentions the protocol and the status of the request (&lt;code&gt;200&lt;/code&gt; in this case, that means success), while the following lines contain metadata in various headers. Finally, after an empty line, the message contains the resource the client asked for, the source code of the base URL of the website in this case. Since this HTML page probably contains references to other resources like CSS, JS, images, and so on, the browser will send several other requests to gather all the data it needs to properly show the page to the user.&lt;/p&gt;
 &lt;p&gt;So, the first problem we have is that of implementing a server that understands this protocol and sends a proper response when it receives an HTTP request. We should try to load the requested resource and return either a success (HTTP 200) if we can find it, or a failure (HTTP 404) if we can't.&lt;/p&gt;
@@ -100,7 +98,6 @@ Last-Modified: Mon, 10 Feb 2020 08:41:27 GMT
     &lt;span class="n"&gt;conn&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;close&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;This little program accepts a connection on port 8080 and prints the received data on the terminal. You can test it executing it and then running &lt;code&gt;curl localhost:8080&lt;/code&gt; in another terminal. You should see something like&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ python3 server.py 
 GET / HTTP/1.1
@@ -109,14 +106,12 @@ User-Agent: curl/7.65.3
 Accept: */*
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;The server keeps running the code in the &lt;code&gt;while&lt;/code&gt; loop, so if you want to terminate it you have to do it with Ctrl+C. So far so good, but this is not an HTTP server yet, as it sends no response; you should actually receive an error message from curl that says &lt;code&gt;curl: (52) Empty reply from server&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;Sending back a standard response is very simple, we just need to call &lt;code&gt;conn.sendall&lt;/code&gt; passing the raw bytes. A minimal HTTP response contains the protocol and the status, an empty line, and the actual content, for example&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;HTTP&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="mi"&gt;200&lt;/span&gt; &lt;span class="n"&gt;OK&lt;/span&gt;
 
 &lt;span class="n"&gt;Hi&lt;/span&gt; &lt;span class="n"&gt;there&lt;/span&gt;&lt;span class="o"&gt;!&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;Our server becomes then&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;socket&lt;/span&gt;
@@ -149,7 +144,6 @@ Accept: */*
     &lt;span class="c1"&gt;# Close the connection&lt;/span&gt;
     &lt;span class="n"&gt;conn&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;close&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;At this point, we are not really responding to the user's request, however. Try different curl command lines like &lt;code&gt;curl localhost:8080/index.html&lt;/code&gt; or &lt;code&gt;curl localhost:8080/main.css&lt;/code&gt; and you will always receive the same response. We should try to find the resource the user is asking for and send that back in the response content.&lt;/p&gt;
 &lt;p&gt;This version of the HTTP server properly extracts the resource and tries to load it from the current directory, returning either a success of a failure&lt;/p&gt;
@@ -201,7 +195,6 @@ Accept: */*
     &lt;span class="n"&gt;conn&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;close&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;As you can see this implementation is extremely simple. If you create a simple local file named &lt;code&gt;index.html&lt;/code&gt; with this content&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;head&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
     &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;title&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;This is my page&lt;span class="p"&gt;&amp;lt;/&lt;/span&gt;&lt;span class="nt"&gt;title&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
@@ -211,7 +204,6 @@ Accept: */*
     &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;p&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;Some random content&lt;span class="p"&gt;&amp;lt;/&lt;/span&gt;&lt;span class="nt"&gt;p&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
 &lt;span class="p"&gt;&amp;lt;/&lt;/span&gt;&lt;span class="nt"&gt;html&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;and run &lt;code&gt;curl localhost:8080/index.html&lt;/code&gt; you will see the content of the file. At this point, you can even use your browser to open &lt;code&gt;http://localhost:8080/index.html&lt;/code&gt; and you will see the title of the page and the content. A Web browser is a software capable of sending HTTP requests and of interpreting the content of the responses if this is HTML (and many other file types like images or videos), so it can &lt;em&gt;render&lt;/em&gt; the content of the message. The browser is also responsible of retrieving the missing resources needed for the rendering, so when you provide links to style sheets or JS scripts with the &lt;code&gt;&amp;lt;link&amp;gt;&lt;/code&gt; or the &lt;code&gt;&amp;lt;script&amp;gt;&lt;/code&gt; tags in the HTML code of a page, you are instructing the browser to send an HTTP GET request for those files as well.&lt;/p&gt;
 &lt;p&gt;The output of &lt;code&gt;server.py&lt;/code&gt; when I access &lt;code&gt;http://localhost:8080/index.html&lt;/code&gt; is&lt;/p&gt;
@@ -258,7 +250,6 @@ Resource favicon.ico cannot be loaded
 --------------------
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;As you can see the browser sends rich HTTP requests, with a lot of headers, automatically requesting the CSS file mentioned in the HTML code and automatically trying to retrieve a favicon image.&lt;/p&gt;
 &lt;h2 id="13-resources"&gt;1.3 Resources&lt;a class="headerlink" href="#13-resources" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;These resources provide more detailed information on the topics discussed in this section&lt;/p&gt;
@@ -290,7 +281,6 @@ Resource favicon.ico cannot be loaded
 &lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;app&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;routes&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;and the &lt;code&gt;app/routes.py&lt;/code&gt; file is&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;app&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;application&lt;/span&gt;
 
@@ -301,12 +291,10 @@ Resource favicon.ico cannot be loaded
     &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Hello, world!&amp;quot;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;You can already see here the power of a framework in action. We defined an &lt;code&gt;index&lt;/code&gt; function and connected it with two different URLs (&lt;code&gt;/&lt;/code&gt; and &lt;code&gt;/index&lt;/code&gt;) in 3 lines of Python. This leaves us time and energy to properly work on the business logic, that in this case is a revolutionary "Hello, world!". Nobody ever did this before.&lt;/p&gt;
 &lt;p&gt;Finally, the &lt;code&gt;service.py&lt;/code&gt; file is&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;app&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;application&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;Flask comes with a so-called development web server (do these words ring any bell now?) that we can run on a terminal&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ &lt;span class="nv"&gt;FLASK_APP&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;service.py flask run
@@ -318,12 +306,10 @@ Resource favicon.ico cannot be loaded
  * Running on http://127.0.0.1:5000/ &lt;span class="o"&gt;(&lt;/span&gt;Press CTRL+C to quit&lt;span class="o"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;You can now visit the given URL with your browser and see that everything works properly. Remember that 127.0.0.1 is the special IP address that refers to "this computer"; the name &lt;code&gt;localhost&lt;/code&gt; is usually created by the operating system as an alias for that, so the two are interchangeable. As you can see the standard port for Flask's development server is 5000, so you have to mention it explicitly, otherwise your browser would try to access port 80 (the default HTTP one). When you connect with the browser you will see some log messages about the HTTP requests&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="m"&gt;127&lt;/span&gt;.0.0.1 - - &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;14&lt;/span&gt;/Feb/2020 &lt;span class="m"&gt;14&lt;/span&gt;:54:27&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;GET / HTTP/1.1&amp;quot;&lt;/span&gt; &lt;span class="m"&gt;200&lt;/span&gt; -
 &lt;span class="m"&gt;127&lt;/span&gt;.0.0.1 - - &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;14&lt;/span&gt;/Feb/2020 &lt;span class="m"&gt;14&lt;/span&gt;:54:28&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;GET /favicon.ico HTTP/1.1&amp;quot;&lt;/span&gt; &lt;span class="m"&gt;404&lt;/span&gt; -
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;You can recognise both now, as those are the same request we got with our little server in the previous part of the article.&lt;/p&gt;
 &lt;h2 id="23-resources"&gt;2.3 Resources&lt;a class="headerlink" href="#23-resources" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
@@ -338,7 +324,6 @@ Resource favicon.ico cannot be loaded
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;   WARNING: This is a development server. Do not use it in a production deployment.
    Use a production WSGI server instead.
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;The main issue we have when we deal with any production system is represented by performances. Think about what we do with JavaScript when we minimise the code: we consciously obfuscate the code in order to make the file smaller, but this is done for the sole purpose of making the file faster to retrieve.&lt;/p&gt;
 &lt;p&gt;For HTTP servers the story is not very different. The Web framework usually provides a development Web server, as Flask does, which properly implements HTTP, but does it in a very inefficient way. For starters, this is a &lt;em&gt;blocking&lt;/em&gt; framework, which means that if our request takes seconds to be served (for example because the endpoint retrieves data from a very slow database), any other request will have to wait to be served in a queue. That ultimately means that the user will see a spinner in the browser's tab and just shake their head thinking that we can't build a modern website. Other performances concerns might be connected with memory management or disk caches, but in general, we are safe to say that this web server cannot handle any production load (i.e. multiple users accessing the web site at the same time and expecting good quality of service).&lt;/p&gt;
@@ -363,7 +348,6 @@ Resource favicon.ico cannot be loaded
     &lt;span class="n"&gt;application&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;run&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;To run Gunicorn specify the number of concurrent instances and the external port&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ gunicorn --workers &lt;span class="m"&gt;3&lt;/span&gt; --bind &lt;span class="m"&gt;0&lt;/span&gt;.0.0.0:8000 wsgi
 &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;2020&lt;/span&gt;-02-12 &lt;span class="m"&gt;18&lt;/span&gt;:39:07 +0000&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;13393&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;INFO&lt;span class="o"&gt;]&lt;/span&gt; Starting gunicorn &lt;span class="m"&gt;20&lt;/span&gt;.0.4
@@ -374,7 +358,6 @@ Resource favicon.ico cannot be loaded
 &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;2020&lt;/span&gt;-02-12 &lt;span class="m"&gt;18&lt;/span&gt;:39:07 +0000&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;13398&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;INFO&lt;span class="o"&gt;]&lt;/span&gt; Booting worker with pid: &lt;span class="m"&gt;13398&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;As you can see, Gunicorn has the concept of &lt;em&gt;workers&lt;/em&gt; which are a generic way to express concurrency. Specifically, Gunicorn implements a pre-fork worker model, which means that it (pre)creates a different Unix process for each worker. You can check this running &lt;code&gt;ps&lt;/code&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ ps ax &lt;span class="p"&gt;|&lt;/span&gt; grep gunicorn
 &lt;span class="m"&gt;14919&lt;/span&gt; pts/1    S+     &lt;span class="m"&gt;0&lt;/span&gt;:00 ~/venv3/bin/python3 ~/venv3/bin/gunicorn --workers &lt;span class="m"&gt;3&lt;/span&gt; --bind &lt;span class="m"&gt;0&lt;/span&gt;.0.0.0:8000 wsgi
@@ -382,7 +365,6 @@ Resource favicon.ico cannot be loaded
 &lt;span class="m"&gt;14923&lt;/span&gt; pts/1    S+     &lt;span class="m"&gt;0&lt;/span&gt;:00 ~/venv3/bin/python3 ~/venv3/bin/gunicorn --workers &lt;span class="m"&gt;3&lt;/span&gt; --bind &lt;span class="m"&gt;0&lt;/span&gt;.0.0.0:8000 wsgi
 &lt;span class="m"&gt;14924&lt;/span&gt; pts/1    S+     &lt;span class="m"&gt;0&lt;/span&gt;:00 ~/venv3/bin/python3 ~/venv3/bin/gunicorn --workers &lt;span class="m"&gt;3&lt;/span&gt; --bind &lt;span class="m"&gt;0&lt;/span&gt;.0.0.0:8000 wsgi
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;Using processes is just one of the two ways to implement concurrency in a Unix system, the other being using threads. The benefits and demerits of each solution are outside the scope of this post, however. For the time being just remember that you are dealing with multiple workers that process incoming requests asynchronously, thus implementing a non-blocking server, ready to accept multiple connections.&lt;/p&gt;
 &lt;h2 id="33-resources"&gt;3.3 Resources&lt;a class="headerlink" href="#33-resources" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
@@ -425,7 +407,6 @@ Resource favicon.ico cannot be loaded
 &lt;span class="k"&gt;EXPOSE&lt;/span&gt;&lt;span class="s"&gt; 8000&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;This starts from a Python Docker image, adds the &lt;code&gt;app&lt;/code&gt; directory and the &lt;code&gt;wsgi.py&lt;/code&gt; file, and installs Gunicorn. Now create a configuration for nginx in a file called &lt;code&gt;nginx.conf&lt;/code&gt; in the same directory&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;server&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
     &lt;span class="kn"&gt;listen&lt;/span&gt; &lt;span class="mi"&gt;80&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
@@ -436,7 +417,6 @@ Resource favicon.ico cannot be loaded
     &lt;span class="p"&gt;}&lt;/span&gt;
 &lt;span class="p"&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;This defines a server that listens on port 80 and that connects all the URL starting with &lt;code&gt;/&lt;/code&gt; with a server called &lt;code&gt;application&lt;/code&gt; on port 8000, which is the container running Gunicorn.&lt;/p&gt;
 &lt;p&gt;Last, create a file &lt;code&gt;docker-compose.yml&lt;/code&gt; that will describe the configuration of the containers.&lt;/p&gt;
@@ -460,12 +440,10 @@ Resource favicon.ico cannot be loaded
       &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;application&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;As you can see the name &lt;code&gt;application&lt;/code&gt; that we mentioned in the nginx configuration file is not a magic string, but is the name we assigned to the Gunicorn container in the Docker Compose configuration.&lt;/p&gt;
 &lt;p&gt;To create this infrastructure we need to install Docker Compose in our virtual environment through &lt;code&gt;pip install docker-compose&lt;/code&gt;. I also created a file named &lt;code&gt;.env&lt;/code&gt; with the name of the project&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nv"&gt;COMPOSE_PROJECT_NAME&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;service
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;At this point you can run Docker Compose with &lt;code&gt;docker-compose up -d&lt;/code&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ docker-compose up -d
@@ -473,7 +451,6 @@ Creating network &lt;span class="s2"&gt;&amp;quot;service_default&amp;quot;&lt;/
 Creating service_application_1 ... &lt;span class="k"&gt;done&lt;/span&gt;
 Creating service_nginx_1       ... &lt;span class="k"&gt;done&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;If everything is working correctly, opening the browser and visiting &lt;code&gt;localhost&lt;/code&gt; should show you the HTML page Flask is serving.&lt;/p&gt;
 &lt;p&gt;Through &lt;code&gt;docker-compose logs&lt;/code&gt; we can check what services are doing. We can recognise the output of Gunicorn in the logs of the service named &lt;code&gt;application&lt;/code&gt;&lt;/p&gt;
@@ -487,13 +464,11 @@ application_1  &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="o"&gt;[&lt;/
 application_1  &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;2020&lt;/span&gt;-02-14 &lt;span class="m"&gt;08&lt;/span&gt;:35:42 +0000&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;10&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;INFO&lt;span class="o"&gt;]&lt;/span&gt; Booting worker with pid: &lt;span class="m"&gt;10&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;but the one we are mostly interested with now is the service named &lt;code&gt;nginx&lt;/code&gt;, so let's follow the logs in real-time with &lt;code&gt;docker-compose logs -f nginx&lt;/code&gt;. Refresh the &lt;code&gt;localhost&lt;/code&gt; page you visited with the browser, and the container should output something like&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ docker-compose logs -f nginx
 Attaching to service_nginx_1
 nginx_1        &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="m"&gt;192&lt;/span&gt;.168.192.1 - - &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;14&lt;/span&gt;/Feb/2020:08:42:20 +0000&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;GET / HTTP/1.1&amp;quot;&lt;/span&gt; &lt;span class="m"&gt;200&lt;/span&gt; &lt;span class="m"&gt;13&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;-&amp;quot;&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:72.0) Gecko/20100101 Firefox/72.0&amp;quot;&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;-&amp;quot;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;which is the standard log format of nginx. It shows the IP address of the client (&lt;code&gt;192.168.192.1&lt;/code&gt;), the connection timestamp, the HTTP request and the response status code (200), plus other information on the client itself.&lt;/p&gt;
 &lt;p&gt;Let's now increase the number of services, to see the load balancing mechanism in action. To do this, first we need to change the log format of nginx to show the IP address of the machine that served the request. Change the &lt;code&gt;nginx.conf&lt;/code&gt; file adding the &lt;code&gt;log_format&lt;/code&gt; and &lt;code&gt;access_log&lt;/code&gt; options&lt;/p&gt;
@@ -511,7 +486,6 @@ nginx_1        &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="m"&gt;192&lt
 &lt;span class="p"&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;The &lt;code&gt;$upstream_addr&lt;/code&gt; variable is the one that contains the IP address of the server proxied by nginx. Now run &lt;code&gt;docker-compose down&lt;/code&gt; to stop all containers and then &lt;code&gt;docker-compose up -d --scale application=3&lt;/code&gt; to start them again&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ docker-compose down
 Stopping service_nginx_1       ... &lt;span class="k"&gt;done&lt;/span&gt;
@@ -527,13 +501,11 @@ Creating service_application_3 ... &lt;span class="k"&gt;done&lt;/span&gt;
 Creating service_nginx_1       ... &lt;span class="k"&gt;done&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;As you can see, Docker Compose runs now 3 containers for the &lt;code&gt;application&lt;/code&gt; service. If you open the logs stream and visit the page in the browser you will now see a slightly different output&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ docker-compose logs -f nginx
 Attaching to service_nginx_1
 nginx_1        &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;14&lt;/span&gt;/Feb/2020:09:00:16 +0000&lt;span class="o"&gt;]&lt;/span&gt; localhost to: &lt;span class="m"&gt;192&lt;/span&gt;.168.240.4:8000: GET / HTTP/1.1 &lt;span class="m"&gt;200&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;where you can spot &lt;code&gt;to: 192.168.240.4:8000&lt;/code&gt; which is the IP address of one of the application containers. If you now visit the page again multiple times you should notice a change in the upstream address, something like&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ docker-compose logs -f nginx
@@ -544,7 +516,6 @@ nginx_1        &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="o"&gt;[&lt;/
 nginx_1        &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;14&lt;/span&gt;/Feb/2020:09:00:17 +0000&lt;span class="o"&gt;]&lt;/span&gt; localhost to: &lt;span class="m"&gt;192&lt;/span&gt;.168.240.4:8000: GET / HTTP/1.1 &lt;span class="m"&gt;200&lt;/span&gt;
 nginx_1        &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;14&lt;/span&gt;/Feb/2020:09:00:17 +0000&lt;span class="o"&gt;]&lt;/span&gt; localhost to: &lt;span class="m"&gt;192&lt;/span&gt;.168.240.2:8000: GET / HTTP/1.1 &lt;span class="m"&gt;200&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;This shows that nginx is performing load balancing, but to tell the truth this is happening through Docker's DNS, and not by an explicit action performed by the web server. We can verify this accessing the nginx container and running &lt;code&gt;dig application&lt;/code&gt; (you need to run &lt;code&gt;apt update&lt;/code&gt; and &lt;code&gt;apt install dnsutils&lt;/code&gt; to install &lt;code&gt;dig&lt;/code&gt;)&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@99c2f348140e:/# dig application
@@ -569,7 +540,6 @@ application.            &lt;span class="m"&gt;600&lt;/span&gt;     IN      A    
 &lt;span class="p"&gt;;;&lt;/span&gt; MSG SIZE  rcvd: &lt;span class="m"&gt;110&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;To see load balancing performed by nginx we can explicitly define two services and assign them different weights. Run &lt;code&gt;docker-compose down&lt;/code&gt; and change the nginx configuration to&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;upstream&lt;/span&gt; &lt;span class="s"&gt;app&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
     &lt;span class="kn"&gt;server&lt;/span&gt; &lt;span class="n"&gt;application1&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;8000&lt;/span&gt; &lt;span class="s"&gt;weight=3&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
@@ -589,7 +559,6 @@ application.            &lt;span class="m"&gt;600&lt;/span&gt;     IN      A    
     &lt;span class="kn"&gt;access_log&lt;/span&gt; &lt;span class="s"&gt;/var/log/nginx/access.log&lt;/span&gt; &lt;span class="s"&gt;upstreamlog&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 &lt;span class="p"&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;We defined here an &lt;code&gt;upstream&lt;/code&gt; structure that lists two different services, &lt;code&gt;application1&lt;/code&gt; and &lt;code&gt;application2&lt;/code&gt;, giving to the first one a weight of 3. This mean that each 4 requests, 3 will be routed to the first service, and one to the second service. Now nginx is not just relying on the DNS, but consciously choosing between two different services.&lt;/p&gt;
 &lt;p&gt;Let's define the services accordingly in the Docker Compose configuration file&lt;/p&gt;
@@ -622,7 +591,6 @@ application.            &lt;span class="m"&gt;600&lt;/span&gt;     IN      A    
       &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;application2&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;I basically duplicated the definition of &lt;code&gt;application&lt;/code&gt;, but the first service is running now 6 workers, just for the sake of showing a possible difference between the two. Now run &lt;code&gt;docker-compose up -d&lt;/code&gt; and &lt;code&gt;docker-compose logs -f nginx&lt;/code&gt;. If you refresh the page on the browser multiple times you will see something like&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ docker-compose logs -f nginx
 Attaching to service_nginx_1
@@ -638,7 +606,6 @@ nginx_1         &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="o"&gt;[&lt;
 nginx_1         &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;14&lt;/span&gt;/Feb/2020:11:03:35 +0000&lt;span class="o"&gt;]&lt;/span&gt; localhost to: &lt;span class="m"&gt;172&lt;/span&gt;.18.0.2:8000: GET / HTTP/1.1 &lt;span class="m"&gt;200&lt;/span&gt;
 nginx_1         &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;14&lt;/span&gt;/Feb/2020:11:03:35 +0000&lt;span class="o"&gt;]&lt;/span&gt; localhost to: &lt;span class="m"&gt;172&lt;/span&gt;.18.0.3:8000: GET / HTTP/1.1 &lt;span class="m"&gt;200&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;where you can clearly notice the load balancing between &lt;code&gt;172.18.0.2&lt;/code&gt; (&lt;code&gt;application1&lt;/code&gt;) and &lt;code&gt;172.18.0.3&lt;/code&gt; (&lt;code&gt;application2&lt;/code&gt;) in action.&lt;/p&gt;
 &lt;p&gt;I will not show here an example of reverse proxy or HTTPS to prevent this post to become too long. You can find resources on those topics in the next section.&lt;/p&gt;
@@ -744,7 +711,6 @@ pip install cookiecutter
 cookiecutter https://github.com/audreyr/cookiecutter-pypackage
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Now answer the questions, then finish creating the project with the following code&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;deactivate
 rm -fR venv3
@@ -753,14 +719,12 @@ virtualenv venv3 -p python3
 &lt;span class="nb"&gt;source&lt;/span&gt; venv3/bin/activate
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Get rid of the &lt;code&gt;requirements_dev.txt&lt;/code&gt; file that Cookiecutter created for you. I usually store virtualenv requirements in different hierarchical files to separate production, development and testing environments, so create the &lt;code&gt;requirements&lt;/code&gt; directory and the relative files&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;mkdir requirements
 touch requirements/prod.txt
 touch requirements/dev.txt
 touch requirements/test.txt
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;The &lt;code&gt;test.txt&lt;/code&gt; file will contain specific packages used to test the project. Since to test the project you also need to install the packages for the production environment the file will first include the production one.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;-r prod.txt
@@ -771,7 +735,6 @@ coverage
 pytest-cov
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;The &lt;code&gt;dev.txt&lt;/code&gt; file will contain packages used during the development process and shall install also test and production package&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;-r test.txt
 
@@ -781,12 +744,10 @@ flake8
 Sphinx
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;(taking advantage of the fact that &lt;code&gt;test.txt&lt;/code&gt; already includes &lt;code&gt;prod.txt&lt;/code&gt;).&lt;/p&gt;
 &lt;p&gt;Last, the main &lt;code&gt;requirements.txt&lt;/code&gt; file of the project will just import &lt;code&gt;requirements/prod.txt&lt;/code&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;-r prod.txt
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;Obviously you are free to find the project structure that better suits your need or preferences. This is the structure we are going to use in this project but nothing forces you to follow it in your personal projects.&lt;/p&gt;
 &lt;p&gt;This separation allows you to install a full-fledged development environment on your machine, while installing only testing tools in a testing environment like the Travis platform and to further reduce the amount of dependencies in the production case. &lt;/p&gt;
@@ -794,7 +755,6 @@ Sphinx
 &lt;p&gt;Remember at this point to install the development requirements in your virtualenv&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ pip install -r requirements/dev.txt
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;h2 id="miscellaneous-configuration"&gt;Miscellaneous configuration&lt;a class="headerlink" href="#miscellaneous-configuration" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;The &lt;code&gt;pytest&lt;/code&gt; testing library needs to be configured. This is the &lt;code&gt;pytest.ini&lt;/code&gt; file that you can create in the root directory (where the &lt;code&gt;setup.py&lt;/code&gt; file is located)&lt;/p&gt;
@@ -804,16 +764,13 @@ norecursedirs = .git .tox venv* requirements*
 python_files = test*.py
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;To run the tests during the development of the project just execute&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ py.test -sv
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;If you want to check the coverage, i.e. the amount of code which is run by your tests or "covered", execute&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ py.test --cov-report term-missing --cov&lt;span class="o"&gt;=&lt;/span&gt;rentomatic
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;If you want to know more about test coverage check the official documentation of the &lt;a href="http://coverage.readthedocs.io/en/latest/"&gt;Coverage.py&lt;/a&gt; and the &lt;a href="http://pytest-cov.readthedocs.io/en/latest/index.html"&gt;pytest-cov&lt;/a&gt; packages.&lt;/p&gt;
 &lt;p&gt;I strongly suggest the use of the &lt;code&gt;flake8&lt;/code&gt; package to check that your Python code is PEP8 compliant. This is the &lt;code&gt;flake8&lt;/code&gt; configuration that you can put in your &lt;code&gt;setup.cfg&lt;/code&gt; file&lt;/p&gt;
@@ -823,11 +780,9 @@ exclude = .git, venv*, docs
 max-complexity = 10
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;To check the compliance of your code with the PEP8 standard execute&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ flake8
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;Flake8 documentation is available &lt;a href="http://flake8.pycqa.org/en/latest/"&gt;here&lt;/a&gt;.&lt;/p&gt;
 &lt;p&gt;Note that every step in this post produces tested code and a of coverage of 100%. One of the benefits of a clean architecture is the separation between layers, and this guarantees a great degree of testability. Note however that in this tutorial, in particular in the REST sections, some tests have been omitted in favour of a simpler description of the architecture. &lt;/p&gt;
@@ -869,7 +824,6 @@ max-complexity = 10
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;storageroom&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;latitude&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mf"&gt;51.75436293&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;With these two tests we ensure that our model can be initialized with the correct values and that can be created from a dictionary. In this first version all the parameters of the model are required. Later we could want to make some of them optional, and in that case we will have to add the relevant tests.&lt;/p&gt;
 &lt;p&gt;Now let's write the &lt;code&gt;StorageRoom&lt;/code&gt; class in the &lt;code&gt;rentomatic/domain/storageroom.py&lt;/code&gt; file. Do not forget to create the &lt;code&gt;__init__.py&lt;/code&gt; file in the subdirectories of the project, otherwise Python will not be able to import the modules.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;rentomatic.shared.domain_model&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;DomainModel&lt;/span&gt;
@@ -899,7 +853,6 @@ max-complexity = 10
 
 &lt;span class="n"&gt;DomainModel&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;register&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;StorageRoom&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;The model is very simple, and requires no further explanation. One of the benefits of a clean architecture is that each layer contains small pieces of code that, being isolated, shall perform simple tasks. In this case the model provides an initialization API and stores the information inside the class.&lt;/p&gt;
 &lt;p&gt;The &lt;code&gt;from_dict&lt;/code&gt; method comes in handy when we have to create a model from data coming from another layer (such as the database layer or the query string of the REST layer).&lt;/p&gt;
@@ -935,7 +888,6 @@ max-complexity = 10
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;storageroom1&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;storageroom2&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;and the new methods of the object in &lt;code&gt;rentomatic/domain/storageroom.py&lt;/code&gt; are&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;to_dict&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
         &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
@@ -949,7 +901,6 @@ max-complexity = 10
     &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__eq__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;other&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
         &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;to_dict&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;other&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;to_dict&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;h1 id="serializers"&gt;Serializers&lt;a class="headerlink" href="#serializers" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;&lt;strong&gt;Git tag: &lt;a href="https://github.com/lgiordani/rentomatic/tree/step03"&gt;step03&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
@@ -996,7 +947,6 @@ max-complexity = 10
         &lt;span class="n"&gt;json&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;dumps&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;datetime&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;datetime&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;now&lt;/span&gt;&lt;span class="p"&gt;(),&lt;/span&gt; &lt;span class="bp"&gt;cls&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;srs&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;StorageRoomEncoder&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Put in the &lt;code&gt;rentomatic/serializers/storageroom_serializer.py&lt;/code&gt; file the code that makes the test pass&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;json&lt;/span&gt;
 
@@ -1016,7 +966,6 @@ max-complexity = 10
         &lt;span class="k"&gt;except&lt;/span&gt; &lt;span class="ne"&gt;AttributeError&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
             &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="nb"&gt;super&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;default&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;o&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;Providing a class that inherits from &lt;code&gt;json.JSONEncoder&lt;/code&gt; let us use the &lt;code&gt;json.dumps(room, cls=StorageRoomEncoder)&lt;/code&gt; syntax to serialize the model.&lt;/p&gt;
 &lt;p&gt;There is a certain degree of repetition in the code we wrote, and this is the annoying part of a clean architecture. Since we want to isolate layers as much as possible and create lightweight classes we end up somehow repeating certain types of actions. For example the serialization code that assigns attributes of a &lt;code&gt;StorageRoom&lt;/code&gt; to JSON attributes is very similar to that we use to create the object from a dictionary. Not exactly the same, obviously, but the two functions are very close.&lt;/p&gt;
@@ -1082,7 +1031,6 @@ max-complexity = 10
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;result&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;domain_storagerooms&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;The test is straightforward. First we mock the repository so that is provides a &lt;code&gt;list()&lt;/code&gt; method that returns the list of models we created above the test. Then we initialize the use case with the repo and execute it, collecting the result. The first thing we check is if the repository method was called without any parameter, and the second is the effective correctness of the result.&lt;/p&gt;
 &lt;p&gt;This is the implementation of the use case that makes the test pass. Put the code in the &lt;code&gt;rentomatic/use_cases/storageroom_use_case.py&lt;/code&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;StorageRoomListUseCase&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;object&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
@@ -1093,7 +1041,6 @@ max-complexity = 10
     &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;execute&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
         &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;repo&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;list&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;With such an implementation of the use case, however, we will soon experience issues. For starters, we do not have a standard way to transport the call parameters, which means that we do not have a standard way to check for their correctness either. The second problem is that we miss a standard way to return the call results and consequently we lack a way to communicate if the call was successful of if it failed, and in the latter case what are the reasons of the failure. This applies also to the case of bad parameters discussed in the previous point.&lt;/p&gt;
 &lt;p&gt;We want thus to introduce some structures to wrap input and outputs of our use cases. Those structures are called request and response objects.&lt;/p&gt;
@@ -1118,7 +1065,6 @@ max-complexity = 10
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="nb"&gt;bool&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;req&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;is&lt;/span&gt; &lt;span class="kc"&gt;True&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;While at the moment this request object is basically empty, it will come in handy as soon as we start having parameters for the list use case. The code of the &lt;code&gt;StorageRoomListRequestObject&lt;/code&gt; is the following and goes into the &lt;code&gt;rentomatic/use_cases/request_objects.py&lt;/code&gt; file&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;StorageRoomListRequestObject&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;object&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
     &lt;span class="nd"&gt;@classmethod&lt;/span&gt;
@@ -1129,7 +1075,6 @@ max-complexity = 10
         &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="kc"&gt;True&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;The response object is also very simple, since for the moment we just need a successful response. Unlike the request, the response is not linked to any particular use case, so the test file can be named &lt;code&gt;tests/shared/test_response_object.py&lt;/code&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;rentomatic.shared&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;response_object&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;ro&lt;/span&gt;
 
@@ -1137,7 +1082,6 @@ max-complexity = 10
 &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_response_success_is_true&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="nb"&gt;bool&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;ro&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ResponseSuccess&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt; &lt;span class="ow"&gt;is&lt;/span&gt; &lt;span class="kc"&gt;True&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;and the actual response object is in the file &lt;code&gt;rentomatic/shared/response_object.py&lt;/code&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;ResponseSuccess&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;object&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
@@ -1150,7 +1094,6 @@ max-complexity = 10
 
     &lt;span class="fm"&gt;__bool__&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;__nonzero__&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;h1 id="use-cases-part-2"&gt;Use cases (part 2)&lt;a class="headerlink" href="#use-cases-part-2" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;&lt;strong&gt;Git tag: &lt;a href="https://github.com/lgiordani/rentomatic/tree/step06"&gt;step06&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
@@ -1217,7 +1160,6 @@ max-complexity = 10
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;response_object&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;value&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;domain_storagerooms&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;The new version of the &lt;code&gt;rentomatic/use_case/storageroom_use_cases.py&lt;/code&gt; file is the following&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;rentomatic.shared&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;response_object&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;ro&lt;/span&gt;
 
@@ -1231,7 +1173,6 @@ max-complexity = 10
         &lt;span class="n"&gt;storage_rooms&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;repo&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;list&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
         &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;ro&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ResponseSuccess&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;storage_rooms&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;Let us consider what we have achieved with our clean architecture up to this point. We have a very lightweight model that can be serialized to JSON and which is completely independent from other parts of the system. The code also contains a use case that, given a repository that exposes a given API, extracts all the models and returns them contained in a structured object.&lt;/p&gt;
 &lt;p&gt;We are missing some objects, however. For example, we have not implemented any unsuccessful response object or validated the incoming request object.&lt;/p&gt;
@@ -1293,7 +1234,6 @@ max-complexity = 10
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="nb"&gt;bool&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;req&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;is&lt;/span&gt; &lt;span class="kc"&gt;False&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;As you can see I added the &lt;code&gt;assert req.filters is None&lt;/code&gt; check to the original two tests, then I added 5 tests to check if filters can be specified and to test the behaviour of the object with an invalid filter parameter.&lt;/p&gt;
 &lt;p&gt;To make the tests pass we have to change our &lt;code&gt;StorageRoomListRequestObject&lt;/code&gt; class. There are obviously multiple possible solutions that you can come up with, and I recommend you to try to find your own. This is the one I usually employ. The file &lt;code&gt;rentomatic/use_cases/request_object.py&lt;/code&gt; becomes&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;collections&lt;/span&gt;
@@ -1346,7 +1286,6 @@ max-complexity = 10
         &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;StorageRoomListRequestObject&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;filters&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;adict&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;filters&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kc"&gt;None&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Let me review this new code bit by bit.&lt;/p&gt;
 &lt;p&gt;First of all, two helper objects have been introduced, &lt;code&gt;ValidRequestObject&lt;/code&gt; and &lt;code&gt;InvalidRequestObject&lt;/code&gt;. They are different because an invalid request shall contain the validation errors, but both can be converted to booleans. &lt;/p&gt;
 &lt;p&gt;Second, the &lt;code&gt;StorageRoomListRequestObject&lt;/code&gt; accepts an optional &lt;code&gt;filters&lt;/code&gt; parameter when instantiated. There are no validation checks in the &lt;code&gt;__init__()&lt;/code&gt; method because this is considered to be an internal method that gets called when the parameters have already been validated.&lt;/p&gt;
@@ -1378,7 +1317,6 @@ max-complexity = 10
     &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;This is a response error&amp;#39;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;This is some boilerplate code, basically pytest fixtures that we will use in the following tests.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_response_success_is_true&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;response_value&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="nb"&gt;bool&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;res&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ResponseSuccess&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;response_value&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt; &lt;span class="ow"&gt;is&lt;/span&gt; &lt;span class="kc"&gt;True&lt;/span&gt;
@@ -1388,14 +1326,12 @@ max-complexity = 10
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="nb"&gt;bool&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;res&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ResponseFailure&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;response_type&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;response_message&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt; &lt;span class="ow"&gt;is&lt;/span&gt; &lt;span class="kc"&gt;False&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Two basic tests to check that both the old &lt;code&gt;ResponseSuccess&lt;/code&gt; and the new &lt;code&gt;ResponseFailure&lt;/code&gt; objects behave consistently when converted to boolean.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_response_success_contains_value&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;response_value&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
     &lt;span class="n"&gt;response&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;res&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ResponseSuccess&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;response_value&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;response&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;value&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;response_value&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;The &lt;code&gt;ResponseSuccess&lt;/code&gt; object contains the call result in the &lt;code&gt;value&lt;/code&gt; attribute.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_response_failure_has_type_and_message&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;response_type&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;response_message&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
@@ -1410,7 +1346,6 @@ max-complexity = 10
 
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;response&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;value&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;response_type&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;message&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;response_message&lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;These two tests ensure that the &lt;code&gt;ResponseFailure&lt;/code&gt; object provides the same interface provided by the successful one and that the &lt;code&gt;type&lt;/code&gt; and &lt;code&gt;message&lt;/code&gt; parameter are accessible.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_response_failure_initialization_with_exception&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
@@ -1439,7 +1374,6 @@ max-complexity = 10
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;response&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;message&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;path: Is mandatory&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s2"&gt;path: can&amp;#39;t be blank&amp;quot;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;We sometimes want to create responses from Python exceptions that can happen in the use case, so we test that &lt;code&gt;ResponseFailure&lt;/code&gt; objects can be initialized with a generic exception.&lt;/p&gt;
 &lt;p&gt;And last we have the tests for the &lt;code&gt;build_from_invalid_request_object()&lt;/code&gt; method that automate the initialization of the response from an invalid request. If the request contains errors (remember that the request validates itself), we need to put them into the response message.&lt;/p&gt;
 &lt;p&gt;The last test uses a class attribute to classify the error. The &lt;code&gt;ResponseFailure&lt;/code&gt; class will contain three predefined errors that can happen when running the use case, namely &lt;code&gt;RESOURCE_ERROR&lt;/code&gt;, &lt;code&gt;PARAMETERS_ERROR&lt;/code&gt;, and &lt;code&gt;SYSTEM_ERROR&lt;/code&gt;. This categorization is an attempt to capture the different types of issues that can happen when dealing with an external system through an API. &lt;code&gt;RESOURCE_ERROR&lt;/code&gt; contains all those errors that are related to the resources contained in the repository, for instance when you cannot find an entry given its unique id. &lt;code&gt;PARAMETERS_ERROR&lt;/code&gt; describes all those errors that occur when the request parameters are wrong or missing. &lt;code&gt;SYSTEM_ERROR&lt;/code&gt; encompass the errors that happen in the underlying system at operating system level, such as a failure in a filesystem operation, or a network connection error while fetching data from the database.&lt;/p&gt;
@@ -1460,13 +1394,11 @@ max-complexity = 10
         &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;msg&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Through the &lt;code&gt;_format_message()&lt;/code&gt; method we enable the class to accept both string messages and Python exceptions, which is very handy when dealing with external libraries that can raise exceptions we do not know or do not want to manage.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="nd"&gt;@property&lt;/span&gt;
     &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;value&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
         &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;type&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;message&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;message&lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;This property makes the class comply with the &lt;code&gt;ResponseSuccess&lt;/code&gt; API, providing the &lt;code&gt;value&lt;/code&gt; attribute, which is an aptly formatted dictionary.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;__nonzero__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
@@ -1480,7 +1412,6 @@ max-complexity = 10
                              &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;err&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;invalid_request_object&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;errors&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
         &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="bp"&gt;cls&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;cls&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;PARAMETERS_ERROR&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;message&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;As explained before, the &lt;code&gt;PARAMETERS_ERROR&lt;/code&gt; type encompasses all those errors that come from an invalid set of parameters, which is the case of this function, that shall be called whenever the request is wrong, which means that some parameters contain errors or are missing.&lt;/p&gt;
 &lt;p&gt;Since building failure responses is a common activity it is useful to have helper methods, so I add three tests for the building functions to the &lt;code&gt;tests/shared/test_response_object.py&lt;/code&gt; file&lt;/p&gt;
@@ -1508,7 +1439,6 @@ max-complexity = 10
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;response&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;message&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;test message&amp;quot;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;We add the relevant methods to the class and change the &lt;code&gt;build_from_invalid_request_object()&lt;/code&gt; method to leverage the &lt;code&gt;build_parameters_error()&lt;/code&gt; new method. Change the &lt;code&gt;rentomatic/shared/response_object.py&lt;/code&gt; file to contain this code&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="nd"&gt;@classmethod&lt;/span&gt;
     &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;build_resource_error&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;cls&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;message&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="kc"&gt;None&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
@@ -1528,7 +1458,6 @@ max-complexity = 10
                              &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;err&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;invalid_request_object&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;errors&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
         &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="bp"&gt;cls&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;build_parameters_error&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;message&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;h1 id="use-cases-part-3"&gt;Use cases (part 3)&lt;a class="headerlink" href="#use-cases-part-3" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;&lt;strong&gt;Git tag: &lt;a href="https://github.com/lgiordani/rentomatic/tree/step09"&gt;step09&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
@@ -1563,7 +1492,6 @@ max-complexity = 10
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;response_object&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;value&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;domain_storagerooms&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;This is the test we already wrote, but the &lt;code&gt;assert_called_with()&lt;/code&gt; method is called with &lt;code&gt;filters=None&lt;/code&gt; to reflect the added parameter. The import line has slightly changed as well, given that we are now importing both &lt;code&gt;response_objects&lt;/code&gt; and &lt;code&gt;request_objects&lt;/code&gt;. The &lt;code&gt;domain_storagerooms&lt;/code&gt; fixture has not changed and has been omitted from the code snippet to keep it short.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_storageroom_list_with_filters&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;domain_storagerooms&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
     &lt;span class="n"&gt;repo&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;mock&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Mock&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
@@ -1579,7 +1507,6 @@ max-complexity = 10
     &lt;span class="n"&gt;repo&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;list&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;assert_called_with&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;filters&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;qry_filters&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;response_object&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;value&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;domain_storagerooms&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;This test checks that the value of the &lt;code&gt;filters&lt;/code&gt; key in the dictionary used to create the request is actually used when calling the repository.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_storageroom_list_handles_generic_error&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
@@ -1613,7 +1540,6 @@ max-complexity = 10
     &lt;span class="p"&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;This last two tests check the behaviour of the use case when the repository raises an exception or when the request is badly formatted.&lt;/p&gt;
 &lt;p&gt;Change the file &lt;code&gt;rentomatic/use_cases/storageroom_use_cases.py&lt;/code&gt; to contain the new use case implementation that makes all the test pass&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;rentomatic.shared&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;response_object&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;res&lt;/span&gt;
@@ -1635,7 +1561,6 @@ max-complexity = 10
             &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;res&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ResponseFailure&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;build_system_error&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
                 &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="si"&gt;{}&lt;/span&gt;&lt;span class="s2"&gt;: &lt;/span&gt;&lt;span class="si"&gt;{}&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;exc&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="vm"&gt;__class__&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="vm"&gt;__name__&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="si"&gt;{}&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;exc&lt;/span&gt;&lt;span class="p"&gt;)))&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;As you can see the first thing that the &lt;code&gt;execute()&lt;/code&gt; method does is to check if the request is valid, otherwise returns a &lt;code&gt;ResponseFailure&lt;/code&gt; build with the same request object. Then the actual business logic is implemented, calling the repository and returning a success response. If something goes wrong in this phase the exception is caught and returned as an aptly formatted &lt;code&gt;ResponseFailure&lt;/code&gt;.&lt;/p&gt;
 &lt;h1 id="intermezzo-refactoring"&gt;Intermezzo: refactoring&lt;a class="headerlink" href="#intermezzo-refactoring" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
@@ -1663,7 +1588,6 @@ max-complexity = 10
         &lt;span class="s1"&gt;&amp;#39;NotImplementedError: process_request() not implemented by UseCase class&amp;#39;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;This test checks that the &lt;code&gt;UseCase&lt;/code&gt; class cannot be actually used to process incoming requests.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_use_case_can_process_invalid_requests_and_returns_response_failure&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
     &lt;span class="n"&gt;invalid_request_object&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;req&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;InvalidRequestObject&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
@@ -1676,7 +1600,6 @@ max-complexity = 10
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;response&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;type&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;res&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ResponseFailure&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;PARAMETERS_ERROR&lt;/span&gt;
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;response&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;message&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;someparam: somemessage&amp;#39;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;This test runs the use case with an invalid request and check if the response is correct. Since the request is wrong the response type is &lt;code&gt;PARAMETERS_ERROR&lt;/code&gt;, as this represents an issue in the request parameters.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_use_case_can_manage_generic_exception_from_process_request&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
@@ -1693,7 +1616,6 @@ max-complexity = 10
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;response&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;type&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;res&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ResponseFailure&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;SYSTEM_ERROR&lt;/span&gt;
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;response&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;message&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;TestException: somemessage&amp;#39;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;This test makes the use case raise an exception. This type of error is categorized as &lt;code&gt;SYSTEM_ERROR&lt;/code&gt;, which is a generic name for an exception which is not related to request parameters or actual entities.&lt;/p&gt;
 &lt;p&gt;As you can see in this last test the idea is that of exposing the &lt;code&gt;execute()&lt;/code&gt; method in the &lt;code&gt;UseCase&lt;/code&gt; class and to call the &lt;code&gt;process_request()&lt;/code&gt; method defined by each child class, which is the actual use case we are implementing.&lt;/p&gt;
@@ -1717,7 +1639,6 @@ max-complexity = 10
             &lt;span class="s2"&gt;&amp;quot;process_request() not implemented by UseCase class&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;While the &lt;code&gt;rentomatic/use_cases/storageroom_use_cases.py&lt;/code&gt; now contains the following code&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;rentomatic.shared&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;use_case&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;uc&lt;/span&gt;
 &lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;rentomatic.shared&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;response_object&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;res&lt;/span&gt;
@@ -1732,7 +1653,6 @@ max-complexity = 10
         &lt;span class="n"&gt;domain_storageroom&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;repo&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;list&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;filters&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;request_object&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;filters&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
         &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;res&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ResponseSuccess&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;domain_storageroom&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;h1 id="the-repository-layer"&gt;The repository layer&lt;a class="headerlink" href="#the-repository-layer" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;&lt;strong&gt;Git tag: &lt;a href="https://github.com/lgiordani/rentomatic/tree/step11"&gt;step11&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
@@ -1785,7 +1705,6 @@ max-complexity = 10
     &lt;span class="p"&gt;]&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Since the repository object will return domain models, we need a helper function to check the correctness of the results. The following function checks the length of the two lists, ensures that all the returned elements are domain models and compares the codes. Note that we can safely employ the &lt;code&gt;isinstance()&lt;/code&gt; built-in function since &lt;code&gt;DomainModel&lt;/code&gt; is an abstract base class and our models are registered (see the &lt;code&gt;rentomatic/domain/storagerooms.py&lt;/code&gt;)&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;_check_results&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;domain_models_list&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;data_list&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="nb"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;domain_models_list&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="nb"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;data_list&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
@@ -1793,7 +1712,6 @@ max-complexity = 10
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="nb"&gt;set&lt;/span&gt;&lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;dm&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;code&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;dm&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;domain_models_list&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
                &lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="nb"&gt;set&lt;/span&gt;&lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;d&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;code&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;d&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;data_list&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;We need to be able to initialize the repository with a list of dictionaries, and the &lt;code&gt;list()&lt;/code&gt; method without any parameter shall return the same list of entries.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_repository_list_without_parameters&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;storageroom_dicts&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
@@ -1804,7 +1722,6 @@ max-complexity = 10
         &lt;span class="n"&gt;storageroom_dicts&lt;/span&gt;
     &lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;The &lt;code&gt;list()&lt;/code&gt; method shall accept a &lt;code&gt;filters&lt;/code&gt; parameter, which is a dictionary. The dictionary keys shall be in the form &lt;code&gt;&amp;lt;attribute&amp;gt;__&amp;lt;operator&amp;gt;&lt;/code&gt;, similar to the syntax used by the Django ORM. So to express that the price shall be less than 65 we can write &lt;code&gt;filters={'price__lt': 60}&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;A couple of error conditions shall be checked: using an unknown key shall raise a &lt;code&gt;KeyError&lt;/code&gt; exception, and using a wrong operator shall raise a &lt;code&gt;ValueError&lt;/code&gt; exception.&lt;/p&gt;
@@ -1821,7 +1738,6 @@ max-complexity = 10
     &lt;span class="k"&gt;with&lt;/span&gt; &lt;span class="n"&gt;pytest&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;raises&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ne"&gt;ValueError&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
         &lt;span class="n"&gt;repo&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;list&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;filters&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;price__in&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;20&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;30&lt;/span&gt;&lt;span class="p"&gt;]})&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;Let us then test that the filtering mechanism actually works. We want the default operator to be &lt;code&gt;__eq&lt;/code&gt;, which means that if we do not put any operator an equality check shall be performed.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_repository_list_with_filters_price&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;storageroom_dicts&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
@@ -1900,7 +1816,6 @@ max-complexity = 10
     &lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;The implementation of the &lt;code&gt;MemRepo&lt;/code&gt; class is pretty simple, and I will not dive into it line by line.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;rentomatic.domain&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;storageroom&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;sr&lt;/span&gt;
 
@@ -1943,7 +1858,6 @@ max-complexity = 10
         &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;sr&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;StorageRoom&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;from_dict&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;result&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;h1 id="the-rest-layer-part1"&gt;The REST layer (part1)&lt;a class="headerlink" href="#the-rest-layer-part1" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;&lt;strong&gt;Git tag: &lt;a href="https://github.com/lgiordani/rentomatic/tree/step12"&gt;step12&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;This is the last step of our journey into the clean architecture. We created the domain models, the serializers, the use cases and the repository. We are actually missing an interface that glues everything together, that is gets the call parameters from the user, initializes a use case with a repository, runs the use case that fetches the domain models from the repository and converts them to a standard format. This layer can be represented by a wide number of interfaces and technologies. For example a command line interface (CLI) can implement exactly those steps, getting the parameters via command line switches, and returning the results as plain text on the console. The same underlying system, however, can be leveraged by a web page that gets the call parameters from a set of widgets, perform the steps described above, and parses the returned JSON data to show the result on the same page.&lt;/p&gt;
@@ -1960,7 +1874,6 @@ Sphinx
 Flask
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;And the &lt;code&gt;test.txt&lt;/code&gt; file will contain the pytest extension to work with Flask (more on this later)&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;-r prod.txt
 
@@ -1970,7 +1883,6 @@ coverage
 pytest-cov
 pytest-flask
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;Remember to run &lt;code&gt;pip install -r requirements/dev.txt&lt;/code&gt; again after those changes to actually install the new packages in your virtual environment.&lt;/p&gt;
 &lt;p&gt;The setup of a Flask application is not complex, but a lot of concepts are involved, and since this is not a tutorial on Flask I will run quickly through these steps. I will however provide links to the Flask documentation for every concept.&lt;/p&gt;
@@ -2004,7 +1916,6 @@ pytest-flask
     &lt;span class="n"&gt;DEBUG&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kc"&gt;True&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Read &lt;a href="https://flask.pocoo.org/docs/latest/config/"&gt;this page&lt;/a&gt; to know more about Flask configuration parameters. Now we need a function that initializes the Flask application (&lt;a href="https://flask.pocoo.org/docs/latest/patterns/appfactories/"&gt;documentation&lt;/a&gt;), configures it and registers the blueprints (&lt;a href="https://flask.pocoo.org/docs/latest/blueprints/"&gt;documentation&lt;/a&gt;). The file &lt;code&gt;rentomatic/app.py&lt;/code&gt; contains the following code&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;flask&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;Flask&lt;/span&gt;
 
@@ -2019,7 +1930,6 @@ pytest-flask
     &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;app&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;The application endpoints need to return a Flask &lt;code&gt;Response&lt;/code&gt; object, with the actual results and an HTTP status. The content of the response, in this case, is the JSON serialization of the use case response.&lt;/p&gt;
 &lt;p&gt;Let us write a test step by step, so that you can perfectly understand what is going to happen in the REST endpoint. The basic structure of the test is&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;[SOME PREPARATION]
@@ -2029,25 +1939,21 @@ pytest-flask
 [CHECK RESPONSE MIMETYPE]
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;So our first test &lt;code&gt;tests/rest/test_get_storagerooms_list.py&lt;/code&gt; is made of the following parts&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nd"&gt;@mock&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;patch&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;rentomatic.use_cases.storageroom_use_cases.StorageRoomListUseCase&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;mock_use_case&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;client&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
     &lt;span class="n"&gt;mock_use_case&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;execute&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;return_value&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;res&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ResponseSuccess&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;storagerooms&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Remember that we are not testing the use case here, so we can safely mock it. Here we make the use case return a &lt;code&gt;ResponseSuccess&lt;/code&gt; instance containing a list of domain models (that we didn't define yet).&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="n"&gt;http_response&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;client&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;/storagerooms&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;This is the actual API call. We are exposing the endpoint at the &lt;code&gt;/storagerooms&lt;/code&gt; address. Note the use of the &lt;code&gt;client&lt;/code&gt; fixture provided by &lt;code&gt;pytest-flask&lt;/code&gt;.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;json&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;loads&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;http_response&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;decode&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;UTF-8&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;storageroom1_dict&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;http_response&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;status_code&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;200&lt;/span&gt;
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;http_response&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;mimetype&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;application/json&amp;#39;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;These are the three checks previously mentioned. The second and the third ones are pretty straightforward, while the first one needs some explanations. We want to compare &lt;code&gt;http_response.data&lt;/code&gt; with &lt;code&gt;[storageroom1_dict]&lt;/code&gt;, which is a list with a Python dictionary containing the data of the &lt;code&gt;storageroom1_domain_model&lt;/code&gt; object. Flask &lt;code&gt;Response&lt;/code&gt; objects contain a binary representation of the data, so first we decode the bytes using UTF-8, then convert them in a Python object. It is much more convenient to compare Python objects, since pytest can deal with issues like the unordered nature of dictionaries, while this is not possible when comparing two strings.  &lt;/p&gt;
 &lt;p&gt;The final test file, with the test domain model and its dictionary is&lt;/p&gt;
@@ -2081,7 +1987,6 @@ pytest-flask
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;http_response&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;mimetype&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;application/json&amp;#39;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;If you run pytest you'll notice that the test suite fails because of the &lt;code&gt;app&lt;/code&gt; fixture, which is missing. The &lt;code&gt;pytest-flask&lt;/code&gt; plugin provides the &lt;code&gt;client&lt;/code&gt; fixture, but relies on the &lt;code&gt;app&lt;/code&gt; fixture which has to be provided. The best place to define it is in &lt;code&gt;tests/conftest.py&lt;/code&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;pytest&lt;/span&gt;
 
@@ -2094,7 +1999,6 @@ pytest-flask
 &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;app&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
     &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;create_app&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;TestConfig&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;It's time to write the endpoint, where we will finally see all the pieces of the architecture working together. &lt;/p&gt;
 &lt;p&gt;The minimal Flask endpoint we can put in &lt;code&gt;rentomatic/rest/storageroom.py&lt;/code&gt; is something like&lt;/p&gt;
@@ -2109,34 +2013,28 @@ pytest-flask
                     &lt;span class="n"&gt;status&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;STATUS&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;The first part of our logic is the creation of a &lt;code&gt;StorageRoomListRequestObject&lt;/code&gt;. For the moment we can ignore the optional querystring parameters and use an empty dictionary&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;storageroom&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
     &lt;span class="n"&gt;request_object&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;ro&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;StorageRoomListRequestObject&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;from_dict&lt;/span&gt;&lt;span class="p"&gt;({})&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;As you can see I'm creating the object from an empty dictionary, so querystring parameters are not taken into account for the moment. The second thing to do is to initialize the repository&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="n"&gt;repo&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;mr&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;MemRepo&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;The third thing the endpoint has to do is the initialization of the use case&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="n"&gt;use_case&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;uc&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;StorageRoomListUseCase&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;repo&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;And finally we run the use case passing the request object&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="n"&gt;response&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;use_case&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;execute&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;request_object&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;This response, however, is not yet an HTTP response, and we have to explicitly build it. The HTTP response will contain the JSON representation of the &lt;code&gt;response.value&lt;/code&gt; attribute.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;Response&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;json&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;dumps&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;response&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;value&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="bp"&gt;cls&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;ser&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;StorageRoomEncoder&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;
                     &lt;span class="n"&gt;mimetype&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;application/json&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
                     &lt;span class="n"&gt;status&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;200&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;Note that this function is obviously still incomplete, as it returns always a successful response (code 200). It is however enough to pass the test we wrote. The whole file is the following&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;json&lt;/span&gt;
@@ -2163,7 +2061,6 @@ pytest-flask
                     &lt;span class="n"&gt;mimetype&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;application/json&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
                     &lt;span class="n"&gt;status&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;200&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;This code demonstrates how the clean architecture works in a nutshell. The function we wrote is however not complete, as it doesn't consider querystring parameters and error cases.&lt;/p&gt;
 &lt;h1 id="the-server-in-action"&gt;The server in action&lt;a class="headerlink" href="#the-server-in-action" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
@@ -2195,11 +2092,9 @@ pytest-flask
 &lt;span class="p"&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;And then use them to initialise the repository&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="n"&gt;repo&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;mr&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;MemRepo&lt;/span&gt;&lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;storageroom1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;storageroom2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;storageroom3&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;To run the web server we need to create a &lt;code&gt;wsgi.py&lt;/code&gt; file in the main project folder (the folder where &lt;code&gt;setup.py&lt;/code&gt; is stored)&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;rentomatic.app&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;create_app&lt;/span&gt;
@@ -2208,11 +2103,9 @@ pytest-flask
 &lt;span class="n"&gt;app&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;create_app&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Now we can run the Flask development server&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ flask run
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;At this point, if you open your browser and navigate to &lt;a href="http://localhost:5000/storagerooms"&gt;http://localhost:5000/storagerooms&lt;/a&gt;, you can see the API call results. I recommend installing a formatter extension for the browser to better check the output. If you are using Chrome try &lt;a href="https://github.com/callumlocke/json-formatter"&gt;JSON Formatter&lt;/a&gt;.&lt;/p&gt;
 &lt;h1 id="the-rest-layer-part2"&gt;The REST layer (part2)&lt;a class="headerlink" href="#the-rest-layer-part2" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
@@ -2232,7 +2125,6 @@ pytest-flask
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;http_response&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;mimetype&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;application/json&amp;#39;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;This makes the use case return a failed response and check that the HTTP response contains a formatted version of the error. To make this test pass we have to introduce a proper mapping between domain responses codes and HTTP codes in the &lt;code&gt;rentomatic/rest/storageroom.py&lt;/code&gt; file&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;rentomatic.shared&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;response_object&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;res&lt;/span&gt;
 
@@ -2244,13 +2136,11 @@ pytest-flask
 &lt;span class="p"&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Then we need to create the Flask response with the correct code in the definition of the endpoint&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;Response&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;json&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;dumps&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;response&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;value&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="bp"&gt;cls&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;ser&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;StorageRoomEncoder&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;
                     &lt;span class="n"&gt;mimetype&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;application/json&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
                     &lt;span class="n"&gt;status&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;STATUS_CODES&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;response&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;type&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;The second and last test is a bit more complex. As before we will mock the use case, but this time we will also patch &lt;code&gt;StorageRoomListRequestObject&lt;/code&gt;. We do this because we need to know if the request object is initialized with the correct parameters from the command line. So, step by step&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nd"&gt;@mock&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;patch&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;rentomatic.use_cases.storageroom_use_cases.StorageRoomListUseCase&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
@@ -2258,11 +2148,9 @@ pytest-flask
     &lt;span class="n"&gt;mock_use_case&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;execute&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;return_value&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;res&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ResponseSuccess&lt;/span&gt;&lt;span class="p"&gt;([])&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;This is, like, before, a patch of the use case class that ensures the use case will return a &lt;code&gt;ResponseSuccess&lt;/code&gt; instance.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="n"&gt;internal_request_object&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;mock&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Mock&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;The request object will be internally created with &lt;code&gt;StorageRoomListRequestObject.from_dict&lt;/code&gt;, and we want that function to return a known mock object, which is the one we initialized here.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="n"&gt;request_object_class&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;rentomatic.use_cases.request_objects.StorageRoomListRequestObject&amp;#39;&lt;/span&gt;
@@ -2271,14 +2159,12 @@ pytest-flask
         &lt;span class="n"&gt;client&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;/storagerooms?filter_param1=value1&amp;amp;filter_param2=value2&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Here we patch &lt;code&gt;StorageRoomListRequestObject&lt;/code&gt; and we assign a known output to the &lt;code&gt;from_dict()&lt;/code&gt; method. Then we call the endpoint with some querystring parameters. What should happen is that the &lt;code&gt;from_dict()&lt;/code&gt; method of the request is called with the filter parameters and that the &lt;code&gt;execute()&lt;/code&gt; method of the use case instance is called with the &lt;code&gt;internal_request_object&lt;/code&gt;.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="n"&gt;mock_request_object&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;from_dict&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;assert_called_with&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
         &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;filters&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;param1&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;value1&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;param2&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;value2&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;}}&lt;/span&gt;
     &lt;span class="p"&gt;)&lt;/span&gt;
     &lt;span class="n"&gt;mock_use_case&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;execute&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;assert_called_with&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;internal_request_object&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;The endpoint function shall be changed somehow to reflect this new behaviour and to make the test pass. The whole code of the new &lt;code&gt;storageroom()&lt;/code&gt; Flask method is the following&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;json&lt;/span&gt;
@@ -2345,7 +2231,6 @@ pytest-flask
                     &lt;span class="n"&gt;mimetype&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;application/json&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
                     &lt;span class="n"&gt;status&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;STATUS_CODES&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;response&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;type&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;Note that we extract the querystring parameters from the global &lt;code&gt;request&lt;/code&gt; object provided by Flask. Once the querystring parameters are in a dictionary, we just need to create the request object from it.&lt;/p&gt;
 &lt;h2 id="conclusions"&gt;Conclusions&lt;a class="headerlink" href="#conclusions" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;

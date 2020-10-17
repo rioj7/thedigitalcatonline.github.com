@@ -131,7 +131,6 @@
     <span class="n">get_oldest_three</span><span class="p">(</span><span class="n">Book</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="s1">&#39;type=Book.HARDCOVER&#39;</span><span class="p">))</span>
 </code></pre></div>
 
-
 <p>As you can see the <code>get_oldest_three</code> method is just filtering an incoming <code>QuerySet</code> (which can be of any type); it simply orders the objects and gets the first three inserted in the DB. The important thing here is that we are using querysets like pure algorithms, or descriptions of a procedure. When creating the <code>old_books</code> variable we are just telling the <code>get_oldest_three</code> method "Hey, this is the way I extract the data I'm interested in. May you please refine it and return the actual data?"</p>
 <p>Being such flexible objects, querysets are an important part of generic views, so keep them warm for the upcoming banquet.</p>
 <h1 id="being-flexible-parametric-views">Being flexible: parametric views<a class="headerlink" href="#being-flexible-parametric-views" title="Permanent link">&para;</a></h1>
@@ -173,7 +172,6 @@
         <span class="k">return</span> <span class="n">view</span>
 </code></pre></div>
 
-
 <p>Now look at what the <code>view</code> wrapper function actually does with the instanced class (<a href="https://github.com/django/django/blob/stable/1.5.x/django/views/generic/base.py#L46">CODE</a>); not surprisingly it takes the <code>request</code>, <code>args</code> and <code>kwargs</code> passed by the URLconf and converts them into as many class attributes with the same names. Remember that URLconf is given this function itself, not the result of the call, which is the result of <code>dispatch</code>.</p>
 <p>This means that <em>anywhere in our CBVs</em> we can access the original call parameters simply reading <code>request</code>, <code>args</code> and <code>kwargs</code>, where <code>*args</code> and <code>**kwargs</code> are the unnamed and named values extracted by the URLconf regular expression.</p>
 <h1 id="getting-details">Getting details<a class="headerlink" href="#getting-details" title="Permanent link">&para;</a></h1>
@@ -186,7 +184,6 @@
         <span class="n">context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_context_data</span><span class="p">(</span><span class="nb">object</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">render_to_response</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>As you can see, this method extracts the single object that it shall represent calling <code>get_object</code>, then calls <code>get_context_data</code> (that we already met in the previous post) and last the familiar <code>render_to_response</code>. The method <code>get_object</code> is provided by <code>BaseDetailView</code>'s ancestor <code>SingleObjectMixin</code> (<a href="https://github.com/django/django/blob/stable/3.0.x/django/views/generic/detail.py#L8">CODE</a>): the most important parts of its code, for the sake of our present topic are</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">get_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queryset</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -213,7 +210,6 @@
     <span class="k">return</span> <span class="n">obj</span>
 </code></pre></div>
 
-
 <p><strong>Warning</strong>: I removed many lines from the previous function to improve readability; please check the original source code for the complete implementation.</p>
 <p>The code shows where <code>DetailView</code> gets the queryset from; the <code>get_queryset</code> method is provided by <code>SingleObjectMixin</code> itself and basically returns <code>queryset</code> if present, otherwise returns all objects of the given model (acting just like <code>ListView</code> does). This <code>queryset</code> is then refined by a <code>filter</code> and last by a <code>get</code>. Here <code>get</code> is not used directly (I think) to manage the different error cases and raise the correct exceptions.</p>
 <p>The parameter <code>pk</code> used in <code>filter</code> comes directly from <code>kwargs</code>, so it is taken directly from the URL. Since this is a core concept of views in general I want to look at this part with some extra care.</p>
@@ -238,7 +234,6 @@
     <span class="p">)</span>
 </code></pre></div>
 
-
 <p>The view extracts a single object with the <code>Book</code> model; the regex is configured with the standard <code>pk</code> name.</p>
 <p>As shown for <code>ListView</code> in the previous post, any CBV uses <code>get_context_data</code> to return the context dictionary to the rendering engine. So views that inherit from <code>DetailView</code> can add data to the context following the same pattern. Suppose we have a function <code>get_similar_books</code> that given a book, returns similar ones according to some criteria.</p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">BookDetail</span><span class="p">(</span><span class="n">DetailView</span><span class="p">):</span>
@@ -255,7 +250,6 @@
         <span class="n">name</span><span class="o">=</span><span class="s1">&#39;detail&#39;</span><span class="p">),</span>
     <span class="p">)</span>
 </code></pre></div>
-
 
 <p>As explained before, you can access the object being shown through <code>object</code>, which in the above example is passed to a service function we implemented somewhere in our code.</p>
 <h1 id="using-the-base-views">Using the base views<a class="headerlink" href="#using-the-base-views" title="Permanent link">&para;</a></h1>

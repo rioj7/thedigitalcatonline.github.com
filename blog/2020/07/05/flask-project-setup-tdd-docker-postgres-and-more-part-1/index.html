@@ -58,7 +58,7 @@
 	  "@id": "https://www.thedigitalcatonline.com/blog/2020/07/05/flask-project-setup-tdd-docker-postgres-and-more-part-1/"
       },
       "datePublished" : "05/07/2020",
-      "dateModified" : "05/07/2020",
+      "dateModified" : "17/10/2020",
       "image" : "https://www.thedigitalcatonline.com/images/flask-project-setup-tdd-docker-postgres-and-more-part-1.jpg",
       "description" : "A step-by-step tutorial on how to setup a Flask project with TDD, Docker and Postgres",
       "headline" : "A step-by-step tutorial on how to setup a Flask project with TDD, Docker and Postgres",
@@ -101,6 +101,7 @@
 
     <span class="fas fa-calendar-alt"></span> <time datetime="2020-07-05T13:00:00+01:00"> 05/07/2020</time>
 
+    <span class="fas fa-edit"></span> <time datetime="2020-10-17T14:00:00+01:00"> 17/10/2020</time>
 
     <span class="fas fa-tags"></span>
     <a class="tag" href="/categories/aws/">AWS</a>    <a class="tag" href="/categories/docker/">Docker</a>    <a class="tag" href="/categories/flask/">Flask</a>    <a class="tag" href="/categories/http/">HTTP</a>    <a class="tag" href="/categories/postgres/">Postgres</a>    <a class="tag" href="/categories/python/">Python</a>    <a class="tag" href="/categories/python3/">Python3</a>    <a class="tag" href="/categories/tdd/">TDD</a>    <a class="tag" href="/categories/testing/">testing</a>    <a class="tag" href="/categories/www/">WWW</a>    <br>
@@ -139,22 +140,18 @@
 <div class="highlight"><pre><span></span><code>## This file is currently empty
 </code></pre></div>
 
-
 <p>File: <code>requirements/testing.txt</code></p>
 <div class="highlight"><pre><span></span><code>-r production.txt
 </code></pre></div>
-
 
 <p>File: <code>requirements/development.txt</code></p>
 <div class="highlight"><pre><span></span><code>-r testing.txt
 </code></pre></div>
 
-
 <p>There is also a final <code>requirements.txt</code> file that points to the production one.</p>
 <p>File: <code>requirements.txt</code></p>
 <div class="highlight"><pre><span></span><code>-r requirements/production.txt
 </code></pre></div>
-
 
 <p>As you can see this allows me to separate the requirements to avoid installing unneeded packages, which greatly speeds up the deploy in production and keeps things as essential as possible. Production contains the minimum requirements needed to run the project, testing adds to those the packages used to test the code, and development adds to the latter the tools needed during development. A minor shortcoming of this setup is that I might not need in development everything I need in production, for example the HTTP server. I don't think this is significantly affecting my local setup, though, and if I have to decide between production and development, I prefer to keep the former lean and tidy.</p>
 <p>I have my linters already installed system-wide, but as I'm using black to format the code I have to configure flake8 to accept what I'm doing</p>
@@ -166,9 +163,10 @@
 <span class="na">ignore</span> <span class="o">=</span> <span class="s">E231</span>
 </code></pre></div>
 
-
 <p>This is clearly a very personal choice, and you might have different requirements. Take your time to properly configure the editor and the linter(s). Remember that the editor for a programmer is like the violin for the violinist. You need to know it, and to take care of it. So, set it up properly.</p>
 <p>At this point I also create my virtual environment and activate it.</p>
+<h4 id="git-commit">Git commit<a class="headerlink" href="#git-commit" title="Permanent link">&para;</a></h4>
+<p>You can see the changes made in this step through <a href="https://github.com/lgiordani/flask_project_setup/commit/a6c8e7acde7d5d5d89fad22224fff707d625ebe3">this Git commit</a> or <a href="https://github.com/lgiordani/flask_project_setup/tree/a6c8e7acde7d5d5d89fad22224fff707d625ebe3">browse the files</a>.</p>
 <h4 id="resources">Resources<a class="headerlink" href="#resources" title="Permanent link">&para;</a></h4>
 <ul>
 <li><a href="https://packaging.python.org/tutorials/installing-packages/">Installing packages in Python</a></li>
@@ -181,11 +179,9 @@
 <div class="highlight"><pre><span></span><code>Flask
 </code></pre></div>
 
-
 <p>Now, install the development requirements with</p>
 <div class="highlight"><pre><span></span><code>$ pip install -r requirements/development.txt
 </code></pre></div>
-
 
 <p>As we saw before, that file automatically installs the testing and production requirements as well.</p>
 <p>Then we need a directory where to keep all the code that is directly connected with the Flask framework, and where we will start creating the configuration for the application. Create the <code>application</code> directory and the file <code>config.py</code> in it.</p>
@@ -212,7 +208,6 @@
 
     <span class="n">TESTING</span> <span class="o">=</span> <span class="kc">True</span>
 </code></pre></div>
-
 
 <p>There are many ways to configure a Flask application, one of which is using Python objects. This allows me to leverage inheritance to avoid duplication (which is always good), so it's my method of choice.</p>
 <p>It's important to understand the variables and the parameters involved in the configuration. As the documentation clearly states, <code>FLASK_ENV</code> and <code>FLASK_DEBUG</code> have to be initialised outside the application as the code might misbehave if they are changed once the engine has been started. Furthermore the <code>FLASK_ENV</code> variable can have only the two values <code>development</code> and <code>production</code>, and the main difference is in performances. The most important thing we need to be aware of is that if <code>FLASK_ENV</code> is <code>development</code>, then <code>FLASK_DEBUG</code> becomes automatically <code>True</code>. To sum up we have the following guidelines:</p>
@@ -241,7 +236,6 @@
     <span class="k">return</span> <span class="n">app</span>
 </code></pre></div>
 
-
 <p>I also added the standard "Hello, world!" route to have a quick way to see if the server is working or not.</p>
 <p>Last, we need something that initializes the application running the application factory and passing the correct value for the <code>config_name</code> parameter. The Flask development server can automatically use any file named <code>wsgi.py</code> in the root directory, and since WSGI is a standard specification using that makes me sure that any HTTP server we will use in production (for example Gunicorn or uWSGI) will be immediately working.</p>
 <p>File: <code>wsgi.py</code></p>
@@ -251,7 +245,6 @@
 
 <span class="n">app</span> <span class="o">=</span> <span class="n">create_app</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;FLASK_CONFIG&quot;</span><span class="p">])</span>
 </code></pre></div>
-
 
 <p>Here, I decided to read the value of <code>config_name</code> from the <code>FLASK_CONFIG</code> variable. This is not a variable requested by the framework, but I decided to use the <code>FLASK_</code> prefix anyway because it is tightly connected with the structure of the Flask application.</p>
 <p>At this point we can happily run the Flask development server with</p>
@@ -263,8 +256,9 @@
  * Running on http://127.0.0.1:5000/ <span class="o">(</span>Press CTRL+C to quit<span class="o">)</span>
 </code></pre></div>
 
-
 <p>Please note that it says <code>Environment: production</code> because we haven't configured <code>FLASK_ENV</code> yet. If you head to http://127.0.0.1:5000/ with your browser you can see the greetings message.</p>
+<h4 id="git-commit_1">Git commit<a class="headerlink" href="#git-commit_1" title="Permanent link">&para;</a></h4>
+<p>You can see the changes made in this step through <a href="https://github.com/lgiordani/flask_project_setup/commit/656621980f6f2c2aac3c526b37dca6ac32363bd5">this Git commit</a> or <a href="https://github.com/lgiordani/flask_project_setup/tree/656621980f6f2c2aac3c526b37dca6ac32363bd5">browse the files</a>.</p>
 <h4 id="resources_1">Resources<a class="headerlink" href="#resources_1" title="Permanent link">&para;</a></h4>
 <ul>
 <li><a href="https://flask.palletsprojects.com/en/1.1.x/config/">Flask configuration documentation</a></li>
@@ -279,10 +273,13 @@
   <span class="p">{</span>
     <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;FLASK_ENV&quot;</span><span class="p">,</span>
     <span class="nt">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;development&quot;</span>
+  <span class="p">},</span>
+  <span class="p">{</span>
+    <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;FLASK_CONFIG&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;development&quot;</span>
   <span class="p">}</span>
 <span class="p">]</span>
 </code></pre></div>
-
 
 <p>I obviously need a script that extracts variables from the JSON file and converts them into environment variables, so it's time to start writing my own <code>manage.py</code> file. This is a pretty standard concept in the world of Python web frameworks, a tradition initiated by Django. The idea is to centralise all the management functions like starting/stopping the development server or managing database migrations. As in flask this is partially done by the <code>flask</code> command itself, for the time being I just need to wrap it providing suitable environment variables.</p>
 <p>File: <code>manage.py</code></p>
@@ -339,11 +336,9 @@
     <span class="n">cli</span><span class="p">()</span>
 </code></pre></div>
 
-
 <p>Remember to give make the script executables with</p>
 <div class="highlight"><pre><span></span><code>$ chmod <span class="m">775</span> manage.py
 </code></pre></div>
-
 
 <p>As you can see I'm using <code>click</code>, which is the recommended way to implement Flask commands. As I might use it to customise subcommands of the flask main script, I decided to stick to one tool and use it for the <code>manage.py</code> script as well.</p>
 <p>The <code>APPLICATION_CONFIG</code> variable is the only one that I need to specify, and its default value is <code>development</code>. From that variable I infer the name of the JSON file with the full configuration and load environment variables from that. The <code>flask</code> function simply wraps the <code>flask</code> command provided by Flask so that I can run <code>./manage.py flask &lt;subcommand&gt;</code> to run it using the <code>development</code> configuration or <code>APPLICATION_CONFIG="foobar" ./manage.py flask &lt;subcommand&gt;</code> to use the <code>foobar</code> one.</p>
@@ -363,8 +358,9 @@
  * Debugger PIN: <span class="m">172</span>-719-201
 </code></pre></div>
 
-
 <p>Note that it now says <code>Environment: development</code> because of <code>FLASK_ENV</code> has been set to <code>development</code> in the configuration. As we did before, a quick visit to <a href="http://127.0.0.1:5000/">http://127.0.0.1:5000/</a> shows us that everything is up and running.</p>
+<h4 id="git-commit_2">Git commit<a class="headerlink" href="#git-commit_2" title="Permanent link">&para;</a></h4>
+<p>You can see the changes made in this step through <a href="https://github.com/lgiordani/flask_project_setup/commit/8330e792aa55d2903fd4846487c64de12530c0d3">this Git commit</a> or <a href="https://github.com/lgiordani/flask_project_setup/tree/8330e792aa55d2903fd4846487c64de12530c0d3">browse the files</a>.</p>
 <h4 id="resources_2">Resources:<a class="headerlink" href="#resources_2" title="Permanent link">&para;</a></h4>
 <ul>
 <li><a href="https://docs.djangoproject.com/en/3.0/ref/django-admin/">Django's management script</a></li>
@@ -389,7 +385,6 @@
 <span class="k">RUN</span> pip install -r /opt/requirements/development.txt
 </code></pre></div>
 
-
 <p>As you can see the requirements directory is copied into the image, so that Docker can run the <code>pip install</code> command at creation time. The whole code directory will be mounted live into the image at run time.</p>
 <p>This clearly means that every time we change the development requirements we need to rebuild the image. This is not a complicated process, so I will keep it as a manual process for now. To run the image we can create a configuration file for docker-compose.</p>
 <p>File: <code>docker/development.yml</code></p>
@@ -410,7 +405,6 @@
       <span class="p p-Indicator">-</span> <span class="s">&quot;5000:5000&quot;</span>
 </code></pre></div>
 
-
 <p>As you can see, the docker-compose configuration file can read environment variables natively. To run it we first need to add docker-compose itself to the development requirements.</p>
 <p>File: <code>requirements/development.txt</code></p>
 <div class="highlight"><pre><span></span><code><span class="o">-</span><span class="n">r</span> <span class="n">testing</span><span class="p">.</span><span class="n">txt</span>
@@ -418,18 +412,16 @@
 <span class="n">docker</span><span class="o">-</span><span class="n">compose</span>
 </code></pre></div>
 
-
 <p>Install it with <code>pip install -r requirements/development.txt</code>, then build the image with</p>
 <div class="highlight"><pre><span></span><code>$ <span class="nv">FLASK_ENV</span><span class="o">=</span><span class="s2">&quot;development&quot;</span> <span class="nv">FLASK_CONFIG</span><span class="o">=</span><span class="s2">&quot;development&quot;</span> docker-compose -f docker/development.yml build web
 </code></pre></div>
 
-
+<p>This will take some time, as Docker has to download all the required layers and install the requirements.</p>
 <p>We are explicitly passing environment variables here, as we have not wrapped docker-compose in the manage script yet. Once the image has been build, we can run it with the <code>up</code> command</p>
 <div class="highlight"><pre><span></span><code>$ <span class="nv">FLASK_ENV</span><span class="o">=</span><span class="s2">&quot;development&quot;</span> <span class="nv">FLASK_CONFIG</span><span class="o">=</span><span class="s2">&quot;development&quot;</span> docker-compose -f docker/development.yml up
 </code></pre></div>
 
-
-<p>This command should give us the following output</p>
+<p>This command gives us the following output</p>
 <div class="highlight"><pre><span></span><code>Creating network &quot;docker_default&quot; with the default driver
 Creating docker_web_1 ... done
 Attaching to docker_web_1
@@ -441,28 +433,23 @@ web_1  |  * Debugger is active!
 web_1  |  * Debugger PIN: 234-361-737
 </code></pre></div>
 
-
 <p>You can stop the containers pressing <code>Ctrl-C</code>, which gracefully tears down the system. If you run the command <code>up -d</code> docker-compose will run as a daemon, leaving you the control of the current terminal. If docker-compose is running you can <code>docker ps</code> and you should see an output similar to this</p>
 <div class="highlight"><pre><span></span><code>CONTAINER ID  IMAGE       COMMAND                 ...   PORTS                   NAMES
 c98f35635625  docker_web  &quot;flask run --host 0.…&quot;  ...   0.0.0.0:5000-&gt;5000/tcp  docker_web_1
 </code></pre></div>
 
-
 <p>If you need to explore the container you can login directly with </p>
 <div class="highlight"><pre><span></span><code>$ docker <span class="nb">exec</span> -it docker_web_1 bash
 </code></pre></div>
-
 
 <p>or with</p>
 <div class="highlight"><pre><span></span><code>$ <span class="nv">FLASK_ENV</span><span class="o">=</span><span class="s2">&quot;development&quot;</span> <span class="nv">FLASK_CONFIG</span><span class="o">=</span><span class="s2">&quot;development&quot;</span> docker-compose -f docker/development.yml <span class="nb">exec</span> web bash
 </code></pre></div>
 
-
 <p>In either case, you will end up in the <code>/opt/code</code> directory (which is the <code>WORKDIR</code> of the image), where the current directory in the host is mounted.</p>
 <p>To tear down the containers, when running as daemon, you can run</p>
 <div class="highlight"><pre><span></span><code>$ <span class="nv">FLASK_ENV</span><span class="o">=</span><span class="s2">&quot;development&quot;</span> <span class="nv">FLASK_CONFIG</span><span class="o">=</span><span class="s2">&quot;development&quot;</span> docker-compose -f docker/development.yml down
 </code></pre></div>
-
 
 <p>Notice that the server now says <code>Running on http://0.0.0.0:5000/</code>, as the Docker container is using that network interface to communicate with the outside world. Since the ports are mapped, however, you can head to either <a href="http://localhost:5000">http://localhost:5000</a> or <a href="http://0.0.0.0:5000">http://0.0.0.0:5000</a> with your browser.</p>
 <p>To simplify the usage of docker-compose, I want to wrap it in the <code>manage.py</code> script, so that it automatically receives environment variables, as their number is going to increase soon when we will add a database.</p>
@@ -534,24 +521,10 @@ c98f35635625  docker_web  &quot;flask run --host 0.…&quot;  ...   0.0.0.0:5000
     <span class="n">cli</span><span class="p">()</span>
 </code></pre></div>
 
-
 <p>You might have noticed that the two functions <code>flask</code> and <code>compose</code> are basically the same code, but I resisted the temptation to refactor them because I know that the <code>compose</code> command will need some changes as soon as I add a database.</p>
-<p>The last change we need in order to make everything work properly is adding the <code>FLASK_CONFIG</code> variable to the config file</p>
-<p>File: <code>config/development.json</code></p>
-<div class="highlight"><pre><span></span><code><span class="p">[</span>
-  <span class="p">{</span>
-    <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;FLASK_ENV&quot;</span><span class="p">,</span>
-    <span class="nt">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;development&quot;</span>
-  <span class="p">},</span>
-  <span class="p">{</span>
-    <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;FLASK_CONFIG&quot;</span><span class="p">,</span>
-    <span class="nt">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;development&quot;</span>
-  <span class="p">}</span>
-<span class="p">]</span>
-</code></pre></div>
-
-
 <p>Now I can run <code>./manage.py compose up -d</code> and <code>./manage.py compose down</code> and have the environment variables automatically passed to the system.</p>
+<h4 id="git-commit_3">Git commit<a class="headerlink" href="#git-commit_3" title="Permanent link">&para;</a></h4>
+<p>You can see the changes made in this step through <a href="https://github.com/lgiordani/flask_project_setup/commit/9e08735af6177760cd750230122a507b15c9c112">this Git commit</a> or <a href="https://github.com/lgiordani/flask_project_setup/tree/9e08735af6177760cd750230122a507b15c9c112">browse the files</a>.</p>
 <h4 id="resources_3">Resources<a class="headerlink" href="#resources_3" title="Permanent link">&para;</a></h4>
 <ul>
 <li><a href="https://docs.docker.com/compose/">Docker compose</a> - A tool for defining and running multi-container Docker applications</li>

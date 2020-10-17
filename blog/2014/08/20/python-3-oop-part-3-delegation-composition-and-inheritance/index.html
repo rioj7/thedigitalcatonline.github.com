@@ -135,11 +135,9 @@
     <span class="k">pass</span>
 </code></pre></div>
 
-
 <p>where we declare a new class <code>SecurityDoor</code> that, at the moment, is a perfect copy of the <code>Door</code> class. Let us investigate what happens when we access attributes and methods. First we instance the class</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">sdoor</span> <span class="o">=</span> <span class="n">SecurityDoor</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;closed&#39;</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>The first check we can do is that class attributes are still global and shared</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">SecurityDoor</span><span class="o">.</span><span class="n">colour</span> <span class="ow">is</span> <span class="n">Door</span><span class="o">.</span><span class="n">colour</span>
@@ -147,7 +145,6 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="n">sdoor</span><span class="o">.</span><span class="n">colour</span> <span class="ow">is</span> <span class="n">Door</span><span class="o">.</span><span class="n">colour</span>
 <span class="go">True</span>
 </code></pre></div>
-
 
 <p>This shows us that Python tries to resolve instance members not only looking into the class the instance comes from, but also investigating the parent classes. In this case <code>sdoor.colour</code> becomes <code>SecurityDoor.colour</code>, that in turn becomes <code>Door.colour</code>. <code>SecurityDoor</code> <em>is</em> a <code>Door</code>.</p>
 <p>If we investigate the content of <code>__dict__</code> we can catch a glimpse of the inheritance mechanism in action</p>
@@ -168,12 +165,10 @@
 <span class="go">    &#39;paint&#39;: &lt;classmethod object at 0xb67ff6ec&gt;})</span>
 </code></pre></div>
 
-
 <p>As you can see the content of <code>__dict__</code> for <code>SecurityDoor</code> is very narrow compared to that of <code>Door</code>. The inheritance mechanism takes care of the missing elements by climbing up the classes tree. Where does Python get the parent classes? A class always contains a <code>__bases__</code> tuple that lists them</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">SecurityDoor</span><span class="o">.</span><span class="vm">__bases__</span>
 <span class="go">(&lt;class &#39;__main__.Door&#39;&gt;,)</span>
 </code></pre></div>
-
 
 <p>So an example of what Python does to resolve a class method call through the inheritance tree is</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">sdoor</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__bases__</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">&#39;knock&#39;</span><span class="p">]</span><span class="o">.</span><span class="fm">__get__</span><span class="p">(</span><span class="n">sdoor</span><span class="p">)</span>
@@ -181,7 +176,6 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="n">sdoor</span><span class="o">.</span><span class="n">knock</span>
 <span class="go">&lt;bound method type.knock of &lt;class &#39;__main__.SecurityDoor&#39;&gt;&gt;</span>
 </code></pre></div>
-
 
 <p>Please note that this is just an example that does not consider multiple inheritance.</p>
 <p>Let us try now to override some methods and attributes. In Python you can <em>override</em> (redefine) a parent class member simply by redefining it in the child class.</p>
@@ -194,7 +188,6 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s1">&#39;open&#39;</span>
 </code></pre></div>
 
-
 <p>As you can forecast, the overridden members now are present in the <code>__dict__</code> of the <code>SecurityDoor</code> class</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">SecurityDoor</span><span class="o">.</span><span class="vm">__dict__</span>
 <span class="go">mappingproxy({&#39;__doc__&#39;: None,</span>
@@ -203,7 +196,6 @@
 <span class="go">    &#39;colour&#39;: &#39;gray&#39;,</span>
 <span class="go">    &#39;locked&#39;: True})</span>
 </code></pre></div>
-
 
 <p>So when you override a member, the one you put in the child class is used instead of the one in the parent class simply because the former is found before the latter while climbing the class hierarchy. This also shows you that Python does not implicitly call the parent implementation when you override a method. So, overriding is a way to block implicit delegation.</p>
 <p>If we want to call the parent implementation we have to do it explicitly. In the former example we could write</p>
@@ -216,7 +208,6 @@
             <span class="k">return</span>
         <span class="n">Door</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>You can easily test that this implementation is working correctly.</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">sdoor</span> <span class="o">=</span> <span class="n">SecurityDoor</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;closed&#39;</span><span class="p">)</span>
@@ -231,7 +222,6 @@
 <span class="go">&#39;open&#39;</span>
 </code></pre></div>
 
-
 <p>This form of explicit parent delegation is heavily discouraged, however.</p>
 <p>The first reason is because of the very high coupling that results from explicitly naming the parent class again when calling the method. <em>Coupling</em>, in the computer science lingo, means to link two parts of a system, so that changes in one of them directly affect the other one, and is usually avoided as much as possible. In this case if you decide to use a new parent class you have to manually propagate the change to every method that calls it. Moreover, since in Python the class hierarchy can be dynamically changed (i.e. at runtime), this form of explicit delegation could be not only annoying but also wrong.</p>
 <p>The second reason is that in general you need to deal with multiple inheritance, where you do not know a priori which parent class implements the original form of the method you are overriding.</p>
@@ -245,7 +235,6 @@
             <span class="k">return</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">open</span><span class="p">()</span>
 </code></pre></div>
-
 
 <p>The output of <code>super()</code> is not exactly the <code>Door</code> class. It returns a <code>super</code> object which representation is <code>&lt;super: &lt;class 'SecurityDoor'&gt;, &lt;SecurityDoor object&gt;&gt;</code>. This object however acts like the parent class, so you can safely ignore its custom nature and use it just like you would do with the <code>Door</code> class in this case.</p>
 <h2 id="enter-the-composition">Enter the Composition<a class="headerlink" href="#enter-the-composition" title="Permanent link">&para;</a></h2>
@@ -267,7 +256,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">door</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </code></pre></div>
 
-
 <p>The primary goal of composition is to relax the coupling between objects. This little example shows that now <code>SecurityDoor</code> is an <code>object</code> and no more a <code>Door</code>, which means that the internal structure of <code>Door</code> is not copied. For this very simple example both <code>Door</code> and <code>SecurityDoor</code> are not big classes, but in a real system objects can very complex; this means that their allocation consumes a lot of memory and if a system contains thousands or millions of objects that could be an issue.</p>
 <p>The composed <code>SecurityDoor</code> has to redefine the <code>colour</code> attribute since the concept of delegation applies only to methods and not to attributes, doesn't it?</p>
 <p>Well, no. Python provides a very high degree of indirection for objects manipulation and attribute access is one of the most useful. As you already discovered, accessing attributes is ruled by a special method called <code>__getattribute__()</code> that is called whenever an attribute of the object is accessed. Overriding <code>__getattribute__()</code>, however, is overkill; it is a very complex method, and, being called on every attribute access, any change makes the whole thing slower.</p>
@@ -287,7 +275,6 @@
         <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">door</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>Using <code>__getattr__()</code> blends the separation line between inheritance and composition since after all the former is a form of automatic delegation of every member access.</p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">ComposedDoor</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">number</span><span class="p">,</span> <span class="n">status</span><span class="p">):</span>
@@ -296,7 +283,6 @@
     <span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">door</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>As this last example shows, delegating every member access through <code>__getattr__()</code> is very simple. Pay attention to <code>getattr()</code> which is different from <code>__getattr__()</code>. The former is a built-in that is equivalent to the dotted syntax, i.e. <code>getattr(obj, 'someattr')</code> is the same as <code>obj.someattr</code>, but you have to use it since the name of the attribute is contained in a string.</p>
 <p>Composition provides a superior way to manage delegation since it can selectively delegate the access, even mask some attributes or methods, while inheritance cannot. In Python you also avoid the memory problems that might arise when you put many objects inside another; Python handles everything through its reference, i.e. through a pointer to the memory position of the thing, so the size of an attribute is constant and very limited.</p>

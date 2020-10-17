@@ -11,7 +11,6 @@
     &lt;span class="o"&gt;...&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;does not check if the object is a &lt;code&gt;list&lt;/code&gt; or a &lt;code&gt;dictionary&lt;/code&gt; (both would allow the &lt;code&gt;[1]&lt;/code&gt; notation), but if the object can be accessed by key (or index). When you accept a parameter in a function Python does not specify the type (leaving aside type hints) because you are not interested in accepting a given type or one of its derived types. You are interested in accepting something that provides the methods you will use.&lt;/p&gt;
 &lt;p&gt;The behaviour, in an object-oriented environment, is the run-time interface of the object. This is different from the static interface, which is the collection of the methods provided by the object. The run-time interface is the actual interface the object shows when it is used, and this encompasses the methods provided by its class, but also methods provided by parent classes, the metaclass and other entry points provided by &lt;code&gt;__getattr__&lt;/code&gt;.&lt;/p&gt;
 &lt;h2 id="complex-checks"&gt;Complex checks&lt;a class="headerlink" href="#complex-checks" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
@@ -27,7 +26,6 @@
     &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="o"&gt;...&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;which tries to cover the methods a list-like object shall provide. This test, however, accepts objects that do not really behave like a list such as&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;FakeList&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
     &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;fakemethod&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
@@ -38,12 +36,10 @@
             &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;fakemethod&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;It is unlikely that you will write such a class, but this shows you one of the potential pitfalls of the previous test, which is wrong because it tries to rely on the structure instead of testing the behaviour. The temptation to rely on &lt;code&gt;isinstance()&lt;/code&gt; is big&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="nb"&gt;isinstance&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;someobj&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;list&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
     &lt;span class="o"&gt;...&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;If possible this approach is worse than before, since it tests the exact type. Even if &lt;code&gt;isinstance()&lt;/code&gt; and &lt;code&gt;issubclass()&lt;/code&gt; are smart enough to walk through the hierarchy of parent classes, this excludes evary class that behaves like a list does not inherit from it.&lt;/p&gt;
 &lt;h2 id="back-to-delegation"&gt;Back to delegation&lt;a class="headerlink" href="#back-to-delegation" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
@@ -51,11 +47,9 @@
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nb"&gt;issubclass&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;myclass&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;someclass&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;does no more perform a pure external check of the relationship between &lt;code&gt;someclass&lt;/code&gt; and &lt;code&gt;myclass&lt;/code&gt;. The first thing that &lt;code&gt;issubclass()&lt;/code&gt; does now is the following&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;someclass&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="fm"&gt;__subclasscheck__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;myclass&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;This is very natural because, after all, &lt;code&gt;someclass&lt;/code&gt; is the best source of judgement about being a subclass of itself.&lt;/p&gt;
 &lt;h2 id="a-new-type-of-subclass"&gt;A new type of subclass&lt;a class="headerlink" href="#a-new-type-of-subclass" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
@@ -64,11 +58,9 @@
     &lt;span class="k"&gt;pass&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;or can be a &lt;em&gt;virtual&lt;/em&gt; subclass, obtained through registration&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;ParentClass&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;register&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;ChildClass&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;The difference between a real and a virtual subclass is very simple: a real subclass knows its relationship with the parent class through its &lt;code&gt;__bases__&lt;/code&gt; attribute, and can thus implicitly delegate the resolution of missing methods. A virtual subclass knows nothing about the class that registered it, and nowhere in the subclass will you find something that links it to the parent class. Thus, a virtual parent class is useful only as a categorization.&lt;/p&gt;
 &lt;h2 id="abstract-base-classes"&gt;Abstract Base Classes&lt;a class="headerlink" href="#abstract-base-classes" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
@@ -88,7 +80,6 @@
 &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="o"&gt;...&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Where the &lt;code&gt;Sequence&lt;/code&gt; and the &lt;code&gt;MutableSequence&lt;/code&gt; ABCs register some built-in types of Python.&lt;/p&gt;
 &lt;p&gt;It is very important to understand that registering a class does not imply any form of check about methods or attributes. Registering is just the &lt;em&gt;promise&lt;/em&gt; that a given behaviour is provided by the registered class.&lt;/p&gt;
 &lt;p&gt;To demonstrate this let me provide you a very simple example made using one of the &lt;code&gt;collections&lt;/code&gt; classes&lt;/p&gt;
@@ -105,7 +96,6 @@
 &lt;span class="go"&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;As you can see, the &lt;code&gt;MyClass&lt;/code&gt; class is initially not recognized as a subclass of &lt;code&gt;collections.Sequence&lt;/code&gt;, but after the registration &lt;code&gt;issubclass()&lt;/code&gt; returns &lt;code&gt;True&lt;/code&gt;, even if the class is still empty.&lt;/p&gt;
 &lt;h2 id="how-to-create-abcs"&gt;How to create ABCs&lt;a class="headerlink" href="#how-to-create-abcs" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;The example given by the official documentation is very simple and clear&lt;/p&gt;
@@ -120,7 +110,6 @@
 &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="nb"&gt;isinstance&lt;/span&gt;&lt;span class="p"&gt;((),&lt;/span&gt; &lt;span class="n"&gt;MyABC&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;All you need to do is to create a class and use the &lt;code&gt;ABCMeta&lt;/code&gt; metaclass provided by the &lt;code&gt;abc&lt;/code&gt; module and you will obtain a class that has the &lt;code&gt;register()&lt;/code&gt; method and a suitable implementation of &lt;code&gt;__subclasscheck__()&lt;/code&gt; and &lt;code&gt;__instancecheck__()&lt;/code&gt;. Checking again the &lt;code&gt;_collections_abc.py&lt;/code&gt; file you can see that this is exactly the way the &lt;code&gt;collections&lt;/code&gt; classes are implemented&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="o"&gt;...&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
 
@@ -132,7 +121,6 @@
 
 &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="o"&gt;...&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;h2 id="are-you-scared-of-metaclasses"&gt;Are you scared of metaclasses?&lt;a class="headerlink" href="#are-you-scared-of-metaclasses" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;Metaclasses are a strange topic in Python. Most of the times the advice given to the novice is "Don't use them", like they were an error of the language and something that shall be avoided.&lt;/p&gt;
@@ -156,7 +144,6 @@
 &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;c&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;answer&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;42&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Now, when you build a class you use a metaclass (like a blueprint) and the metaclass can put things into the class.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# Metaclass definition&lt;/span&gt;
 &lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;NewType&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;type&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
@@ -170,7 +157,6 @@
 &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;Child&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;answer&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;42&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Sounds complex? Not at all, in my opinion. If you check the two examples you will see that they are exactly the same thing, the first referring to the instance-class relationship, the second to the class-metaclass one.&lt;/p&gt;
 &lt;p&gt;This is all you need to understand metaclasses. When you build a class you need to put things into it, for example you need to put the &lt;code&gt;__getattribute__&lt;/code&gt; or the &lt;code&gt;__new__()&lt;/code&gt; methods. This is done by the metaclass, which is usually &lt;code&gt;type&lt;/code&gt; for every class. Indeed, if you check the &lt;code&gt;__class__&lt;/code&gt; attribute into a class you get exactly this&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="nb"&gt;int&lt;/span&gt;
@@ -179,7 +165,6 @@
 &lt;span class="go"&gt;&amp;lt;class &amp;#39;type&amp;#39;&amp;gt;&lt;/span&gt;
 &lt;span class="go"&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;h2 id="metaclasses-and-mro"&gt;Metaclasses and MRO&lt;a class="headerlink" href="#metaclasses-and-mro" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;A slightly advanced annotation: when I say that the metaclass &lt;em&gt;puts&lt;/em&gt; the methods into the class I'm simplifying the whole thing. As a matter of fact, like a class provides methods to the instance at runtime through the &lt;code&gt;__class__&lt;/code&gt; attribute and the MRO protocol, the metaclass provides methods for the class. Attributes, instead, are put inside the class by the &lt;code&gt;__new__&lt;/code&gt; or &lt;code&gt;__init__&lt;/code&gt; methods of the metaclass.&lt;/p&gt;
@@ -192,7 +177,6 @@
 &lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Child&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Parent&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt; &lt;span class="k"&gt;pass&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;calling the method &lt;code&gt;get_name()&lt;/code&gt; on an instance of &lt;code&gt;Child&lt;/code&gt; will look for it first into the &lt;code&gt;Child&lt;/code&gt; class, then into &lt;code&gt;Parent&lt;/code&gt; and &lt;code&gt;GrandParent&lt;/code&gt;, in this order. Finally, it will check &lt;code&gt;object&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;What happens to the MRO when a class of this hierarchy defines a different metaclass? For example&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;NewType&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;type&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt; &lt;span class="k"&gt;pass&lt;/span&gt;
@@ -204,7 +188,6 @@
 &lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Child&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Parent&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;metaclass&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;NewType&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt; &lt;span class="k"&gt;pass&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;In this case everything works as usual, but after checking &lt;code&gt;object&lt;/code&gt; the MRO will also check the &lt;code&gt;NewType&lt;/code&gt; metaclass (and its ancestors).&lt;/p&gt;
 &lt;p&gt;So, metaclasses can act as mixins, and they are queried only at the end of the usual MRO. This is exactly what happens using multiple inheritance if &lt;code&gt;NewType&lt;/code&gt; were a standard parent class that does not have &lt;code&gt;Parent&lt;/code&gt; or &lt;code&gt;GrandParent&lt;/code&gt; as ancestors.&lt;/p&gt;
 &lt;p&gt;Metaclasses are not part of the MRO however, since the MRO just deals with standard inheritance. If you check the MRO of the &lt;code&gt;Child&lt;/code&gt; class, you will see that the metaclass is not included&lt;/p&gt;
@@ -214,7 +197,6 @@
 &lt;span class="go"&gt;&amp;lt;class &amp;#39;__main__.NewType&amp;#39;&amp;gt;&lt;/span&gt;
 &lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;h2 id="abstract-methods"&gt;Abstract methods&lt;a class="headerlink" href="#abstract-methods" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;Why are ABC called &lt;code&gt;abstract&lt;/code&gt;? ABCs can be instantiated, so they are after all not pure interfaces (like Java ones, for example)&lt;/p&gt;
@@ -226,14 +208,12 @@
 &lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;They may however define some methods as &lt;em&gt;abstract&lt;/em&gt;, using the &lt;code&gt;abc.abstractmethod&lt;/code&gt; decorator, which prevents the class from being instantiated if the method is not implemented. Let me give you a simple example: I define an Abstract Base Class with and abstract method&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;MyABC&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;metaclass&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;abc&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ABCMeta&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
     &lt;span class="nd"&gt;@abc&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;abstractmethod&lt;/span&gt;
     &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
         &lt;span class="k"&gt;pass&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;and try to instantiate it. Python complains&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;MyABC&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
@@ -242,19 +222,16 @@
 &lt;span class="gr"&gt;TypeError&lt;/span&gt;: &lt;span class="n"&gt;Can&amp;#39;t instantiate abstract class MyABC with abstract methods get&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;I am forced to create a new class that inherits from &lt;code&gt;MyABC&lt;/code&gt; and implements the method&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Concrete&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;MyABC&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
     &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
         &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Now I can instantiate the class.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Concrete&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
 &lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;Check the official documentation of Abstract Base Classes for a complete description of &lt;code&gt;@abstractmethod&lt;/code&gt; and &lt;code&gt;@abstractproperty&lt;/code&gt;.&lt;/p&gt;
 &lt;h2 id="what-about-the-behaviour"&gt;What about the behaviour?&lt;a class="headerlink" href="#what-about-the-behaviour" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;

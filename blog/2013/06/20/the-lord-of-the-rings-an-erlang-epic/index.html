@@ -122,16 +122,13 @@
 <span class="p">-</span><span class="ni">endif</span><span class="p">.</span>
 </code></pre></div>
 
-
 <p>This converts the line</p>
 <div class="highlight"><pre><span></span><code><span class="o">?</span><span class="nv">DEBUG</span><span class="p">(</span><span class="s">&quot;A message</span><span class="si">~n</span><span class="s">&quot;</span><span class="p">,</span> <span class="p">[]).</span>
 </code></pre></div>
 
-
 <p>to</p>
 <div class="highlight"><pre><span></span><code>&lt;<span class="m">0</span>.44.0&gt;: A message
 </code></pre></div>
-
 
 <p>where <code>&lt;0.44.0&gt;</code> is the pid of the message calling <code>?DEBUG</code> (only if <code>-define(debug, true).</code> is in the file).</p>
 <h2 id="the-master-process-solution">The “master process” solution<a class="headerlink" href="#the-master-process-solution" title="Permanent link">&para;</a></h2>
@@ -184,7 +181,6 @@
     <span class="n">loop</span><span class="p">(</span><span class="nv">NextProcess</span><span class="p">).</span>
 </code></pre></div>
 
-
 <p><a href="/code/erlang-rings/ring_master_no_messages.erl">source code</a></p>
 <p>Note that the first spawn cannot directly call <code>create/2</code> passing <code>self()</code> since at that moment <code>self()</code> is the pid of the calling process (e.g. the Erlang shell) and not the pid of the first process of the ring, which is what we want. So we have to bypass this by spawning a process which executes <code>create/1</code>, which in turn calls <code>create/2</code> with the pid the process extracted with <code>self()</code>.</p>
 <p>This first program spawns a set of processes that sit down and do nothing. Since they are all linked together (through the link with the master process), you can terminate the whole set by sending an exit signal to one of them. You can get the list of pid and names through the shell function <code>i()</code>. Otherwise, you can get and use the pid returned by the function <code>start/1</code>.</p>
@@ -192,7 +188,6 @@
 <span class="p">[...]</span>
 <span class="mi">2</span><span class="o">&gt;</span> <span class="nb">exit</span><span class="p">(</span><span class="n">pid</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">44</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">boom</span><span class="p">).</span>
 </code></pre></div>
-
 
 <h4 id="sending-a-single-message">Sending a single message<a class="headerlink" href="#sending-a-single-message" title="Permanent link">&para;</a></h4>
 <p>Now I am going to develop further the solution by making a single message travel the whole ring.</p>
@@ -257,7 +252,6 @@
             <span class="n">ok</span>
     <span class="k">end</span><span class="p">.</span>
 </code></pre></div>
-
 
 <p><a href="/code/erlang-rings/ring_master_single_message.erl">source code</a></p>
 <p>Beware that a subtle mechanism conceals here: in Erlang, you can always send a message to a pid, even if it the relative process does not exist; in the latter case the message is simply discarded. This feature allows us to make the first process send the message and terminate without having the last process crash by sending a message to it. Remember that you cannot do this with registered processes alias, only with pids.</p>
@@ -333,7 +327,6 @@
     <span class="k">end</span><span class="p">.</span>
 </code></pre></div>
 
-
 <p><a href="/code/erlang-rings/ring_master_multiple_messages.erl">source code</a></p>
 <p>As before, we are here relying on the possibility of sending a message to a non existent process.</p>
 <h4 id="exposing-a-functional-interface">Exposing a functional interface<a class="headerlink" href="#exposing-a-functional-interface" title="Permanent link">&para;</a></h4>
@@ -347,7 +340,6 @@
 <p>To expose a functional interface you need to register one or more processes, to get a global access point for your functions, so the first change to the code is that the spawned process is registered. Note that <code>Message</code> and <code>NumberProcesses</code> are no more passed to the <code>create()</code> function.</p>
 <div class="highlight"><pre><span></span><code><span class="nb">register</span><span class="p">(</span><span class="n">ring_master_functional</span><span class="p">,</span> <span class="nb">spawn</span><span class="p">(</span><span class="o">?</span><span class="nv">MODULE</span><span class="p">,</span> <span class="n">create</span><span class="p">,</span> <span class="p">[</span><span class="nv">NumberProcesses</span><span class="p">])),</span>
 </code></pre></div>
-
 
 <p>This is not enough. We have to be sure that the whole ring is ready before giving control back to the user issuing <code>start()</code>. Until now the message was sent by the master process just after the creation of the last ring process, so there was no need to synchronize the return of the start function with the spawned processes. Now we need it, so just after registering the master process we wait for a ready message coming from the ring. To allow the ring to send the message to the initial caller we have to pass <code>self()</code> to <code>create()</code>. Pay attention that <code>self()</code> passed to the spawned process is the pid of the external process (e.g. the Erlang shell) while <code>self()</code> passed to <code>create()</code> is the pid of the master ring process.</p>
 <div class="highlight"><pre><span></span><code><span class="c">%%% Author:  Leonardo Giordani &lt;giordani.leonardo@gmail.com&gt;</span>
@@ -452,7 +444,6 @@
     <span class="k">end</span><span class="p">.</span>
 </code></pre></div>
 
-
 <p><a href="/code/erlang-rings/ring_master_functional.erl">source code</a></p>
 <p>The exposed functions are very simple. As you can see they use two different messages: <code>{command, stop}</code> and <code>{command, message, [Message, Times]}</code>. One of the advantages of exposing a functional API is that you are free to format your messages according to the current status of the software and change the format if it does no more suit the application needs.</p>
 <p>The <code>loop()</code> function has been splitted in two different functions now: <code>loop/1</code> rules the behaviour of the standard ring process, while <code>loop_master/1</code> rules the behaviour of the master process.</p>
@@ -528,7 +519,6 @@
     <span class="n">loop</span><span class="p">(</span><span class="nv">NextProcess</span><span class="p">).</span>
 </code></pre></div>
 
-
 <p><a href="/code/erlang-rings/ring_recursion_no_messages.erl">source code</a></p>
 <p>The recursive ring with a single message travelling.</p>
 <div class="highlight"><pre><span></span><code><span class="c">%%% Author:  Leonardo Giordani &lt;giordani.leonardo@gmail.com&gt;</span>
@@ -580,7 +570,6 @@
             <span class="n">ok</span>
     <span class="k">end</span><span class="p">.</span>
 </code></pre></div>
-
 
 <p><a href="/code/erlang-rings/ring_recursion_single_message.erl">source code</a></p>
 <p>The recursive ring with support for multiple message travels.</p>
@@ -650,7 +639,6 @@
             <span class="n">loop</span><span class="p">(</span><span class="nv">NextProcess</span><span class="p">,</span> <span class="nv">NumberMessages</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
     <span class="k">end</span><span class="p">.</span>
 </code></pre></div>
-
 
 <p><a href="/code/erlang-rings/ring_recursion_multiple_messages.erl">source code</a></p>
 <p>The recursive ring exposing the functional API.</p>
@@ -751,7 +739,6 @@
             <span class="n">loop</span><span class="p">(</span><span class="nv">NextProcess</span><span class="p">)</span>
     <span class="k">end</span><span class="p">.</span>
 </code></pre></div>
-
 
 <p><a href="/code/erlang-rings/ring_recursion_functional.erl">source code</a></p>
 <h2 id="conclusions">Conclusions<a class="headerlink" href="#conclusions" title="Permanent link">&para;</a></h2>

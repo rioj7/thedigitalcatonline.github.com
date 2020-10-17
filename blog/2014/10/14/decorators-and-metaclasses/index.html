@@ -126,7 +126,6 @@
 <span class="s2">&quot;A test string&quot;</span> <span class="o">==</span> <span class="n">msp</span><span class="p">(</span><span class="s2">&quot;a test  string&quot;</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>The module defines a <code>StringProcessor</code> class that I can inherit and customize adding methods that have a standard signature <code>(self, str)</code> and are decorated with <code>@stringfilter</code>. This class can later be instantiated and the instance used to directly process a string and return the result. Internally the class automatically executes all the decorated methods in succession. I also would like the class to obey the order I defined the filters: first defined, first executed.</p>
 <h2 id="the-hitchhikers-guide-to-metaclasses">The Hitchhiker's Guide To Metaclasses<a class="headerlink" href="#the-hitchhikers-guide-to-metaclasses" title="Permanent link">&para;</a></h2>
 <p>How can metaclasses help to reach this target?</p>
@@ -138,7 +137,6 @@
     <span class="k">def</span> <span class="fm">__prepare__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">()</span>
 </code></pre></div>
-
 
 <p>This way, when the class will be created, an <code>OrderedDict</code> will be used to host the namespace, allowing us to keep the definition order. Please note that the signature <code>__prepare__(name, bases, **kwds)</code> is enforced by the language. If you want the method to get the metaclass as a first argument (because the code of the method needs it) you have to change the signature to <code>__prepare__(metacls, name, bases, **kwds)</code> and decorate it with <code>@classmethod</code>.</p>
 <p>The second function we want to define in our metaclass is <code>__new__</code>. Just like happens for the instantiation of classes, this method is invoked by Python to get a new instance of the metaclass, and is run before <code>__init__</code>. Its signature has to be <code>__new__(metacls, name, bases, namespace, **kwds)</code> and the result shall be an instance of the metaclass. As for its normal class counterpart (after all a metaclass is a class), <code>__new__()</code> usually wraps the same method of the parent class, <code>type</code> in this case, adding its own customizations.</p>
@@ -156,7 +154,6 @@
         <span class="k">return</span> <span class="n">result</span>
 </code></pre></div>
 
-
 <p>Now we have to find a way to mark all filter methods with a <code>_filter</code> attribute.</p>
 <h2 id="the-anatomy-of-purple-decorators">The Anatomy of Purple Decorators<a class="headerlink" href="#the-anatomy-of-purple-decorators" title="Permanent link">&para;</a></h2>
 <p><strong>decorate</strong>: <em>to add something to an object or place, especially in order to make it more attractive</em> (Cambridge Dictionary)</p>
@@ -168,7 +165,6 @@
     <span class="n">func</span><span class="o">.</span><span class="n">_filter</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">return</span> <span class="n">func</span>
 </code></pre></div>
-
 
 <p>As you can see the decorator just creates an attribute called <code>_filter</code> into the function (remember that functions are objects). The actual value of this attribute is not important in this case, since we are just interested in telling apart class members that contain it.</p>
 <h2 id="the-dynamics-of-a-callable-object">The Dynamics of a Callable Object<a class="headerlink" href="#the-dynamics-of-a-callable-object" title="Permanent link">&para;</a></h2>
@@ -184,7 +180,6 @@
 
         <span class="k">return</span> <span class="n">_string</span>
 </code></pre></div>
-
 
 <p>A quick review of this simple function shows that it accepts the string as an argument, stores it in a local variable and loops over the filters, executing each of them on the local string, that is on the result of the previous filter.</p>
 <p>The filter functions are extracted from the <code>self._filters</code> list, that is compiled by the <code>FilterClass</code> metaclass we already discussed.</p>
@@ -202,7 +197,6 @@
         <span class="k">return</span> <span class="n">string</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;  &#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>The two <code>capitalize()</code> and <code>remove_double_spaces()</code> methods have been decorated, so they will be applied in order to any string passed when calling the class. A quick example of this last class is</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">strproc</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">msp</span> <span class="o">=</span> <span class="n">strproc</span><span class="o">.</span><span class="n">MyStringProcessor</span><span class="p">()</span>
@@ -214,7 +208,6 @@
 <span class="go">OUTPUT STRING: A test string</span>
 <span class="gp">&gt;&gt;&gt; </span>
 </code></pre></div>
-
 
 <p>That's it!</p>
 <h2 id="final-words">Final words<a class="headerlink" href="#final-words" title="Permanent link">&para;</a></h2>

@@ -123,7 +123,6 @@
     <span class="n">auto_delete</span> <span class="o">=</span> <span class="kc">False</span>
 </code></pre></div>
 
-
 <p>This imports the messaging part of Postage and declares a <code>PingExchange</code>, which is a simple direct RabbitMQ exchange, which name is <code>ping-exchange</code>. Remember that in a AMQP system exchanges are unique by name and virtualhost, i.e. given a virtualhost the name of the exchange uniquely identifies it.</p>
 <h4 id="setting-up-the-producer">Setting up the producer<a class="headerlink" href="#setting-up-the-producer" title="Permanent link">&para;</a></h4>
 <p>Just below the exchange object we declare a producer, a class that can send a given set of messages:</p>
@@ -133,7 +132,6 @@
     <span class="k">def</span> <span class="nf">build_message_ping</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">messaging</span><span class="o">.</span><span class="n">MessageCommand</span><span class="p">(</span><span class="s1">&#39;ping&#39;</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>First of all our producer inherits from <code>GenericProducer</code>, a rich object that manages low-level stuff such as connection to the AMQP broker (RabbitMQ), exchange declaration and message creation.</p>
 <p>The <code>eks</code> class attribute is a list of exchange/routing key couples (tuples); we list here all the exchanges that will receive our messages when the object will send them and for each exchange we give a routing key. Recall that routing keys are used to label messages so that the exchange can route them to the subscribing queues (according to the rules of the exchange type). Here, we declare that the messages of our producer are going to be sent to the <code>PingExchange</code> exchange with the <code>ping_rk</code> routing key.</p>
@@ -146,12 +144,10 @@
 <span class="n">fingerprint</span> <span class="o">=</span> <span class="n">messaging</span><span class="o">.</span><span class="n">Fingerprint</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;ping_sender&quot;</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>After the usual imports, I create a fingerprint for this program. As explained in <a href="https://github.com/lgiordani/postage#fingerprint">the documentation</a>, a fingerprint is a collection of useful information about the component that sends messages. It can be easily customized since all Postage objects expect it to be a dictionary, so any object that behaves like a dictionary works. The standard <code>Fingerprint</code> provided by Postage collects some useful properties from the OS and the RabbitMQ installation; here we customize the <code>name</code> value that otherwise would be set to <code>None</code>. The fingerprint, once loaded in a producer, will be automatically attached to any message the producer will send.</p>
 <div class="highlight"><pre><span></span><code><span class="n">producer</span> <span class="o">=</span> <span class="n">facilities</span><span class="o">.</span><span class="n">PingProducer</span><span class="p">(</span><span class="n">fingerprint</span><span class="o">.</span><span class="n">as_dict</span><span class="p">())</span>
 <span class="n">producer</span><span class="o">.</span><span class="n">message_ping</span><span class="p">()</span>
 </code></pre></div>
-
 
 <p>The <code>PingProducer</code> we declared in <code>facilities.py</code> is instanced, and its <code>message_ping()</code> method is invoked.
 If you review the above paragraph you will notice that you never defined a <code>message_ping()</code> method; this is automatically implemented by the <code>GenericProducer</code> class from the <code>build_message_ping()</code> method. The class performs many actions under the hood: it executes some code to set up the correct RabbitMQ structures, calls your method to get the actual message data, attaches the fingerprint to the message, and serializes the message data. Eventually, the producer sends the message to the exchange defined in the class (<code>PingExchange</code>) with the linked routing key (<code>ping_rk</code>).</p>
@@ -165,7 +161,6 @@ If you review the above paragraph you will notice that you never defined a <code
 <span class="n">fingerprint</span> <span class="o">=</span> <span class="n">messaging</span><span class="o">.</span><span class="n">Fingerprint</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;ping_receiver&quot;</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>that loads the modules we need and builds the fingerprint of this application. Creating a receiver means declaring a class that inherits from <code>MessageProcessor</code> and implements a method for each incoming message we want to process.</p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">PingReceiver</span><span class="p">(</span><span class="n">messaging</span><span class="o">.</span><span class="n">MessageProcessor</span><span class="p">):</span>
     <span class="nd">@messaging</span><span class="o">.</span><span class="n">MessageHandler</span><span class="p">(</span><span class="s1">&#39;command&#39;</span><span class="p">,</span> <span class="s1">&#39;ping&#39;</span><span class="p">)</span>
@@ -173,13 +168,11 @@ If you review the above paragraph you will notice that you never defined a <code
         <span class="nb">print</span> <span class="s2">&quot;Got a ping!&quot;</span>
 </code></pre></div>
 
-
 <p>As you can see here the <code>msg_ping()</code> method is declared as a handler for the command message <code>ping</code>; the name of the method is arbitrary, but it has to accept one parameter, namely the content of the incoming message (more on this later). In this case, when the object receives a ping message it just prints out a string.</p>
 <div class="highlight"><pre><span></span><code><span class="n">eqks</span> <span class="o">=</span> <span class="p">[(</span><span class="n">facilities</span><span class="o">.</span><span class="n">PingExchange</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;ping_queue&#39;</span><span class="p">,</span> <span class="s1">&#39;ping_rk&#39;</span><span class="p">)])]</span>
 <span class="n">receiver</span> <span class="o">=</span> <span class="n">PingReceiver</span><span class="p">(</span><span class="n">fingerprint</span><span class="o">.</span><span class="n">as_dict</span><span class="p">(),</span> <span class="n">eqks</span><span class="p">,</span>
                         <span class="kc">None</span><span class="p">,</span> <span class="n">messaging</span><span class="o">.</span><span class="n">global_vhost</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>To start the receiver we have to connect it to an exchange; recall that the AMQP mechanism requires you to declare a queue and to connect it to an exchange through a key, which format depends on the exchange type. Being the <code>PingExchange</code> a direct exchange we want to connect to it with the exact routing key we want to match, that is <code>ping_rk</code>. The <code>eqks</code> structure is rather complex and may result overblown in such a simple context: it is a list of tuples in the form <code>(exchange_class, qk_list)</code> that links the given exchange class to a list of queues; the latter list contains tuples in the form <code>(queue_name, key)</code>. Each queue listed here connects to the exchange and fetches messages that match the linked key.</p>
 <p>In this case, we simply subscribe the <code>facilities.PingExchange</code> exchange with a <code>ping_queue</code> queue receiving messages routed with the <code>ping_rk</code> key.</p>
@@ -191,7 +184,6 @@ If you review the above paragraph you will notice that you never defined a <code
     <span class="k">pass</span>
 </code></pre></div>
 
-
 <p>This code creates a scheduler and adds the receiver, which is a <code>microthreads.Microthread</code>, then starts the execution loop.</p>
 <h4 id="execution">Execution<a class="headerlink" href="#execution" title="Permanent link">&para;</a></h4>
 <p>Open two different shells on your system and execute the receiver in the first</p>
@@ -199,20 +191,17 @@ If you review the above paragraph you will notice that you never defined a <code
 postage.messaging: global_vhost set to /
 </code></pre></div>
 
-
 <p>and the sender in the second</p>
 <div class="highlight"><pre><span></span><code>$ python send_ping.py 
 postage.messaging: global_vhost set to /
 $  
 </code></pre></div>
 
-
 <p>The receiver shall at this point notify that a message has been sent</p>
 <div class="highlight"><pre><span></span><code>$ python receive_ping.py 
 postage.messaging: global_vhost set to /
 Got a ping!
 </code></pre></div>
-
 
 <p>which is what we expected. You can stop the receiver with <code>Ctrl-C</code>, this kills the Pika connection somehow abruptly, but I am not going to implement in this article a good signal management.</p>
 <h4 id="adding-message-parameters">Adding message parameters<a class="headerlink" href="#adding-message-parameters" title="Permanent link">&para;</a></h4>
@@ -232,7 +221,6 @@ Got a ping!
                                         <span class="n">parameters</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;time&#39;</span><span class="p">:</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()})</span>
 </code></pre></div>
 
-
 <p>As you can see I just added the <code>build_message_timed_ping()</code> method, which sends a <code>timed_ping</code> command, but this time I added a <code>parameters</code> dictionary that encompasses all the parameters of the command. Remember that all the structures you put in a message are serialized in JSON by default so they must be processable by <code>json.dumps()</code>; if you need to send very complex structures you can customize Postage to use another encoder, either a customized JSON or a completely different one; see <a href="https://github.com/lgiordani/postage#encoder">the documentation</a>.</p>
 <p>The receiver has to be modified accordingly:</p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">PingReceiver</span><span class="p">(</span><span class="n">messaging</span><span class="o">.</span><span class="n">MessageProcessor</span><span class="p">):</span>
@@ -245,7 +233,6 @@ Got a ping!
         <span class="nb">print</span> <span class="s2">&quot;Got a timed ping! Time is </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span><span class="p">(</span><span class="n">content</span><span class="p">[</span><span class="s1">&#39;parameters&#39;</span><span class="p">][</span><span class="s1">&#39;time&#39;</span><span class="p">])</span>
 </code></pre></div>
 
-
 <p>Here the new method, <code>msg_timed_ping()</code>, prints a different message extracting the parameters from the message content.
 Last, you need to add the actual call that sends the message to <code>send_ping.py</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="n">producer</span> <span class="o">=</span> <span class="n">facilities</span><span class="o">.</span><span class="n">PingProducer</span><span class="p">(</span><span class="n">fingerprint</span><span class="o">.</span><span class="n">as_dict</span><span class="p">())</span>
@@ -253,14 +240,12 @@ Last, you need to add the actual call that sends the message to <code>send_ping.
 <span class="n">producer</span><span class="o">.</span><span class="n">message_timed_ping</span><span class="p">()</span>
 </code></pre></div>
 
-
 <p>The execution shows that everything works as expected</p>
 <div class="highlight"><pre><span></span><code>$ python receive_ping.py 
 postage.messaging: global_vhost set to /
 Got a ping!
 Got a timed ping! Time is 1374826309.06
 </code></pre></div>
-
 
 <h4 id="adding-call-parameters">Adding call parameters<a class="headerlink" href="#adding-call-parameters" title="Permanent link">&para;</a></h4>
 <p>If you want to allow the user to pass a parameter when sending the message, you just need to accept and use it in your <code>build_message_NAME()</code> method. In <code>facilities.py</code> add:</p>
@@ -271,7 +256,6 @@ Got a timed ping! Time is 1374826309.06
                                     <span class="n">parameters</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;custom_value&#39;</span><span class="p">:</span><span class="n">custom_value</span><span class="p">})</span>
 </code></pre></div>
 
-
 <p>Add a handler in the receiver (<code>receive_ping.py</code>):</p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">PingReceiver</span><span class="p">(</span><span class="n">messaging</span><span class="o">.</span><span class="n">MessageProcessor</span><span class="p">):</span>
     <span class="p">[</span><span class="o">...</span><span class="p">]</span>
@@ -281,11 +265,9 @@ Got a timed ping! Time is 1374826309.06
               <span class="o">%</span><span class="p">(</span><span class="n">content</span><span class="p">[</span><span class="s1">&#39;parameters&#39;</span><span class="p">][</span><span class="s1">&#39;custom_value&#39;</span><span class="p">])</span>
 </code></pre></div>
 
-
 <p>And exploit it when sending the message (<code>send_ping.py</code>):</p>
 <div class="highlight"><pre><span></span><code><span class="n">producer</span><span class="o">.</span><span class="n">message_custom_ping</span><span class="p">((</span><span class="s2">&quot;Just ping me&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
 </code></pre></div>
-
 
 <p>When you execute it you get:</p>
 <div class="highlight"><pre><span></span><code>$ python receive_ping.py 
@@ -294,7 +276,6 @@ Got a ping!
 Got a timed ping! Time is 1374832738.18
 Got a custom ping! The custom value is [u&#39;Just ping me&#39;, 1]
 </code></pre></div>
-
 
 <p>Pay attention to JSON, which does not tell apart tuples from lists.</p>
 <h4 id="rpc-calls-to-the-rescue">RPC calls to the rescue<a class="headerlink" href="#rpc-calls-to-the-rescue" title="Permanent link">&para;</a></h4>
@@ -305,7 +286,6 @@ Got a custom ping! The custom value is [u&#39;Just ping me&#39;, 1]
     <span class="k">def</span> <span class="nf">build_rpc_ping</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">messaging</span><span class="o">.</span><span class="n">RpcCommand</span><span class="p">(</span><span class="s1">&#39;ping&#39;</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>Things are not very different from the previous cases here: we use the <code>build_rpc_NAME()</code> form of the method then we return an RpcCommand, instead of a MessageCommand. Beware that, alas!, nomenclature here is a little misleading: both are messages in the sense of "something that will be sent on the AMQP network", but while MessageCommand does not expect an answer, RpcCommand does.</p>
 <p>I want to point out that the name of the message is <code>ping</code> just like the previous one; Postage tells the two messages apart using the name (<code>ping</code>), the type (<code>command</code>) and the category (<code>rpc</code> or <code>message</code>), although the latter is somewhat concealed.</p>
@@ -318,7 +298,6 @@ Got a custom ping! The custom value is [u&#39;Just ping me&#39;, 1]
         <span class="n">reply_func</span><span class="p">(</span><span class="n">messaging</span><span class="o">.</span><span class="n">MessageResult</span><span class="p">(</span><span class="s1">&#39;Pong&#39;</span><span class="p">))</span>
 </code></pre></div>
 
-
 <p>Accordingly, there is an RPC version of <code>MessageHandler</code>, <code>RpcHandler</code>. The method has to accept an additional parameter that is a reply function; the latter can be called at any time from the method, allowing it to perform some cleanup after answering if needed. In this case, it simply sends a <code>MessageResult</code> object back with <code>'Pong'</code> as value.</p>
 <p>In <code>send_ping.py</code> you can now make a remote call:</p>
 <div class="highlight"><pre><span></span><code><span class="n">answer</span> <span class="o">=</span> <span class="n">producer</span><span class="o">.</span><span class="n">rpc_ping</span><span class="p">()</span>
@@ -328,7 +307,6 @@ Got a custom ping! The custom value is [u&#39;Just ping me&#39;, 1]
 <span class="k">elif</span> <span class="n">answer</span><span class="o">.</span><span class="n">body</span><span class="p">[</span><span class="s1">&#39;content&#39;</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;exception&#39;</span><span class="p">:</span>
     <span class="nb">print</span> <span class="s2">&quot;An exception occoured! (</span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span><span class="p">(</span><span class="n">answer</span><span class="o">.</span><span class="n">body</span><span class="p">[</span><span class="s1">&#39;content&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">])</span>
 </code></pre></div>
-
 
 <p>The first part is straightforward: you call the RPC just like a local function. What you get is always a <code>MessageResult</code> object or derived (<code>MessageResultError</code> or <code>MessageResultException</code>). Be warned that the API here is awkward, to be indulgent. I wrote it, but probably the good-coder-in-me (TM) was on holiday that time; <a href="https://github.com/lgiordani/postage/issues/1">I am going to fix it</a> in a short time.</p>
 <p>Anyway, you have to check the answer to be sure that the call was successful; never, never, never trust RPC calls, network is in the middle and everything can happen (yes, even someone tripping over the network cable).</p>
@@ -344,7 +322,6 @@ Got a custom ping! The custom value is [u&#39;Just ping me&#39;, 1]
               <span class="o">%</span><span class="p">(</span><span class="n">fingerprint</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="n">fingerprint</span><span class="p">[</span><span class="s1">&#39;host&#39;</span><span class="p">],</span> <span class="n">fingerprint</span><span class="p">[</span><span class="s1">&#39;pid&#39;</span><span class="p">])</span>
 </code></pre></div>
 
-
 <p>Here, we handle the <code>ping</code> command, just like the method <code>msg_ping()</code> does; indeed nothing stops you to write more than a handler for a given message, but remember that they are processed in random order. Obviously we need to give the decorated method a different name, otherwise the second one will redefine the first one. Being decorated with <code>MessageHandlerFullBody</code> the method receives the full body of the message and can access the fingerprint.</p>
 <p>Executing it we get:</p>
 <div class="highlight"><pre><span></span><code>$ python receive_ping.py 
@@ -352,7 +329,6 @@ postage.messaging: global_vhost set to staging
 Got a ping from ping_sender running on yoda with pid 26812
 Got a ping!
 </code></pre></div>
-
 
 <p>As we expected both handlers have been activated by the incoming message, and, not surprisingly, they have been processed out of order.</p>
 <p>The second trick handlers have in store for you is the Handler class. Instead of decorating a method you can define a class that inherits from <code>Handler</code> and decorate that; this class shall at least define a <code>call()</code> method without arguments (aside from <code>self</code>) that will be executed when the relative message arrives. This class can access <code>self.data</code>, which is the data passed by the decorator (either the message content or the full body), <code>self.reply_func</code> that defaults to <code>None</code> for non-RPC messages, and <code>self.processor</code> that is the underlying <code>MessageProcessor</code> object hosting the handler.</p>
@@ -366,7 +342,6 @@ Got a ping!
                   <span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">processor</span><span class="o">.</span><span class="vm">__class__</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>You can see that the definition of a basic handler class is pretty simple. When executed this gives the following:</p>
 <div class="highlight"><pre><span></span><code>$ python receive_ping.py 
 postage.messaging: global_vhost set to staging
@@ -375,7 +350,6 @@ Got a ping - processed by &lt;class &#39;__main__.MsgPing&#39;&gt;
 Got a ping from ping_sender running on yoda with pid 27596
 Got a ping!
 </code></pre></div>
-
 
 <p>Leveraging the full body access and the class handlers you can write advanced filters on incoming messages, and add interesting features like runtime configuration of your handlers or configuration through incoming messages.</p>
 <h2 id="full-code">Full code<a class="headerlink" href="#full-code" title="Permanent link">&para;</a></h2>
@@ -416,7 +390,6 @@ Got a ping!
         <span class="k">return</span> <span class="n">messaging</span><span class="o">.</span><span class="n">RpcCommand</span><span class="p">(</span><span class="s1">&#39;ping&#39;</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p><a href="/code/postage/facilities.py">source code</a></p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">postage</span> <span class="kn">import</span> <span class="n">messaging</span>
 <span class="kn">import</span> <span class="nn">facilities</span>
@@ -443,7 +416,6 @@ Got a ping!
 <span class="k">elif</span> <span class="n">answer</span><span class="o">.</span><span class="n">body</span><span class="p">[</span><span class="s1">&#39;content&#39;</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;exception&#39;</span><span class="p">:</span>
     <span class="nb">print</span> <span class="s2">&quot;An exception occoured! (</span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span><span class="p">(</span><span class="n">answer</span><span class="o">.</span><span class="n">body</span><span class="p">[</span><span class="s1">&#39;content&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">])</span>
 </code></pre></div>
-
 
 <p><a href="/code/postage/send_ping.py">source code</a></p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">postage</span> <span class="kn">import</span> <span class="n">messaging</span>
@@ -505,7 +477,6 @@ Got a ping!
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">scheduler</span><span class="o">.</span><span class="n">main</span><span class="p">():</span>
     <span class="k">pass</span>
 </code></pre></div>
-
 
 <p><a href="/code/postage/receive_ping.py">source code</a></p>
 <h2 id="conclusion">Conclusion<a class="headerlink" href="#conclusion" title="Permanent link">&para;</a></h2>

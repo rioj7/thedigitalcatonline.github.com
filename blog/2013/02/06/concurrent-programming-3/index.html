@@ -129,7 +129,6 @@
 <div class="highlight"><pre><span></span><code><span class="kt">pid_t</span> <span class="n">waitpid</span> <span class="p">(</span><span class="kt">pid_t</span> <span class="n">PID</span><span class="p">,</span> <span class="kt">int</span> <span class="o">*</span><span class="n">STATUS_PTR</span><span class="p">,</span> <span class="kt">int</span> <span class="n">OPTIONS</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>where <code>PID</code> is the PID of the process we are waiting for, <code>STATUS_PTR</code> a pointer to an integer which will contain the status of the child process (<code>NULL</code> if the information is not needed) and <code>OPTIONS</code> a set of options we have not to care about for now.</p>
 <p>This is an example of a program in which the parent creates a child process and waits until it ends up</p>
 <div class="highlight"><pre><span></span><code><span class="cp">#include</span> <span class="cpf">&lt;unistd.h&gt;</span><span class="cp"></span>
@@ -158,7 +157,6 @@
 <span class="p">}</span>
 </code></pre></div>
 
-
 <p>Let's save the code as <code>fork_demo3.c</code>, compile it and execute. The output I get from this program is the following</p>
 <div class="highlight"><pre><span></span><code>$ ./fork_demo3
 +parent+ Waiting <span class="k">for</span> the child to terminate...
@@ -172,7 +170,6 @@
 -child-
 +parent+ ...ended
 </code></pre></div>
-
 
 <p>Looking at it you can realize a very important thing about <code>waitpid()</code>: it is a so-called <strong>blocking system call</strong>; that is something that keeps running until a certain condition is met. In this case, <code>waitpid()</code> keeps doing nothing until the child ends. So waiting is a blocking synchronization technique.</p>
 <h2 id="relationships">Relationships<a class="headerlink" href="#relationships" title="Permanent link">&para;</a></h2>
@@ -204,12 +201,10 @@
 <span class="p">}</span>
 </code></pre></div>
 
-
 <p>Save it as <code>zombie_demo.c</code>, compile and run. Just after the child has printed its string open another terminal and run <code>ps xa</code>. The last lines of your output will be something like</p>
 <div class="highlight"><pre><span></span><code> <span class="m">4399</span> pts/1    S+     <span class="m">0</span>:00 ./zombie_demo
  <span class="m">4400</span> pts/1    Z+     <span class="m">0</span>:00 <span class="o">[</span>zombie_demo<span class="o">]</span> &lt;defunct&gt;
 </code></pre></div>
-
 
 <p>As you can see the first process listed is the parent, while the second, the child, is marked as defunct and its status is zombie (Z).</p>
 <h2 id="conclusion">Conclusion<a class="headerlink" href="#conclusion" title="Permanent link">&para;</a></h2>

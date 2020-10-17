@@ -68,7 +68,6 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
     &lt;span class="o"&gt;...&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;does not check if the object is a &lt;code&gt;list&lt;/code&gt; or a &lt;code&gt;dictionary&lt;/code&gt; (both would allow the &lt;code&gt;[1]&lt;/code&gt; notation), but if the object can be accessed by key (or index). When you accept a parameter in a function Python does not specify the type (leaving aside type hints) because you are not interested in accepting a given type or one of its derived types. You are interested in accepting something that provides the methods you will use.&lt;/p&gt;
 &lt;p&gt;The behaviour, in an object-oriented environment, is the run-time interface of the object. This is different from the static interface, which is the collection of the methods provided by the object. The run-time interface is the actual interface the object shows when it is used, and this encompasses the methods provided by its class, but also methods provided by parent classes, the metaclass and other entry points provided by &lt;code&gt;__getattr__&lt;/code&gt;.&lt;/p&gt;
 &lt;h2 id="complex-checks"&gt;Complex checks&lt;a class="headerlink" href="#complex-checks" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
@@ -84,7 +83,6 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
     &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="o"&gt;...&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;which tries to cover the methods a list-like object shall provide. This test, however, accepts objects that do not really behave like a list such as&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;FakeList&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
     &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;fakemethod&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
@@ -95,12 +93,10 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
             &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;fakemethod&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;It is unlikely that you will write such a class, but this shows you one of the potential pitfalls of the previous test, which is wrong because it tries to rely on the structure instead of testing the behaviour. The temptation to rely on &lt;code&gt;isinstance()&lt;/code&gt; is big&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="nb"&gt;isinstance&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;someobj&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;list&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
     &lt;span class="o"&gt;...&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;If possible this approach is worse than before, since it tests the exact type. Even if &lt;code&gt;isinstance()&lt;/code&gt; and &lt;code&gt;issubclass()&lt;/code&gt; are smart enough to walk through the hierarchy of parent classes, this excludes evary class that behaves like a list does not inherit from it.&lt;/p&gt;
 &lt;h2 id="back-to-delegation"&gt;Back to delegation&lt;a class="headerlink" href="#back-to-delegation" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
@@ -108,11 +104,9 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nb"&gt;issubclass&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;myclass&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;someclass&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;does no more perform a pure external check of the relationship between &lt;code&gt;someclass&lt;/code&gt; and &lt;code&gt;myclass&lt;/code&gt;. The first thing that &lt;code&gt;issubclass()&lt;/code&gt; does now is the following&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;someclass&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="fm"&gt;__subclasscheck__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;myclass&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;This is very natural because, after all, &lt;code&gt;someclass&lt;/code&gt; is the best source of judgement about being a subclass of itself.&lt;/p&gt;
 &lt;h2 id="a-new-type-of-subclass"&gt;A new type of subclass&lt;a class="headerlink" href="#a-new-type-of-subclass" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
@@ -121,11 +115,9 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
     &lt;span class="k"&gt;pass&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;or can be a &lt;em&gt;virtual&lt;/em&gt; subclass, obtained through registration&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;ParentClass&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;register&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;ChildClass&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;The difference between a real and a virtual subclass is very simple: a real subclass knows its relationship with the parent class through its &lt;code&gt;__bases__&lt;/code&gt; attribute, and can thus implicitly delegate the resolution of missing methods. A virtual subclass knows nothing about the class that registered it, and nowhere in the subclass will you find something that links it to the parent class. Thus, a virtual parent class is useful only as a categorization.&lt;/p&gt;
 &lt;h2 id="abstract-base-classes"&gt;Abstract Base Classes&lt;a class="headerlink" href="#abstract-base-classes" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
@@ -145,7 +137,6 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
 &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="o"&gt;...&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Where the &lt;code&gt;Sequence&lt;/code&gt; and the &lt;code&gt;MutableSequence&lt;/code&gt; ABCs register some built-in types of Python.&lt;/p&gt;
 &lt;p&gt;It is very important to understand that registering a class does not imply any form of check about methods or attributes. Registering is just the &lt;em&gt;promise&lt;/em&gt; that a given behaviour is provided by the registered class.&lt;/p&gt;
 &lt;p&gt;To demonstrate this let me provide you a very simple example made using one of the &lt;code&gt;collections&lt;/code&gt; classes&lt;/p&gt;
@@ -162,7 +153,6 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
 &lt;span class="go"&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;As you can see, the &lt;code&gt;MyClass&lt;/code&gt; class is initially not recognized as a subclass of &lt;code&gt;collections.Sequence&lt;/code&gt;, but after the registration &lt;code&gt;issubclass()&lt;/code&gt; returns &lt;code&gt;True&lt;/code&gt;, even if the class is still empty.&lt;/p&gt;
 &lt;h2 id="how-to-create-abcs"&gt;How to create ABCs&lt;a class="headerlink" href="#how-to-create-abcs" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;The example given by the official documentation is very simple and clear&lt;/p&gt;
@@ -177,7 +167,6 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
 &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="nb"&gt;isinstance&lt;/span&gt;&lt;span class="p"&gt;((),&lt;/span&gt; &lt;span class="n"&gt;MyABC&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;All you need to do is to create a class and use the &lt;code&gt;ABCMeta&lt;/code&gt; metaclass provided by the &lt;code&gt;abc&lt;/code&gt; module and you will obtain a class that has the &lt;code&gt;register()&lt;/code&gt; method and a suitable implementation of &lt;code&gt;__subclasscheck__()&lt;/code&gt; and &lt;code&gt;__instancecheck__()&lt;/code&gt;. Checking again the &lt;code&gt;_collections_abc.py&lt;/code&gt; file you can see that this is exactly the way the &lt;code&gt;collections&lt;/code&gt; classes are implemented&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="o"&gt;...&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
 
@@ -189,7 +178,6 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
 
 &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="o"&gt;...&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;h2 id="are-you-scared-of-metaclasses"&gt;Are you scared of metaclasses?&lt;a class="headerlink" href="#are-you-scared-of-metaclasses" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;Metaclasses are a strange topic in Python. Most of the times the advice given to the novice is "Don't use them", like they were an error of the language and something that shall be avoided.&lt;/p&gt;
@@ -213,7 +201,6 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
 &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;c&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;answer&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;42&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Now, when you build a class you use a metaclass (like a blueprint) and the metaclass can put things into the class.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# Metaclass definition&lt;/span&gt;
 &lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;NewType&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;type&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
@@ -227,7 +214,6 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
 &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;Child&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;answer&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;42&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Sounds complex? Not at all, in my opinion. If you check the two examples you will see that they are exactly the same thing, the first referring to the instance-class relationship, the second to the class-metaclass one.&lt;/p&gt;
 &lt;p&gt;This is all you need to understand metaclasses. When you build a class you need to put things into it, for example you need to put the &lt;code&gt;__getattribute__&lt;/code&gt; or the &lt;code&gt;__new__()&lt;/code&gt; methods. This is done by the metaclass, which is usually &lt;code&gt;type&lt;/code&gt; for every class. Indeed, if you check the &lt;code&gt;__class__&lt;/code&gt; attribute into a class you get exactly this&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="nb"&gt;int&lt;/span&gt;
@@ -236,7 +222,6 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
 &lt;span class="go"&gt;&amp;lt;class &amp;#39;type&amp;#39;&amp;gt;&lt;/span&gt;
 &lt;span class="go"&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;h2 id="metaclasses-and-mro"&gt;Metaclasses and MRO&lt;a class="headerlink" href="#metaclasses-and-mro" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;A slightly advanced annotation: when I say that the metaclass &lt;em&gt;puts&lt;/em&gt; the methods into the class I'm simplifying the whole thing. As a matter of fact, like a class provides methods to the instance at runtime through the &lt;code&gt;__class__&lt;/code&gt; attribute and the MRO protocol, the metaclass provides methods for the class. Attributes, instead, are put inside the class by the &lt;code&gt;__new__&lt;/code&gt; or &lt;code&gt;__init__&lt;/code&gt; methods of the metaclass.&lt;/p&gt;
@@ -249,7 +234,6 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
 &lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Child&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Parent&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt; &lt;span class="k"&gt;pass&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;calling the method &lt;code&gt;get_name()&lt;/code&gt; on an instance of &lt;code&gt;Child&lt;/code&gt; will look for it first into the &lt;code&gt;Child&lt;/code&gt; class, then into &lt;code&gt;Parent&lt;/code&gt; and &lt;code&gt;GrandParent&lt;/code&gt;, in this order. Finally, it will check &lt;code&gt;object&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;What happens to the MRO when a class of this hierarchy defines a different metaclass? For example&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;NewType&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;type&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt; &lt;span class="k"&gt;pass&lt;/span&gt;
@@ -261,7 +245,6 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
 &lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Child&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Parent&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;metaclass&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;NewType&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt; &lt;span class="k"&gt;pass&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;In this case everything works as usual, but after checking &lt;code&gt;object&lt;/code&gt; the MRO will also check the &lt;code&gt;NewType&lt;/code&gt; metaclass (and its ancestors).&lt;/p&gt;
 &lt;p&gt;So, metaclasses can act as mixins, and they are queried only at the end of the usual MRO. This is exactly what happens using multiple inheritance if &lt;code&gt;NewType&lt;/code&gt; were a standard parent class that does not have &lt;code&gt;Parent&lt;/code&gt; or &lt;code&gt;GrandParent&lt;/code&gt; as ancestors.&lt;/p&gt;
 &lt;p&gt;Metaclasses are not part of the MRO however, since the MRO just deals with standard inheritance. If you check the MRO of the &lt;code&gt;Child&lt;/code&gt; class, you will see that the metaclass is not included&lt;/p&gt;
@@ -271,7 +254,6 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
 &lt;span class="go"&gt;&amp;lt;class &amp;#39;__main__.NewType&amp;#39;&amp;gt;&lt;/span&gt;
 &lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;h2 id="abstract-methods"&gt;Abstract methods&lt;a class="headerlink" href="#abstract-methods" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;Why are ABC called &lt;code&gt;abstract&lt;/code&gt;? ABCs can be instantiated, so they are after all not pure interfaces (like Java ones, for example)&lt;/p&gt;
@@ -283,14 +265,12 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
 &lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;They may however define some methods as &lt;em&gt;abstract&lt;/em&gt;, using the &lt;code&gt;abc.abstractmethod&lt;/code&gt; decorator, which prevents the class from being instantiated if the method is not implemented. Let me give you a simple example: I define an Abstract Base Class with and abstract method&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;MyABC&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;metaclass&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;abc&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ABCMeta&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
     &lt;span class="nd"&gt;@abc&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;abstractmethod&lt;/span&gt;
     &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
         &lt;span class="k"&gt;pass&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;and try to instantiate it. Python complains&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;MyABC&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
@@ -299,19 +279,16 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
 &lt;span class="gr"&gt;TypeError&lt;/span&gt;: &lt;span class="n"&gt;Can&amp;#39;t instantiate abstract class MyABC with abstract methods get&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;I am forced to create a new class that inherits from &lt;code&gt;MyABC&lt;/code&gt; and implements the method&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Concrete&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;MyABC&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
     &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
         &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Now I can instantiate the class.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Concrete&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
 &lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;Check the official documentation of Abstract Base Classes for a complete description of &lt;code&gt;@abstractmethod&lt;/code&gt; and &lt;code&gt;@abstractproperty&lt;/code&gt;.&lt;/p&gt;
 &lt;h2 id="what-about-the-behaviour"&gt;What about the behaviour?&lt;a class="headerlink" href="#what-about-the-behaviour" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
@@ -348,7 +325,6 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
 &lt;span class="go"&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Given that, Python does nothing special to treat functions like first-class citizens, it simply recognizes that they are objects just like any other thing.&lt;/p&gt;
 &lt;h3 id="callables"&gt;Callables&lt;a class="headerlink" href="#callables" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h3&gt;
 &lt;p&gt;While Python has the well-defined &lt;code&gt;function&lt;/code&gt; class seen in the above example, it relies more on the presence of the &lt;code&gt;__call__&lt;/code&gt; method. That is, in Python any object can act as a function, provided that it has this method, which is invoked when the object is "called".&lt;/p&gt;
@@ -360,7 +336,6 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
 &lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="fm"&gt;__call__&lt;/span&gt;
 &lt;span class="go"&gt;&amp;lt;method-wrapper &amp;#39;__call__&amp;#39; of function object at 0xb6709fa4&amp;gt;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;h2 id="metaprogramming"&gt;Metaprogramming&lt;a class="headerlink" href="#metaprogramming" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;While this is not a post on languages theory, it is worth spending a couple of words about metaprogramming. Usually "programming" can be seen as the task of applying transformations to data. Data and functions can be put together by an object-oriented approach, but they still are two different things. But you soon realize that, as you may run some code to change data, you may also run some code to change the code itself.&lt;/p&gt;
@@ -381,14 +356,12 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
     &lt;span class="k"&gt;pass&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;where &lt;code&gt;dec&lt;/code&gt; is the name of the decorator and the function &lt;code&gt;func&lt;/code&gt; is said to be &lt;em&gt;decorated&lt;/em&gt; by it. As you can see any reader can quickly identify that the function has a special label attached, thus being altered in its behaviour.&lt;/p&gt;
 &lt;p&gt;This form, however, is just a simplification of the more generic form&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;func&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;args&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;**&lt;/span&gt;&lt;span class="n"&gt;kwds&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
     &lt;span class="k"&gt;pass&lt;/span&gt;
 &lt;span class="n"&gt;func&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;dec&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;func&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;But what actually ARE the changes that you may want do to functions or classes? Let us stick for the moment to a very simple task: adding attributes. This is by no means a meaningless task, since there are many practical use cases that make use of it. Let us first test how we can add attributes to functions in plain Python&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;func&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
@@ -398,7 +371,6 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
 &lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="n"&gt;func&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;attr&lt;/span&gt;
 &lt;span class="go"&gt;&amp;#39;a custom function attribute&amp;#39;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;and to classes&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;SomeClass&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
@@ -411,7 +383,6 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
 &lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="n"&gt;s&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;attr&lt;/span&gt;
 &lt;span class="go"&gt;&amp;#39;a custom class attribute&amp;#39;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;As you can see adding attributes to a class correctly results in a class attribute, which is thus shared by any instance of that class (check &lt;a href="https://www.thedigitalcatonline.com/blog/2014/08/20/python-3-oop-part-2-classes-and-members/"&gt;this post&lt;/a&gt; for some explanations about class attributes and sharing).&lt;/p&gt;
 &lt;h2 id="class-based-decorators-without-arguments"&gt;Class-based decorators without arguments&lt;a class="headerlink" href="#class-based-decorators-without-arguments" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
@@ -426,7 +397,6 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
         &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;obj&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;As you can see there is already a lot of things that shall be clarified. First of all the class, when used as a decorator, is initialized with the object that is going to be decorated, here called &lt;code&gt;obj&lt;/code&gt; (most of the time it is just called &lt;code&gt;f&lt;/code&gt; for function, but you know that this is only a special case).&lt;/p&gt;
 &lt;p&gt;While the &lt;code&gt;__init__()&lt;/code&gt; method is called at decoration time, the &lt;code&gt;__call__()&lt;/code&gt; method of the decorator is called instead of the same method of the decorated object. In this case (decorator without arguments), the &lt;code&gt;__call__()&lt;/code&gt; method of the decorator does not receive any argument. In this example we just "redirect" the call to the original function, which was stored during the initialization step.&lt;/p&gt;
 &lt;p&gt;So you see that in this case we have two different moments in which we may alter the behaviour of the decorated objects. The first is at its definition and the second is when it is actually called.&lt;/p&gt;
@@ -436,7 +406,6 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
     &lt;span class="k"&gt;pass&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;When Python parses the file and defines the function &lt;code&gt;func&lt;/code&gt; the code it executes under the hood is&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;func&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
     &lt;span class="k"&gt;pass&lt;/span&gt;
@@ -444,19 +413,16 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
 &lt;span class="n"&gt;func&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;CustomAttr&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;func&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;according to the definition of decorator. This is why the class shall accept the decorated object as a parameter in its &lt;code&gt;__init__()&lt;/code&gt; method.&lt;/p&gt;
 &lt;p&gt;Note that in this case the &lt;code&gt;func&lt;/code&gt; object we obtain after the decoration is no more a function but a &lt;code&gt;CustomAttr&lt;/code&gt; object&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="n"&gt;func&lt;/span&gt;
 &lt;span class="go"&gt;&amp;lt;__main__.CustomAttr object at 0xb6f5ea8c&amp;gt;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;and this is why in the &lt;code&gt;__init__()&lt;/code&gt; method I attached the &lt;code&gt;attr&lt;/code&gt; attribute to the class instance &lt;code&gt;self&lt;/code&gt; and not to &lt;code&gt;obj&lt;/code&gt;, so that now this works&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="n"&gt;func&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;attr&lt;/span&gt;
 &lt;span class="go"&gt;&amp;#39;a custom function attribute&amp;#39;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;This replacement is also the reason why you shall also redefine &lt;code&gt;__call__()&lt;/code&gt;. When you write &lt;code&gt;func()&lt;/code&gt; you are not executing the function but calling the instance of &lt;code&gt;CustomAttr&lt;/code&gt; returned by the decoration.&lt;/p&gt;
 &lt;h2 id="class-based-decorators-with-arguments"&gt;Class-based decorators with arguments&lt;a class="headerlink" href="#class-based-decorators-with-arguments" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
@@ -475,7 +441,6 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
 &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;func&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
     &lt;span class="k"&gt;pass&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;Now the &lt;code&gt;__init__()&lt;/code&gt; method shall accept some arguments, with the standard rules of Python functions for named and default arguments. The &lt;code&gt;__call__()&lt;/code&gt; method receives the decorated object, which in the previous case was passed to the &lt;code&gt;__init__()&lt;/code&gt; method.&lt;/p&gt;
 &lt;p&gt;The biggest change, however is that &lt;code&gt;__call__()&lt;/code&gt; is not run when you call the decorated object, but immediately after &lt;code&gt;__init__()&lt;/code&gt; during the decoration phase. This results in the following difference: while in the previous case the decorated object was no more itself, but an instance of the decorator, now the decorated objects becomes the return value of the &lt;code&gt;__call__()&lt;/code&gt; method.&lt;/p&gt;
@@ -498,7 +463,6 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
     &lt;span class="k"&gt;pass&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Here the returned object is no more the decorated one, but a new function &lt;code&gt;wrap()&lt;/code&gt; defined locally. It is interesting to show how Python identifies it&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="nd"&gt;@CustomAttrArg&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;span class="gp"&gt;... &lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;func&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
@@ -507,7 +471,6 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
 &lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="n"&gt;func&lt;/span&gt;
 &lt;span class="go"&gt;&amp;lt;function CustomAttrArg.__call__.&amp;lt;locals&amp;gt;.wrap at 0xb70185cc&amp;gt;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;This pattern enables you to do every sort of things with the decorated object. Not only to change it (adding attributes, for example), but also pre- or post- filtering its results. You may start to understand that what we called metaprogramming may be very useful for everyday tasks, and not only for some obscure wizardry.&lt;/p&gt;
 &lt;h3 id="decorators-and-prototypes"&gt;Decorators and prototypes&lt;a class="headerlink" href="#decorators-and-prototypes" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h3&gt;
@@ -526,7 +489,6 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
     &lt;span class="k"&gt;pass&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;This behaves like the equivalent case with classes. The function is passed as an argument to the &lt;code&gt;decorate()&lt;/code&gt; function by the decoration process that calls it passing the decorated object. When you actually call the function, however, you are actually calling &lt;code&gt;wrap()&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;As happens for class-based decorators, the parametrization changes the calling procedure. This is the code&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;decorate&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;arg1&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
@@ -540,7 +502,6 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
 &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;func&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;arg&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
     &lt;span class="k"&gt;pass&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;As you see it is not really straightforward, and this is the reason I preferred to discuss it as the last case. Recall what we learned about class-based decorators: the first call to the &lt;code&gt;decorate()&lt;/code&gt; function happens when the decorator is called with an argument. Thus &lt;code&gt;@decorate(1)&lt;/code&gt; calls &lt;code&gt;decorate()&lt;/code&gt; passing &lt;code&gt;1&lt;/code&gt; as &lt;code&gt;arg1&lt;/code&gt;, and this function returns the &lt;code&gt;wrap()&lt;/code&gt; local function.&lt;/p&gt;
 &lt;p&gt;This second function accepts another function as an argument, and indeed it is used in the actual decoration process, which can be represented by the code &lt;code&gt;func = wrap(func)&lt;/code&gt;. This &lt;code&gt;wrap()&lt;/code&gt; function, being used to decorate &lt;code&gt;func()&lt;/code&gt;, wants to return a compatible object, that is in this case a function that accepts a single argument. This is why, in turn, &lt;code&gt;wrap()&lt;/code&gt; defines and returns a &lt;code&gt;_wrap()&lt;/code&gt; local function, which eventually uses both the argument passed to &lt;code&gt;func()&lt;/code&gt; and the argument passed to the decorator.&lt;/p&gt;
@@ -567,7 +528,6 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
         &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;name&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&lt;/span&gt; &lt;span class="n"&gt;other&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;name&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;This is a simple class that defines the &lt;code&gt;==&lt;/code&gt; and &lt;code&gt;&amp;lt;&lt;/code&gt; comparison methods.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="n"&gt;p1&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Person&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;Bob&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="n"&gt;p2&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Person&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;Alice&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
@@ -581,7 +541,6 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
     &lt;span class="n"&gt;p1&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;=&lt;/span&gt; &lt;span class="n"&gt;p2&lt;/span&gt;
 &lt;span class="gr"&gt;TypeError&lt;/span&gt;: &lt;span class="n"&gt;unorderable types: Person() &amp;gt;= Person()&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;A big warning: Python doesn't complain if you try to perform the &lt;code&gt;&amp;gt;&lt;/code&gt; and &lt;code&gt;!=&lt;/code&gt; comparisons but lacking the dedicated methods it does perform a "standard" comparison. This means that, as the documentation states &lt;a href="https://docs.python.org/2/reference/datamodel.html#object.__lt__"&gt;here&lt;/a&gt;, "There are no implied relationships among the comparison operators. The truth of x==y does not imply that x!=y is false."&lt;/p&gt;
 &lt;p&gt;With the &lt;code&gt;total_ordering&lt;/code&gt; decorator, however, all six comparisons become available&lt;/p&gt;
@@ -599,7 +558,6 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
         &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;name&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&lt;/span&gt; &lt;span class="n"&gt;other&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;name&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="n"&gt;p1&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Person&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;Bob&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="n"&gt;p2&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Person&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;Alice&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="n"&gt;p1&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;p2&lt;/span&gt;
@@ -615,7 +573,6 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
 &lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="n"&gt;p1&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;=&lt;/span&gt; &lt;span class="n"&gt;p2&lt;/span&gt;
 &lt;span class="go"&gt;False&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;h2 id="final-words"&gt;Final words&lt;a class="headerlink" href="#final-words" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;Decorators are a very powerful tool, and they are worth learning. This may be for you just the first step into the amazing world of metaprogramming or just an advanced technique you may use to simplify your code. Whatever you do with them be sure to understand the difference between the two cases (with and without arguments) and don't avoid function-based decorators just because their syntax is a bit complex.&lt;/p&gt;
@@ -647,7 +604,6 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
 &lt;span class="s2"&gt;&amp;quot;A test string&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;msp&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;a test  string&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;The module defines a &lt;code&gt;StringProcessor&lt;/code&gt; class that I can inherit and customize adding methods that have a standard signature &lt;code&gt;(self, str)&lt;/code&gt; and are decorated with &lt;code&gt;@stringfilter&lt;/code&gt;. This class can later be instantiated and the instance used to directly process a string and return the result. Internally the class automatically executes all the decorated methods in succession. I also would like the class to obey the order I defined the filters: first defined, first executed.&lt;/p&gt;
 &lt;h2 id="the-hitchhikers-guide-to-metaclasses"&gt;The Hitchhiker's Guide To Metaclasses&lt;a class="headerlink" href="#the-hitchhikers-guide-to-metaclasses" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;How can metaclasses help to reach this target?&lt;/p&gt;
@@ -659,7 +615,6 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
     &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__prepare__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;name&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;bases&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;**&lt;/span&gt;&lt;span class="n"&gt;kwds&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
         &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;collections&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;OrderedDict&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;This way, when the class will be created, an &lt;code&gt;OrderedDict&lt;/code&gt; will be used to host the namespace, allowing us to keep the definition order. Please note that the signature &lt;code&gt;__prepare__(name, bases, **kwds)&lt;/code&gt; is enforced by the language. If you want the method to get the metaclass as a first argument (because the code of the method needs it) you have to change the signature to &lt;code&gt;__prepare__(metacls, name, bases, **kwds)&lt;/code&gt; and decorate it with &lt;code&gt;@classmethod&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;The second function we want to define in our metaclass is &lt;code&gt;__new__&lt;/code&gt;. Just like happens for the instantiation of classes, this method is invoked by Python to get a new instance of the metaclass, and is run before &lt;code&gt;__init__&lt;/code&gt;. Its signature has to be &lt;code&gt;__new__(metacls, name, bases, namespace, **kwds)&lt;/code&gt; and the result shall be an instance of the metaclass. As for its normal class counterpart (after all a metaclass is a class), &lt;code&gt;__new__()&lt;/code&gt; usually wraps the same method of the parent class, &lt;code&gt;type&lt;/code&gt; in this case, adding its own customizations.&lt;/p&gt;
@@ -677,7 +632,6 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
         &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;result&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Now we have to find a way to mark all filter methods with a &lt;code&gt;_filter&lt;/code&gt; attribute.&lt;/p&gt;
 &lt;h2 id="the-anatomy-of-purple-decorators"&gt;The Anatomy of Purple Decorators&lt;a class="headerlink" href="#the-anatomy-of-purple-decorators" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;&lt;strong&gt;decorate&lt;/strong&gt;: &lt;em&gt;to add something to an object or place, especially in order to make it more attractive&lt;/em&gt; (Cambridge Dictionary)&lt;/p&gt;
@@ -689,7 +643,6 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
     &lt;span class="n"&gt;func&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_filter&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kc"&gt;True&lt;/span&gt;
     &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;func&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;As you can see the decorator just creates an attribute called &lt;code&gt;_filter&lt;/code&gt; into the function (remember that functions are objects). The actual value of this attribute is not important in this case, since we are just interested in telling apart class members that contain it.&lt;/p&gt;
 &lt;h2 id="the-dynamics-of-a-callable-object"&gt;The Dynamics of a Callable Object&lt;a class="headerlink" href="#the-dynamics-of-a-callable-object" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
@@ -705,7 +658,6 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
 
         &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;_string&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;A quick review of this simple function shows that it accepts the string as an argument, stores it in a local variable and loops over the filters, executing each of them on the local string, that is on the result of the previous filter.&lt;/p&gt;
 &lt;p&gt;The filter functions are extracted from the &lt;code&gt;self._filters&lt;/code&gt; list, that is compiled by the &lt;code&gt;FilterClass&lt;/code&gt; metaclass we already discussed.&lt;/p&gt;
@@ -723,7 +675,6 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
         &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;string&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;replace&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;  &amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39; &amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;The two &lt;code&gt;capitalize()&lt;/code&gt; and &lt;code&gt;remove_double_spaces()&lt;/code&gt; methods have been decorated, so they will be applied in order to any string passed when calling the class. A quick example of this last class is&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;strproc&lt;/span&gt;
 &lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="n"&gt;msp&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;strproc&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;MyStringProcessor&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
@@ -735,7 +686,6 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
 &lt;span class="go"&gt;OUTPUT STRING: A test string&lt;/span&gt;
 &lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;That's it!&lt;/p&gt;
 &lt;h2 id="final-words"&gt;Final words&lt;a class="headerlink" href="#final-words" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
@@ -786,7 +736,6 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
     &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="o"&gt;...&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;where the methods of the &lt;code&gt;list&lt;/code&gt; type are accessed (not called) just to force the object to raise the &lt;code&gt;AttributeError&lt;/code&gt; exception if they are not present. This code, however, is not only ugly but also wrong. If you recall the "Enter the Composition" section of the &lt;a href="https://www.thedigitalcatonline.com/blog/2014/08/20/python-3-oop-part-3-delegation-composition-and-inheritance/"&gt;third post&lt;/a&gt; of this series, you know that in Python you can always customize the &lt;code&gt;__getattr__()&lt;/code&gt; method, which is called whenever the requested attribute is not found in the object. So I could write a class that passes the test but actually does not act like a list&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;FakeList&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
     &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;fakemethod&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
@@ -796,7 +745,6 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
         &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;name&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;append&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;count&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;extend&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;index&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;insert&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;...&lt;/span&gt;&lt;span class="p"&gt;]:&lt;/span&gt;
             &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;fakemethod&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;This is obviously just an example, and no one will ever write such a class, but this demonstrates that just accessing methods does not guarantee that a class &lt;em&gt;acts&lt;/em&gt; like the one we are expecting.&lt;/p&gt;
 &lt;p&gt;There are many examples that could be done leveraging the highly dynamic nature of Python and its rich object model. I would summarize them by saying that sometimes you'd better to check the type of the incoming object.&lt;/p&gt;
@@ -821,7 +769,6 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
 &lt;span class="go"&gt;True&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;As you can see the function can also walk the class hierarchy, so the check is not so trivial like the one you would obtain by directly using &lt;code&gt;type()&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;The &lt;code&gt;isinstance()&lt;/code&gt; function, however, does not completely solve the problem. If we write a class that actually &lt;em&gt;acts&lt;/em&gt; like a &lt;code&gt;list&lt;/code&gt; but does not inherit from it, &lt;code&gt;isinstance()&lt;/code&gt; does not recognize the fact that the two may be considered the same thing. The following code returns &lt;code&gt;False&lt;/code&gt; regardless the content of the &lt;code&gt;MyList&lt;/code&gt; class&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;MyList&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
@@ -831,7 +778,6 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
 &lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="nb"&gt;isinstance&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;ml&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;list&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;span class="go"&gt;False&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;since &lt;code&gt;isinstance()&lt;/code&gt; does not check the content of the class or its behaviour, it just considers the class and its ancestors.&lt;/p&gt;
 &lt;p&gt;The problem, thus, may be summed up with the following question: what is the best way to test that an object exposes a given interface? Here, the word &lt;em&gt;interface&lt;/em&gt; is used for its natural meaning, without any reference to other programming solutions, which however address the same problem.&lt;/p&gt;
@@ -852,7 +798,6 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
    &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="o"&gt;...&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;where &lt;code&gt;cls&lt;/code&gt; is the class where they are injected, that is the one representing the promised behaviour. The two built-ins, however, have a reversed argument order, where the behaviour comes after the tested object: when you write &lt;code&gt;isinstance([], list)&lt;/code&gt; you want to check if the &lt;code&gt;[]&lt;/code&gt; instance has the &lt;code&gt;list&lt;/code&gt; behaviour. This is the reason behind the name choice: just calling the methods &lt;code&gt;__isinstance__()&lt;/code&gt; and &lt;code&gt;__issubclass__()&lt;/code&gt; and passing arguments in a reversed order would have been confusing.&lt;/p&gt;
 &lt;h4 id="this-is-abc"&gt;This is ABC&lt;a class="headerlink" href="#this-is-abc" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
 &lt;p&gt;The proposed solution is thus called Abstract Base Classes, as it provides a way to attach to a concrete class a virtual class with the only purpose of signaling a promised behaviour to anyone inspecting it with &lt;code&gt;isinstance()&lt;/code&gt; or &lt;code&gt;issubclass()&lt;/code&gt;.&lt;/p&gt;
@@ -869,7 +814,6 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
 &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="nb"&gt;isinstance&lt;/span&gt;&lt;span class="p"&gt;((),&lt;/span&gt; &lt;span class="n"&gt;MyABC&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Here, the &lt;code&gt;MyABC&lt;/code&gt; class is provided the &lt;code&gt;ABCMeta&lt;/code&gt; metaclass. This puts the two &lt;code&gt;__instancecheck__()&lt;/code&gt; and &lt;code&gt;__subclasscheck__()&lt;/code&gt; methods inside &lt;code&gt;MyABC&lt;/code&gt; so that, when issuing &lt;code&gt;isinstance()&lt;/code&gt;, what Python actually ececutes is&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="n"&gt;d&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;a&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;
 &lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="nb"&gt;isinstance&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;d&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;MyABC&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
@@ -882,13 +826,11 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
 &lt;span class="go"&gt;True&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;After the definition of &lt;code&gt;MyABC&lt;/code&gt; we need a way to signal that a given class is an instance of the Abstract Base Class and this happens through the &lt;code&gt;register()&lt;/code&gt; method, provided by the &lt;code&gt;ABCMeta&lt;/code&gt; metaclass. Calling &lt;code&gt;MyABC.register(tuple)&lt;/code&gt; we record inside &lt;code&gt;MyABC&lt;/code&gt; the fact that the &lt;code&gt;tuple&lt;/code&gt; class shall be identified as a subclass of &lt;code&gt;MyABC&lt;/code&gt; itself. This is analogous to saying that &lt;code&gt;tuple&lt;/code&gt; inherits from &lt;code&gt;MyABC&lt;/code&gt; but not quite the same. As already said registering a class in an Abstract Base Class with &lt;code&gt;register()&lt;/code&gt; does not affect the class hierarchy. Indeed, the whole &lt;code&gt;tuple&lt;/code&gt; class is unchanged.&lt;/p&gt;
 &lt;p&gt;The current implementation of ABCs stores the registered types inside the &lt;code&gt;_abc_registry&lt;/code&gt; attribute. Actually it stores there weak references to the registered types (this part is outside the scope of this article, so I'm not detailing it)&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="n"&gt;MyABC&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_abc_registry&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;
 &lt;span class="go"&gt;{&amp;lt;weakref at 0xb682966c; to &amp;#39;type&amp;#39; at 0x83dcca0 (tuple)&amp;gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;h2 id="movie-trivia"&gt;Movie Trivia&lt;a class="headerlink" href="#movie-trivia" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;Section titles come from the following movies: &lt;em&gt;The Breakfast Club (1985)&lt;/em&gt;, &lt;em&gt;E.T. the Extra-Terrestrial (1982)&lt;/em&gt;, &lt;em&gt;Who Framed Roger Rabbit (1988)&lt;/em&gt;, &lt;em&gt;Trading Places (1983)&lt;/em&gt;, &lt;em&gt;This is Spinal Tap (1984)&lt;/em&gt;.&lt;/p&gt;
@@ -910,7 +852,6 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
 &lt;span class="go"&gt;()&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;The variable &lt;code&gt;a&lt;/code&gt; is an instance of the &lt;code&gt;int&lt;/code&gt; class, and the latter inherits from &lt;code&gt;object&lt;/code&gt;, which inherits from nothing. This demonstrates that &lt;code&gt;object&lt;/code&gt; is at the top of the class hierarchy. However, as you can see, both &lt;code&gt;int&lt;/code&gt; and &lt;code&gt;object&lt;/code&gt; are called &lt;em&gt;classes&lt;/em&gt; (&lt;code&gt;&amp;lt;class 'int'&amp;gt;&lt;/code&gt;, &lt;code&gt;&amp;lt;class 'object'&amp;gt;&lt;/code&gt;). Indeed, while &lt;code&gt;a&lt;/code&gt; is an instance of the &lt;code&gt;int&lt;/code&gt; class, &lt;code&gt;int&lt;/code&gt; itself is an instance of another class, &lt;em&gt;a class that is instanced to build classes&lt;/em&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="nb"&gt;type&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;span class="go"&gt;&amp;lt;class &amp;#39;int&amp;#39;&amp;gt;&lt;/span&gt;
@@ -922,7 +863,6 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
 &lt;span class="go"&gt;&amp;lt;class &amp;#39;type&amp;#39;&amp;gt;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Since in Python everything is an object, everything is the instance of a class, even classes. Well, &lt;code&gt;type&lt;/code&gt; is the class that is instanced to get classes. So remember this: &lt;code&gt;object&lt;/code&gt; is the base of every object, &lt;code&gt;type&lt;/code&gt; is the class of every type. Sounds puzzling? It is not your fault, don't worry. However, just to strike you with the finishing move, this is what Python is built on&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="nb"&gt;type&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;object&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;span class="go"&gt;&amp;lt;class &amp;#39;type&amp;#39;&amp;gt;&lt;/span&gt;
@@ -930,14 +870,12 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
 &lt;span class="go"&gt;(&amp;lt;class &amp;#39;object&amp;#39;&amp;gt;,)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;If you are not about to faint at this point chances are that you are Guido van Rossum of one of his friends down at the Python core development team (in this case let me thank you for your beautiful creation). You may get a cup of tea, if you need it.&lt;/p&gt;
 &lt;p&gt;Jokes apart, at the very base of Python type system there are two things, &lt;code&gt;object&lt;/code&gt; and &lt;code&gt;type&lt;/code&gt;, which are inseparable. The previous code shows that &lt;code&gt;object&lt;/code&gt; is an instance of &lt;code&gt;type&lt;/code&gt;, and &lt;code&gt;type&lt;/code&gt; inherits from &lt;code&gt;object&lt;/code&gt;. Take your time to understand this subtle concept, as it is very important for the upcoming discussion about metaclasses.&lt;/p&gt;
 &lt;p&gt;When you think you grasped the &lt;code&gt;type&lt;/code&gt;/&lt;code&gt;object&lt;/code&gt; matter read this and start thinking again&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="nb"&gt;type&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;type&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;span class="go"&gt;&amp;lt;class &amp;#39;type&amp;#39;&amp;gt;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;h2 id="the-metaclasses-take-python"&gt;The Metaclasses Take Python&lt;a class="headerlink" href="#the-metaclasses-take-python" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;You are now familiar with Python classes. You know that a class is used to create an instance, and that the structure of the latter is ruled by the source class and all its parent classes (until you reach &lt;code&gt;object&lt;/code&gt;).&lt;/p&gt;
@@ -959,7 +897,6 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
 &lt;span class="go"&gt;&amp;lt;class &amp;#39;type&amp;#39;&amp;gt;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;h4 id="metaclasses-2-singleton-day"&gt;Metaclasses 2: Singleton Day&lt;a class="headerlink" href="#metaclasses-2-singleton-day" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
 &lt;p&gt;Metaclasses are a very advanced topic in Python, but they have many practical uses. For example, by means of a custom metaclass you may log any time a class is instanced, which can be important for applications that shall keep a low memory usage or have to monitor it.&lt;/p&gt;
 &lt;p&gt;I am going to show here a very simple example of metaclass, the Singleton. Singleton is a well known design pattern, and many description of it may be found on the Internet. It has also been heavily criticized mostly because its bad behaviour when subclassed, but here I do not want to introduce it for its technological value, but for its simplicity (so please do not question the choice, it is just an example).&lt;/p&gt;
@@ -972,7 +909,6 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
              &lt;span class="bp"&gt;cls&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;instance&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;super&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Singleton&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="bp"&gt;cls&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="fm"&gt;__call__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;args&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;**&lt;/span&gt;&lt;span class="n"&gt;kw&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
         &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="bp"&gt;cls&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;instance&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;We are defining a new type, which inherits from &lt;code&gt;type&lt;/code&gt; to provide all bells and whistles of Python classes. We override the &lt;code&gt;__call__&lt;/code&gt; method, that is a special method invoked when we call the class, i.e. when we instance it. The new method wraps the original method of &lt;code&gt;type&lt;/code&gt; by calling it only when the &lt;code&gt;instance&lt;/code&gt; attribute is not set, i.e. the first time the class is instanced, otherwise it just returns the recorded instance. As you can see this is a very basic cache class, the only trick is that it is applied to the creation of instances.&lt;/p&gt;
 &lt;p&gt;To test the new type we need to define a new class that uses it as its metaclass&lt;/p&gt;
@@ -989,7 +925,6 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
 &lt;span class="go"&gt;&amp;#39;0xb68030ec&amp;#39;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;By using the &lt;code&gt;is&lt;/code&gt; operator we test that the two objects are the very same structure in memory, that is their ids are the same, as explicitly shown. What actually happens is that when you issue &lt;code&gt;a = ASingleton()&lt;/code&gt; the &lt;code&gt;ASingleton&lt;/code&gt; class runs its &lt;code&gt;__call__()&lt;/code&gt; method, which is taken from the &lt;code&gt;Singleton&lt;/code&gt; type behind the class. That method recognizes that no instance has been created (&lt;code&gt;Singleton.instance&lt;/code&gt; is &lt;code&gt;None&lt;/code&gt;) and acts just like any standard class does. When you issue &lt;code&gt;b = ASingleton()&lt;/code&gt; the very same things happen, but since &lt;code&gt;Singleton.instance&lt;/code&gt; is now different from &lt;code&gt;None&lt;/code&gt; its value (the previous instance) is directly returned.&lt;/p&gt;
 &lt;p&gt;Metaclasses are a very powerful programming tool and leveraging them you can achieve very complex behaviours with a small effort. Their use is a must every time you are actually metaprogramming, that is you are writing code that has to drive the way your code works. Good examples are creational patterns (injecting custom class attributes depending on some configuration), testing, debugging, and performance monitoring.&lt;/p&gt;
 &lt;h2 id="coming-to-instance"&gt;Coming to Instance&lt;a class="headerlink" href="#coming-to-instance" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
@@ -1004,7 +939,6 @@ Object-Oriented Programming in Python 3 - Classes and members&lt;/a&gt;&lt;/li&g
         &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;put&lt;/span&gt; &lt;span class="n"&gt;your&lt;/span&gt; &lt;span class="n"&gt;code&lt;/span&gt; &lt;span class="n"&gt;here&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
         &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;obj&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;just like you usually do with &lt;code&gt;__init__()&lt;/code&gt;. When your class inherits from &lt;code&gt;object&lt;/code&gt; you do not need to call the parent method (&lt;code&gt;object.__init__()&lt;/code&gt;), because it is empty, but you need to do it when overriding &lt;code&gt;__new__&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;Remember that &lt;code&gt;__new__()&lt;/code&gt; is not forced to return an instance of the class in which it is defined, even if you shall have very good reasons to break this behaviour. Anyway, &lt;code&gt;__init__()&lt;/code&gt; will be called only if you return an instance of the container class. Please also note that &lt;code&gt;__new__()&lt;/code&gt;, unlike &lt;code&gt;__init__()&lt;/code&gt;, accepts the class as its first parameter. The name is not important in Python, and you can also call it &lt;code&gt;self&lt;/code&gt;, but it is worth using &lt;code&gt;cls&lt;/code&gt; to remember that it is not an instance.&lt;/p&gt;

@@ -58,7 +58,7 @@
 	  "@id": "https://www.thedigitalcatonline.com/blog/2020/07/07/flask-project-setup-tdd-docker-postgres-and-more-part-3/"
       },
       "datePublished" : "07/07/2020",
-      "dateModified" : "07/07/2020",
+      "dateModified" : "17/10/2020",
       "image" : "https://www.thedigitalcatonline.com/images/flask-project-setup-tdd-docker-postgres-and-more-part-3.jpg",
       "description" : "A step-by-step tutorial on how to setup a Flask project with TDD, Docker and Postgres",
       "headline" : "A step-by-step tutorial on how to setup a Flask project with TDD, Docker and Postgres",
@@ -101,6 +101,7 @@
 
     <span class="fas fa-calendar-alt"></span> <time datetime="2020-07-07T13:00:00+01:00"> 07/07/2020</time>
 
+    <span class="fas fa-edit"></span> <time datetime="2020-10-17T14:00:00+01:00"> 17/10/2020</time>
 
     <span class="fas fa-tags"></span>
     <a class="tag" href="/categories/aws/">AWS</a>    <a class="tag" href="/categories/docker/">Docker</a>    <a class="tag" href="/categories/flask/">Flask</a>    <a class="tag" href="/categories/http/">HTTP</a>    <a class="tag" href="/categories/postgres/">Postgres</a>    <a class="tag" href="/categories/pytest/">pytest</a>    <a class="tag" href="/categories/python/">Python</a>    <a class="tag" href="/categories/python3/">Python3</a>    <a class="tag" href="/categories/tdd/">TDD</a>    <a class="tag" href="/categories/testing/">testing</a>    <a class="tag" href="/categories/www/">WWW</a>    <br>
@@ -366,7 +367,6 @@
     <span class="n">cli</span><span class="p">()</span>
 </code></pre></div>
 
-
 <p>where I added the <code>scenario up</code> and <code>scenario down</code> commands. As you can see the function <code>up</code> first copies the <code>config/scenario.json</code> and the <code>docker/scenario.yml</code> files (that I still have to create) into files named after the scenario.</p>
 <p>Then I run the <code>up -d</code> command and wait for the database to be ready, as I already do for tests. After that, it's time to extract the port of the container with some very simple Python string processing and to initialise the correct environment variable.</p>
 <p>Last, I import and execute the Python file containing the code of the scenario itself and print a friendly message with the command line to run <code>psql</code> to have a Postgres shell into the newly created database.</p>
@@ -388,7 +388,7 @@
   <span class="nt">web</span><span class="p">:</span>
     <span class="nt">build</span><span class="p">:</span>
       <span class="nt">context</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">${PWD}</span>
-      <span class="nt">dockerfile</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">docker/web/Dockerfile</span>
+      <span class="nt">dockerfile</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">docker/Dockerfile</span>
     <span class="nt">environment</span><span class="p">:</span>
       <span class="nt">FLASK_ENV</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">${FLASK_ENV}</span>
       <span class="nt">FLASK_CONFIG</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">${FLASK_CONFIG}</span>
@@ -396,14 +396,12 @@
       <span class="nt">POSTGRES_USER</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">${POSTGRES_USER}</span>
       <span class="nt">POSTGRES_HOSTNAME</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">${POSTGRES_HOSTNAME}</span>
       <span class="nt">POSTGRES_PASSWORD</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">${POSTGRES_PASSWORD}</span>
-      <span class="nt">POSTGRES_PORT</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">${POSTGRES_PORT}</span>
     <span class="nt">command</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">flask run --host 0.0.0.0</span>
     <span class="nt">volumes</span><span class="p">:</span>
       <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">${PWD}:/opt/code</span>
     <span class="nt">ports</span><span class="p">:</span>
       <span class="p p-Indicator">-</span> <span class="s">&quot;5000&quot;</span>
 </code></pre></div>
-
 
 <p>Here you can see that the database is ephemeral, that the port on the host is automatically assigned, and that I also spin up the application (mapping it to a random port as well to avoid clashing with the development one).</p>
 <p>The configuration file is</p>
@@ -440,8 +438,9 @@
 <span class="p">]</span>
 </code></pre></div>
 
-
 <p>which doesn't add anything new to what I already did for development and testing. </p>
+<h4 id="git-commit">Git commit<a class="headerlink" href="#git-commit" title="Permanent link">&para;</a></h4>
+<p>You can see the changes made in this step through <a href="https://github.com/lgiordani/flask_project_setup/commit/7f88f82a8cd6aea0519962326cb3a27d393e6cfb">this Git commit</a> or <a href="https://github.com/lgiordani/flask_project_setup/tree/7f88f82a8cd6aea0519962326cb3a27d393e6cfb">browse the files</a>.</p>
 <h4 id="resources">Resources<a class="headerlink" href="#resources" title="Permanent link">&para;</a></h4>
 <ul>
 <li><a href="https://docs.docker.com/compose/compose-file/#ports">Expose ports in docker-compose</a></li>
@@ -458,7 +457,6 @@
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;HEY! This is scenario&quot;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;APPLICATION_SCENARIO_NAME&quot;</span><span class="p">])</span>
 </code></pre></div>
 
-
 <p>When I run the scenario I get the following output</p>
 <div class="highlight"><pre><span></span><code>$ ./manage.py scenario up foo
 Creating network <span class="s2">&quot;scenario_foo_default&quot;</span> with the default driver
@@ -469,7 +467,6 @@ Your scenario is ready. If you want to open a SQL shell run
 docker-compose -p scenario_foo -f docker/scenario_foo.yml <span class="nb">exec</span> db psql -U postgres -d application
 </code></pre></div>
 
-
 <p>The command <code>docker ps</code> shows that my development environment is happily running alongside with the scenario</p>
 <div class="highlight"><pre><span></span><code>$ docker ps
 CONTAINER ID  IMAGE             COMMAND                 <span class="o">[</span>...<span class="o">]</span>  PORTS                    NAMES
@@ -479,30 +476,30 @@ a031b6429e07  postgres          <span class="s2">&quot;docker-entrypoint.s…&qu
 28aa566321b5  postgres          <span class="s2">&quot;docker-entrypoint.s…&quot;</span>  <span class="o">[</span>...<span class="o">]</span>  <span class="m">0</span>.0.0.0:5432-&gt;5432/tcp   development_db_1
 </code></pre></div>
 
-
 <p>And the output of the <code>scenario up foo</code> command contains the string <code>HEY! This is scenario foo</code> that was printed by the file <code>foo.py</code>. We can also successfully run the suggested command</p>
-<div class="highlight"><pre><span></span><code>$ docker-compose -p scenario_foo -f docker/scenario_foo.yml <span class="nb">exec</span> db psql -U postgres -d application
-psql <span class="o">(</span><span class="m">12</span>.3 <span class="o">(</span>Debian <span class="m">12</span>.3-1.pgdg100+1<span class="o">))</span>
-Type <span class="s2">&quot;help&quot;</span> <span class="k">for</span> help.
+<div class="highlight"><pre><span></span><code>$ docker-compose -p scenario_foo -f docker/scenario_foo.yml exec db psql -U postgres -d application
+psql (12.3 (Debian 12.3-1.pgdg100+1))
+Type &quot;help&quot; for help.
 
-<span class="nv">application</span><span class="o">=</span><span class="c1"># \l</span>
+application=# \l
                                   List of databases
-    Name     <span class="p">|</span>  Owner   <span class="p">|</span> Encoding <span class="p">|</span>  Collate   <span class="p">|</span>   Ctype    <span class="p">|</span>   Access privileges   
+    Name     |  Owner   | Encoding |  Collate   |   Ctype    |   Access privileges   
 -------------+----------+----------+------------+------------+-----------------------
- application <span class="p">|</span> postgres <span class="p">|</span> UTF8     <span class="p">|</span> en_US.utf8 <span class="p">|</span> en_US.utf8 <span class="p">|</span> 
- postgres    <span class="p">|</span> postgres <span class="p">|</span> UTF8     <span class="p">|</span> en_US.utf8 <span class="p">|</span> en_US.utf8 <span class="p">|</span> 
- template0   <span class="p">|</span> postgres <span class="p">|</span> UTF8     <span class="p">|</span> en_US.utf8 <span class="p">|</span> en_US.utf8 <span class="p">|</span> <span class="o">=</span>c/postgres          +
-             <span class="p">|</span>          <span class="p">|</span>          <span class="p">|</span>            <span class="p">|</span>            <span class="p">|</span> <span class="nv">postgres</span><span class="o">=</span>CTc/postgres
- template1   <span class="p">|</span> postgres <span class="p">|</span> UTF8     <span class="p">|</span> en_US.utf8 <span class="p">|</span> en_US.utf8 <span class="p">|</span> <span class="o">=</span>c/postgres          +
-             <span class="p">|</span>          <span class="p">|</span>          <span class="p">|</span>            <span class="p">|</span>            <span class="p">|</span> <span class="nv">postgres</span><span class="o">=</span>CTc/postgres
-<span class="o">(</span><span class="m">4</span> rows<span class="o">)</span>
+ application | postgres | UTF8     | en_US.utf8 | en_US.utf8 | 
+ postgres    | postgres | UTF8     | en_US.utf8 | en_US.utf8 | 
+ template0   | postgres | UTF8     | en_US.utf8 | en_US.utf8 | =c/postgres          +
+             |          |          |            |            | postgres=CTc/postgres
+ template1   | postgres | UTF8     | en_US.utf8 | en_US.utf8 | =c/postgres          +
+             |          |          |            |            | postgres=CTc/postgres
+(4 rows)
 
-<span class="nv">application</span><span class="o">=</span><span class="c1">#</span>
+application=#
 </code></pre></div>
-
 
 <p>And inside the database we find the <code>application</code> database created explicitly for the scenario (the name is specified in <code>config/scenario.json</code>). If you don't know <code>psql</code> you can exit with <code>\q</code> or <code>Ctrl-d</code>.</p>
 <p>Before tearing down the scenario have a look at the two files <code>config/scenario_foo.json</code> and <code>docker/scenario_foo.yml</code>. They are just copies of <code>config/scenario.json</code> and <code>docker/scenario.yml</code> but I think seeing them there might help to understand how the whole thing works. When you are done run <code>./manage.py scenario down foo</code>.</p>
+<h4 id="git-commit_1">Git commit<a class="headerlink" href="#git-commit_1" title="Permanent link">&para;</a></h4>
+<p>You can see the changes made in this step through <a href="https://github.com/lgiordani/flask_project_setup/commit/16330e0e7c8e842f2afb474fb2045c735ff194b2">this Git commit</a> or <a href="https://github.com/lgiordani/flask_project_setup/tree/16330e0e7c8e842f2afb474fb2045c735ff194b2">browse the files</a>.</p>
 <h3 id="scenario-example-2">Scenario example 2<a class="headerlink" href="#scenario-example-2" title="Permanent link">&para;</a></h3>
 <p>Let's do something a bit more interesting. The new scenario is contained in <code>scenarios/users.py</code></p>
 <p>File: <code>scenarios/users.py</code></p>
@@ -533,37 +530,36 @@ Type <span class="s2">&quot;help&quot;</span> <span class="k">for</span> help.
         <span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
 </code></pre></div>
 
-
 <p>I decided to be as agnostic as possible in the scenarios, to avoid creating something too specific that eventually would not give me enough flexibility to test what I need. This means that the scenario has to create the app and to use the database session explicitly, as I do in this example. The application is created with the <code>"development"</code> configuration. Remember that this is the Flask configuration that you find in <code>application/config.py</code>, not the one that is in <code>config/development.json</code>.</p>
 <p>I can run the scenario with</p>
 <div class="highlight"><pre><span></span><code>$ ./manage.py scenario up users
 </code></pre></div>
 
-
 <p>and then connect to the database to find my users</p>
-<div class="highlight"><pre><span></span><code>$ docker-compose -p scenario_users -f docker/scenario_users.yml <span class="nb">exec</span> db psql -U postgres -d application
-psql <span class="o">(</span><span class="m">12</span>.3 <span class="o">(</span>Debian <span class="m">12</span>.3-1.pgdg100+1<span class="o">))</span>
-Type <span class="s2">&quot;help&quot;</span> <span class="k">for</span> help.
+<div class="highlight"><pre><span></span><code>$ docker-compose -p scenario_users -f docker/scenario_users.yml exec db psql -U postgres -d application
+psql (12.3 (Debian 12.3-1.pgdg100+1))
+Type &quot;help&quot; for help.
 
-<span class="nv">application</span><span class="o">=</span><span class="c1"># \dt</span>
+application=# \dt
          List of relations
- Schema <span class="p">|</span> Name  <span class="p">|</span> Type  <span class="p">|</span>  Owner
+ Schema | Name  | Type  |  Owner
 --------+-------+-------+----------
- public <span class="p">|</span> users <span class="p">|</span> table <span class="p">|</span> postgres
-<span class="o">(</span><span class="m">1</span> row<span class="o">)</span>
+ public | users | table | postgres
+(1 row)
 
-<span class="nv">application</span><span class="o">=</span><span class="c1"># select * from users;</span>
- id <span class="p">|</span>      email
+application=# select * from users;
+ id |      email
 ----+------------------
-  <span class="m">1</span> <span class="p">|</span> admin@server.com
-  <span class="m">2</span> <span class="p">|</span> user1@server.com
-  <span class="m">3</span> <span class="p">|</span> user2@server.com
-<span class="o">(</span><span class="m">3</span> rows<span class="o">)</span>
+  1 | admin@server.com
+  2 | user1@server.com
+  3 | user2@server.com
+(3 rows)
 
-<span class="nv">application</span><span class="o">=</span><span class="c1"># \q</span>
+application=# \q
 </code></pre></div>
 
-
+<h4 id="git-commit_2">Git commit<a class="headerlink" href="#git-commit_2" title="Permanent link">&para;</a></h4>
+<p>You can see the changes made in this step through <a href="https://github.com/lgiordani/flask_project_setup/commit/2e65ebd1336a6ba4635f5d4dd0048bb7c1903318">this Git commit</a> or <a href="https://github.com/lgiordani/flask_project_setup/tree/2e65ebd1336a6ba4635f5d4dd0048bb7c1903318">browse the files</a>.</p>
 <h2 id="step-2-simulating-the-production-environment">Step 2 - Simulating the production environment<a class="headerlink" href="#step-2-simulating-the-production-environment" title="Permanent link">&para;</a></h2>
 <p>As I stated at the very beginning of this mini series of posts, one of my goals was to run in development the same database that I run in production, and for this reason I went through the configuration steps that allowed me to have a Postgres container running both in development and during tests. In a real production scenario Postgres would probably run in a separate instance, for example on the RDS service in AWS, but as long as you have the connection parameters nothing changes in the configuration.</p>
 <p>Docker actually allows us to easily simulate the production environment as well. Well, if our notebook was connected 24/7 we might as well host the production there directly. Not that I recommend this nowadays, but this is how many important companies begun many years ago when cloud computing had not been here yet. Instead of installing a LAMP stack we configure containers, but the idea doesn't change.</p>
@@ -576,7 +572,6 @@ psycopg2
 flask-migrate
 gunicorn
 </code></pre></div>
-
 
 <p>Then I need to create a docker-compose configuration for production</p>
 <p>File: <code>docker/production.yml</code></p>
@@ -597,7 +592,7 @@ gunicorn
   <span class="nt">web</span><span class="p">:</span>
     <span class="nt">build</span><span class="p">:</span>
       <span class="nt">context</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">${PWD}</span>
-      <span class="nt">dockerfile</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">docker/web/Dockerfile.production</span>
+      <span class="nt">dockerfile</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">docker/Dockerfile.production</span>
     <span class="nt">environment</span><span class="p">:</span>
       <span class="nt">FLASK_ENV</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">${FLASK_ENV}</span>
       <span class="nt">FLASK_CONFIG</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">${FLASK_CONFIG}</span>
@@ -616,10 +611,9 @@ gunicorn
   <span class="nt">pgdata</span><span class="p">:</span>
 </code></pre></div>
 
-
 <p>As you can see here the command that runs the application is slightly different, <code>gunicorn -w 4 -b 0.0.0.0 wsgi:app</code>. It exposes 4 processes (<code>-w 4</code>) on the container's address 0.0.0.0 loading the <code>app</code> object from the <code>wsgi.py</code> file (<code>wsgi:app</code>). As by default Gunicorn exposes port 8000 I mapped that to the same port in the host.</p>
-<p>As the production image need to install the production requirements I also took the opportunity to create the <code>docker/web</code> subdirectory and move the web <code>Dockerfile</code> there. Then I created the <code>Dockerfile.production</code> one</p>
-<p>File: <code>docker/web/Dockerfile.production</code></p>
+<p>Then I created the <code>Dockerfile.production</code> that defines the production image of the web application</p>
+<p>File: <code>docker/Dockerfile.production</code></p>
 <div class="highlight"><pre><span></span><code>FROM python:3
 
 ENV PYTHONUNBUFFERED 1
@@ -631,12 +625,6 @@ WORKDIR /opt/code
 ADD requirements /opt/requirements
 RUN pip install -r /opt/requirements/production.txt
 </code></pre></div>
-
-
-<p>Having moved the development <code>Dockerfile</code> into the subdirectory I also fixed the other docker-compose files to match the new configuration. I can now build the image with</p>
-<div class="highlight"><pre><span></span><code>$ <span class="nv">APPLICATION_CONFIG</span><span class="o">=</span><span class="s2">&quot;production&quot;</span> ./manage.py compose build web
-</code></pre></div>
-
 
 <p>The last thing I need is a configuration file</p>
 <p>File: <code>config/production.json</code></p>
@@ -676,9 +664,14 @@ RUN pip install -r /opt/requirements/production.txt
 <span class="p">]</span>
 </code></pre></div>
 
-
 <p>as you can notice this is not very different from the development one, as I just changed the values of <code>FLASK_ENV</code> and <code>FLASK_CONFIG</code>. Clearly this contains a secret that shouldn't be written in plain text, <code>POSTGRES_PASSWORD</code>, but after all this is a simulation of production. In a real environment secrets should be kept in an encrypted manager such as AWS Secret Manager.</p>
 <p>Remember that <code>FLASK_ENV</code> changes the internal settings of Flask, most notably disabling the debugger, and the <code>FLASK_CONFIG=production</code> loads the <code>ProductionConfig</code> object from <code>application/config.py</code>. That object is empty for the moment, but it might contain public configuration for the production server.</p>
+<p>I can now build the image with</p>
+<div class="highlight"><pre><span></span><code>$ <span class="nv">APPLICATION_CONFIG</span><span class="o">=</span><span class="s2">&quot;production&quot;</span> ./manage.py compose build web
+</code></pre></div>
+
+<h4 id="git-commit_3">Git commit<a class="headerlink" href="#git-commit_3" title="Permanent link">&para;</a></h4>
+<p>You can see the changes made in this step through <a href="https://github.com/lgiordani/flask_project_setup/commit/66fe80edb61f3f8ca3303856f29d70f76923c30b">this Git commit</a> or <a href="https://github.com/lgiordani/flask_project_setup/tree/66fe80edb61f3f8ca3303856f29d70f76923c30b">browse the files</a>.</p>
 <h4 id="resources_1">Resources<a class="headerlink" href="#resources_1" title="Permanent link">&para;</a></h4>
 <ul>
 <li><a href="https://gunicorn.org/">Gunicorn</a> - A Python WSGI HTTP Server</li>
@@ -704,7 +697,7 @@ RUN pip install -r /opt/requirements/production.txt
   <span class="nt">web</span><span class="p">:</span>
     <span class="nt">build</span><span class="p">:</span>
       <span class="nt">context</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">${PWD}</span>
-      <span class="nt">dockerfile</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">docker/web/Dockerfile.production</span>
+      <span class="nt">dockerfile</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">docker/Dockerfile.production</span>
     <span class="nt">environment</span><span class="p">:</span>
       <span class="nt">FLASK_ENV</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">${FLASK_ENV}</span>
       <span class="nt">FLASK_CONFIG</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">${FLASK_CONFIG}</span>
@@ -726,7 +719,6 @@ RUN pip install -r /opt/requirements/production.txt
 <span class="nt">volumes</span><span class="p">:</span>
   <span class="nt">pgdata</span><span class="p">:</span>
 </code></pre></div>
-
 
 <p>As you can see I added a service <code>nginx</code> that runs the default Nginx image, mapping a custom configuration file that I will create in a minute. The application container doesn't need any port mapping, as I won't access it directly from the host anymore. The Nginx configuration file is</p>
 <p>File: <code>docker/nginx/nginx.conf</code></p>
@@ -757,7 +749,6 @@ RUN pip install -r /opt/requirements/production.txt
 <span class="p">}</span>
 </code></pre></div>
 
-
 <p>This is a pretty standard configuration, and in a real production environment I would add many other configuration values (most notably serving HTTPS instead of HTTP). The <code>upstream</code> section leverages docker-compose networking referring to <code>web</code>, which in the internal DNS directly maps to the IPs of the service with the same name. The port 8000 comes from the default Gunicorn port that I already mentioned before. I won't run the nginx container as root on my notebook, so I will expose port 8080 instead of the traditional 80 for HTTP, and this is also something that would be different in a real production environment.</p>
 <p>I can at this point run</p>
 <div class="highlight"><pre><span></span><code>$ <span class="nv">APPLICATION_CONFIG</span><span class="o">=</span><span class="s2">&quot;production&quot;</span> ./manage.py compose up -d
@@ -766,14 +757,12 @@ Starting production_nginx_1 ... <span class="k">done</span>
 Starting production_web_1   ... <span class="k">done</span>
 </code></pre></div>
 
-
 <p>It's interesting to have a look at the logs of the nginx container, as Nginx by default prints all the incoming requests</p>
 <div class="highlight"><pre><span></span><code>$ <span class="nv">APPLICATION_CONFIG</span><span class="o">=</span><span class="s2">&quot;production&quot;</span> ./manage.py compose logs -f nginx
 Attaching to production_nginx_1
 <span class="o">[</span>...<span class="o">]</span>
 nginx_1  <span class="p">|</span> <span class="m">172</span>.30.0.1 - - <span class="o">[</span><span class="m">05</span>/Jul/2020:10:40:44 +0000<span class="o">]</span> <span class="s2">&quot;GET / HTTP/1.1&quot;</span> <span class="m">200</span> <span class="m">13</span> <span class="s2">&quot;-&quot;</span> <span class="s2">&quot;Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0&quot;</span>
 </code></pre></div>
-
 
 <p>The last line is what I get when I visit <a href="http://localhost:8080">localhost:8080</a> while the production setup is up and running.</p>
 <p>Scaling up and down the service is now a breeze</p>
@@ -785,7 +774,8 @@ Creating production_web_2 ... <span class="k">done</span>
 Creating production_web_3 ... <span class="k">done</span>
 </code></pre></div>
 
-
+<h4 id="git-commit_4">Git commit<a class="headerlink" href="#git-commit_4" title="Permanent link">&para;</a></h4>
+<p>You can see the changes made in this step through <a href="https://github.com/lgiordani/flask_project_setup/commit/56278af7d3af1650b691b15c268cfa112d031657">this Git commit</a> or <a href="https://github.com/lgiordani/flask_project_setup/tree/56278af7d3af1650b691b15c268cfa112d031657">browse the files</a>.</p>
 <h4 id="resources_2">Resources<a class="headerlink" href="#resources_2" title="Permanent link">&para;</a></h4>
 <ul>
 <li><a href="https://nginx.org/en/">Nginx</a> - An HTTP and reverse proxy server (and more)</li>
@@ -799,11 +789,9 @@ Creating production_web_3 ... <span class="k">done</span>
 <div class="highlight"><pre><span></span><code>$ <span class="nv">APPLICATION_CONFIG</span><span class="o">=</span><span class="s2">&quot;production&quot;</span> ./manage.py compose <span class="nb">exec</span> nginx bash
 </code></pre></div>
 
-
 <p>Once inside I can see my configuration file at <code>/etc/nginx/nginx.conf</code>, but this has not changed. Remember that Docker networking doesn't work as a templating engine, but with a local DNS. This means that if we try to resolve <code>web</code> from inside the container we should see multiple IPs. The command <code>dig</code> is a good tool to investigate the DNS, but it doesn't come preinstalled in the nginx container, so I need to run</p>
 <div class="highlight"><pre><span></span><code>root@33cbaea369be:/# apt update <span class="o">&amp;&amp;</span> apt install dnsutils
 </code></pre></div>
-
 
 <p>and at this point I can run it</p>
 <div class="highlight"><pre><span></span><code>root@33cbaea369be:/# dig web
@@ -830,11 +818,9 @@ web.                    <span class="m">600</span>     IN      A       <span cla
 root@33cbaea369be:/#
 </code></pre></div>
 
-
 <p>The command outputs 3 IPs, which correspond to the 3 containers of the <code>web</code> service that I am currently running. If I scale down (from outside the container)</p>
 <div class="highlight"><pre><span></span><code>$ <span class="nv">APPLICATION_CONFIG</span><span class="o">=</span><span class="s2">&quot;production&quot;</span> ./manage.py compose up -d --scale <span class="nv">web</span><span class="o">=</span><span class="m">1</span>
 </code></pre></div>
-
 
 <p>then the output of <code>dig</code> becomes</p>
 <div class="highlight"><pre><span></span><code>root@33cbaea369be:/# dig web
@@ -858,7 +844,6 @@ web.                    <span class="m">600</span>     IN      A       <span cla
 
 root@33cbaea369be:/#
 </code></pre></div>
-
 
 <h2 id="how-to-create-the-production-infrastructure">How to create the production infrastructure<a class="headerlink" href="#how-to-create-the-production-infrastructure" title="Permanent link">&para;</a></h2>
 <p>This will be a very short section, as creating infrastructure and deploying in production are complex topics, so I want to just give some hints to stimulate your research.</p>

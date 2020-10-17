@@ -115,11 +115,9 @@
 <div class="highlight"><pre><span></span><code>$ pytest -svv tests/test_calc.py::test_addition
 </code></pre></div>
 
-
 <p>which for example runs the <code>tests_addition</code> test inside the <code>tests/test_calc.py</code> file. You can also specify the file name only to run all the tests contained there</p>
 <div class="highlight"><pre><span></span><code>$ pytest -svv tests/test_calc.py
 </code></pre></div>
-
 
 <h1 id="skipping-tests">Skipping tests<a class="headerlink" href="#skipping-tests" title="Permanent link">&para;</a></h1>
 <p>Sometimes it is useful to skip tests. The reason might be that some new code broke too many tests, and we want to face them one at a time, or that a specific feature had to be temporarily disabled. In all those cases the <code>pytest.mark.skip</code> decorator is your friend. Remember that a decorator is something that changes the way the decorated function works (for the skilled reader: it's a function wrapper). Assuming we are working on a <code>tests/test_calc.py</code> file the code might be</p>
@@ -128,11 +126,9 @@
     <span class="p">[</span><span class="o">...</span><span class="p">]</span>
 </code></pre></div>
 
-
 <p>The result on the command line will be (after running <code>py.test -svv</code>)</p>
 <div class="highlight"><pre><span></span><code>tests/test_calc.py::test_addition SKIPPED
 </code></pre></div>
-
 
 <h1 id="skipping-with-a-reason">Skipping with a reason<a class="headerlink" href="#skipping-with-a-reason" title="Permanent link">&para;</a></h1>
 <p>The previous solution is good for a temporary skip, but if the test has to remain deactivated for a long time it's better to annotate a specific reason for the exclusion. In my experience 1 day is enough to forget small details like this, so my advice is to always put a well-written reason on skipped tests. To add it you can use the <code>reason</code> attribute of the <code>skip</code> decorator</p>
@@ -140,7 +136,6 @@
 <span class="k">def</span> <span class="nf">test_test_addition</span><span class="p">():</span>
     <span class="p">[</span><span class="o">...</span><span class="p">]</span>
 </code></pre></div>
-
 
 <p>Remember to add the <code>-rs</code> option to your command line to see the <code>r</code>eason behind <code>s</code>kipped tests. So after running <code>py.test -svv -rs</code> we will get something like</p>
 <div class="highlight"><pre><span></span><code>tests/test_calc.py::test_addition SKIPPED
@@ -150,7 +145,6 @@ SKIP <span class="o">[</span><span class="m">1</span><span class="o">]</span> te
 
 <span class="o">======================</span> <span class="m">12</span> passed, <span class="m">1</span> skipped in <span class="m">0</span>.02 <span class="nv">seconds</span> <span class="o">=======================</span>
 </code></pre></div>
-
 
 <h1 id="skipping-tests-conditionally">Skipping tests conditionally<a class="headerlink" href="#skipping-tests-conditionally" title="Permanent link">&para;</a></h1>
 <p>Well, most of the time we will skip tests not for a stable reason, but according to some other condition that we can retrieve from the system, like the Python version, or maybe the region in which a server is running. The decorator that we need to use in that case is <code>skipif</code>, which accepts a condition (a boolean value) and a reason</p>
@@ -165,18 +159,15 @@ SKIP <span class="o">[</span><span class="m">1</span><span class="o">]</span> te
     <span class="p">[</span><span class="o">...</span><span class="p">]</span>
 </code></pre></div>
 
-
 <p>With this code running <code>AWS_REGION=eu-west-1 py.test -svv -rs</code> will run the <code>test_addition</code> test, while running <code>AWS_REGION=us-west-2 py.test -svv -rs</code> will skip it. The environment variable <code>AWS_REGION</code> set in the previous command lines is an example that simulates the presence of the variable in the system.</p>
 <h1 id="run-tests-by-name">Run tests by name<a class="headerlink" href="#run-tests-by-name" title="Permanent link">&para;</a></h1>
 <p>You can selectively run tests by name using <code>-k</code>. This option accepts Python expressions that try to match the name of the test with the provided values. So</p>
 <div class="highlight"><pre><span></span><code>$ pytest -svv -k <span class="s2">&quot;test_addition&quot;</span>
 </code></pre></div>
 
-
 <p>will run all those tests which name contains the substring <code>'addition'</code>, like <code>test_addiiton</code>, <code>test_addition_multiple_inputs</code>, and <code>test_complex_addition</code>. A more complex expression could be for example</p>
 <div class="highlight"><pre><span></span><code>$ pytest -svv -k <span class="s2">&quot;test_addition and not complex&quot;</span>
 </code></pre></div>
-
 
 <p>which will run both <code>test_addition</code> and <code>test_addition_multiple_inputs</code> but not <code>test_complex_addition</code>.</p>
 <h1 id="tagging-tests">Tagging tests<a class="headerlink" href="#tagging-tests" title="Permanent link">&para;</a></h1>
@@ -195,11 +186,9 @@ SKIP <span class="o">[</span><span class="m">1</span><span class="o">]</span> te
     <span class="p">[</span><span class="o">...</span><span class="p">]</span>
 </code></pre></div>
 
-
 <p>In the above example <code>test_addition</code> and <code>test_multiplication</code> have been decorated with <code>pytest.mark.slow</code> which tells pytest to label them with the <code>slow</code> identifier. At this point we can run all the tests that are tagged with the <code>-m</code> option</p>
 <div class="highlight"><pre><span></span><code>$ pytest -svv -m slow
 </code></pre></div>
-
 
 <p>Tests can be tagged multiple times</p>
 <div class="highlight"><pre><span></span><code><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">complex</span>
@@ -208,17 +197,14 @@ SKIP <span class="o">[</span><span class="m">1</span><span class="o">]</span> te
     <span class="p">[</span><span class="o">...</span><span class="p">]</span>
 </code></pre></div>
 
-
 <p>In this case the test will be run both by <code>pytest -svv -m slow</code> and by <code>pytest -svv -m complex</code>.</p>
 <p>The <code>-m</code> option supports complex expressions like</p>
 <div class="highlight"><pre><span></span><code>$ pytest -svv -m <span class="s1">&#39;not slow&#39;</span>
 </code></pre></div>
 
-
 <p>which runs all the tests that are not tagged with <code>slow</code>, or</p>
 <div class="highlight"><pre><span></span><code>$ pytest -svv -m <span class="s1">&#39;mac or linux&#39;</span>
 </code></pre></div>
-
 
 <p>which runs all the tests tagged with <code>mac</code> and all the tests tagged with <code>linux</code>. Pay attention that <code>-m</code> expressions refer to the tags of each single test, so <code>slow and complex</code> will run only those tests that are tagged both with <code>slow</code> and with <code>complex</code>, and not all the tests marked with the first and all the tests marked with the second.</p>
 <h1 id="adding-a-command-line-option">Adding a command line option<a class="headerlink" href="#adding-a-command-line-option" title="Permanent link">&para;</a></h1>
@@ -229,13 +215,11 @@ SKIP <span class="o">[</span><span class="m">1</span><span class="o">]</span> te
                      <span class="n">help</span><span class="o">=</span><span class="s2">&quot;run slow tests&quot;</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>The command line parser configuration will be stored into the <code>config</code> attribute of the setup of each test. Thus we can use the <code>pytest_runtest_setup</code> hook that runs before each test</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">pytest_runtest_setup</span><span class="p">(</span><span class="n">item</span><span class="p">):</span>
     <span class="k">if</span> <span class="s1">&#39;slow&#39;</span> <span class="ow">in</span> <span class="n">item</span><span class="o">.</span><span class="n">keywords</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">item</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">getvalue</span><span class="p">(</span><span class="s2">&quot;runslow&quot;</span><span class="p">):</span>
         <span class="n">pytest</span><span class="o">.</span><span class="n">skip</span><span class="p">(</span><span class="s2">&quot;need --runslow option to run&quot;</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>Here <code>item</code> is the single test, so <code>item.keywords</code> is the set of tags attached to the test, and <code>item.config</code> is the configuration after the parser run on the command line. This makes the previous code match all the tests that are decorated with <code>@pytest.mark.slow</code> and only when the <code>--runslow</code> option has been specified on the command line. If both those conditions are satisfied the <code>pytest.skip</code> function is run, which skips the current test adding the specified string as a reason.</p>
 <h1 id="coverage">Coverage<a class="headerlink" href="#coverage" title="Permanent link">&para;</a></h1>
@@ -247,11 +231,9 @@ SKIP <span class="o">[</span><span class="m">1</span><span class="o">]</span> te
 <div class="highlight"><pre><span></span><code>$ pip install pytest-cov
 </code></pre></div>
 
-
 <p>and run pytest with</p>
 <div class="highlight"><pre><span></span><code>$ pytest -svv --cov<span class="o">=</span>&lt;name&gt; --cov-report<span class="o">=</span>term
 </code></pre></div>
-
 
 <p>where <code>&lt;name&gt;</code> is the name of the Python module you are testing (actually the path where the code you are testing is). This gives you a nice report with the percentage of covered code file by file.</p>
 <div class="highlight"><pre><span></span><code>$ py.test -svv --cov<span class="o">=</span>mypymodule --cov-report<span class="o">=</span>term
@@ -265,7 +247,6 @@ mypymodule/calc.py          <span class="m">23</span>      <span class="m">0</sp
 TOTAL                            <span class="m">26</span>      <span class="m">0</span>   <span class="m">100</span>%
 </code></pre></div>
 
-
 <p>You may also use the <code>term-missing</code> report instad of just <code>term</code>, that lists the code blocks that are not covered</p>
 <div class="highlight"><pre><span></span><code>$ py.test -svv --cov<span class="o">=</span>mypymodule --cov-report<span class="o">=</span>term-missing
 
@@ -277,7 +258,6 @@ mypymodule/calc.py          <span class="m">23</span>      <span class="m">2</sp
 -----------------------------------------------------------
 TOTAL                            <span class="m">26</span>      <span class="m">2</span>    <span class="m">92</span>%
 </code></pre></div>
-
 
 <p>Here I commented some of the tests to force the coverage percentage to drop. As you can see the report tells us that lines 6 and 11 of the <code>mypymodule/calc.py</code> file are not covered by any test.</p>
 <h1 id="updates">Updates<a class="headerlink" href="#updates" title="Permanent link">&para;</a></h1>

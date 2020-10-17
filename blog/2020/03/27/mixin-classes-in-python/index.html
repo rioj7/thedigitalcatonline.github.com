@@ -124,7 +124,6 @@
             pull request
 </code></pre></div>
 
-
 <p>which allows us to put in <code>pull request</code> only the specific code required by that element. This is a great achievement, as it is what libraries do for code, but on live objects. Method calls and delegation are nothing more than messages between objects, so the delegation hierarchy is just a simple networked system.</p>
 <p>Unfortunately, the use of inheritance over composition often leads to systems that, paradoxically, increase code duplication. The main problem lies in the fact that inheritance can directly delegate to only one other class (the parent class), as opposed to composition, where the object can delegate to any number of other ones. This limitation of inheritance means that we might have a class that inherits from another one because it needs some of its features, but doing this receives features it doesn't want, or shouldn't have.</p>
 <p>Let's continue the example of the code management portal, and consider an <code>issue</code>, which is an item that we want to store in the system, but cannot be reviewed by a user. If we create a hierarchy like this</p>
@@ -142,7 +141,6 @@
         issue          pull request
    (not reviewable)
 </code></pre></div>
-
 
 <p>we end up putting the features related to the review process in an object that shouldn't have them. The standard solution to this problem is that of increasing the depth of the inheritance hierarchy and to derive from the new simpler ancestor.</p>
 <div class="highlight"><pre><span></span><code>          assignable item
@@ -165,7 +163,6 @@
         issue              pull request
 </code></pre></div>
 
-
 <p>However, this approach stops being viable as soon as an object needs to inherit from a given class but not from the parent of that class. For example, an element that has to be reviewable but not assignable, like a <code>best practice</code> that we want to add to the site. If we want to keep using inheritance, the only solution at this point is to duplicate the code that implements the reviewable nature of the item (or the code that implements the assignable feature) and create two different class hierarchies.</p>
 <div class="highlight"><pre><span></span><code>          assignable item              +--------&gt;  reviewable item
          (assign_to_user)              |         (ask_review_to_user)
@@ -186,7 +183,6 @@
           |                     |                         |
         issue              pull request             best practice
 </code></pre></div>
-
 
 <p>Please note that this doesn't even take into account that the new <code>reviewable item</code> might need attributes from <code>assignable item</code>, which prompts for another level of depth in the hierarchy, where we isolate those features in a more generic class. So, unfortunately, chances are that this is only the first of many compromises we will have to accept to keep the system in a stable state if we can't change our approach.</p>
 <p>Multiple inheritance was then introduced in OOP, as it was clear that an object might want to delegate certain actions to a given class, and other actions to a different one, mimicking what life forms do when they inherit traits from multiple ancestors (parents, grandparents, etc.).</p>
@@ -211,7 +207,6 @@
         issue              pull request              best practice
 </code></pre></div>
 
-
 <p>Generally speaking, then, multiple inheritance is introduced to give the programmer a way to keep using inheritance without introducing code duplication, keeping the class hierarchy simpler and cleaner. Eventually, everything we do in software design is to try and separate concerns, that is, to isolate features, and multiple inheritance can help to do this.</p>
 <p>These are just examples and might be valid or not, depending on the concrete case, but they clearly show the issues that we can have even with a very simple hierarchy of 4 classes. Many of these problems clearly arise from the fact that we wanted to implement delegation only through inheritance, and I dare to say that 80% of the architectural errors in OOP projects come from using inheritance instead of composition and from using god objects, that is classes that have responsibilities over too many different parts of the system. Always remember that OOP was born with the idea of small objects interacting through messages, so the considerations we make for monolithic architectures are valid even here.</p>
 <p>That said, as inheritance and composition implement two different types of delegation (<em>to be</em> and <em>to have</em>), they are both valuable, and multiple inheritance is the way to remove the single provider limitation that comes from having only one parent class.</p>
@@ -235,7 +230,6 @@
     <span class="k">pass</span>
 </code></pre></div>
 
-
 <p>Things can even get worse, as parents can have different signatures of the common method, for example</p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">Parent1</span><span class="p">:</span>
     <span class="c1"># This inherits from Ancestor but redefines __init__</span>
@@ -253,7 +247,6 @@
     <span class="c1"># This inherits from both Parent1 and Parent2, which __init__ does it use?</span>
     <span class="k">pass</span>
 </code></pre></div>
-
 
 <p>The problem can be extended even further, introducing a common ancestor above <code>Parent1</code> and <code>Parent2</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">Ancestor</span><span class="p">:</span>
@@ -279,7 +272,6 @@
     <span class="k">pass</span>
 </code></pre></div>
 
-
 <p>As you can see, we already have a problem when we introduce multiple parents, and a common ancestor just adds a new level of complexity. The ancestor class can clearly be at any point of the inheritance tree (grandparent, grand-grandparent, etc.), the important part is that it is shared between <code>Parent1</code> and <code>Parent2</code>. This is the so-called diamond problem, as the inheritance graph has the shape of a diamond</p>
 <div class="highlight"><pre><span></span><code>      Ancestor
        ^   ^
@@ -291,7 +283,6 @@ Parent1     Parent2
       \     /
        Child
 </code></pre></div>
-
 
 <p>So, while with single-parent inheritance the rules are straightforward, with multiple inheritance we immediately have a more complex situation that doesn't have a trivial solution. Does all this prevent multiple inheritance from being implemented?</p>
 <p>Not at all! There are solutions to this problem, as we will see shortly, but this further level of intricacy makes multiple inheritance something that doesn't fit easily in a design and has to be implemented carefully to avoid subtle bugs. Remember that inheritance is an automatic delegation mechanism, as this makes what happens in the code less evident. For these reasons, multiple inheritance is often depicted as scary and convoluted, and usually given some space only in the advanced OOP courses, at least in the Python world. I believe every Python programmer, instead, should familiarise with it and learn how to take advantage of it.</p>
@@ -334,7 +325,6 @@ Parent1     Parent2
 <span class="n">c</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
 </code></pre></div>
 
-
 <p>As you can see, we can access the MRO of any class reasind its <code>__mro__</code> attribute, and as we expected its value is <code>(&lt;class '__main__.Child'&gt;, &lt;class '__main__.Parent1'&gt;, &lt;class '__main__.Parent2'&gt;, &lt;class '__main__.Ancestor'&gt;, &lt;class 'object'&gt;).</code></p>
 <p>So, in this case an instance <code>c</code> of <code>Child</code> provides <code>rewind</code>, <code>open</code>, <code>close</code>, and <code>flush</code>. When <code>c.rewind</code> is called, the code in <code>Ancestor</code> is executed, as this is the first class in the MRO list that provides that method. The method <code>open</code> is provided by <code>Parent1</code>, while <code>close</code> is provided by <code>Parent2</code>. If the method <code>c.flush</code> is called, the code is provided by the <code>Child</code> class itself, that redefines it overriding the one provided by <code>Parent2</code>.</p>
 <p>As we see with the <code>flush</code> method, Python doesn't change its behaviour when it comes to method overriding with multiple parents. The first implementation of a method with that name is executed, and the parent's implementation is not automatically called. As in the case of standard inheritance, then, it's up to us to design classes with matching method signatures.</p>
@@ -374,13 +364,11 @@ Parent1     Parent2
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>Please note that <code>Square</code> changes the signature of both <code>__init__</code> and <code>resize</code>. Now, when we instantiate those classes we need to keep in mind the different signature of <code>__init__</code> in <code>Square</code></p>
 <div class="highlight"><pre><span></span><code><span class="n">r1</span> <span class="o">=</span> <span class="n">Rectangle</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>
 <span class="n">r2</span> <span class="o">=</span> <span class="n">Rectangle</span><span class="p">(</span><span class="mi">150</span><span class="p">,</span> <span class="mi">280</span><span class="p">,</span> <span class="mi">23</span><span class="p">,</span> <span class="mi">55</span><span class="p">)</span>
 <span class="n">q1</span> <span class="o">=</span> <span class="n">Square</span><span class="p">(</span><span class="mi">300</span><span class="p">,</span> <span class="mi">400</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>We usually accept that an enhanced version of a class accepts different parameters when it is initialized, as we do not expect it to be polymorphic on <code>__init__</code>. Problems arise when we try to leverage polymorphism on other methods, for example resizing all <code>GraphicalEntity</code> objects in a list</p>
 <div class="highlight"><pre><span></span><code><span class="k">for</span> <span class="n">shape</span> <span class="ow">in</span> <span class="p">[</span><span class="n">r1</span><span class="p">,</span> <span class="n">r2</span><span class="p">,</span> <span class="n">q1</span><span class="p">]:</span>
@@ -388,7 +376,6 @@ Parent1     Parent2
     <span class="n">size_y</span> <span class="o">=</span> <span class="n">shape</span><span class="o">.</span><span class="n">size_y</span>
     <span class="n">shape</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">size_x</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span> <span class="n">size_y</span><span class="o">*</span><span class="mi">2</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>Since <code>r1</code>, <code>r2</code>, and <code>q1</code> are all objects that inherit from <code>GraphicalEntity</code> we expect them to provide the interface provided by that class, but this fails, because <code>Square</code> changed the signature of <code>resize</code>. The same would happen if we instantiated them in a for loop from a list of classes, but as I said it is generally accepted that child classes change the signature of the <code>__init__</code> method. This is not true, for example, in a plugin-based system, where all plugins shall be initialized the same way.</p>
 <p>This is a classic problem in OOP. While we, as humans, perceive a square just as a slightly special rectangle, from the interface point of view the two classes are different, and thus should not be in the same inheritance tree when we are dealing with dimensions. This is an important consideration: <code>Rectangle</code> and <code>Square</code> are polymorphic on the <code>move</code> method, but not on <code>__init__</code> and <code>resize</code>. So, the question is if we could somehow separate the two natures of being movable and resizable.</p>
@@ -420,7 +407,6 @@ Parent1     Parent2
 <span class="n">rge</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">2000</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>Here, the class <code>ResizableMixin</code> doesn't inherit from <code>GraphicalEntity</code>, but directly from <code>object</code>, so <code>ResizableGraphicalEntity</code> gets from it just the <code>resize</code> method. As we said before, this simplifies the inheritance tree of <code>ResizableGraphicalEntity</code> and helps to reduce the risk of the diamond problem. It leaves us free to use <code>GraphicalEntity</code> as a parent for other classes without having to inherit methods that we don't want. Please remember that this happens because the classes are designed to avoid it, and not because of language features: the MRO algorithm just ensures that there will always be an unambiguous choice in case of multiple ancestors.</p>
 <p>Mixins cannot usually be too generic. After all, they are designed to add features to classes, but these new features often interact with other pre-existing features of the augmented class. In this case, the <code>resize</code> method interacts with the attributes <code>size_x</code> and <code>size_y</code> that have to be present in the object. Obviously, there are obviously examples of <em>pure</em> mixins, but since they would require no initialization their scope is definitely limited.</p>
 <h2 id="using-mixins-to-hijack-inheritance">Using mixins to hijack inheritance<a class="headerlink" href="#using-mixins-to-hijack-inheritance" title="Permanent link">&para;</a></h2>
@@ -442,7 +428,6 @@ Parent1     Parent2
 
 <span class="n">b</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>As you can see the <code>Button</code> class extends the <code>GraphicalEntity</code> one in a classic way, using <code>super</code> to call the parent's <code>__init__</code> method before adding the new <code>status</code> attribute. Now, if I wanted to create a <code>SquareButton</code> class I have two choices.</p>
 <p>I might just override <code>__init__</code> in the new class</p>
@@ -469,7 +454,6 @@ Parent1     Parent2
 
 <span class="n">b</span> <span class="o">=</span> <span class="n">SquareButton</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>which performs the requested job, but strongly connects the feature of having a single dimension with the <code>Button</code> nature. If we wanted to create a circular image we could not inherit from <code>SquareButton</code>, as the image has a different nature.</p>
 <p>The second option is that of isolating the features connected with having a single dimension in a mixin class, and add it as a parent for the new class</p>
@@ -501,14 +485,12 @@ Parent1     Parent2
 <span class="n">b</span> <span class="o">=</span> <span class="n">SquareButton</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>The second solution gives the same final result, but promotes code reuse, as now the <code>SingleDimensionMixin</code> class can be applied to other classes derived from <code>GraphicalEntity</code> and make them accept only one size, while in the first solution that feature was tightly connected with the <code>Button</code> ancestor class.</p>
 <p>Please note that the position of the mixin is important as <code>super</code> follows the MRO. As it is, the MRO of <code>SquareButton</code> is <code>(SquareButton, SingleDimensionMixin, Button, GraphicalEntity, object)</code>, so, when we instantiate it the <code>__init__</code> method is provided by <code>SingleDimensionMixin</code>, which in turn calls through <code>super</code> the method <code>__init__</code> of <code>Button</code>. The call <code>super().__init__(pos_x, pos_y, size, size)</code> in <code>SingleDimensionMixin</code> and the signature <code>def __init__(self, pos_x, pos_y, size_x, size_y):</code> in <code>Button</code> match, so everything works.</p>
 <p>If we defined <code>SquareButton</code> as</p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">SquareButton</span><span class="p">(</span><span class="n">Button</span><span class="p">,</span> <span class="n">SingleDimensionMixin</span><span class="p">):</span>
     <span class="k">pass</span>
 </code></pre></div>
-
 
 <p>then the <code>__init__</code> method would first be provided by <code>Button</code>, and its <code>super</code> would call the <code>__init__</code> method of <code>SingleDimensionMixin</code>. This would however result in an error, as the call <code>super().__init__(pos_x, pos_y, size_x, size_y)</code> in <code>Button</code> doesn't match the signature <code>def __init__(self, pos_x, pos_y, size):</code> of <code>SingleDimensionMixin</code>.</p>
 <p>Mixins are not used only when you want to change the object's interface, though. Leveraging <code>super</code> we can achieve interesting designs like</p>
@@ -544,7 +526,6 @@ Parent1     Parent2
 <span class="nb">print</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">size_y</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>Here, the MRO or <code>LimitSizeButton</code> is <code>(&lt;class '__main__.LimitSizeButton'&gt;, &lt;class '__main__.LimitSizeMixin'&gt;, &lt;class '__main__.Button'&gt;, &lt;class '__main__.GraphicalEntity'&gt;, &lt;class 'object'&gt;)</code>, which means that when we initialize it the <code>__init__</code> method is first provided by <code>LimitSizeMixin</code>, which then calls through <code>super</code> the <code>__init__</code> method of <code>Button</code>, and through the latter the <code>__init__</code> method of <code>GraphicalEntity</code>.</p>
 <p>Remember that in Python, you are never forced to call the parent's implementation of a method, so the mixin here might also stop the dispatching mechanism if that is the requirement of the business logic of the new object.</p>
 <h1 id="a-real-example-django-class-based-views">A real example: Django class-based views<a class="headerlink" href="#a-real-example-django-class-based-views" title="Permanent link">&para;</a></h1>
@@ -560,7 +541,6 @@ Parent1     Parent2
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">render_to_response</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>As you can see <code>TemplateView</code> is a <code>View</code>, but it uses two mixins to inject features. Let's have a look at <code>TemplateResponseMixin</code></p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">TemplateResponseMixin</span><span class="p">:</span>
     <span class="p">[</span><span class="o">...</span><span class="p">]</span>
@@ -572,12 +552,10 @@ Parent1     Parent2
         <span class="p">[</span><span class="o">...</span><span class="p">]</span>
 </code></pre></div>
 
-
 <p>[I removed the code of the class as it is not crucial for the present discussion, you can see the full class <a href="https://github.com/django/django/blob/3.0/django/views/generic/base.py#L117">here</a>]</p>
 <p>It is clear that <code>TemplateResponseMixin</code> just adds to any class the two methods <code>get_template_names</code> and <code>render_to_response</code>. The latter is called in the <code>get</code> method of <code>TemplateView</code> to create the response. Let's have a look at a simplified schema of the calls:</p>
 <div class="highlight"><pre><span></span><code>GET request --&gt; TemplateView.dispatch --&gt; View.dispatch --&gt; TemplateView.get --&gt; TemplateResponseMixin.render_to_response
 </code></pre></div>
-
 
 <p>It might look complicated, but try to follow the code a couple of times and the whole picture will start to make sense. The important thing I want to stress is that the code in <code>TemplateResponseMixin</code> is available for any class that wants to have the feature of rendering a template, for example <code>DetailView</code> (<a href="https://github.com/django/django/blob/3.0/django/views/generic/detail.py#L164">CODE</a>), which receives the feature of showing the details of a single object by <code>SingleObjectTemplateResponseMixin</code>, which inherits from <code>TemplateResponseMixin</code>, overriding its method <code>get_template_names</code> (<a href="https://github.com/django/django/blob/3.0/django/views/generic/detail.py#L111">CODE</a>).</p>
 <p>As we discussed before, mixins cannot be too generic, and here we see a good example of a mixin designed to work on specific classes. <code>TemplateResponseMixin</code> has to be applied to classes that contain <code>self.request</code> (<a href="https://github.com/django/django/blob/3.0/django/views/generic/base.py#L133">CODE</a>), and while this doesn't mean exclusively classes derived from <code>View</code>, it is clear that it has been designed to augment that specific type.</p>

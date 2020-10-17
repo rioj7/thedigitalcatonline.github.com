@@ -152,7 +152,6 @@
 <span class="go">&gt;&gt;&gt;</span>
 </code></pre></div>
 
-
 <p>If you haven't been surprised by what's happening here you already grasped one of the most important things in Python and can safely skip the following explanation.</p>
 <p>The <code>print_id()</code> function demonstrates that placeholders inside functions are the very same variable passed at runtime (their memory addresses match).</p>
 <p>The two versions of <code>alter_value()</code> are meant to be functions that try to change the value of the passed argument. As you can see the first version of <code>alter_value()</code> does not succeed in changing the value of the variable <code>a</code>, while the second version does. Why? Indeed both act the same, trying to modify the value of the original variable passed, but some types in Python are <em>immutable</em>, and integers are among them. On the other hand, lists are not immutable, so the function does what its name pledges. (<a href="https://docs.python.org/3.4/reference/datamodel.html">here</a> you find more details on immutable types).</p>
@@ -166,7 +165,6 @@
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;LOG: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">message</span><span class="p">))</span>
 </code></pre></div>
 
-
 <p>This function may be run with an argument (which can be <code>None</code>)</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;File closed&quot;</span><span class="p">)</span>
 <span class="go">LOG: File closed</span>
@@ -174,17 +172,14 @@
 <span class="go">&gt;&gt;&gt;</span>
 </code></pre></div>
 
-
 <p>but can also be called <em>without</em> arguments, in which case it will receive the default value set in its prototype (<code>None</code>, in this case)</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">log</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span>
 </code></pre></div>
 
-
 <p>You can find more interesting examples in the standard library, for example in the <code>open()</code> function (check the <a href="https://docs.python.org/3.4/library/functions.html#open">official documentation</a>)</p>
 <div class="highlight"><pre><span></span><code><span class="nb">open</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">buffering</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">closefd</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">opener</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>It's evident from the prototype that a call like <code>f = open('/etc/hosts')</code> hides a lot of arguments by passing them default values (<code>mode</code>, <code>buffering</code>, <code>encoding</code>, etc), and making the function very simple to use in its standard use case.</p>
 <p>As you see from the <code>open()</code> builtin function we can use both standard and default arguments in a function, but the order in which they appear in the function prototype is fixed: all standard arguments first, then the default ones.</p>
@@ -192,12 +187,10 @@
     <span class="k">pass</span>
 </code></pre></div>
 
-
 <p>The reason is easy to figure out: if we put an argument with a default value before a standard one, the language has no way to understand if the argument  with default value has been initialized or not. For example consider the following function definition</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">a_rich_function</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">e</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
     <span class="k">pass</span>
 </code></pre></div>
-
 
 <p>when calling the function <code>a_rich_function(1, 2, 4, 5)</code> what arguments are we passing? Is <code>d=4, c=5</code> or <code>c=4, e=5</code> since <code>d</code> has a default value? That order of definition is thus forbidden, and if you try Python will raise a <code>SyntaxError</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">a_rich_function</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">e</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
@@ -208,7 +201,6 @@
 <span class="go">&gt;&gt;&gt;</span>
 </code></pre></div>
 
-
 <h2 id="default-arguments-evaluation">Default arguments evaluation<a class="headerlink" href="#default-arguments-evaluation" title="Permanent link">&para;</a></h2>
 <p>Default arguments may be provided as plain values or as the result of a function call, but the latter technique need a <strong>very big warning</strong>.</p>
 <p>While plain values are hardcoded, thus needing no evaluation except that made at compilation time, function calls are expected to be executed at run time (check <a href="https://www.reddit.com/r/Python/comments/2viygh/default_arguments_in_python/coii8bn?context=3">this comment on Reddit</a> for a better explanation of this matter). So we could write</p>
@@ -217,7 +209,6 @@
 <span class="k">def</span> <span class="nf">log_time</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()):</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">: </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">isoformat</span><span class="p">(),</span> <span class="n">message</span><span class="p">))</span>
 </code></pre></div>
-
 
 <p>expecting the <code>log_time()</code> function to correctly provide the current time each time we call it. This unfortunately does not work: default arguments are evaluated at definition time (for example when you first import the module), and the result of successive calls is</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">log_time</span><span class="p">(</span><span class="s2">&quot;message 1&quot;</span><span class="p">)</span>
@@ -228,7 +219,6 @@
 <span class="go">2015-02-10T21:20:32.998647: message 3</span>
 </code></pre></div>
 
-
 <p>If you set the default value to a class instance the result may be even stranger, as you can read in <a href="http://docs.python-guide.org/en/latest/writing/gotchas/">The Hitchhiker’s Guide to Python!</a>. As suggested by the latter resource the usual solution is to replace the default value with <code>None</code> and to check the value of the argument inside the function</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">datetime</span> <span class="k">as</span> <span class="nn">dt</span>
 
@@ -237,7 +227,6 @@
         <span class="n">time</span><span class="o">=</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">: </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">isoformat</span><span class="p">(),</span> <span class="n">message</span><span class="p">))</span>
 </code></pre></div>
-
 
 <h2 id="conclusions">Conclusions<a class="headerlink" href="#conclusions" title="Permanent link">&para;</a></h2>
 <p>Default arguments may vastly simplify APIs, provided that you pay attention to their only "failure point", the evaluation time. Surprisingly, one of the most basic things in Python, function arguments and references, are one of the biggest source of errors, sometimes for experienced programmers too. I recommend giving references and polymorphism some study time.</p>

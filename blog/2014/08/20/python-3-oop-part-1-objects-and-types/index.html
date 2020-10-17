@@ -136,7 +136,6 @@
 <span class="nb">print</span><span class="p">(</span><span class="n">avg</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
 </code></pre></div>
 
-
 <p>As you can see the code is quite good and general: the procedure (function) operates on a sequence of data, and it returns the average of the sequence items. So far, so good: computing the average of some numbers leaves the numbers untouched and creates new data.</p>
 <p>The observation of the everyday world, however, shows that <em>complex data mutate</em>: an electrical device is on or off, a door is open or closed, the content of a bookshelf in your room changes as you buy new books.</p>
 <p>You can still manage it keeping data and procedures separate, for example</p>
@@ -151,7 +150,6 @@
 <span class="n">open_door</span><span class="p">(</span><span class="n">door1</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">door1</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>I described a door as a structure containing a number and the status of the door (as you would do in languages like LISP, for example). The procedure knows how this structure is made and may alter it.</p>
 <p>This also works like a charm. Some problems arise, however, when we start building specialized types of data. What happens, for example, when I introduce a "lockable door" data type, which can be opened only when it is not locked? Let's see</p>
@@ -178,7 +176,6 @@
 <span class="nb">print</span><span class="p">(</span><span class="n">ldoor1</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>Everything still works, no surprises in this code. However, as you can see, I had to find a different name for the procedure that opens a locked door since its implementation differs from the procedure that opens a standard door. But, wait... I'm still opening a door, the action is the same, and it just changes the status of the door itself. So why shall I remember that a locked door shall be opened with <code>open_ldoor()</code> instead of <code>open_door()</code> if the verb is the same?</p>
 <p>Chances are that this separation between data and procedures doesn't perfectly fit some situations. The key problem is that the "open" action is not actually <em>using</em> the door; rather it is <em>changing its state</em>. So, just like the volume control buttons of your phone, which are <em>on</em> your phone, the "open" procedure should stick to the "door" data.</p>
 <p>This is exactly what leads to the concept of <em>object</em>: an object, in the OOP context, is a structure holding data <em>and</em> procedures operating on them.</p>
@@ -200,14 +197,12 @@
 <span class="go">&lt;class &#39;int&#39;&gt;</span>
 </code></pre></div>
 
-
 <p>As you can see, the built-in function <code>type()</code> returns the content of the <em>magic attribute</em> <code>__class__</code> (magic here means that its value is managed by Python itself offstage). The type of the variable <code>a</code>, or its class, is <code>int</code>. (This is a very inaccurate description of this rather complex topic, so remember that at the moment we are just scratching the surface).</p>
 <p>Once you have a class you can <em>instantiate</em> it to get a concrete object (an <em>instance</em>) of that type, i.e. an object built according to the structure of that class. The Python syntax to instantiate a class is the same of a function call</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="nb">int</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">type</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
 <span class="go">&lt;class &#39;int&#39;&gt;</span>
 </code></pre></div>
-
 
 <p>When you create an instance, you can pass some values, according to the class definition, to <em>initialize</em> it.</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="nb">int</span><span class="p">()</span>
@@ -217,7 +212,6 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
 <span class="go">7</span>
 </code></pre></div>
-
 
 <p>In this example, the <code>int</code> class creates an integer with value 0 when called without arguments, otherwise it uses the given argument to initialize the newly created object.</p>
 <p>Let us write a class that represents a door to match the procedural examples done in the first section</p>
@@ -232,7 +226,6 @@
     <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s1">&#39;closed&#39;</span>
 </code></pre></div>
-
 
 <p>The <code>class</code> keyword defines a new class named <code>Door</code>; everything indented under <code>class</code> is part of the class. The functions you write inside the object are called <em>methods</em> and don't differ at all from standard functions; the nomenclature changes only to highlight the fact that those functions now are part of an object.</p>
 <p>Methods of a class must accept as first argument a special value called <code>self</code> (the name is a convention but please never break it).</p>
@@ -249,7 +242,6 @@
 <span class="go">closed</span>
 </code></pre></div>
 
-
 <p>Now <code>door1</code> is an instance of the <code>Door</code> class; <code>type()</code> returns the class as <code>__main__.Door</code> since the class was defined directly in the interactive shell, that is in the current main module.</p>
 <p>To call a method of an object, that is to run one of its internal functions, you just access it as an attribute with the dotted syntax and call it like a standard function.</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">door1</span><span class="o">.</span><span class="n">open</span><span class="p">()</span>
@@ -258,7 +250,6 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">door1</span><span class="o">.</span><span class="n">status</span><span class="p">)</span>
 <span class="go">open</span>
 </code></pre></div>
-
 
 <p>In this case, the <code>open()</code> method of the <code>door1</code> instance has been called. No arguments have been passed to the <code>open()</code> method, but if you review the class declaration, you see that it was declared to accept an argument (<code>self</code>). When you call a method of an instance, Python automatically passes the instance itself to the method as the first argument.</p>
 <p>You can create as many instances as needed and they are completely unrelated each other. That is, the changes you make on one instance do not reflect on another instance of the same class.</p>

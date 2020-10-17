@@ -119,7 +119,6 @@
 <span class="p">}</span>
 </code></pre></div>
 
-
 <p>Once we convert this to a Python data structure we obtain a list of dictionaries, where <code>'age'</code> is an integer, and the remaining fields are strings.</p>
 <p>Someone then wrote a class that computes some statistics on the input data. This class, called <code>DataStats</code>, provides a single method <code>stats()</code>, whose inputs are the data returned by the service (in JSON format), and two integers called <code>iage</code> and <code>isalary</code>. Those, according to the short documentation of the class, are the initial age and the initial salary used to compute the average yearly increase of the salary on the whole dataset.</p>
 <p>The code is the following</p>
@@ -163,7 +162,6 @@
         <span class="p">})</span>
 </code></pre></div>
 
-
 <h1 id="the-goal">The goal<a class="headerlink" href="#the-goal" title="Permanent link">&para;</a></h1>
 <p>It is fairly easy, even for the untrained eye, to spot some issues in the previous class. A list of the most striking ones is</p>
 <ul>
@@ -187,7 +185,6 @@
 <div class="highlight"><pre><span></span><code>pip install -r requirements.txt
 </code></pre></div>
 
-
 <p>The repository already contains a configuration file for pytest and you should customise it to avoid entering your virtual environment directory. Go and fix the <code>norecursedirs</code> parameter in that file, adding the name of the virtual environment you just created; I usually name my virtual environments with a <code>venv</code> prefix, and this is why that variable contains the entry <code>venv*</code>.</p>
 <p>At this point you should be able to run <code>pytest -svv</code> in the parent directory of the repository (the one that contains <code>pytest.ini</code>), and obtain a result similar to the following</p>
 <div class="highlight"><pre><span></span><code><span class="o">==========================</span> <span class="nb">test</span> session <span class="nv">starts</span> <span class="o">==========================</span>
@@ -199,7 +196,6 @@ collected <span class="m">0</span> <span class="nv">items</span>
 
 <span class="o">======================</span> no tests ran in <span class="m">0</span>.00 <span class="nv">seconds</span> <span class="o">======================</span>
 </code></pre></div>
-
 
 <p>The given repository contains two branches. <code>master</code> is the one that you are into, and contains the initial setup, while <code>develop</code> points to the last step of the whole refactoring process. Every step of this post contains a reference to the commit that contains the changes introduced in that section.</p>
 <h1 id="step-1-testing-the-endpoints">Step 1 - Testing the endpoints<a class="headerlink" href="#step-1-testing-the-endpoints" title="Permanent link">&para;</a></h1>
@@ -231,7 +227,6 @@ collected <span class="m">0</span> <span class="nv">items</span>
 <span class="p">]</span>
 </code></pre></div>
 
-
 <p>and calling the <code>stats()</code> method with that output, with <code>iage</code> set to <code>20</code>, and <code>isalary</code> set to <code>20000</code>, we get the following JSON result</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
     <span class="nt">&quot;avg_age&quot;</span><span class="p">:</span> <span class="mi">62</span><span class="p">,</span>
@@ -253,7 +248,6 @@ collected <span class="m">0</span> <span class="nv">items</span>
     <span class="p">}]</span>
 <span class="p">}</span>
 </code></pre></div>
-
 
 <p>Caveat: I'm using a single very short set of real data, namely a list of 3 dictionaries. In a real case I would test the black box with many different use cases, to ensure I am not just checking some corner case.</p>
 <p>The test is the following</p>
@@ -312,7 +306,6 @@ collected <span class="m">0</span> <span class="nv">items</span>
     <span class="p">)</span>
 </code></pre></div>
 
-
 <p>As said before, this test is obviously passing, having been artificially constructed from a real execution of the code.</p>
 <p>Well, this test is very important! Now we know that if we change something inside the code, altering the behaviour of the class, at least one test will fail.</p>
 <h1 id="step-2-getting-rid-of-the-json-format">Step 2 - Getting rid of the JSON format<a class="headerlink" href="#step-2-getting-rid-of-the-json-format" title="Permanent link">&para;</a></h1>
@@ -328,7 +321,6 @@ collected <span class="m">0</span> <span class="nv">items</span>
             <span class="p">[</span><span class="n">code_part_2</span><span class="p">]</span>
         <span class="p">})</span>
 </code></pre></div>
-
 
 <p>Where obviously <code>code_part_2</code> depends on <code>code_part_1</code>. The first refactoring, then, will follow this procedure</p>
 <p>1. We write a test called <code>test__stats()</code> for a <code>_stats()</code> method that is supposed to return the data as a Python structure. We can infer the latter manually from the JSON or running <code>json.loads()</code> from a Python shell. The test fails.</p>
@@ -348,7 +340,6 @@ collected <span class="m">0</span> <span class="nv">items</span>
         <span class="p">})</span>
 </code></pre></div>
 
-
 <p>3. We remove the duplicated code in <code>stats()</code> replacing it with a call to <code>_stats()</code></p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">DataStats</span><span class="p">:</span>
 
@@ -362,7 +353,6 @@ collected <span class="m">0</span> <span class="nv">items</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_stats</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">iage</span><span class="p">,</span> <span class="n">isalary</span><span class="p">)</span>
         <span class="p">)</span>
 </code></pre></div>
-
 
 <p>At this point we could refactor the initial test <code>test_json()</code> that we wrote, but this is an advanced consideration, and I'll leave it for some later notes.</p>
 <p>So now the code of our class looks like this</p>
@@ -406,7 +396,6 @@ collected <span class="m">0</span> <span class="nv">items</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_stats</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">iage</span><span class="p">,</span> <span class="n">isalary</span><span class="p">)</span>
         <span class="p">)</span>
 </code></pre></div>
-
 
 <p>and we have two tests that check the correctness of it.</p>
 <h1 id="step-3-refactoring-the-tests">Step 3 - Refactoring the tests<a class="headerlink" href="#step-3-refactoring-the-tests" title="Permanent link">&para;</a></h1>
@@ -496,7 +485,6 @@ collected <span class="m">0</span> <span class="nv">items</span>
     <span class="p">}</span>
 </code></pre></div>
 
-
 <h1 id="step-4-isolate-the-average-age-algorithm">Step 4 - Isolate the average age algorithm<a class="headerlink" href="#step-4-isolate-the-average-age-algorithm" title="Permanent link">&para;</a></h1>
 <p>Commit: <a href="https://github.com/lgiordani/datastats/commit/9db18036eee2f6712384195fcd970303387291f6">9db1803</a></p>
 <p>Isolating independent features is a key target of software design. Thus, our refactoring shall aim to disentangle the code dividing it into small separated functions.</p>
@@ -509,13 +497,11 @@ collected <span class="m">0</span> <span class="nv">items</span>
     <span class="k">assert</span> <span class="n">ds</span><span class="o">.</span><span class="n">_avg_age</span><span class="p">(</span><span class="n">test_data</span><span class="p">)</span> <span class="o">==</span> <span class="mi">62</span>
 </code></pre></div>
 
-
 <p>We know that the method's output shall be <code>62</code> as that is the value we have in the output data of the original <code>stats()</code> method. Please note that there is no need to pass <code>iage</code> and <code>isalary</code> as they are not used in the refactored code.</p>
 <p>The test fails, so we can dutifully go and duplicate the code we use to compute <code>'avg_age'</code></p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">_avg_age</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="nb">sum</span><span class="p">([</span><span class="n">e</span><span class="p">[</span><span class="s1">&#39;age&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">data</span><span class="p">])</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
 </code></pre></div>
-
 
 <p>and once the test passes we can replace the duplicated code in <code>_stats()</code> with a call to <code>_avg_age()</code></p>
 <div class="highlight"><pre><span></span><code>        <span class="k">return</span> <span class="p">{</span>
@@ -528,7 +514,6 @@ collected <span class="m">0</span> <span class="nv">items</span>
         <span class="p">}</span>
 </code></pre></div>
 
-
 <p>Checking after that that no test is failing. Well done! We isolated the first feature, and our refactoring produced already three tests.</p>
 <h1 id="step-5-isolate-the-average-salary-algorithm">Step 5 - Isolate the average salary algorithm<a class="headerlink" href="#step-5-isolate-the-average-salary-algorithm" title="Permanent link">&para;</a></h1>
 <p>Commit: <a href="https://github.com/lgiordani/datastats/commit/412220145ea4d7ef846b1d1f289b4ddefc4fb24b">4122201</a></p>
@@ -540,12 +525,10 @@ collected <span class="m">0</span> <span class="nv">items</span>
     <span class="k">assert</span> <span class="n">ds</span><span class="o">.</span><span class="n">_avg_salary</span><span class="p">(</span><span class="n">test_data</span><span class="p">)</span> <span class="o">==</span> <span class="mi">55165</span>
 </code></pre></div>
 
-
 <p>a new <code>_avg_salary()</code> method</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">_avg_salary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="nb">sum</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="s1">&#39;salary&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">:])</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">data</span><span class="p">])</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
 </code></pre></div>
-
 
 <p>and a new version of the final return value</p>
 <div class="highlight"><pre><span></span><code>        <span class="k">return</span> <span class="p">{</span>
@@ -557,7 +540,6 @@ collected <span class="m">0</span> <span class="nv">items</span>
         <span class="p">}</span>
 </code></pre></div>
 
-
 <h1 id="step-6-isolate-the-average-yearly-increase-algorithm">Step 6 - Isolate the average yearly increase algorithm<a class="headerlink" href="#step-6-isolate-the-average-yearly-increase-algorithm" title="Permanent link">&para;</a></h1>
 <p>Commit: <a href="https://github.com/lgiordani/datastats/commit/4005145f39d36fda0519127d57e1b4099d24e72b">4005145</a></p>
 <p>The remaining three keys are computed with algorithms that, being longer than one line, couldn't be squeezed directly in the definition of the dictionary. The refactoring process, however, does not really change; as before, we first test a helper method, then we define it duplicating the code, and last we call the helper removing the code duplication.</p>
@@ -568,7 +550,6 @@ collected <span class="m">0</span> <span class="nv">items</span>
 
     <span class="k">assert</span> <span class="n">ds</span><span class="o">.</span><span class="n">_avg_yearly_increase</span><span class="p">(</span><span class="n">test_data</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">20000</span><span class="p">)</span> <span class="o">==</span> <span class="mi">837</span>
 </code></pre></div>
-
 
 <p>a new method that passes the test</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">_avg_yearly_increase</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">iage</span><span class="p">,</span> <span class="n">isalary</span><span class="p">):</span>
@@ -583,7 +564,6 @@ collected <span class="m">0</span> <span class="nv">items</span>
 
         <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">average_salary_increase</span><span class="o">/</span><span class="n">average_age_increase</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>and a new version of the <code>_stats()</code> method</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">iage</span><span class="p">,</span> <span class="n">isalary</span><span class="p">):</span>
@@ -607,7 +587,6 @@ collected <span class="m">0</span> <span class="nv">items</span>
             <span class="s1">&#39;min_salary&#39;</span><span class="p">:</span> <span class="n">min_salary</span>
         <span class="p">}</span>
 </code></pre></div>
-
 
 <p>Please note that we are not solving any code duplication but the ones that we introduce to refactor. The first achievement we should aim to is to completely isolate independent features.</p>
 <h1 id="step-7-isolate-max-and-min-salary-algorithms">Step 7 - Isolate max and min salary algorithms<a class="headerlink" href="#step-7-isolate-max-and-min-salary-algorithms" title="Permanent link">&para;</a></h1>
@@ -640,7 +619,6 @@ collected <span class="m">0</span> <span class="nv">items</span>
     <span class="p">}]</span>
 </code></pre></div>
 
-
 <p>The new methods in the <code>DataStats</code> class are</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">_max_salary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="c1"># Compute max salary</span>
@@ -656,7 +634,6 @@ collected <span class="m">0</span> <span class="nv">items</span>
                 <span class="s1">&#39;£</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">salaries</span><span class="p">)))]</span>
 </code></pre></div>
 
-
 <p>and the <code>_stats()</code> method is now really tiny</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">iage</span><span class="p">,</span> <span class="n">isalary</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">{</span>
@@ -668,7 +645,6 @@ collected <span class="m">0</span> <span class="nv">items</span>
             <span class="s1">&#39;min_salary&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_min_salary</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
         <span class="p">}</span>
 </code></pre></div>
-
 
 <h1 id="step-8-reducing-code-duplication">Step 8 - Reducing code duplication<a class="headerlink" href="#step-8-reducing-code-duplication" title="Permanent link">&para;</a></h1>
 <p>Commit: <a href="https://github.com/lgiordani/datastats/commit/b559a5c91ef58e1e734ac97b676468d09a460a45">b559a5c</a></p>
@@ -688,7 +664,6 @@ collected <span class="m">0</span> <span class="nv">items</span>
                 <span class="s1">&#39;£</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">salaries</span><span class="p">)))]</span>
 </code></pre></div>
 
-
 <p>I'll start by making explicit the <code>threshold</code> variable in the second function. As soon as I change something, I'll run the tests to check that the external behaviour did not change.</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">_max_salary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="c1"># Compute max salary</span>
@@ -704,7 +679,6 @@ collected <span class="m">0</span> <span class="nv">items</span>
 
         <span class="k">return</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">data</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="s1">&#39;salary&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">threshold</span><span class="p">]</span>
 </code></pre></div>
-
 
 <p>Now, it is pretty evident that the two functions are the same but for the <code>min()</code> and <code>max()</code> functions. They still use different variable names and different code to format the threshold, so my first action is to even out them, copying the code of <code>_min_salary()</code> to <code>_max_salary()</code> and changing <code>min()</code> to <code>max()</code></p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">_max_salary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
@@ -722,7 +696,6 @@ collected <span class="m">0</span> <span class="nv">items</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">data</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="s1">&#39;salary&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">threshold</span><span class="p">]</span>
 </code></pre></div>
 
-
 <p>Now I can create another helper called <code>_select_salary()</code> that duplicates that code and accepts a function, used instead of <code>min()</code> or <code>max()</code>. As I did before, first I duplicate the code, and then remove the duplication by calling the new function.</p>
 <p>After some passages, the code looks like this</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">_select_salary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">func</span><span class="p">):</span>
@@ -738,17 +711,14 @@ collected <span class="m">0</span> <span class="nv">items</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_select_salary</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">min</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>I noticed then a code duplication between <code>_avg_salary()</code> and <code>_select_salary()</code></p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">_avg_salary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="nb">sum</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="s1">&#39;salary&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">:])</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">data</span><span class="p">])</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
 </code></pre></div>
 
-
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">_select_salary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">func</span><span class="p">):</span>
         <span class="n">salaries</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;salary&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">:])</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">data</span><span class="p">]</span>
 </code></pre></div>
-
 
 <p>and decided to extract the common algorithm in a method called <code>_salaries()</code>. As before, I write the test first</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_salaries</span><span class="p">():</span>
@@ -758,25 +728,21 @@ collected <span class="m">0</span> <span class="nv">items</span>
     <span class="k">assert</span> <span class="n">ds</span><span class="o">.</span><span class="n">_salaries</span><span class="p">(</span><span class="n">test_data</span><span class="p">)</span> <span class="o">==</span> <span class="p">[</span><span class="mi">27888</span><span class="p">,</span> <span class="mi">67137</span><span class="p">,</span> <span class="mi">70472</span><span class="p">]</span>
 </code></pre></div>
 
-
 <p>then I implement the method</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">_salaries</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;salary&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">:])</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">data</span><span class="p">]</span>
 </code></pre></div>
-
 
 <p>and eventually I replace the duplicated code with a call to the new method</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">_salaries</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;salary&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">:])</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">data</span><span class="p">]</span>
 </code></pre></div>
 
-
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">_select_salary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">func</span><span class="p">):</span>
         <span class="n">threshold</span> <span class="o">=</span> <span class="s1">&#39;£</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">func</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_salaries</span><span class="p">(</span><span class="n">data</span><span class="p">))))</span>
 
         <span class="k">return</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">data</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="s1">&#39;salary&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">threshold</span><span class="p">]</span>
 </code></pre></div>
-
 
 <p>While doing this I noticed that <code>_avg_yearly_increase()</code> contains the same code, and fix it there as well.</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">_avg_yearly_increase</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">iage</span><span class="p">,</span> <span class="n">isalary</span><span class="p">):</span>
@@ -792,7 +758,6 @@ collected <span class="m">0</span> <span class="nv">items</span>
         <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">average_salary_increase</span><span class="o">/</span><span class="n">average_age_increase</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>It would be useful at this point to store the input data inside the class and to use it as <code>self.data</code> instead of passing it around to all the class's methods. This however would break the class's API, as <code>DataStats</code> is currently initialised without any data. Later I will show how to introduce changes that potentially break the API, and briefly discuss the issue. For the moment, however, I'll keep changing the class without modifying the external interface.</p>
 <p>It looks like <code>age</code> has the same code duplication issues as <code>salary</code>, so with the same procedure I introduce the <code>_ages()</code> method and change the <code>_avg_age()</code> and <code>_avg_yearly_increase()</code> methods accordingly.</p>
 <p>Speaking of <code>_avg_yearly_increase()</code>, the code of that method contains the code of the <code>_avg_age()</code> and <code>_avg_salary()</code> methods, so it is worth replacing it with two calls. As I am moving code between existing methods, I do not need further tests.</p>
@@ -806,7 +771,6 @@ collected <span class="m">0</span> <span class="nv">items</span>
 
         <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">average_salary_increase</span><span class="o">/</span><span class="n">average_age_increase</span><span class="p">)</span>
 </code></pre></div>
-
 
 <h1 id="step-9-advanced-refactoring">Step 9 - Advanced refactoring<a class="headerlink" href="#step-9-advanced-refactoring" title="Permanent link">&para;</a></h1>
 <p>Commit: <a href="https://github.com/lgiordani/datastats/commit/cc0b0a105ebc882cb73831b177e881bb65f4b491">cc0b0a1</a></p>
@@ -852,14 +816,12 @@ collected <span class="m">0</span> <span class="nv">items</span>
     <span class="k">assert</span> <span class="n">ds</span><span class="o">.</span><span class="n">data</span> <span class="o">==</span> <span class="n">test_data</span>
 </code></pre></div>
 
-
 <p>This test doesn't pass, and the code that implements the class is very simple</p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">NewDataStats</span><span class="p">:</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
 </code></pre></div>
-
 
 <p>Now I can start an iterative process:</p>
 <ol>
@@ -875,19 +837,16 @@ collected <span class="m">0</span> <span class="nv">items</span>
     <span class="k">assert</span> <span class="n">ds</span><span class="o">.</span><span class="n">_ages</span><span class="p">()</span> <span class="o">==</span> <span class="p">[</span><span class="mi">68</span><span class="p">,</span> <span class="mi">49</span><span class="p">,</span> <span class="mi">70</span><span class="p">]</span>
 </code></pre></div>
 
-
 <p>and the code that passes the test is</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">_ages</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;age&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">]</span>
 </code></pre></div>
-
 
 <p>Once finished, I noticed that, as now methods like <code>_ages()</code> do not require an input parameter any more, I can convert them to properties, changing the tests accordingly.</p>
 <div class="highlight"><pre><span></span><code>    <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">_ages</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;age&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">]</span>
 </code></pre></div>
-
 
 <p>It is time to replace the methods of <code>DataStats</code> with calls to <code>NewDataStats</code>. We could do it method by method, but actually the only thing that we really need is to replace <code>stats()</code>. So the new code is</p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">DataStats</span><span class="p">:</span>
@@ -896,7 +855,6 @@ collected <span class="m">0</span> <span class="nv">items</span>
         <span class="n">nds</span> <span class="o">=</span> <span class="n">NewDataStats</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">nds</span><span class="o">.</span><span class="n">stats</span><span class="p">(</span><span class="n">iage</span><span class="p">,</span> <span class="n">isalary</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>And since all the other methods are not used any more we can safely delete them, checking that the tests do not fail. Speaking of tests, removing methods will make many tests of <code>DataStats</code> fail, so we need to remove them.</p>
 <h1 id="step-10-still-room-for-improvement">Step 10 - Still room for improvement<a class="headerlink" href="#step-10-still-room-for-improvement" title="Permanent link">&para;</a></h1>
@@ -909,7 +867,6 @@ collected <span class="m">0</span> <span class="nv">items</span>
         <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ages</span><span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">))</span>
 </code></pre></div>
 
-
 <p>share the same logic, so we can definitely isolate that and call the common code in each function</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">_floor_avg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sum_of_numbers</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">sum_of_numbers</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">))</span>
@@ -920,7 +877,6 @@ collected <span class="m">0</span> <span class="nv">items</span>
     <span class="k">def</span> <span class="nf">_avg_age</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_floor_avg</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ages</span><span class="p">))</span>
 </code></pre></div>
-
 
 <p>which passes all the tests and is thus correct.</p>
 <p>Whenever I get corrected by someone who read one of my posts and just learned something new I feel so happy, because it means that the message is clear!</p>

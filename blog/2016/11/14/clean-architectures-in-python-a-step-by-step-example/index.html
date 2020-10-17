@@ -160,7 +160,6 @@ pip install cookiecutter
 cookiecutter https://github.com/audreyr/cookiecutter-pypackage
 </code></pre></div>
 
-
 <p>Now answer the questions, then finish creating the project with the following code</p>
 <div class="highlight"><pre><span></span><code>deactivate
 rm -fR venv3
@@ -169,14 +168,12 @@ virtualenv venv3 -p python3
 <span class="nb">source</span> venv3/bin/activate
 </code></pre></div>
 
-
 <p>Get rid of the <code>requirements_dev.txt</code> file that Cookiecutter created for you. I usually store virtualenv requirements in different hierarchical files to separate production, development and testing environments, so create the <code>requirements</code> directory and the relative files</p>
 <div class="highlight"><pre><span></span><code>mkdir requirements
 touch requirements/prod.txt
 touch requirements/dev.txt
 touch requirements/test.txt
 </code></pre></div>
-
 
 <p>The <code>test.txt</code> file will contain specific packages used to test the project. Since to test the project you also need to install the packages for the production environment the file will first include the production one.</p>
 <div class="highlight"><pre><span></span><code>-r prod.txt
@@ -187,7 +184,6 @@ coverage
 pytest-cov
 </code></pre></div>
 
-
 <p>The <code>dev.txt</code> file will contain packages used during the development process and shall install also test and production package</p>
 <div class="highlight"><pre><span></span><code>-r test.txt
 
@@ -197,12 +193,10 @@ flake8
 Sphinx
 </code></pre></div>
 
-
 <p>(taking advantage of the fact that <code>test.txt</code> already includes <code>prod.txt</code>).</p>
 <p>Last, the main <code>requirements.txt</code> file of the project will just import <code>requirements/prod.txt</code></p>
 <div class="highlight"><pre><span></span><code>-r prod.txt
 </code></pre></div>
-
 
 <p>Obviously you are free to find the project structure that better suits your need or preferences. This is the structure we are going to use in this project but nothing forces you to follow it in your personal projects.</p>
 <p>This separation allows you to install a full-fledged development environment on your machine, while installing only testing tools in a testing environment like the Travis platform and to further reduce the amount of dependencies in the production case. </p>
@@ -210,7 +204,6 @@ Sphinx
 <p>Remember at this point to install the development requirements in your virtualenv</p>
 <div class="highlight"><pre><span></span><code>$ pip install -r requirements/dev.txt
 </code></pre></div>
-
 
 <h2 id="miscellaneous-configuration">Miscellaneous configuration<a class="headerlink" href="#miscellaneous-configuration" title="Permanent link">&para;</a></h2>
 <p>The <code>pytest</code> testing library needs to be configured. This is the <code>pytest.ini</code> file that you can create in the root directory (where the <code>setup.py</code> file is located)</p>
@@ -220,16 +213,13 @@ norecursedirs = .git .tox venv* requirements*
 python_files = test*.py
 </code></pre></div>
 
-
 <p>To run the tests during the development of the project just execute</p>
 <div class="highlight"><pre><span></span><code>$ py.test -sv
 </code></pre></div>
 
-
 <p>If you want to check the coverage, i.e. the amount of code which is run by your tests or "covered", execute</p>
 <div class="highlight"><pre><span></span><code>$ py.test --cov-report term-missing --cov<span class="o">=</span>rentomatic
 </code></pre></div>
-
 
 <p>If you want to know more about test coverage check the official documentation of the <a href="http://coverage.readthedocs.io/en/latest/">Coverage.py</a> and the <a href="http://pytest-cov.readthedocs.io/en/latest/index.html">pytest-cov</a> packages.</p>
 <p>I strongly suggest the use of the <code>flake8</code> package to check that your Python code is PEP8 compliant. This is the <code>flake8</code> configuration that you can put in your <code>setup.cfg</code> file</p>
@@ -239,11 +229,9 @@ exclude = .git, venv*, docs
 max-complexity = 10
 </code></pre></div>
 
-
 <p>To check the compliance of your code with the PEP8 standard execute</p>
 <div class="highlight"><pre><span></span><code>$ flake8
 </code></pre></div>
-
 
 <p>Flake8 documentation is available <a href="http://flake8.pycqa.org/en/latest/">here</a>.</p>
 <p>Note that every step in this post produces tested code and a of coverage of 100%. One of the benefits of a clean architecture is the separation between layers, and this guarantees a great degree of testability. Note however that in this tutorial, in particular in the REST sections, some tests have been omitted in favour of a simpler description of the architecture. </p>
@@ -285,7 +273,6 @@ max-complexity = 10
     <span class="k">assert</span> <span class="n">storageroom</span><span class="o">.</span><span class="n">latitude</span> <span class="o">==</span> <span class="mf">51.75436293</span>
 </code></pre></div>
 
-
 <p>With these two tests we ensure that our model can be initialized with the correct values and that can be created from a dictionary. In this first version all the parameters of the model are required. Later we could want to make some of them optional, and in that case we will have to add the relevant tests.</p>
 <p>Now let's write the <code>StorageRoom</code> class in the <code>rentomatic/domain/storageroom.py</code> file. Do not forget to create the <code>__init__.py</code> file in the subdirectories of the project, otherwise Python will not be able to import the modules.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">rentomatic.shared.domain_model</span> <span class="kn">import</span> <span class="n">DomainModel</span>
@@ -315,7 +302,6 @@ max-complexity = 10
 
 <span class="n">DomainModel</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">StorageRoom</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>The model is very simple, and requires no further explanation. One of the benefits of a clean architecture is that each layer contains small pieces of code that, being isolated, shall perform simple tasks. In this case the model provides an initialization API and stores the information inside the class.</p>
 <p>The <code>from_dict</code> method comes in handy when we have to create a model from data coming from another layer (such as the database layer or the query string of the REST layer).</p>
@@ -351,7 +337,6 @@ max-complexity = 10
     <span class="k">assert</span> <span class="n">storageroom1</span> <span class="o">==</span> <span class="n">storageroom2</span>
 </code></pre></div>
 
-
 <p>and the new methods of the object in <code>rentomatic/domain/storageroom.py</code> are</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">{</span>
@@ -365,7 +350,6 @@ max-complexity = 10
     <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
 </code></pre></div>
-
 
 <h1 id="serializers">Serializers<a class="headerlink" href="#serializers" title="Permanent link">&para;</a></h1>
 <p><strong>Git tag: <a href="https://github.com/lgiordani/rentomatic/tree/step03">step03</a></strong></p>
@@ -412,7 +396,6 @@ max-complexity = 10
         <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(),</span> <span class="bp">cls</span><span class="o">=</span><span class="n">srs</span><span class="o">.</span><span class="n">StorageRoomEncoder</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>Put in the <code>rentomatic/serializers/storageroom_serializer.py</code> file the code that makes the test pass</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">json</span>
 
@@ -432,7 +415,6 @@ max-complexity = 10
         <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">default</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>Providing a class that inherits from <code>json.JSONEncoder</code> let us use the <code>json.dumps(room, cls=StorageRoomEncoder)</code> syntax to serialize the model.</p>
 <p>There is a certain degree of repetition in the code we wrote, and this is the annoying part of a clean architecture. Since we want to isolate layers as much as possible and create lightweight classes we end up somehow repeating certain types of actions. For example the serialization code that assigns attributes of a <code>StorageRoom</code> to JSON attributes is very similar to that we use to create the object from a dictionary. Not exactly the same, obviously, but the two functions are very close.</p>
@@ -498,7 +480,6 @@ max-complexity = 10
     <span class="k">assert</span> <span class="n">result</span> <span class="o">==</span> <span class="n">domain_storagerooms</span>
 </code></pre></div>
 
-
 <p>The test is straightforward. First we mock the repository so that is provides a <code>list()</code> method that returns the list of models we created above the test. Then we initialize the use case with the repo and execute it, collecting the result. The first thing we check is if the repository method was called without any parameter, and the second is the effective correctness of the result.</p>
 <p>This is the implementation of the use case that makes the test pass. Put the code in the <code>rentomatic/use_cases/storageroom_use_case.py</code></p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">StorageRoomListUseCase</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -509,7 +490,6 @@ max-complexity = 10
     <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">repo</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
 </code></pre></div>
-
 
 <p>With such an implementation of the use case, however, we will soon experience issues. For starters, we do not have a standard way to transport the call parameters, which means that we do not have a standard way to check for their correctness either. The second problem is that we miss a standard way to return the call results and consequently we lack a way to communicate if the call was successful of if it failed, and in the latter case what are the reasons of the failure. This applies also to the case of bad parameters discussed in the previous point.</p>
 <p>We want thus to introduce some structures to wrap input and outputs of our use cases. Those structures are called request and response objects.</p>
@@ -534,7 +514,6 @@ max-complexity = 10
     <span class="k">assert</span> <span class="nb">bool</span><span class="p">(</span><span class="n">req</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span>
 </code></pre></div>
 
-
 <p>While at the moment this request object is basically empty, it will come in handy as soon as we start having parameters for the list use case. The code of the <code>StorageRoomListRequestObject</code> is the following and goes into the <code>rentomatic/use_cases/request_objects.py</code> file</p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">StorageRoomListRequestObject</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="nd">@classmethod</span>
@@ -545,7 +524,6 @@ max-complexity = 10
         <span class="k">return</span> <span class="kc">True</span>
 </code></pre></div>
 
-
 <p>The response object is also very simple, since for the moment we just need a successful response. Unlike the request, the response is not linked to any particular use case, so the test file can be named <code>tests/shared/test_response_object.py</code></p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">rentomatic.shared</span> <span class="kn">import</span> <span class="n">response_object</span> <span class="k">as</span> <span class="n">ro</span>
 
@@ -553,7 +531,6 @@ max-complexity = 10
 <span class="k">def</span> <span class="nf">test_response_success_is_true</span><span class="p">():</span>
     <span class="k">assert</span> <span class="nb">bool</span><span class="p">(</span><span class="n">ro</span><span class="o">.</span><span class="n">ResponseSuccess</span><span class="p">())</span> <span class="ow">is</span> <span class="kc">True</span>
 </code></pre></div>
-
 
 <p>and the actual response object is in the file <code>rentomatic/shared/response_object.py</code></p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">ResponseSuccess</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -566,7 +543,6 @@ max-complexity = 10
 
     <span class="fm">__bool__</span> <span class="o">=</span> <span class="n">__nonzero__</span>
 </code></pre></div>
-
 
 <h1 id="use-cases-part-2">Use cases (part 2)<a class="headerlink" href="#use-cases-part-2" title="Permanent link">&para;</a></h1>
 <p><strong>Git tag: <a href="https://github.com/lgiordani/rentomatic/tree/step06">step06</a></strong></p>
@@ -633,7 +609,6 @@ max-complexity = 10
     <span class="k">assert</span> <span class="n">response_object</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="n">domain_storagerooms</span>
 </code></pre></div>
 
-
 <p>The new version of the <code>rentomatic/use_case/storageroom_use_cases.py</code> file is the following</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">rentomatic.shared</span> <span class="kn">import</span> <span class="n">response_object</span> <span class="k">as</span> <span class="n">ro</span>
 
@@ -647,7 +622,6 @@ max-complexity = 10
         <span class="n">storage_rooms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">repo</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">ro</span><span class="o">.</span><span class="n">ResponseSuccess</span><span class="p">(</span><span class="n">storage_rooms</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>Let us consider what we have achieved with our clean architecture up to this point. We have a very lightweight model that can be serialized to JSON and which is completely independent from other parts of the system. The code also contains a use case that, given a repository that exposes a given API, extracts all the models and returns them contained in a structured object.</p>
 <p>We are missing some objects, however. For example, we have not implemented any unsuccessful response object or validated the incoming request object.</p>
@@ -709,7 +683,6 @@ max-complexity = 10
     <span class="k">assert</span> <span class="nb">bool</span><span class="p">(</span><span class="n">req</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span>
 </code></pre></div>
 
-
 <p>As you can see I added the <code>assert req.filters is None</code> check to the original two tests, then I added 5 tests to check if filters can be specified and to test the behaviour of the object with an invalid filter parameter.</p>
 <p>To make the tests pass we have to change our <code>StorageRoomListRequestObject</code> class. There are obviously multiple possible solutions that you can come up with, and I recommend you to try to find your own. This is the one I usually employ. The file <code>rentomatic/use_cases/request_object.py</code> becomes</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">collections</span>
@@ -762,7 +735,6 @@ max-complexity = 10
         <span class="k">return</span> <span class="n">StorageRoomListRequestObject</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">adict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;filters&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
 </code></pre></div>
 
-
 <p>Let me review this new code bit by bit.</p>
 <p>First of all, two helper objects have been introduced, <code>ValidRequestObject</code> and <code>InvalidRequestObject</code>. They are different because an invalid request shall contain the validation errors, but both can be converted to booleans. </p>
 <p>Second, the <code>StorageRoomListRequestObject</code> accepts an optional <code>filters</code> parameter when instantiated. There are no validation checks in the <code>__init__()</code> method because this is considered to be an internal method that gets called when the parameters have already been validated.</p>
@@ -794,7 +766,6 @@ max-complexity = 10
     <span class="k">return</span> <span class="s1">&#39;This is a response error&#39;</span>
 </code></pre></div>
 
-
 <p>This is some boilerplate code, basically pytest fixtures that we will use in the following tests.</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_response_success_is_true</span><span class="p">(</span><span class="n">response_value</span><span class="p">):</span>
     <span class="k">assert</span> <span class="nb">bool</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">ResponseSuccess</span><span class="p">(</span><span class="n">response_value</span><span class="p">))</span> <span class="ow">is</span> <span class="kc">True</span>
@@ -804,14 +775,12 @@ max-complexity = 10
     <span class="k">assert</span> <span class="nb">bool</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">ResponseFailure</span><span class="p">(</span><span class="n">response_type</span><span class="p">,</span> <span class="n">response_message</span><span class="p">))</span> <span class="ow">is</span> <span class="kc">False</span>
 </code></pre></div>
 
-
 <p>Two basic tests to check that both the old <code>ResponseSuccess</code> and the new <code>ResponseFailure</code> objects behave consistently when converted to boolean.</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_response_success_contains_value</span><span class="p">(</span><span class="n">response_value</span><span class="p">):</span>
     <span class="n">response</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">ResponseSuccess</span><span class="p">(</span><span class="n">response_value</span><span class="p">)</span>
 
     <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="n">response_value</span>
 </code></pre></div>
-
 
 <p>The <code>ResponseSuccess</code> object contains the call result in the <code>value</code> attribute.</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_response_failure_has_type_and_message</span><span class="p">(</span><span class="n">response_type</span><span class="p">,</span> <span class="n">response_message</span><span class="p">):</span>
@@ -826,7 +795,6 @@ max-complexity = 10
 
     <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="n">response_type</span><span class="p">,</span> <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="n">response_message</span><span class="p">}</span>
 </code></pre></div>
-
 
 <p>These two tests ensure that the <code>ResponseFailure</code> object provides the same interface provided by the successful one and that the <code>type</code> and <code>message</code> parameter are accessible.</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_response_failure_initialization_with_exception</span><span class="p">():</span>
@@ -855,7 +823,6 @@ max-complexity = 10
     <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">message</span> <span class="o">==</span> <span class="s2">&quot;path: Is mandatory</span><span class="se">\n</span><span class="s2">path: can&#39;t be blank&quot;</span>
 </code></pre></div>
 
-
 <p>We sometimes want to create responses from Python exceptions that can happen in the use case, so we test that <code>ResponseFailure</code> objects can be initialized with a generic exception.</p>
 <p>And last we have the tests for the <code>build_from_invalid_request_object()</code> method that automate the initialization of the response from an invalid request. If the request contains errors (remember that the request validates itself), we need to put them into the response message.</p>
 <p>The last test uses a class attribute to classify the error. The <code>ResponseFailure</code> class will contain three predefined errors that can happen when running the use case, namely <code>RESOURCE_ERROR</code>, <code>PARAMETERS_ERROR</code>, and <code>SYSTEM_ERROR</code>. This categorization is an attempt to capture the different types of issues that can happen when dealing with an external system through an API. <code>RESOURCE_ERROR</code> contains all those errors that are related to the resources contained in the repository, for instance when you cannot find an entry given its unique id. <code>PARAMETERS_ERROR</code> describes all those errors that occur when the request parameters are wrong or missing. <code>SYSTEM_ERROR</code> encompass the errors that happen in the underlying system at operating system level, such as a failure in a filesystem operation, or a network connection error while fetching data from the database.</p>
@@ -876,13 +843,11 @@ max-complexity = 10
         <span class="k">return</span> <span class="n">msg</span>
 </code></pre></div>
 
-
 <p>Through the <code>_format_message()</code> method we enable the class to accept both string messages and Python exceptions, which is very handy when dealing with external libraries that can raise exceptions we do not know or do not want to manage.</p>
 <div class="highlight"><pre><span></span><code>    <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">message</span><span class="p">}</span>
 </code></pre></div>
-
 
 <p>This property makes the class comply with the <code>ResponseSuccess</code> API, providing the <code>value</code> attribute, which is an aptly formatted dictionary.</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">__nonzero__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -896,7 +861,6 @@ max-complexity = 10
                              <span class="k">for</span> <span class="n">err</span> <span class="ow">in</span> <span class="n">invalid_request_object</span><span class="o">.</span><span class="n">errors</span><span class="p">])</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">PARAMETERS_ERROR</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>As explained before, the <code>PARAMETERS_ERROR</code> type encompasses all those errors that come from an invalid set of parameters, which is the case of this function, that shall be called whenever the request is wrong, which means that some parameters contain errors or are missing.</p>
 <p>Since building failure responses is a common activity it is useful to have helper methods, so I add three tests for the building functions to the <code>tests/shared/test_response_object.py</code> file</p>
@@ -924,7 +888,6 @@ max-complexity = 10
     <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">message</span> <span class="o">==</span> <span class="s2">&quot;test message&quot;</span>
 </code></pre></div>
 
-
 <p>We add the relevant methods to the class and change the <code>build_from_invalid_request_object()</code> method to leverage the <code>build_parameters_error()</code> new method. Change the <code>rentomatic/shared/response_object.py</code> file to contain this code</p>
 <div class="highlight"><pre><span></span><code>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">build_resource_error</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -944,7 +907,6 @@ max-complexity = 10
                              <span class="k">for</span> <span class="n">err</span> <span class="ow">in</span> <span class="n">invalid_request_object</span><span class="o">.</span><span class="n">errors</span><span class="p">])</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">build_parameters_error</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
 </code></pre></div>
-
 
 <h1 id="use-cases-part-3">Use cases (part 3)<a class="headerlink" href="#use-cases-part-3" title="Permanent link">&para;</a></h1>
 <p><strong>Git tag: <a href="https://github.com/lgiordani/rentomatic/tree/step09">step09</a></strong></p>
@@ -979,7 +941,6 @@ max-complexity = 10
     <span class="k">assert</span> <span class="n">response_object</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="n">domain_storagerooms</span>
 </code></pre></div>
 
-
 <p>This is the test we already wrote, but the <code>assert_called_with()</code> method is called with <code>filters=None</code> to reflect the added parameter. The import line has slightly changed as well, given that we are now importing both <code>response_objects</code> and <code>request_objects</code>. The <code>domain_storagerooms</code> fixture has not changed and has been omitted from the code snippet to keep it short.</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_storageroom_list_with_filters</span><span class="p">(</span><span class="n">domain_storagerooms</span><span class="p">):</span>
     <span class="n">repo</span> <span class="o">=</span> <span class="n">mock</span><span class="o">.</span><span class="n">Mock</span><span class="p">()</span>
@@ -995,7 +956,6 @@ max-complexity = 10
     <span class="n">repo</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">assert_called_with</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">qry_filters</span><span class="p">)</span>
     <span class="k">assert</span> <span class="n">response_object</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="n">domain_storagerooms</span>
 </code></pre></div>
-
 
 <p>This test checks that the value of the <code>filters</code> key in the dictionary used to create the request is actually used when calling the repository.</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_storageroom_list_handles_generic_error</span><span class="p">():</span>
@@ -1029,7 +989,6 @@ max-complexity = 10
     <span class="p">}</span>
 </code></pre></div>
 
-
 <p>This last two tests check the behaviour of the use case when the repository raises an exception or when the request is badly formatted.</p>
 <p>Change the file <code>rentomatic/use_cases/storageroom_use_cases.py</code> to contain the new use case implementation that makes all the test pass</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">rentomatic.shared</span> <span class="kn">import</span> <span class="n">response_object</span> <span class="k">as</span> <span class="n">res</span>
@@ -1051,7 +1010,6 @@ max-complexity = 10
             <span class="k">return</span> <span class="n">res</span><span class="o">.</span><span class="n">ResponseFailure</span><span class="o">.</span><span class="n">build_system_error</span><span class="p">(</span>
                 <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">exc</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">exc</span><span class="p">)))</span>
 </code></pre></div>
-
 
 <p>As you can see the first thing that the <code>execute()</code> method does is to check if the request is valid, otherwise returns a <code>ResponseFailure</code> build with the same request object. Then the actual business logic is implemented, calling the repository and returning a success response. If something goes wrong in this phase the exception is caught and returned as an aptly formatted <code>ResponseFailure</code>.</p>
 <h1 id="intermezzo-refactoring">Intermezzo: refactoring<a class="headerlink" href="#intermezzo-refactoring" title="Permanent link">&para;</a></h1>
@@ -1079,7 +1037,6 @@ max-complexity = 10
         <span class="s1">&#39;NotImplementedError: process_request() not implemented by UseCase class&#39;</span>
 </code></pre></div>
 
-
 <p>This test checks that the <code>UseCase</code> class cannot be actually used to process incoming requests.</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_use_case_can_process_invalid_requests_and_returns_response_failure</span><span class="p">():</span>
     <span class="n">invalid_request_object</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">InvalidRequestObject</span><span class="p">()</span>
@@ -1092,7 +1049,6 @@ max-complexity = 10
     <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">res</span><span class="o">.</span><span class="n">ResponseFailure</span><span class="o">.</span><span class="n">PARAMETERS_ERROR</span>
     <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">message</span> <span class="o">==</span> <span class="s1">&#39;someparam: somemessage&#39;</span>
 </code></pre></div>
-
 
 <p>This test runs the use case with an invalid request and check if the response is correct. Since the request is wrong the response type is <code>PARAMETERS_ERROR</code>, as this represents an issue in the request parameters.</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_use_case_can_manage_generic_exception_from_process_request</span><span class="p">():</span>
@@ -1109,7 +1065,6 @@ max-complexity = 10
     <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">res</span><span class="o">.</span><span class="n">ResponseFailure</span><span class="o">.</span><span class="n">SYSTEM_ERROR</span>
     <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">message</span> <span class="o">==</span> <span class="s1">&#39;TestException: somemessage&#39;</span>
 </code></pre></div>
-
 
 <p>This test makes the use case raise an exception. This type of error is categorized as <code>SYSTEM_ERROR</code>, which is a generic name for an exception which is not related to request parameters or actual entities.</p>
 <p>As you can see in this last test the idea is that of exposing the <code>execute()</code> method in the <code>UseCase</code> class and to call the <code>process_request()</code> method defined by each child class, which is the actual use case we are implementing.</p>
@@ -1133,7 +1088,6 @@ max-complexity = 10
             <span class="s2">&quot;process_request() not implemented by UseCase class&quot;</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>While the <code>rentomatic/use_cases/storageroom_use_cases.py</code> now contains the following code</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">rentomatic.shared</span> <span class="kn">import</span> <span class="n">use_case</span> <span class="k">as</span> <span class="n">uc</span>
 <span class="kn">from</span> <span class="nn">rentomatic.shared</span> <span class="kn">import</span> <span class="n">response_object</span> <span class="k">as</span> <span class="n">res</span>
@@ -1148,7 +1102,6 @@ max-complexity = 10
         <span class="n">domain_storageroom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">repo</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">request_object</span><span class="o">.</span><span class="n">filters</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">res</span><span class="o">.</span><span class="n">ResponseSuccess</span><span class="p">(</span><span class="n">domain_storageroom</span><span class="p">)</span>
 </code></pre></div>
-
 
 <h1 id="the-repository-layer">The repository layer<a class="headerlink" href="#the-repository-layer" title="Permanent link">&para;</a></h1>
 <p><strong>Git tag: <a href="https://github.com/lgiordani/rentomatic/tree/step11">step11</a></strong></p>
@@ -1201,7 +1154,6 @@ max-complexity = 10
     <span class="p">]</span>
 </code></pre></div>
 
-
 <p>Since the repository object will return domain models, we need a helper function to check the correctness of the results. The following function checks the length of the two lists, ensures that all the returned elements are domain models and compares the codes. Note that we can safely employ the <code>isinstance()</code> built-in function since <code>DomainModel</code> is an abstract base class and our models are registered (see the <code>rentomatic/domain/storagerooms.py</code>)</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">_check_results</span><span class="p">(</span><span class="n">domain_models_list</span><span class="p">,</span> <span class="n">data_list</span><span class="p">):</span>
     <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">domain_models_list</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_list</span><span class="p">)</span>
@@ -1209,7 +1161,6 @@ max-complexity = 10
     <span class="k">assert</span> <span class="nb">set</span><span class="p">([</span><span class="n">dm</span><span class="o">.</span><span class="n">code</span> <span class="k">for</span> <span class="n">dm</span> <span class="ow">in</span> <span class="n">domain_models_list</span><span class="p">]</span>
                <span class="p">)</span> <span class="o">==</span> <span class="nb">set</span><span class="p">([</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;code&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">data_list</span><span class="p">])</span>
 </code></pre></div>
-
 
 <p>We need to be able to initialize the repository with a list of dictionaries, and the <code>list()</code> method without any parameter shall return the same list of entries.</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_repository_list_without_parameters</span><span class="p">(</span><span class="n">storageroom_dicts</span><span class="p">):</span>
@@ -1220,7 +1171,6 @@ max-complexity = 10
         <span class="n">storageroom_dicts</span>
     <span class="p">)</span>
 </code></pre></div>
-
 
 <p>The <code>list()</code> method shall accept a <code>filters</code> parameter, which is a dictionary. The dictionary keys shall be in the form <code>&lt;attribute&gt;__&lt;operator&gt;</code>, similar to the syntax used by the Django ORM. So to express that the price shall be less than 65 we can write <code>filters={'price__lt': 60}</code>.</p>
 <p>A couple of error conditions shall be checked: using an unknown key shall raise a <code>KeyError</code> exception, and using a wrong operator shall raise a <code>ValueError</code> exception.</p>
@@ -1237,7 +1187,6 @@ max-complexity = 10
     <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
         <span class="n">repo</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;price__in&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">]})</span>
 </code></pre></div>
-
 
 <p>Let us then test that the filtering mechanism actually works. We want the default operator to be <code>__eq</code>, which means that if we do not put any operator an equality check shall be performed.</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_repository_list_with_filters_price</span><span class="p">(</span><span class="n">storageroom_dicts</span><span class="p">):</span>
@@ -1316,7 +1265,6 @@ max-complexity = 10
     <span class="p">)</span>
 </code></pre></div>
 
-
 <p>The implementation of the <code>MemRepo</code> class is pretty simple, and I will not dive into it line by line.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">rentomatic.domain</span> <span class="kn">import</span> <span class="n">storageroom</span> <span class="k">as</span> <span class="n">sr</span>
 
@@ -1359,7 +1307,6 @@ max-complexity = 10
         <span class="k">return</span> <span class="p">[</span><span class="n">sr</span><span class="o">.</span><span class="n">StorageRoom</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">r</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">result</span><span class="p">]</span>
 </code></pre></div>
 
-
 <h1 id="the-rest-layer-part1">The REST layer (part1)<a class="headerlink" href="#the-rest-layer-part1" title="Permanent link">&para;</a></h1>
 <p><strong>Git tag: <a href="https://github.com/lgiordani/rentomatic/tree/step12">step12</a></strong></p>
 <p>This is the last step of our journey into the clean architecture. We created the domain models, the serializers, the use cases and the repository. We are actually missing an interface that glues everything together, that is gets the call parameters from the user, initializes a use case with a repository, runs the use case that fetches the domain models from the repository and converts them to a standard format. This layer can be represented by a wide number of interfaces and technologies. For example a command line interface (CLI) can implement exactly those steps, getting the parameters via command line switches, and returning the results as plain text on the console. The same underlying system, however, can be leveraged by a web page that gets the call parameters from a set of widgets, perform the steps described above, and parses the returned JSON data to show the result on the same page.</p>
@@ -1376,7 +1323,6 @@ Sphinx
 Flask
 </code></pre></div>
 
-
 <p>And the <code>test.txt</code> file will contain the pytest extension to work with Flask (more on this later)</p>
 <div class="highlight"><pre><span></span><code>-r prod.txt
 
@@ -1386,7 +1332,6 @@ coverage
 pytest-cov
 pytest-flask
 </code></pre></div>
-
 
 <p>Remember to run <code>pip install -r requirements/dev.txt</code> again after those changes to actually install the new packages in your virtual environment.</p>
 <p>The setup of a Flask application is not complex, but a lot of concepts are involved, and since this is not a tutorial on Flask I will run quickly through these steps. I will however provide links to the Flask documentation for every concept.</p>
@@ -1420,7 +1365,6 @@ pytest-flask
     <span class="n">DEBUG</span> <span class="o">=</span> <span class="kc">True</span>
 </code></pre></div>
 
-
 <p>Read <a href="https://flask.pocoo.org/docs/latest/config/">this page</a> to know more about Flask configuration parameters. Now we need a function that initializes the Flask application (<a href="https://flask.pocoo.org/docs/latest/patterns/appfactories/">documentation</a>), configures it and registers the blueprints (<a href="https://flask.pocoo.org/docs/latest/blueprints/">documentation</a>). The file <code>rentomatic/app.py</code> contains the following code</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span>
 
@@ -1435,7 +1379,6 @@ pytest-flask
     <span class="k">return</span> <span class="n">app</span>
 </code></pre></div>
 
-
 <p>The application endpoints need to return a Flask <code>Response</code> object, with the actual results and an HTTP status. The content of the response, in this case, is the JSON serialization of the use case response.</p>
 <p>Let us write a test step by step, so that you can perfectly understand what is going to happen in the REST endpoint. The basic structure of the test is</p>
 <div class="highlight"><pre><span></span><code>[SOME PREPARATION]
@@ -1445,25 +1388,21 @@ pytest-flask
 [CHECK RESPONSE MIMETYPE]
 </code></pre></div>
 
-
 <p>So our first test <code>tests/rest/test_get_storagerooms_list.py</code> is made of the following parts</p>
 <div class="highlight"><pre><span></span><code><span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;rentomatic.use_cases.storageroom_use_cases.StorageRoomListUseCase&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">test_get</span><span class="p">(</span><span class="n">mock_use_case</span><span class="p">,</span> <span class="n">client</span><span class="p">):</span>
     <span class="n">mock_use_case</span><span class="p">()</span><span class="o">.</span><span class="n">execute</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">ResponseSuccess</span><span class="p">(</span><span class="n">storagerooms</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>Remember that we are not testing the use case here, so we can safely mock it. Here we make the use case return a <code>ResponseSuccess</code> instance containing a list of domain models (that we didn't define yet).</p>
 <div class="highlight"><pre><span></span><code>    <span class="n">http_response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;/storagerooms&#39;</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>This is the actual API call. We are exposing the endpoint at the <code>/storagerooms</code> address. Note the use of the <code>client</code> fixture provided by <code>pytest-flask</code>.</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">assert</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">http_response</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;UTF-8&#39;</span><span class="p">))</span> <span class="o">==</span> <span class="p">[</span><span class="n">storageroom1_dict</span><span class="p">]</span>
     <span class="k">assert</span> <span class="n">http_response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span>
     <span class="k">assert</span> <span class="n">http_response</span><span class="o">.</span><span class="n">mimetype</span> <span class="o">==</span> <span class="s1">&#39;application/json&#39;</span>
 </code></pre></div>
-
 
 <p>These are the three checks previously mentioned. The second and the third ones are pretty straightforward, while the first one needs some explanations. We want to compare <code>http_response.data</code> with <code>[storageroom1_dict]</code>, which is a list with a Python dictionary containing the data of the <code>storageroom1_domain_model</code> object. Flask <code>Response</code> objects contain a binary representation of the data, so first we decode the bytes using UTF-8, then convert them in a Python object. It is much more convenient to compare Python objects, since pytest can deal with issues like the unordered nature of dictionaries, while this is not possible when comparing two strings.  </p>
 <p>The final test file, with the test domain model and its dictionary is</p>
@@ -1497,7 +1436,6 @@ pytest-flask
     <span class="k">assert</span> <span class="n">http_response</span><span class="o">.</span><span class="n">mimetype</span> <span class="o">==</span> <span class="s1">&#39;application/json&#39;</span>
 </code></pre></div>
 
-
 <p>If you run pytest you'll notice that the test suite fails because of the <code>app</code> fixture, which is missing. The <code>pytest-flask</code> plugin provides the <code>client</code> fixture, but relies on the <code>app</code> fixture which has to be provided. The best place to define it is in <code>tests/conftest.py</code></p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">pytest</span>
 
@@ -1510,7 +1448,6 @@ pytest-flask
 <span class="k">def</span> <span class="nf">app</span><span class="p">():</span>
     <span class="k">return</span> <span class="n">create_app</span><span class="p">(</span><span class="n">TestConfig</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>It's time to write the endpoint, where we will finally see all the pieces of the architecture working together. </p>
 <p>The minimal Flask endpoint we can put in <code>rentomatic/rest/storageroom.py</code> is something like</p>
@@ -1525,34 +1462,28 @@ pytest-flask
                     <span class="n">status</span><span class="o">=</span><span class="p">[</span><span class="n">STATUS</span><span class="p">])</span>
 </code></pre></div>
 
-
 <p>The first part of our logic is the creation of a <code>StorageRoomListRequestObject</code>. For the moment we can ignore the optional querystring parameters and use an empty dictionary</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">storageroom</span><span class="p">():</span>
     <span class="n">request_object</span> <span class="o">=</span> <span class="n">ro</span><span class="o">.</span><span class="n">StorageRoomListRequestObject</span><span class="o">.</span><span class="n">from_dict</span><span class="p">({})</span>
 </code></pre></div>
 
-
 <p>As you can see I'm creating the object from an empty dictionary, so querystring parameters are not taken into account for the moment. The second thing to do is to initialize the repository</p>
 <div class="highlight"><pre><span></span><code>    <span class="n">repo</span> <span class="o">=</span> <span class="n">mr</span><span class="o">.</span><span class="n">MemRepo</span><span class="p">()</span>
 </code></pre></div>
-
 
 <p>The third thing the endpoint has to do is the initialization of the use case</p>
 <div class="highlight"><pre><span></span><code>    <span class="n">use_case</span> <span class="o">=</span> <span class="n">uc</span><span class="o">.</span><span class="n">StorageRoomListUseCase</span><span class="p">(</span><span class="n">repo</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>And finally we run the use case passing the request object</p>
 <div class="highlight"><pre><span></span><code>    <span class="n">response</span> <span class="o">=</span> <span class="n">use_case</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">request_object</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>This response, however, is not yet an HTTP response, and we have to explicitly build it. The HTTP response will contain the JSON representation of the <code>response.value</code> attribute.</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">return</span> <span class="n">Response</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="o">=</span><span class="n">ser</span><span class="o">.</span><span class="n">StorageRoomEncoder</span><span class="p">),</span>
                     <span class="n">mimetype</span><span class="o">=</span><span class="s1">&#39;application/json&#39;</span><span class="p">,</span>
                     <span class="n">status</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>Note that this function is obviously still incomplete, as it returns always a successful response (code 200). It is however enough to pass the test we wrote. The whole file is the following</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">json</span>
@@ -1579,7 +1510,6 @@ pytest-flask
                     <span class="n">mimetype</span><span class="o">=</span><span class="s1">&#39;application/json&#39;</span><span class="p">,</span>
                     <span class="n">status</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>This code demonstrates how the clean architecture works in a nutshell. The function we wrote is however not complete, as it doesn't consider querystring parameters and error cases.</p>
 <h1 id="the-server-in-action">The server in action<a class="headerlink" href="#the-server-in-action" title="Permanent link">&para;</a></h1>
@@ -1611,11 +1541,9 @@ pytest-flask
 <span class="p">}</span>
 </code></pre></div>
 
-
 <p>And then use them to initialise the repository</p>
 <div class="highlight"><pre><span></span><code>    <span class="n">repo</span> <span class="o">=</span> <span class="n">mr</span><span class="o">.</span><span class="n">MemRepo</span><span class="p">([</span><span class="n">storageroom1</span><span class="p">,</span> <span class="n">storageroom2</span><span class="p">,</span> <span class="n">storageroom3</span><span class="p">])</span>
 </code></pre></div>
-
 
 <p>To run the web server we need to create a <code>wsgi.py</code> file in the main project folder (the folder where <code>setup.py</code> is stored)</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">rentomatic.app</span> <span class="kn">import</span> <span class="n">create_app</span>
@@ -1624,11 +1552,9 @@ pytest-flask
 <span class="n">app</span> <span class="o">=</span> <span class="n">create_app</span><span class="p">()</span>
 </code></pre></div>
 
-
 <p>Now we can run the Flask development server</p>
 <div class="highlight"><pre><span></span><code>$ flask run
 </code></pre></div>
-
 
 <p>At this point, if you open your browser and navigate to <a href="http://localhost:5000/storagerooms">http://localhost:5000/storagerooms</a>, you can see the API call results. I recommend installing a formatter extension for the browser to better check the output. If you are using Chrome try <a href="https://github.com/callumlocke/json-formatter">JSON Formatter</a>.</p>
 <h1 id="the-rest-layer-part2">The REST layer (part2)<a class="headerlink" href="#the-rest-layer-part2" title="Permanent link">&para;</a></h1>
@@ -1648,7 +1574,6 @@ pytest-flask
     <span class="k">assert</span> <span class="n">http_response</span><span class="o">.</span><span class="n">mimetype</span> <span class="o">==</span> <span class="s1">&#39;application/json&#39;</span>
 </code></pre></div>
 
-
 <p>This makes the use case return a failed response and check that the HTTP response contains a formatted version of the error. To make this test pass we have to introduce a proper mapping between domain responses codes and HTTP codes in the <code>rentomatic/rest/storageroom.py</code> file</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">rentomatic.shared</span> <span class="kn">import</span> <span class="n">response_object</span> <span class="k">as</span> <span class="n">res</span>
 
@@ -1660,13 +1585,11 @@ pytest-flask
 <span class="p">}</span>
 </code></pre></div>
 
-
 <p>Then we need to create the Flask response with the correct code in the definition of the endpoint</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">return</span> <span class="n">Response</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="o">=</span><span class="n">ser</span><span class="o">.</span><span class="n">StorageRoomEncoder</span><span class="p">),</span>
                     <span class="n">mimetype</span><span class="o">=</span><span class="s1">&#39;application/json&#39;</span><span class="p">,</span>
                     <span class="n">status</span><span class="o">=</span><span class="n">STATUS_CODES</span><span class="p">[</span><span class="n">response</span><span class="o">.</span><span class="n">type</span><span class="p">])</span>
 </code></pre></div>
-
 
 <p>The second and last test is a bit more complex. As before we will mock the use case, but this time we will also patch <code>StorageRoomListRequestObject</code>. We do this because we need to know if the request object is initialized with the correct parameters from the command line. So, step by step</p>
 <div class="highlight"><pre><span></span><code><span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;rentomatic.use_cases.storageroom_use_cases.StorageRoomListUseCase&#39;</span><span class="p">)</span>
@@ -1674,11 +1597,9 @@ pytest-flask
     <span class="n">mock_use_case</span><span class="p">()</span><span class="o">.</span><span class="n">execute</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">ResponseSuccess</span><span class="p">([])</span>
 </code></pre></div>
 
-
 <p>This is, like, before, a patch of the use case class that ensures the use case will return a <code>ResponseSuccess</code> instance.</p>
 <div class="highlight"><pre><span></span><code>    <span class="n">internal_request_object</span> <span class="o">=</span> <span class="n">mock</span><span class="o">.</span><span class="n">Mock</span><span class="p">()</span>
 </code></pre></div>
-
 
 <p>The request object will be internally created with <code>StorageRoomListRequestObject.from_dict</code>, and we want that function to return a known mock object, which is the one we initialized here.</p>
 <div class="highlight"><pre><span></span><code>    <span class="n">request_object_class</span> <span class="o">=</span> <span class="s1">&#39;rentomatic.use_cases.request_objects.StorageRoomListRequestObject&#39;</span>
@@ -1687,14 +1608,12 @@ pytest-flask
         <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;/storagerooms?filter_param1=value1&amp;filter_param2=value2&#39;</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>Here we patch <code>StorageRoomListRequestObject</code> and we assign a known output to the <code>from_dict()</code> method. Then we call the endpoint with some querystring parameters. What should happen is that the <code>from_dict()</code> method of the request is called with the filter parameters and that the <code>execute()</code> method of the use case instance is called with the <code>internal_request_object</code>.</p>
 <div class="highlight"><pre><span></span><code>    <span class="n">mock_request_object</span><span class="o">.</span><span class="n">from_dict</span><span class="o">.</span><span class="n">assert_called_with</span><span class="p">(</span>
         <span class="p">{</span><span class="s1">&#39;filters&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;param1&#39;</span><span class="p">:</span> <span class="s1">&#39;value1&#39;</span><span class="p">,</span> <span class="s1">&#39;param2&#39;</span><span class="p">:</span> <span class="s1">&#39;value2&#39;</span><span class="p">}}</span>
     <span class="p">)</span>
     <span class="n">mock_use_case</span><span class="p">()</span><span class="o">.</span><span class="n">execute</span><span class="o">.</span><span class="n">assert_called_with</span><span class="p">(</span><span class="n">internal_request_object</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>The endpoint function shall be changed somehow to reflect this new behaviour and to make the test pass. The whole code of the new <code>storageroom()</code> Flask method is the following</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">json</span>
@@ -1761,7 +1680,6 @@ pytest-flask
                     <span class="n">mimetype</span><span class="o">=</span><span class="s1">&#39;application/json&#39;</span><span class="p">,</span>
                     <span class="n">status</span><span class="o">=</span><span class="n">STATUS_CODES</span><span class="p">[</span><span class="n">response</span><span class="o">.</span><span class="n">type</span><span class="p">])</span>
 </code></pre></div>
-
 
 <p>Note that we extract the querystring parameters from the global <code>request</code> object provided by Flask. Once the querystring parameters are in a dictionary, we just need to create the request object from it.</p>
 <h2 id="conclusions">Conclusions<a class="headerlink" href="#conclusions" title="Permanent link">&para;</a></h2>

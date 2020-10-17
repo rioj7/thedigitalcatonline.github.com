@@ -117,7 +117,6 @@
         <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2"> by </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">title</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">author</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>Every instance of this class will contain three attributes, namely <code>title</code>, <code>author</code>, and <code>get_entry</code>, in addition to the standard attributes provided by the <code>object</code> ancestor.</p>
 <p><strong>Python 2 users</strong>: remember that in Python 2 you have to specify that <code>Book</code> is a new-style class writing <code>class Book(object):</code></p>
 <h2 id="basic-attribute-access">Basic attribute access<a class="headerlink" href="#basic-attribute-access" title="Permanent link">&para;</a></h2>
@@ -127,12 +126,10 @@
 <span class="go">&#39;Pawn of Prophecy&#39;</span>
 </code></pre></div>
 
-
 <p>As already mentioned, this mechanism works with methods too.</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">b</span><span class="o">.</span><span class="n">get_entry</span>
 <span class="go">&lt;bound method Book.get_entry of &lt;__main__.Book object at 0xb703952c&gt;&gt;</span>
 </code></pre></div>
-
 
 <p>Here I intentionally omitted the calling brackets (parentheses) to show what happens when accessing the method. For a in-depth explanation of the difference between functions and bound methods read <a href="https://www.thedigitalcatonline.com/blog/2014/08/20/python-3-oop-part-2-classes-and-members/">this post</a>.</p>
 <p>When an object does not contain the attribute we are looking for, Python raises an <code>AttributeError</code> exception</p>
@@ -143,12 +140,10 @@
 <span class="go">&gt;&gt;&gt;</span>
 </code></pre></div>
 
-
 <p>Remember also that Python objects provide a wide range of automatically created attributes such as <code>__class__</code> or <code>__doc__</code>. These attributes can be read exactly like standard attributes, since in Python the double underscore prefix and suffix is just a gentleman agreement between programmers.</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">b</span><span class="o">.</span><span class="vm">__class__</span>
 <span class="go">&lt;class &#39;__main__.Book&#39;&gt;</span>
 </code></pre></div>
-
 
 <p>When you try to change the value of an attribute (you <em>write</em> the attribute) the syntax does not change.</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">Book</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Pawn of Prophecy&quot;</span><span class="p">,</span> <span class="n">author</span><span class="o">=</span><span class="s2">&quot;David Eddings&quot;</span><span class="p">)</span>
@@ -156,7 +151,6 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="n">b</span><span class="o">.</span><span class="n">author</span>
 <span class="go">&#39;David Carroll Eddings&#39;</span>
 </code></pre></div>
-
 
 <h2 id="properties">Properties<a class="headerlink" href="#properties" title="Permanent link">&para;</a></h2>
 <p>Sometimes you want to have an attribute which value comes from other attributes or, in general, which value shall be computed at the moment. The standard way to deal with this situation is to create a method, called <em>getter</em>, just like I did with <code>get_entry()</code>. </p>
@@ -172,13 +166,11 @@
     <span class="n">entry</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">get_entry</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>The above syntax defines an <code>entry</code> attribute which automatically calls <code>self.get_entry()</code> when read.</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">Book</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Pawn of Prophecy&quot;</span><span class="p">,</span> <span class="n">author</span><span class="o">=</span><span class="s2">&quot;David Eddings&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">b</span><span class="o">.</span><span class="n">entry</span>
 <span class="go">&#39;Pawn of Prophecy by David Eddings&#39;</span>
 </code></pre></div>
-
 
 <p>Properties allow to specify also a write method (a <em>setter</em>), that is automatically called when you try to change the value of the property itself.</p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">Book</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -197,7 +189,6 @@
     <span class="n">entry</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">_get_entry</span><span class="p">,</span> <span class="n">_set_entry</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>Please note that the set method shall accept the value as its second parameter. When getters and setters are masked by a property it may be a good thing to make their name start with an underscore, just to signal that they are not intended to be used directly. Remember however that this has no special meaning for the language, being just a convention between programmers.</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">Book</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Pawn of Prophecy&quot;</span><span class="p">,</span> <span class="n">author</span><span class="o">=</span><span class="s2">&quot;David Eddings&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">b</span><span class="o">.</span><span class="n">entry</span>
@@ -214,7 +205,6 @@
 <span class="go">ValueError: Entries shall be formatted as &#39;&lt;title&gt; by &lt;author&gt;&#39;</span>
 </code></pre></div>
 
-
 <p>While attributes are usually defined in the instance through the <code>__init__()</code> method (part of the constructor mechanism), properties are part of the class itself.</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">Book</span><span class="o">.</span><span class="n">title</span>
 <span class="go">Traceback  (most recent call last):</span>
@@ -223,7 +213,6 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="n">Book</span><span class="o">.</span><span class="n">entry</span>
 <span class="go">&lt;property object at 0xb676a374&gt;</span>
 </code></pre></div>
-
 
 <p>Remember however that all instances of that class share the same <em>property object</em>, which is a sort of automatic binding between attributes and methods, and not the value of the attribute itself.</p>
 <h2 id="softcoding-attribute-access">Softcoding attribute access<a class="headerlink" href="#softcoding-attribute-access" title="Permanent link">&para;</a></h2>
@@ -236,7 +225,6 @@
 <span class="go">&lt;bound method Book.get_entry of &lt;__main__.Book object at 0xb703952c&gt;&gt;</span>
 </code></pre></div>
 
-
 <p>This type of attribute access may be useful even when accessing a lot of attributes, allowing to write simple for loops or list comprehensions</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">,</span> <span class="s1">&#39;author&#39;</span><span class="p">]:</span>
 <span class="gp">... </span> <span class="nb">getattr</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span>
@@ -244,7 +232,6 @@
 <span class="go">&#39;Pawn of Prophecy&#39;</span>
 <span class="go">&#39;David Eddings&#39;</span>
 </code></pre></div>
-
 
 <p>While this type of access is perfectly valid in Python you should not use it as long as you can use the direct dotted access. Writing tricky code may seem very smart, but when it comes to debugging "the simpler the better".</p>
 <h2 id="avoiding-to-fail">Avoiding to fail<a class="headerlink" href="#avoiding-to-fail" title="Permanent link">&para;</a></h2>
@@ -263,7 +250,6 @@
         <span class="k">return</span> <span class="kc">None</span>
 </code></pre></div>
 
-
 <p><strong>WARNING</strong>: this is just an example to show how <code>__getattr__()</code> works. The code presented here shall <em>not</em> be considered a good example of Python programming.</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">Book</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Pawn of Prophecy&quot;</span><span class="p">,</span> <span class="n">author</span><span class="o">=</span><span class="s2">&quot;David Eddings&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">b</span><span class="o">.</span><span class="n">title</span>
@@ -271,7 +257,6 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="n">b</span><span class="o">.</span><span class="n">publisher</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">b</span><span class="o">.</span><span class="n">somename</span>
 </code></pre></div>
-
 
 <p>As you can see the <code>publisher</code> and <code>somename</code> attributes are correctly accessed even if they do not actually exist inside the object.</p>
 <p>To find a good use for <code>__getattr__()</code> and <code>getattr()</code> we need to step into something a bit more complex, which is the explicit delegation mechanism involved in a composition between objects. You may find more details on this topic in <a href="https://www.thedigitalcatonline.com/blog/2014/08/20/python-3-oop-part-3-delegation-composition-and-inheritance/">this post</a>. </p>

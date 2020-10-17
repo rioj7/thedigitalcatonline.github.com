@@ -119,13 +119,11 @@
     <span class="k">pass</span>
 </code></pre></div>
 
-
 <p>As you can see the <code>Child</code> class is empty, but since it inherits from <code>Parent</code> Python takes charge of routing all method calls. So you may use the <code>get_value()</code> method of <code>Child</code> objects and everything works as expected.</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">Child</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="o">.</span><span class="n">get_value</span><span class="p">()</span>
 <span class="go">5</span>
 </code></pre></div>
-
 
 <p>Indeed <code>get_value()</code> is not exactly part of the <code>Child</code> class as if it were defined in it</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">Parent</span><span class="p">()</span>
@@ -167,7 +165,6 @@
 <span class="go">dict_proxy({&#39;__module__&#39;: &#39;__main__&#39;, &#39;__doc__&#39;: None})</span>
 </code></pre></div>
 
-
 <p>This shows that the <code>Child</code> class does not actually contain the <code>get_value()</code> method and that a mechanism of automatic delegation is active under the hood. For an insight on this mechanism check <a href="https://www.thedigitalcatonline.com/blog/2014/08/20/python-3-oop-part-3-delegation-composition-and-inheritance/">this post</a>.</p>
 <h2 id="method-overriding-in-action">Method overriding in action<a class="headerlink" href="#method-overriding-in-action" title="Permanent link">&para;</a></h2>
 <p>In Python method overriding occurs simply defining in the child class a method with the same name of a method in the parent class. When you define a method in the object you make the latter able to satisfy that method call, so the implementations of its ancestors do not come in play.</p>
@@ -183,13 +180,11 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">+</span> <span class="mi">1</span>
 </code></pre></div>
 
-
 <p>Now <code>Child</code> objects behave differently</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">Child</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="o">.</span><span class="n">get_value</span><span class="p">()</span>
 <span class="go">6</span>
 </code></pre></div>
-
 
 <p>and taking a look inside the class we spot a difference</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">Parent</span><span class="o">.</span><span class="vm">__dict__</span>
@@ -205,7 +200,6 @@
 <span class="go">            &#39;get_value&#39;: &lt;function get_value at 0xb69a65a4&gt;,</span>
 <span class="go">            &#39;__doc__&#39;: None})</span>
 </code></pre></div>
-
 
 <p>since now the <code>Child</code> class actually contains a <code>get_value()</code> method with a different implementation (the id of the two functions are different).</p>
 <p>This is of uttermost importance in Python. Inheritance delegation occours automatically, but if a method is overridden the implementation of the ancestors is not considered at all. So, if you want to run the implementation of one or more of the ancestors of your class, you have to call them explicitly.</p>
@@ -229,7 +223,6 @@
         <span class="nb">super</span><span class="p">(</span><span class="n">TimestampLogger</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>The <code>TimestampLogger</code> object adds some information to the message string before calling the original implementation of its <code>log()</code> method.</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">l</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">l</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s1">&#39;hi!&#39;</span><span class="p">)</span>
@@ -240,7 +233,6 @@
 <span class="go">2014-05-19T13:18:53.402123 hi!</span>
 <span class="gp">&gt;&gt;&gt; </span>
 </code></pre></div>
-
 
 <h4 id="an-example-of-post-filtering">An example of post-filtering<a class="headerlink" href="#an-example-of-post-filtering" title="Permanent link">&para;</a></h4>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">os</span>
@@ -258,7 +250,6 @@
         <span class="n">nonempty_lines</span> <span class="o">=</span> <span class="p">[</span><span class="n">l</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">lines</span> <span class="k">if</span> <span class="n">l</span> <span class="o">!=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">nonempty_lines</span>
 </code></pre></div>
-
 
 <p>When you use the <code>FileCatNoEmpty</code> object you get the result of the <code>FileCat</code> object with the empty lines stripped.</p>
 <p>As you can see while in the first example the original implementation has been called as the last thing, in the second one it is called before everything else. There is therefore no fixed position for the call of the original method, and it depends on what you want to do.</p>

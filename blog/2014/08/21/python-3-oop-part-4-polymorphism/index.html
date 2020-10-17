@@ -136,7 +136,6 @@
 <span class="go">&#39;0xb70d6560&#39;</span>
 </code></pre></div>
 
-
 <p>This little example shows a lot about the Python typing system. The variable <code>a</code> is not statically declared, after all it can contain only one type of data: a memory address. When we assign the number 5 to it, Python stores in <code>a</code> the <em>address</em> of the number 5 (<code>0x83fe540</code> in my case, but your result will be different). The <code>type()</code> built-in function is smart enough to understand that we are not asking about the type of <code>a</code> (which is always a reference), but about the type of the content. When you store another value in <code>a</code>, the string <code>'five'</code>, Python shamelessly replaces the previous content of the variable with the new address.</p>
 <p>So, thanks to the reference system, Python type system is both <em>strong</em> and <em>dynamic</em>. The exact definition of those two concepts is not universal, so if you are interested be ready to dive into a broad matter. However, in Python, the meaning of those two words is the following:</p>
 <ul>
@@ -149,14 +148,12 @@
     <span class="k">return</span> <span class="n">a</span>
 </code></pre></div>
 
-
 <p>The function works as expected, just echoes the given parameter</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">echo</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
 <span class="go">5</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">echo</span><span class="p">(</span><span class="s1">&#39;five&#39;</span><span class="p">)</span>
 <span class="go">&#39;five&#39;</span>
 </code></pre></div>
-
 
 <p>Pretty straightforward, isn't it? Well, if you come from a statically compiled language such as C or C++ you should be at least puzzled. What is <code>a</code>? I mean: what type of data does it contain? Moreover, how can Python know what it is returning if there is no type specification?</p>
 <p>Again, if you recall the references stuff everything becomes clear: that function accepts a reference and returns a reference. In other words we just defined a sort of universal function, that does the same thing regardless of the input.</p>
@@ -169,7 +166,6 @@
     <span class="k">return</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
 </code></pre></div>
 
-
 <p>there is no need to specify the type of the two input variables. The object <code>a</code> (the object contained in the variable <code>a</code>) shall be able to sum with the object <code>b</code>. This is a very beautiful and simple implementation of the polymorphism concept. Python functions are polymorphic simply because they accept everything and trust the input data to be able to perform some actions.</p>
 <p>Let us consider another simple example before moving on. The built-in <code>len()</code> function returns the length of the input object. For example</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">l</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
@@ -179,7 +175,6 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
 <span class="go">15</span>
 </code></pre></div>
-
 
 <p>As you can see it is perfectly polymorphic: you can feed both a list or a string to it and it just computes its length. Does it work with any type? let's check</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">}</span>
@@ -191,7 +186,6 @@
 <span class="go">  File &quot;&lt;stdin&gt;&quot;, line 1, in &lt;module&gt;</span>
 <span class="go">TypeError: object of type &#39;int&#39; has no len()</span>
 </code></pre></div>
-
 
 <p>Ouch! Seems that the <code>len()</code> function is smart enough to deal with dictionaries, but not with integers. Well, after all, the length of an integer is not defined.</p>
 <p>Indeed this is exactly the point of Python polymorphism: <em>the integer type does not define a length operation</em>. While you blame the <code>len()</code> function, the <code>int</code> type is at fault. The <code>len()</code> function just calls the <code>__len__()</code> method of the input object, as you can see from this code</p>
@@ -206,7 +200,6 @@
 <span class="go">  File &quot;&lt;stdin&gt;&quot;, line 1, in &lt;module&gt;</span>
 <span class="go">AttributeError: &#39;int&#39; object has no attribute &#39;__len__&#39;</span>
 </code></pre></div>
-
 
 <p>Very straightforward: the <code>'int' object</code> does not define any <code>__len__()</code> method.</p>
 <p>So, to sum up what we discovered until here, I would say that <em>Python polymorphism is based on delegation</em>. In the following sections we will talk about the <a href="https://docs.python.org/3/glossary.html#term-eafp">EAFP</a> Python principle, and you will see that the delegation principle is somehow ubiquitous in this language.</p>
@@ -231,7 +224,6 @@
     <span class="k">def</span> <span class="nf">is_open</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">door</span><span class="o">.</span><span class="n">is_open</span><span class="p">()</span>
 </code></pre></div>
-
 
 <p>A very simple class, as you can see, just enough to exemplify polymorphism. The <code>Room</code> class accepts a <code>door</code> variable, and the type of this variable is not specified. Duck typing in action: the actual type of <code>door</code> is not declared, there is no "acceptance test" built in the language. Indeed, the incoming variable shall export the following methods that are used in the <code>Room</code> class: <code>open()</code>, <code>close()</code>, <code>is_open()</code>. So we can build the following classes</p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">Door</span><span class="p">:</span>
@@ -262,7 +254,6 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span>
 </code></pre></div>
 
-
 <p>Both represent a door that can be open or closed, and they implement the concept in two different ways: the first class relies on strings, while the second leverages booleans. Despite <em>being</em> two different types, both <em>act</em> the same way, so both can be used to build a <code>Room</code> object.</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">door</span> <span class="o">=</span> <span class="n">Door</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">bool_door</span> <span class="o">=</span> <span class="n">BooleanDoor</span><span class="p">()</span>
@@ -284,7 +275,6 @@
 <span class="go">False</span>
 </code></pre></div>
 
-
 <h2 id="file-like-us">File Like Us<a class="headerlink" href="#file-like-us" title="Permanent link">&para;</a></h2>
 <p>File-like objects are a concrete and very useful example of polymorphism in Python. A file-like object is a class (or the instance of a class) that acts like a file, i.e. it provides those methods a file object exposes.</p>
 <p>Say for example that you code a class that parses an XML tree, and that you expect the XML code to be contained in a file. So your class accepts a file in its <code>__init__()</code> method, and reads the content from it</p>
@@ -296,7 +286,6 @@
 
 <span class="p">[</span><span class="o">...</span><span class="p">]</span>
 </code></pre></div>
-
 
 <p>The class works well until your application shall be modified to receive XML content from a network stream. To use the class without modifying it you shall write the stream in a temporary file and load the latter, but this sounds a little overkill. So you plan to change the class to accept a string, but this way you shall change every single code that uses the class to read a file, since now you shall open, read and close the file on your own, outside the class.</p>
 <p>Polymorphism offers a better way. Why not storing the incoming stream inside an object that <em>acts like</em> a file, even if it is not an actual one? If you check the <a href="https://docs.python.org/3/library/io.html"><code>io</code></a> module you will find that such an object has been already invented and provided in the standard Python library.</p>
@@ -310,7 +299,6 @@
     <span class="p">[</span><span class="o">...</span><span class="p">]</span>
 </code></pre></div>
 
-
 <p>you shall write</p>
 <div class="highlight"><pre><span></span><code><span class="k">try</span><span class="p">:</span>
     <span class="n">someobj</span><span class="o">.</span><span class="n">open</span><span class="p">()</span>
@@ -318,7 +306,6 @@
 <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
     <span class="p">[</span><span class="o">...</span><span class="p">]</span>
 </code></pre></div>
-
 
 <p>As you can see, the second snippet directly uses the method and deals with the possible <code>AttributeError</code> exception (by the way: managing exceptions is one of the top Black Magic Topics in Python, more on it in a future post. A very quick preview: I think we may learn something from Erlang - check <a href="https://www.thedigitalcatonline.com/blog/2013/05/30/error-handling-in-erlang-a-primer/">this</a>).</p>
 <p>Why is this coding style pushed so much in the Python community? I think the main reason is that through EAFP you <em>think</em> polymorphically: you are not interested in knowing if the object <em>has</em> the <code>open</code> attribute, you are interested in knowing if the object can satisfy your request, that is to perform the <code>open()</code> method call.</p>

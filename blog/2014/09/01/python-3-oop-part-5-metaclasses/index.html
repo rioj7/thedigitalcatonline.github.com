@@ -129,7 +129,6 @@
 <span class="go">()</span>
 </code></pre></div>
 
-
 <p>The variable <code>a</code> is an instance of the <code>int</code> class, and the latter inherits from <code>object</code>, which inherits from nothing. This demonstrates that <code>object</code> is at the top of the class hierarchy. However, as you can see, both <code>int</code> and <code>object</code> are called <em>classes</em> (<code>&lt;class 'int'&gt;</code>, <code>&lt;class 'object'&gt;</code>). Indeed, while <code>a</code> is an instance of the <code>int</code> class, <code>int</code> itself is an instance of another class, <em>a class that is instanced to build classes</em></p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="nb">type</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
 <span class="go">&lt;class &#39;int&#39;&gt;</span>
@@ -141,7 +140,6 @@
 <span class="go">&lt;class &#39;type&#39;&gt;</span>
 </code></pre></div>
 
-
 <p>Since in Python everything is an object, everything is the instance of a class, even classes. Well, <code>type</code> is the class that is instanced to get classes. So remember this: <code>object</code> is the base of every object, <code>type</code> is the class of every type. Sounds puzzling? It is not your fault, don't worry. However, just to strike you with the finishing move, this is what Python is built on</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="nb">type</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
 <span class="go">&lt;class &#39;type&#39;&gt;</span>
@@ -149,14 +147,12 @@
 <span class="go">(&lt;class &#39;object&#39;&gt;,)</span>
 </code></pre></div>
 
-
 <p>If you are not about to faint at this point chances are that you are Guido van Rossum of one of his friends down at the Python core development team (in this case let me thank you for your beautiful creation). You may get a cup of tea, if you need it.</p>
 <p>Jokes apart, at the very base of Python type system there are two things, <code>object</code> and <code>type</code>, which are inseparable. The previous code shows that <code>object</code> is an instance of <code>type</code>, and <code>type</code> inherits from <code>object</code>. Take your time to understand this subtle concept, as it is very important for the upcoming discussion about metaclasses.</p>
 <p>When you think you grasped the <code>type</code>/<code>object</code> matter read this and start thinking again</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="nb">type</span><span class="p">(</span><span class="nb">type</span><span class="p">)</span>
 <span class="go">&lt;class &#39;type&#39;&gt;</span>
 </code></pre></div>
-
 
 <h2 id="the-metaclasses-take-python">The Metaclasses Take Python<a class="headerlink" href="#the-metaclasses-take-python" title="Permanent link">&para;</a></h2>
 <p>You are now familiar with Python classes. You know that a class is used to create an instance, and that the structure of the latter is ruled by the source class and all its parent classes (until you reach <code>object</code>).</p>
@@ -178,7 +174,6 @@
 <span class="go">&lt;class &#39;type&#39;&gt;</span>
 </code></pre></div>
 
-
 <h4 id="metaclasses-2-singleton-day">Metaclasses 2: Singleton Day<a class="headerlink" href="#metaclasses-2-singleton-day" title="Permanent link">&para;</a></h4>
 <p>Metaclasses are a very advanced topic in Python, but they have many practical uses. For example, by means of a custom metaclass you may log any time a class is instanced, which can be important for applications that shall keep a low memory usage or have to monitor it.</p>
 <p>I am going to show here a very simple example of metaclass, the Singleton. Singleton is a well known design pattern, and many description of it may be found on the Internet. It has also been heavily criticized mostly because its bad behaviour when subclassed, but here I do not want to introduce it for its technological value, but for its simplicity (so please do not question the choice, it is just an example).</p>
@@ -191,7 +186,6 @@
              <span class="bp">cls</span><span class="o">.</span><span class="n">instance</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Singleton</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">instance</span>
 </code></pre></div>
-
 
 <p>We are defining a new type, which inherits from <code>type</code> to provide all bells and whistles of Python classes. We override the <code>__call__</code> method, that is a special method invoked when we call the class, i.e. when we instance it. The new method wraps the original method of <code>type</code> by calling it only when the <code>instance</code> attribute is not set, i.e. the first time the class is instanced, otherwise it just returns the recorded instance. As you can see this is a very basic cache class, the only trick is that it is applied to the creation of instances.</p>
 <p>To test the new type we need to define a new class that uses it as its metaclass</p>
@@ -208,7 +202,6 @@
 <span class="go">&#39;0xb68030ec&#39;</span>
 </code></pre></div>
 
-
 <p>By using the <code>is</code> operator we test that the two objects are the very same structure in memory, that is their ids are the same, as explicitly shown. What actually happens is that when you issue <code>a = ASingleton()</code> the <code>ASingleton</code> class runs its <code>__call__()</code> method, which is taken from the <code>Singleton</code> type behind the class. That method recognizes that no instance has been created (<code>Singleton.instance</code> is <code>None</code>) and acts just like any standard class does. When you issue <code>b = ASingleton()</code> the very same things happen, but since <code>Singleton.instance</code> is now different from <code>None</code> its value (the previous instance) is directly returned.</p>
 <p>Metaclasses are a very powerful programming tool and leveraging them you can achieve very complex behaviours with a small effort. Their use is a must every time you are actually metaprogramming, that is you are writing code that has to drive the way your code works. Good examples are creational patterns (injecting custom class attributes depending on some configuration), testing, debugging, and performance monitoring.</p>
 <h2 id="coming-to-instance">Coming to Instance<a class="headerlink" href="#coming-to-instance" title="Permanent link">&para;</a></h2>
@@ -223,7 +216,6 @@
         <span class="p">[</span><span class="n">put</span> <span class="n">your</span> <span class="n">code</span> <span class="n">here</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">obj</span>
 </code></pre></div>
-
 
 <p>just like you usually do with <code>__init__()</code>. When your class inherits from <code>object</code> you do not need to call the parent method (<code>object.__init__()</code>), because it is empty, but you need to do it when overriding <code>__new__</code>.</p>
 <p>Remember that <code>__new__()</code> is not forced to return an instance of the class in which it is defined, even if you shall have very good reasons to break this behaviour. Anyway, <code>__init__()</code> will be called only if you return an instance of the container class. Please also note that <code>__new__()</code>, unlike <code>__init__()</code>, accepts the class as its first parameter. The name is not important in Python, and you can also call it <code>self</code>, but it is worth using <code>cls</code> to remember that it is not an instance.</p>

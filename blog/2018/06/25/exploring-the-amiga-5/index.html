@@ -131,11 +131,9 @@
 <span class="mi">00000002</span><span class="o">:</span> <span class="mi">4</span><span class="n">ef9</span> <span class="mi">00</span><span class="n">fc</span> <span class="mi">00</span><span class="n">d2</span>            <span class="n">jmp</span>     <span class="mh">0xfc00d2</span><span class="o">.</span><span class="na">l</span>
 </code></pre></div>
 
-
 <p>and you can clearly see that the long word at address <code>0x4</code> is <code>00fc 00d2</code>. This actually corresponds to the address where the initial code of the ROM is</p>
 <div class="highlight"><pre><span></span><code><span class="mi">000000</span><span class="n">d2</span><span class="o">:</span> <span class="mi">4</span><span class="n">ff9</span> <span class="mi">0004</span> <span class="mi">0000</span>            <span class="n">lea</span>     <span class="mh">0x40000</span><span class="o">.</span><span class="na">l</span><span class="o">,</span><span class="n">sp</span>
 </code></pre></div>
-
 
 <p>which sets the stack pointer, but I'll keep this analysis for a future post.</p>
 <p>The address <code>0x4</code> is then free to be used during the normal execution, since it is used only during a reset, but in that case whatever we wrote there (the Exec base address) is overwritten by the ROM code.</p>
@@ -150,7 +148,6 @@
 <span class="err">    UBYTE   LH_pad</span>
 <span class="err">    LABEL   LH_SIZE ;word aligned</span>
 </code></pre></div>
-
 
 <p>The only two fields that this structure adds compared to the previous description are <code>LH_TYPE</code>, that unsurprisingly contains the type of the data contained in the list, and <code>LH_pad</code> which is nothing but what the name suggests, a padding that allows the structure to be word aligned.</p>
 <p>We need now to discover where Exec keeps the header for the memory list. Analysing the <code>ExecBase</code> structure contained in <code>include_i/exec/execbase.i</code> we find the following definitions</p>
@@ -167,26 +164,25 @@
     <span class="n">STRUCT</span>  <span class="n">SoftInts</span><span class="p">,</span><span class="n">SH_SIZE</span><span class="o">*</span><span class="mi">5</span>
 </code></pre></div>
 
-
 <p>which is exactly what we wanted. When Exec installs itself in the first part of the memory it will also initialise these headers to keep track of the corresponding resources.</p>
 <p>It is interesting to note, however, that the ExecBase structure described in the include files is not used directly, but is more a description of what the code is going to create. This is a bit different from what higher level languages like C use to do. In C you declare a structure, you reserve memory for it, and then access its fields. In Assembly, ultimately, there is no such a concept as a structure and a field. We have only a (flat) memory and addresses.</p>
 <p>Since ExecBase is a description of the structure of Exec once it will be installed in memory it is interesting to run through its fields and annotate the relative address of each of them.</p>
 <p>I took the code contained in <code>include_i/exec/execbase.i</code> and I computed the address of each field. The first column contains the relative address inside the structure (thus starting from <code>0x0</code>), while the second column contains the address relative to the Exec base address. As shown in the fourth post the <code>LN</code> and <code>LIB</code> structures fill the first 34 bytes, which is why the following starting address is <code>0x22</code></p>
-<div class="highlight"><pre><span></span><code><span class="mi">0000</span> <span class="mi">0022</span>    <span class="n">UWORD</span>   <span class="n">SoftVer</span> <span class="p">;</span> <span class="n">kickstart</span> <span class="n">release</span> <span class="nb">number</span> <span class="p">(</span><span class="n">obs</span><span class="p">.)</span>
-<span class="mi">0002</span> <span class="mi">0024</span>    <span class="n">WORD</span>    <span class="n">LowMemChkSum</span>    <span class="p">;</span> <span class="n">checksum</span> <span class="k">of</span> <span class="mi">68000</span> <span class="n">trap</span> <span class="n">vectors</span>
-<span class="mi">0004</span> <span class="mi">0026</span>    <span class="n">ULONG</span>   <span class="n">ChkBase</span> <span class="p">;</span> <span class="k">system</span> <span class="n">base</span> <span class="n">pointer</span> <span class="n">complement</span>
+<div class="highlight"><pre><span></span><code><span class="mi">0000</span> <span class="mi">0022</span>    <span class="n">UWORD</span>   <span class="n">SoftVer</span> <span class="p">;</span> <span class="n">kickstart</span> <span class="n">release</span> <span class="n">number</span> <span class="p">(</span><span class="n">obs</span><span class="o">.</span><span class="p">)</span>
+<span class="mi">0002</span> <span class="mi">0024</span>    <span class="n">WORD</span>    <span class="n">LowMemChkSum</span>    <span class="p">;</span> <span class="n">checksum</span> <span class="n">of</span> <span class="mi">68000</span> <span class="n">trap</span> <span class="n">vectors</span>
+<span class="mi">0004</span> <span class="mi">0026</span>    <span class="n">ULONG</span>   <span class="n">ChkBase</span> <span class="p">;</span> <span class="n">system</span> <span class="n">base</span> <span class="n">pointer</span> <span class="n">complement</span>
 <span class="mi">0008</span> <span class="mi">002</span><span class="n">a</span>    <span class="n">APTR</span>    <span class="n">ColdCapture</span> <span class="p">;</span> <span class="n">coldstart</span> <span class="n">soft</span> <span class="n">capture</span> <span class="n">vector</span>
-<span class="mi">000</span><span class="k">c</span> <span class="mi">002</span><span class="n">e</span>    <span class="n">APTR</span>    <span class="n">CoolCapture</span> <span class="p">;</span> <span class="n">coolstart</span> <span class="n">soft</span> <span class="n">capture</span> <span class="n">vector</span>
+<span class="mi">000</span><span class="n">c</span> <span class="mi">002</span><span class="n">e</span>    <span class="n">APTR</span>    <span class="n">CoolCapture</span> <span class="p">;</span> <span class="n">coolstart</span> <span class="n">soft</span> <span class="n">capture</span> <span class="n">vector</span>
 <span class="mi">0010</span> <span class="mi">0032</span>    <span class="n">APTR</span>    <span class="n">WarmCapture</span> <span class="p">;</span> <span class="n">warmstart</span> <span class="n">soft</span> <span class="n">capture</span> <span class="n">vector</span>
-<span class="mi">0014</span> <span class="mi">0036</span>    <span class="n">APTR</span>    <span class="n">SysStkUpper</span> <span class="p">;</span> <span class="k">system</span> <span class="n">stack</span> <span class="n">base</span>   <span class="p">(</span><span class="k">upper</span> <span class="n">bound</span><span class="p">)</span>
-<span class="mi">0018</span> <span class="mi">003</span><span class="n">a</span>    <span class="n">APTR</span>    <span class="n">SysStkLower</span> <span class="p">;</span> <span class="n">top</span> <span class="k">of</span> <span class="k">system</span> <span class="n">stack</span> <span class="p">(</span><span class="k">lower</span> <span class="n">bound</span><span class="p">)</span>
-<span class="mi">001</span><span class="k">c</span> <span class="mi">003</span><span class="n">e</span>    <span class="n">ULONG</span>   <span class="n">MaxLocMem</span>   <span class="p">;</span> <span class="n">top</span> <span class="k">of</span> <span class="n">chip</span> <span class="n">memory</span>
-<span class="mi">0020</span> <span class="mi">0042</span>    <span class="n">APTR</span>    <span class="n">DebugEntry</span>  <span class="p">;</span> <span class="k">global</span> <span class="n">debugger</span> <span class="n">entry</span> <span class="n">point</span>
-<span class="mi">0024</span> <span class="mi">0046</span>    <span class="n">APTR</span>    <span class="n">DebugData</span>   <span class="p">;</span> <span class="k">global</span> <span class="n">debugger</span> <span class="k">data</span> <span class="n">segment</span>
-<span class="mi">0028</span> <span class="mi">004</span><span class="n">a</span>    <span class="n">APTR</span>    <span class="n">AlertData</span>   <span class="p">;</span> <span class="n">alert</span> <span class="k">data</span> <span class="n">segment</span>
-<span class="mi">002</span><span class="k">c</span> <span class="mi">004</span><span class="n">e</span>    <span class="n">APTR</span>    <span class="n">MaxExtMem</span>   <span class="p">;</span> <span class="n">top</span> <span class="k">of</span> <span class="n">extended</span> <span class="n">mem</span><span class="p">,</span> <span class="k">or</span> <span class="k">null</span> <span class="k">if</span> <span class="k">none</span>
+<span class="mi">0014</span> <span class="mi">0036</span>    <span class="n">APTR</span>    <span class="n">SysStkUpper</span> <span class="p">;</span> <span class="n">system</span> <span class="n">stack</span> <span class="n">base</span>   <span class="p">(</span><span class="n">upper</span> <span class="n">bound</span><span class="p">)</span>
+<span class="mi">0018</span> <span class="mi">003</span><span class="n">a</span>    <span class="n">APTR</span>    <span class="n">SysStkLower</span> <span class="p">;</span> <span class="n">top</span> <span class="n">of</span> <span class="n">system</span> <span class="n">stack</span> <span class="p">(</span><span class="n">lower</span> <span class="n">bound</span><span class="p">)</span>
+<span class="mi">001</span><span class="n">c</span> <span class="mi">003</span><span class="n">e</span>    <span class="n">ULONG</span>   <span class="n">MaxLocMem</span>   <span class="p">;</span> <span class="n">top</span> <span class="n">of</span> <span class="n">chip</span> <span class="n">memory</span>
+<span class="mi">0020</span> <span class="mi">0042</span>    <span class="n">APTR</span>    <span class="n">DebugEntry</span>  <span class="p">;</span> <span class="n">global</span> <span class="n">debugger</span> <span class="n">entry</span> <span class="n">point</span>
+<span class="mi">0024</span> <span class="mi">0046</span>    <span class="n">APTR</span>    <span class="n">DebugData</span>   <span class="p">;</span> <span class="n">global</span> <span class="n">debugger</span> <span class="n">data</span> <span class="n">segment</span>
+<span class="mi">0028</span> <span class="mi">004</span><span class="n">a</span>    <span class="n">APTR</span>    <span class="n">AlertData</span>   <span class="p">;</span> <span class="n">alert</span> <span class="n">data</span> <span class="n">segment</span>
+<span class="mi">002</span><span class="n">c</span> <span class="mi">004</span><span class="n">e</span>    <span class="n">APTR</span>    <span class="n">MaxExtMem</span>   <span class="p">;</span> <span class="n">top</span> <span class="n">of</span> <span class="n">extended</span> <span class="n">mem</span><span class="p">,</span> <span class="ow">or</span> <span class="nb nb-Type">null</span> <span class="k">if</span> <span class="n">none</span>
 
-<span class="mi">0030</span> <span class="mi">0052</span>    <span class="n">WORD</span>    <span class="n">ChkSum</span>      <span class="p">;</span> <span class="k">for</span> <span class="k">all</span> <span class="k">of</span> <span class="n">the</span> <span class="n">above</span> <span class="p">(</span><span class="n">minus</span> <span class="mi">2</span><span class="p">)</span>
+<span class="mi">0030</span> <span class="mi">0052</span>    <span class="n">WORD</span>    <span class="n">ChkSum</span>      <span class="p">;</span> <span class="k">for</span> <span class="n">all</span> <span class="n">of</span> <span class="n">the</span> <span class="n">above</span> <span class="p">(</span><span class="n">minus</span> <span class="mi">2</span><span class="p">)</span>
 
 
 <span class="o">*******</span> <span class="n">Interrupt</span> <span class="n">Related</span> <span class="o">********************************************</span>
@@ -194,73 +190,72 @@
     <span class="n">LABEL</span>   <span class="n">IntVects</span>
 <span class="mi">0032</span> <span class="mi">0054</span>    <span class="n">STRUCT</span>  <span class="n">IVTBE</span><span class="p">,</span><span class="n">IV_SIZE</span>
 <span class="mi">003</span><span class="n">e</span> <span class="mi">0060</span>    <span class="n">STRUCT</span>  <span class="n">IVDSKBLK</span><span class="p">,</span><span class="n">IV_SIZE</span>
-<span class="mi">004</span><span class="n">a</span> <span class="mi">006</span><span class="k">c</span>    <span class="n">STRUCT</span>  <span class="n">IVSOFTINT</span><span class="p">,</span><span class="n">IV_SIZE</span>
+<span class="mi">004</span><span class="n">a</span> <span class="mi">006</span><span class="n">c</span>    <span class="n">STRUCT</span>  <span class="n">IVSOFTINT</span><span class="p">,</span><span class="n">IV_SIZE</span>
 <span class="mi">0056</span> <span class="mi">0078</span>    <span class="n">STRUCT</span>  <span class="n">IVPORTS</span><span class="p">,</span><span class="n">IV_SIZE</span>
 <span class="mi">0062</span> <span class="mi">0084</span>    <span class="n">STRUCT</span>  <span class="n">IVCOPER</span><span class="p">,</span><span class="n">IV_SIZE</span>
 <span class="mi">006</span><span class="n">e</span> <span class="mi">0090</span>    <span class="n">STRUCT</span>  <span class="n">IVVERTB</span><span class="p">,</span><span class="n">IV_SIZE</span>
-<span class="mi">007</span><span class="n">a</span> <span class="mi">009</span><span class="k">c</span>    <span class="n">STRUCT</span>  <span class="n">IVBLIT</span><span class="p">,</span><span class="n">IV_SIZE</span>
+<span class="mi">007</span><span class="n">a</span> <span class="mi">009</span><span class="n">c</span>    <span class="n">STRUCT</span>  <span class="n">IVBLIT</span><span class="p">,</span><span class="n">IV_SIZE</span>
 <span class="mi">0086</span> <span class="mi">00</span><span class="n">a8</span>    <span class="n">STRUCT</span>  <span class="n">IVAUD0</span><span class="p">,</span><span class="n">IV_SIZE</span>
 <span class="mi">0092</span> <span class="mi">00</span><span class="n">b4</span>    <span class="n">STRUCT</span>  <span class="n">IVAUD1</span><span class="p">,</span><span class="n">IV_SIZE</span>
 <span class="mi">009</span><span class="n">e</span> <span class="mi">00</span><span class="n">c0</span>    <span class="n">STRUCT</span>  <span class="n">IVAUD2</span><span class="p">,</span><span class="n">IV_SIZE</span>
 <span class="mi">00</span><span class="n">aa</span> <span class="mi">00</span><span class="n">cc</span>    <span class="n">STRUCT</span>  <span class="n">IVAUD3</span><span class="p">,</span><span class="n">IV_SIZE</span>
 <span class="mi">00</span><span class="n">b6</span> <span class="mi">00</span><span class="n">d8</span>    <span class="n">STRUCT</span>  <span class="n">IVRBF</span><span class="p">,</span><span class="n">IV_SIZE</span>
-<span class="mi">00</span><span class="n">c2</span> <span class="mi">00</span><span class="n">e4</span>    <span class="n">STRUCT</span>  <span class="n">IVDSKSYNC</span><span class="p">,</span><span class="n">IV_SIZE</span>
+<span class="mi">00</span><span class="n">c2</span> <span class="mf">00e4</span>    <span class="n">STRUCT</span>  <span class="n">IVDSKSYNC</span><span class="p">,</span><span class="n">IV_SIZE</span>
 <span class="mi">00</span><span class="n">ce</span> <span class="mi">00</span><span class="n">f0</span>    <span class="n">STRUCT</span>  <span class="n">IVEXTER</span><span class="p">,</span><span class="n">IV_SIZE</span>
 <span class="mi">00</span><span class="n">da</span> <span class="mi">00</span><span class="n">fc</span>    <span class="n">STRUCT</span>  <span class="n">IVINTEN</span><span class="p">,</span><span class="n">IV_SIZE</span>
-<span class="mi">00</span><span class="n">e6</span> <span class="mi">0108</span>    <span class="n">STRUCT</span>  <span class="n">IVNMI</span><span class="p">,</span><span class="n">IV_SIZE</span>
+<span class="mf">00e6</span> <span class="mi">0108</span>    <span class="n">STRUCT</span>  <span class="n">IVNMI</span><span class="p">,</span><span class="n">IV_SIZE</span>
 
 
-<span class="o">*******</span> <span class="k">Dynamic</span> <span class="k">System</span> <span class="n">Variables</span> <span class="o">*************************************</span>
+<span class="o">*******</span> <span class="n">Dynamic</span> <span class="n">System</span> <span class="n">Variables</span> <span class="o">*************************************</span>
 
-<span class="mi">00</span><span class="n">f2</span> <span class="mi">0114</span>    <span class="n">APTR</span>    <span class="n">ThisTask</span>    <span class="p">;</span> <span class="n">pointer</span> <span class="k">to</span> <span class="k">current</span> <span class="n">task</span> <span class="p">(</span><span class="n">readable</span><span class="p">)</span>
+<span class="mi">00</span><span class="n">f2</span> <span class="mi">0114</span>    <span class="n">APTR</span>    <span class="n">ThisTask</span>    <span class="p">;</span> <span class="n">pointer</span> <span class="n">to</span> <span class="n">current</span> <span class="n">task</span> <span class="p">(</span><span class="n">readable</span><span class="p">)</span>
 
 <span class="mi">00</span><span class="n">f6</span> <span class="mi">0118</span>    <span class="n">ULONG</span>   <span class="n">IdleCount</span>   <span class="p">;</span> <span class="n">idle</span> <span class="n">counter</span>
-<span class="mi">00</span><span class="n">fa</span> <span class="mi">011</span><span class="k">c</span>    <span class="n">ULONG</span>   <span class="n">DispCount</span>   <span class="p">;</span> <span class="k">dispatch</span> <span class="n">counter</span>
-<span class="mi">00</span><span class="n">fe</span> <span class="mi">0120</span>    <span class="n">UWORD</span>   <span class="n">Quantum</span> <span class="p">;</span> <span class="k">time</span> <span class="n">slice</span> <span class="n">quantum</span>
-<span class="mi">0100</span> <span class="mi">0122</span>    <span class="n">UWORD</span>   <span class="n">Elapsed</span> <span class="p">;</span> <span class="k">current</span> <span class="n">quantum</span> <span class="n">ticks</span>
-<span class="mi">0102</span> <span class="mi">0124</span>    <span class="n">UWORD</span>   <span class="n">SysFlags</span>    <span class="p">;</span> <span class="n">misc</span> <span class="n">internal</span> <span class="k">system</span> <span class="n">flags</span>
-<span class="mi">0104</span> <span class="mi">0126</span>    <span class="n">BYTE</span>    <span class="n">IDNestCnt</span>   <span class="p">;</span> <span class="n">interrupt</span> <span class="n">disable</span> <span class="n">nesting</span> <span class="k">count</span>
-<span class="mi">0105</span> <span class="mi">0127</span>    <span class="n">BYTE</span>    <span class="n">TDNestCnt</span>   <span class="p">;</span> <span class="n">task</span> <span class="n">disable</span> <span class="n">nesting</span> <span class="k">count</span>
+<span class="mi">00</span><span class="n">fa</span> <span class="mi">011</span><span class="n">c</span>    <span class="n">ULONG</span>   <span class="n">DispCount</span>   <span class="p">;</span> <span class="n">dispatch</span> <span class="n">counter</span>
+<span class="mi">00</span><span class="n">fe</span> <span class="mi">0120</span>    <span class="n">UWORD</span>   <span class="n">Quantum</span> <span class="p">;</span> <span class="n">time</span> <span class="n">slice</span> <span class="n">quantum</span>
+<span class="mi">0100</span> <span class="mi">0122</span>    <span class="n">UWORD</span>   <span class="n">Elapsed</span> <span class="p">;</span> <span class="n">current</span> <span class="n">quantum</span> <span class="n">ticks</span>
+<span class="mi">0102</span> <span class="mi">0124</span>    <span class="n">UWORD</span>   <span class="n">SysFlags</span>    <span class="p">;</span> <span class="n">misc</span> <span class="n">internal</span> <span class="n">system</span> <span class="n">flags</span>
+<span class="mi">0104</span> <span class="mi">0126</span>    <span class="n">BYTE</span>    <span class="n">IDNestCnt</span>   <span class="p">;</span> <span class="n">interrupt</span> <span class="n">disable</span> <span class="n">nesting</span> <span class="n">count</span>
+<span class="mi">0105</span> <span class="mi">0127</span>    <span class="n">BYTE</span>    <span class="n">TDNestCnt</span>   <span class="p">;</span> <span class="n">task</span> <span class="n">disable</span> <span class="n">nesting</span> <span class="n">count</span>
 
 <span class="mi">0106</span> <span class="mi">0128</span>    <span class="n">UWORD</span>   <span class="n">AttnFlags</span>   <span class="p">;</span> <span class="n">special</span> <span class="n">attention</span> <span class="n">flags</span> <span class="p">(</span><span class="n">readable</span><span class="p">)</span>
 
 <span class="mi">0108</span> <span class="mi">012</span><span class="n">a</span>    <span class="n">UWORD</span>   <span class="n">AttnResched</span> <span class="p">;</span> <span class="n">rescheduling</span> <span class="n">attention</span>
-<span class="mi">010</span><span class="n">a</span> <span class="mi">012</span><span class="k">c</span>    <span class="n">APTR</span>    <span class="n">ResModules</span>  <span class="p">;</span> <span class="n">pointer</span> <span class="k">to</span> <span class="n">resident</span> <span class="n">module</span> <span class="nb">array</span>
-<span class="mi">010</span><span class="n">e</span> <span class="mi">0130</span>    <span class="n">APTR</span>    <span class="n">TaskTrapCode</span>    <span class="p">;</span> <span class="k">default</span> <span class="n">task</span> <span class="n">trap</span> <span class="k">routine</span>
-<span class="mi">0112</span> <span class="mi">0134</span>    <span class="n">APTR</span>    <span class="n">TaskExceptCode</span>  <span class="p">;</span> <span class="k">default</span> <span class="n">task</span> <span class="k">exception</span> <span class="n">code</span>
-<span class="mi">0116</span> <span class="mi">0138</span>    <span class="n">APTR</span>    <span class="n">TaskExitCode</span>    <span class="p">;</span> <span class="k">default</span> <span class="n">task</span> <span class="n">exit</span> <span class="n">code</span>
-<span class="mi">011</span><span class="n">a</span> <span class="mi">013</span><span class="k">c</span>    <span class="n">ULONG</span>   <span class="n">TaskSigAlloc</span>    <span class="p">;</span> <span class="n">preallocated</span> <span class="n">signal</span> <span class="n">mask</span>
+<span class="mi">010</span><span class="n">a</span> <span class="mi">012</span><span class="n">c</span>    <span class="n">APTR</span>    <span class="n">ResModules</span>  <span class="p">;</span> <span class="n">pointer</span> <span class="n">to</span> <span class="n">resident</span> <span class="n">module</span> <span class="n">array</span>
+<span class="mi">010</span><span class="n">e</span> <span class="mi">0130</span>    <span class="n">APTR</span>    <span class="n">TaskTrapCode</span>    <span class="p">;</span> <span class="n">default</span> <span class="n">task</span> <span class="n">trap</span> <span class="n">routine</span>
+<span class="mi">0112</span> <span class="mi">0134</span>    <span class="n">APTR</span>    <span class="n">TaskExceptCode</span>  <span class="p">;</span> <span class="n">default</span> <span class="n">task</span> <span class="n">exception</span> <span class="n">code</span>
+<span class="mi">0116</span> <span class="mi">0138</span>    <span class="n">APTR</span>    <span class="n">TaskExitCode</span>    <span class="p">;</span> <span class="n">default</span> <span class="n">task</span> <span class="n">exit</span> <span class="n">code</span>
+<span class="mi">011</span><span class="n">a</span> <span class="mi">013</span><span class="n">c</span>    <span class="n">ULONG</span>   <span class="n">TaskSigAlloc</span>    <span class="p">;</span> <span class="n">preallocated</span> <span class="k">signal</span> <span class="n">mask</span>
 <span class="mi">011</span><span class="n">e</span> <span class="mi">0140</span>    <span class="n">UWORD</span>   <span class="n">TaskTrapAlloc</span>   <span class="p">;</span> <span class="n">preallocated</span> <span class="n">trap</span> <span class="n">mask</span>
 
 
-<span class="o">*******</span> <span class="k">System</span> <span class="n">List</span> <span class="n">Headers</span> <span class="p">(</span><span class="n">private</span><span class="o">!</span><span class="p">)</span> <span class="o">********************************</span>
+<span class="o">*******</span> <span class="n">System</span> <span class="n">List</span> <span class="n">Headers</span> <span class="p">(</span><span class="n">private</span><span class="o">!</span><span class="p">)</span> <span class="o">********************************</span>
 
 <span class="mi">0120</span> <span class="mi">0142</span>    <span class="n">STRUCT</span>  <span class="n">MemList</span><span class="p">,</span><span class="n">LH_SIZE</span>
 <span class="mi">012</span><span class="n">e</span> <span class="mi">0150</span>    <span class="n">STRUCT</span>  <span class="n">ResourceList</span><span class="p">,</span><span class="n">LH_SIZE</span>
-<span class="mi">013</span><span class="k">c</span> <span class="mi">015</span><span class="n">e</span>    <span class="n">STRUCT</span>  <span class="n">DeviceList</span><span class="p">,</span><span class="n">LH_SIZE</span>
-<span class="mi">014</span><span class="n">a</span> <span class="mi">016</span><span class="k">c</span>    <span class="n">STRUCT</span>  <span class="n">IntrList</span><span class="p">,</span><span class="n">LH_SIZE</span>
+<span class="mi">013</span><span class="n">c</span> <span class="mi">015</span><span class="n">e</span>    <span class="n">STRUCT</span>  <span class="n">DeviceList</span><span class="p">,</span><span class="n">LH_SIZE</span>
+<span class="mi">014</span><span class="n">a</span> <span class="mi">016</span><span class="n">c</span>    <span class="n">STRUCT</span>  <span class="n">IntrList</span><span class="p">,</span><span class="n">LH_SIZE</span>
 <span class="mi">0158</span> <span class="mi">017</span><span class="n">a</span>    <span class="n">STRUCT</span>  <span class="n">LibList</span><span class="p">,</span><span class="n">LH_SIZE</span>
 <span class="mi">0166</span> <span class="mi">0188</span>    <span class="n">STRUCT</span>  <span class="n">PortList</span><span class="p">,</span><span class="n">LH_SIZE</span>
 <span class="mi">0174</span> <span class="mi">0196</span>    <span class="n">STRUCT</span>  <span class="n">TaskReady</span><span class="p">,</span><span class="n">LH_SIZE</span>
 <span class="mi">0182</span> <span class="mi">01</span><span class="n">a4</span>    <span class="n">STRUCT</span>  <span class="n">TaskWait</span><span class="p">,</span><span class="n">LH_SIZE</span>
 <span class="mi">0190</span> <span class="mi">01</span><span class="n">b2</span>    <span class="n">STRUCT</span>  <span class="n">SoftInts</span><span class="p">,</span><span class="n">SH_SIZE</span><span class="o">*</span><span class="mi">5</span>
 
-<span class="mi">01</span><span class="n">e0</span> <span class="mi">0202</span>    <span class="n">STRUCT</span>  <span class="n">LastAlert</span><span class="p">,</span><span class="mi">4</span><span class="o">*</span><span class="mi">4</span>
+<span class="mf">01e0</span> <span class="mi">0202</span>    <span class="n">STRUCT</span>  <span class="n">LastAlert</span><span class="p">,</span><span class="mi">4</span><span class="o">*</span><span class="mi">4</span>
 
 <span class="mi">01</span><span class="n">f0</span> <span class="mi">0212</span>    <span class="n">UBYTE</span>   <span class="n">VBlankFrequency</span>     <span class="p">;(</span><span class="n">readable</span><span class="p">)</span>
 <span class="mi">01</span><span class="n">f1</span> <span class="mi">0213</span>    <span class="n">UBYTE</span>   <span class="n">PowerSupplyFrequency</span>    <span class="p">;(</span><span class="n">readable</span><span class="p">)</span>
 
 <span class="mi">01</span><span class="n">f2</span> <span class="mi">0214</span>    <span class="n">STRUCT</span>  <span class="n">SemaphoreList</span><span class="p">,</span><span class="n">LH_SIZE</span>
 
-<span class="mi">0200</span> <span class="mi">0222</span>    <span class="n">APTR</span>    <span class="n">KickMemPtr</span>  <span class="p">;</span> <span class="n">ptr</span> <span class="k">to</span> <span class="n">queue</span> <span class="k">of</span> <span class="n">mem</span> <span class="n">lists</span>
-<span class="mi">0204</span> <span class="mi">0226</span>    <span class="n">APTR</span>    <span class="n">KickTagPtr</span>  <span class="p">;</span> <span class="n">ptr</span> <span class="k">to</span> <span class="n">rom</span> <span class="n">tag</span> <span class="n">queue</span>
-<span class="mi">0208</span> <span class="mi">022</span><span class="n">a</span>    <span class="n">APTR</span>    <span class="n">KickCheckSum</span>    <span class="p">;</span> <span class="n">checksum</span> <span class="k">for</span> <span class="n">mem</span> <span class="k">and</span> <span class="n">tags</span>
+<span class="mi">0200</span> <span class="mi">0222</span>    <span class="n">APTR</span>    <span class="n">KickMemPtr</span>  <span class="p">;</span> <span class="n">ptr</span> <span class="n">to</span> <span class="n">queue</span> <span class="n">of</span> <span class="n">mem</span> <span class="n">lists</span>
+<span class="mi">0204</span> <span class="mi">0226</span>    <span class="n">APTR</span>    <span class="n">KickTagPtr</span>  <span class="p">;</span> <span class="n">ptr</span> <span class="n">to</span> <span class="n">rom</span> <span class="n">tag</span> <span class="n">queue</span>
+<span class="mi">0208</span> <span class="mi">022</span><span class="n">a</span>    <span class="n">APTR</span>    <span class="n">KickCheckSum</span>    <span class="p">;</span> <span class="n">checksum</span> <span class="k">for</span> <span class="n">mem</span> <span class="ow">and</span> <span class="n">tags</span>
 
-<span class="mi">020</span><span class="k">c</span> <span class="mi">022</span><span class="n">e</span>    <span class="n">UBYTE</span> <span class="n">ExecBaseReserved</span><span class="p">[</span><span class="mi">10</span><span class="p">];</span>
+<span class="mi">020</span><span class="n">c</span> <span class="mi">022</span><span class="n">e</span>    <span class="n">UBYTE</span> <span class="n">ExecBaseReserved</span><span class="p">[</span><span class="mi">10</span><span class="p">];</span>
 <span class="mi">0216</span> <span class="mi">0238</span>    <span class="n">UBYTE</span> <span class="n">ExecBaseNewReserved</span><span class="p">[</span><span class="mi">20</span><span class="p">];</span>
-<span class="mi">022</span><span class="n">a</span> <span class="mi">024</span><span class="k">c</span>    <span class="n">LABEL</span>   <span class="n">SYSBASESIZE</span>
+<span class="mi">022</span><span class="n">a</span> <span class="mi">024</span><span class="n">c</span>    <span class="n">LABEL</span>   <span class="n">SYSBASESIZE</span>
 </code></pre></div>
-
 
 <p>According to this structure we expect to find the memory list header 322 bytes (<code>0x142</code>) after the base address, which means that this number should be mentioned somewhere in the Kickstart code.</p>
 <p>It is not surprise indeed that the function <code>AllocMem</code> mentions it. This function is part of the Exec API that we explored in the third and fourth instalments. Following the same method described there I found the function at the address <code>0x17d0</code> in the Kickstart code</p>
@@ -275,7 +270,6 @@
 <span class="mi">000017</span><span class="n">e0</span><span class="p">:</span> <span class="mi">2452</span>                      <span class="n">movea</span><span class="p">.</span><span class="n">l</span> <span class="p">(</span><span class="n">a2</span><span class="p">),</span><span class="n">a2</span>
 <span class="p">;</span> <span class="p">...</span>
 </code></pre></div>
-
 
 <p>and in this initial part of the function we can clearly see the code that loads the effective address of <code>0x142(a6)</code>. Remember that <code>a6</code> is always supposed to contain the Exec base address.</p>
 <p>The displacement <code>0x142</code> is also mentioned in a table towards the beginning of the code, and this is the part we are really interested in at the moment</p>
@@ -312,7 +306,6 @@
 <span class="mi">0000030</span><span class="n">a</span><span class="p">:</span> <span class="mi">0000</span>
 </code></pre></div>
 
-
 <p>As you can see I formatted the code to show that the values after <code>02d2</code> are data and not code. The disassembler will obviously show you some instructions but they are just misinterpretations of the binary data. AS it is usual in the Kickstart code, we have some procedure working on a set of data and the data is stored immediately after the code itself. The purpose of this procedure is that of creating the initial headers for the linked lists that Exec will use to manage the system resources.</p>
 <p>This table is immediately followed by the table we found in the <a href="https://www.thedigitalcatonline.com/blog/2018/06/08/exploring-the-amiga-3/">third post</a> of this series, when we were looking at the values of the <code>LIB</code> structure.</p>
 <p>Let's comment line by line the code at <code>02b0</code></p>
@@ -331,45 +324,38 @@
 <span class="mi">000002</span><span class="n">d0</span><span class="p">:</span> <span class="mi">60</span><span class="n">e2</span>                      <span class="n">bra</span><span class="p">.</span><span class="n">b</span>   <span class="mi">0</span><span class="n">x2b4</span>
 </code></pre></div>
 
-
 <div class="highlight"><pre><span></span><code><span class="mi">000002</span><span class="n">b0</span><span class="o">:</span> <span class="mi">43</span><span class="n">fa</span> <span class="mi">0020</span>                 <span class="n">lea</span>     <span class="mh">0x2d2</span><span class="o">(</span><span class="n">pc</span><span class="o">),</span><span class="n">a1</span>
 </code></pre></div>
-
 
 <p>First of all the code loads the absolute address of <code>0x2d2(pc)</code> in the <code>a1</code> register. This is exactly the beginning of the table, as shown above.</p>
 <div class="highlight"><pre><span></span><code><span class="mi">000002</span><span class="n">b4</span><span class="o">:</span> <span class="mi">3019</span>                      <span class="n">move</span><span class="o">.</span><span class="na">w</span>  <span class="o">(</span><span class="n">a1</span><span class="o">)+,</span><span class="n">d0</span>
 <span class="mi">000002</span><span class="n">b6</span><span class="o">:</span> <span class="mi">6700</span> <span class="mi">0086</span>                 <span class="n">beq</span><span class="o">.</span><span class="na">w</span>   <span class="mh">0x33e</span>
 </code></pre></div>
 
-
 <p>The code then loads the first value of the table (<code>0142</code>) in <code>d0</code> and increments <code>a1</code>. This suggests that we are looking at a loop. The following instruction is indeed a comparison that jumps to <code>0x33e</code> is the value is <code>0</code>. You can easily see above that the table is terminated by a <code>0000</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="mi">000002</span><span class="n">ba</span><span class="o">:</span> <span class="mi">41</span><span class="n">f6</span> <span class="mi">0000</span>                 <span class="n">lea</span>     <span class="o">(</span><span class="mi">0</span><span class="o">,</span><span class="n">a6</span><span class="o">,</span><span class="n">d0</span><span class="o">.</span><span class="na">w</span><span class="o">),</span><span class="n">a0</span>
 </code></pre></div>
-
 
 <p>The register <code>a0</code> is then loaded with the effective address of Exec + <code>d0</code>. This means that we use the value we just read from the table as a pointer. For the first value, then, we are looking at <code>0x142</code> bytes after the beginning of the Exec library, exactly where we expected to find the Memory List header.</p>
 <div class="highlight"><pre><span></span><code><span class="mi">000002</span><span class="n">be</span><span class="o">:</span> <span class="mi">2088</span>                      <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">a0</span><span class="o">,(</span><span class="n">a0</span><span class="o">)</span>
 <span class="mi">000002</span><span class="n">c0</span><span class="o">:</span> <span class="mi">5890</span>                      <span class="n">addq</span><span class="o">.</span><span class="na">l</span>  <span class="err">#</span><span class="mh">0x4</span><span class="o">,(</span><span class="n">a0</span><span class="o">)</span>
 </code></pre></div>
 
-
 <p>An empty linked list has the head pointing to the tail and the tail pointing to zero. To do this we set the content of that address <code>(a0)</code> to the address itself (<code>a0</code>), then we increment it by 4 making it point to the tail.</p>
 <div class="highlight"><pre><span></span><code><span class="mi">000002</span><span class="n">c2</span><span class="o">:</span> <span class="mi">42</span><span class="n">a8</span> <span class="mi">0004</span>                 <span class="n">clr</span><span class="o">.</span><span class="na">l</span>   <span class="mh">0x4</span><span class="o">(</span><span class="n">a0</span><span class="o">)</span>
 <span class="mi">000002</span><span class="n">c6</span><span class="o">:</span> <span class="mi">2148</span> <span class="mi">0008</span>                 <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">a0</span><span class="o">,</span><span class="mh">0x8</span><span class="o">(</span><span class="n">a0</span><span class="o">)</span>
 </code></pre></div>
-
 
 <p>The tail itself is then cleared and the tail predecessor is set to be the head.</p>
 <div class="highlight"><pre><span></span><code><span class="mi">000002</span><span class="n">ca</span><span class="o">:</span> <span class="mi">3019</span>                      <span class="n">move</span><span class="o">.</span><span class="na">w</span>  <span class="o">(</span><span class="n">a1</span><span class="o">)+,</span><span class="n">d0</span>
 <span class="mi">000002</span><span class="n">cc</span><span class="o">:</span> <span class="mi">1140</span> <span class="mi">000</span><span class="n">c</span>                 <span class="n">move</span><span class="o">.</span><span class="na">b</span>  <span class="n">d0</span><span class="o">,</span><span class="mh">0xc</span><span class="o">(</span><span class="n">a0</span><span class="o">)</span>
 </code></pre></div>
 
-
 <p>The code then fetches the next word from the table (<code>000a</code>) and puts it into a field 12 bytes (<code>0xc</code>) from the beginning of the structure, that is <code>LH_TYPE</code>. The possible values of this byte can be found in <code>include_i/exec/nodes.i</code>, where we find that the value <code>0xa</code> corresponds to <code>NT_MEMORY</code>.</p>
-<div class="highlight"><pre><span></span><code><span class="p">;</span><span class="c1">------ Node Types for LN_TYPE</span>
+<div class="highlight"><pre><span></span><code><span class="p">;</span><span class="o">------</span> <span class="n">Node</span> <span class="n">Types</span> <span class="k">for</span> <span class="n">LN_TYPE</span>
 
 <span class="n">NT_UNKNOWN</span>      <span class="n">EQU</span> <span class="mi">0</span>
-<span class="n">NT_TASK</span>         <span class="n">EQU</span> <span class="mi">1</span>   <span class="p">;</span> <span class="k">Exec</span> <span class="n">task</span>
+<span class="n">NT_TASK</span>         <span class="n">EQU</span> <span class="mi">1</span>   <span class="p">;</span> <span class="n">Exec</span> <span class="n">task</span>
 <span class="n">NT_INTERRUPT</span>    <span class="n">EQU</span> <span class="mi">2</span>
 <span class="n">NT_DEVICE</span>       <span class="n">EQU</span> <span class="mi">3</span>
 <span class="n">NT_MSGPORT</span>      <span class="n">EQU</span> <span class="mi">4</span>
@@ -379,25 +365,23 @@
 <span class="n">NT_RESOURCE</span>     <span class="n">EQU</span> <span class="mi">8</span>
 <span class="n">NT_LIBRARY</span>      <span class="n">EQU</span> <span class="mi">9</span>
 <span class="n">NT_MEMORY</span>       <span class="n">EQU</span> <span class="mi">10</span>
-<span class="n">NT_SOFTINT</span>      <span class="n">EQU</span> <span class="mi">11</span>  <span class="p">;</span> <span class="n">Internal</span> <span class="n">flag</span> <span class="n">used</span> <span class="k">by</span> <span class="n">SoftInts</span>
+<span class="n">NT_SOFTINT</span>      <span class="n">EQU</span> <span class="mi">11</span>  <span class="p">;</span> <span class="n">Internal</span> <span class="n">flag</span> <span class="n">used</span> <span class="n">by</span> <span class="n">SoftInts</span>
 <span class="n">NT_FONT</span>         <span class="n">EQU</span> <span class="mi">12</span>
 <span class="n">NT_PROCESS</span>      <span class="n">EQU</span> <span class="mi">13</span>  <span class="p">;</span> <span class="n">AmigaDOS</span> <span class="n">Process</span>
 <span class="n">NT_SEMAPHORE</span>    <span class="n">EQU</span> <span class="mi">14</span>
-<span class="n">NT_SIGNALSEM</span>    <span class="n">EQU</span> <span class="mi">15</span>  <span class="p">;</span> <span class="n">signal</span> <span class="n">semaphores</span>
+<span class="n">NT_SIGNALSEM</span>    <span class="n">EQU</span> <span class="mi">15</span>  <span class="p">;</span> <span class="k">signal</span> <span class="n">semaphores</span>
 <span class="n">NT_BOOTNODE</span>     <span class="n">EQU</span> <span class="mi">16</span>
 <span class="n">NT_KICKMEM</span>      <span class="n">EQU</span> <span class="mi">17</span>
 <span class="n">NT_GRAPHICS</span>     <span class="n">EQU</span> <span class="mi">18</span>
 <span class="n">NT_DEATHMESSAGE</span> <span class="n">EQU</span> <span class="mi">19</span>
 
-<span class="n">NT_USER</span>         <span class="n">EQU</span> <span class="mi">254</span> <span class="p">;</span> <span class="k">User</span> <span class="n">node</span> <span class="n">types</span> <span class="k">work</span> <span class="n">down</span> <span class="k">from</span> <span class="n">here</span>
+<span class="n">NT_USER</span>         <span class="n">EQU</span> <span class="mi">254</span> <span class="p">;</span> <span class="n">User</span> <span class="n">node</span> <span class="n">types</span> <span class="n">work</span> <span class="n">down</span> <span class="n">from</span> <span class="n">here</span>
 <span class="n">NT_EXTENDED</span>     <span class="n">EQU</span> <span class="mi">255</span>
 </code></pre></div>
-
 
 <p>There is only one instruction left</p>
 <div class="highlight"><pre><span></span><code><span class="mi">000002</span><span class="n">d0</span><span class="o">:</span> <span class="mi">60</span><span class="n">e2</span>                      <span class="n">bra</span><span class="o">.</span><span class="na">b</span>   <span class="mh">0x2b4</span>
 </code></pre></div>
-
 
 <p>which jumps back to the beginning of this short piece of code. The procedure then keeps looping on the whole table until it reaches the list terminator <code>0000</code>.</p>
 <p>The final content of the memory at <code>0142</code> will be</p>
@@ -406,7 +390,6 @@
 <span class="mi">0000014</span><span class="n">a</span><span class="o">:</span> <span class="mi">0000</span> <span class="mi">0146</span> <span class="o">;</span> <span class="n">LH_TAILPRED</span>
 <span class="mi">0000014</span><span class="n">d</span><span class="o">:</span> <span class="mi">0</span><span class="n">a</span>        <span class="o">;</span> <span class="n">LH_TYPE</span>
 </code></pre></div>
-
 
 <p>And the same happens for the remaining 7 lists from <code>ResourceList</code> to <code>TaskWait</code>. After this the Exec lists are initialised.</p>
 <p>According to the values of <code>LN_TYPE</code> the list headers table is the following</p>
@@ -426,7 +409,6 @@
 <span class="mi">00000306</span><span class="o">:</span> <span class="mi">0214</span> <span class="mi">000</span><span class="n">f</span> <span class="o">;</span> <span class="n">SemaphoreList</span> <span class="o">(</span><span class="n">NT_SIGNALSEM</span><span class="o">)</span>
 <span class="mi">0000030</span><span class="n">a</span><span class="o">:</span> <span class="mi">0000</span>
 </code></pre></div>
-
 
 <h1 id="whats-next">What's next<a class="headerlink" href="#whats-next" title="Permanent link">&para;</a></h1>
 <p>The next instalment of the series will cover the initial part of the system memory initialisation, both the standard one and potential expansions, introducing <code>AddMemList</code> for the first time. It will also discuss the origin of some important numbers used in the Kickstart code, <code>0x24c</code>, <code>0x400</code>, and <code>0x676</code>.</p>

@@ -126,7 +126,6 @@
     <span class="nb">print</span> <span class="n">i</span>
 </code></pre></div>
 
-
 <p>At  first sight <code>sequence()</code> seems to be a good function without big defects (for the sake of simplicity error checking has been intentionally omitted - it does not work with negative numbers for example - and the code is intentionally non-pythonic).</p>
 <p>The problem concealed in such code is that the function does not execute return until the whole list has been built and until the function returns the loop does not start. Thus when the loop begins the function already processed the whole data set.</p>
 <p>While you are building normal sequences of numbers this can be considered irrelevant, even for rather long ones. The problem gets worse when the data set becomes very big or when the creation of an element is very demanding process; in the first case the function might fill the memory, whereas in the second one the whole execution can last a very long time. Both conditions happen even before the loop produces the first element.</p>
@@ -142,12 +141,10 @@
         <span class="k">yield</span> <span class="n">x</span>
 </code></pre></div>
 
-
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">dec</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">g</span>
 <span class="go">&lt;generator object dec at 0xb6abbf2c&gt;</span>
 </code></pre></div>
-
 
 <p>When executed, the <code>dec()</code> function returns a <strong>generator object</strong> and no lines of code have been executed (i.e. <code>x</code> has not yet been initialized).</p>
 <p>As soon as <code>next()</code> is called for the first time <code>x</code> will be initialized with the value passed to the function (8 in the example above) and the infinite loop will start. Inside it the local variable <code>x</code> will be decremented and returned to the caller by <code>yield</code>. The latter will also freeze again the code, holding the internal state, in this case the value of the variable <code>x</code>.</p>
@@ -160,7 +157,6 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
 <span class="go">4</span>
 </code></pre></div>
-
 
 <p>As you can see the generator <code>g</code> remembers its previous state and acts accordingly.</p>
 <p>Since generators are iterators they are allowed to raise the <code>StopIteration</code> exception to signal their exhaustion. In the previous example the <code>dec()</code> function never raises it, thus providing an infinite generator (or infinite iterator).</p>
@@ -179,7 +175,6 @@
 <span class="go">2</span>
 </code></pre></div>
 
-
 <p>Let’s recap the whole concept. A function containing the <code>yield</code> statement is called generator function and when executed returns a generator object; this is nothing more than a simple iterator, which automatically implements the freeze and resume of the function’s code.</p>
 <p>Pay attention to the fact that a generator is an iterator (it exposes <code>next()</code> and <code>__iter__()</code> methods and may raise <code>StopIteration</code>) but the opposite is not always true. A generator is an iterator built by a generator function, i.e. through the use of the <code>yield</code> statement; as explained there are other ways to build iterators.</p>
 <p>Back to the <code>sequence()</code> function showed above we can now write it as a generator function and use it to build arbitrarily long sequences and, at the limit, infinite.</p>
@@ -191,7 +186,6 @@
         <span class="k">yield</span> <span class="n">i</span>
         <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
 </code></pre></div>
-
 
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">sequence</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
@@ -214,7 +208,6 @@
 <span class="go">2</span>
 </code></pre></div>
 
-
 <h2 id="generators-and-iterators">Generators and iterators<a class="headerlink" href="#generators-and-iterators" title="Permanent link">&para;</a></h2>
 <p>A question might arise: if generators are iterators why should we use the <code>yield</code>-based method to create them? After all, generator functions are simple to write but not so simple to manage, due to the radically different behaviour from that of standard functions. Wouldn’t it be enough to create an iterable object that at each call of the <code>next()</code> method creates the correct element of the sequence?</p>
 <p>The answer is certainly affirmative: everything you can do with generators can be done with standard iterators. There are two caveats, however.</p>
@@ -226,19 +219,16 @@
 <div class="highlight"><pre><span></span><code><span class="n">object_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">MyObject</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">)]</span>
 </code></pre></div>
 
-
 <p>where the classic code would be</p>
 <div class="highlight"><pre><span></span><code><span class="n">object_list</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
     <span class="n">object_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">MyObject</span><span class="p">())</span>
 </code></pre></div>
 
-
 <p>Surely it is not a lot of code, but it is less easy to understand immediately and less elegant; less pythonic, in a word. List comprehension, however, being nothing more than an alternative syntax to express the above for loop, suffers from the same problems, particularly from performance issues we talked about earlier. Bitter enemies of list comprehensions are long lists and objects which creation is expensive.</p>
 <p>Could we take advantage of generators in this case? Yes, with <strong>generator expressions</strong>. The syntax of such expressions is identical to that of list comprehension, except for the use of round brackets instead of square ones. While list comprehension returns a list, however, a generator expression return a generator, as the name implies. The previous code could thus be written this way</p>
 <div class="highlight"><pre><span></span><code><span class="n">object_generator</span> <span class="o">=</span> <span class="p">(</span><span class="n">MyObject</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">))</span>
 </code></pre></div>
-
 
 <p>where <code>object_generator</code> is a generator like one of those returned by a generator function. The latter form of the code would be</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">object_generator_function</span><span class="p">():</span>
@@ -248,23 +238,19 @@
 <span class="n">object_generator</span> <span class="o">=</span> <span class="n">object_generator_function</span><span class="p">()</span>
 </code></pre></div>
 
-
 <p>Which is, as happens for list comprehension and for loops, less elegant than its equivalent shortcut syntax. Obviously, returning a generator has all the advantages we described above: after the generator expression has been executed no element has yet been created. That will happen when the generator is consumed by a for loop or a similar construct.</p>
 <p>As for list comprehension, generator expressions can encompass a condition in the form</p>
 <div class="highlight"><pre><span></span><code><span class="n">generator</span> <span class="o">=</span> <span class="p">(</span><span class="n">expression</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">s</span> <span class="k">if</span> <span class="n">condition</span><span class="p">)</span><span class="o">.</span>
 </code></pre></div>
 
-
 <p>and can also be directly used as arguments for single-argument functions, using function call brackets to mark the expression.</p>
 <div class="highlight"><pre><span></span><code><span class="n">afunction</span><span class="p">(</span><span class="n">expression</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">s</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>There is however no real performance improvement using such a syntax, since the generator is exhausted before passing it to the function, but the syntax is very elegant and compact.</p>
 <p>A typical example of this use is that of the so-called <strong>dictionary comprehension</strong>; from two lists of the same length, one of keys and one of values, we can obtain a dictionary with</p>
 <div class="highlight"><pre><span></span><code><span class="n">d</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">z</span> <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="n">values</span><span class="p">))</span>
 </code></pre></div>
-
 
 <p>since <code>dict()</code> accepts an iterable of <code>(key, value)</code> tuples, which is what the generator with <code>zip()</code> returns.</p>
 <h2 id="conclusions">Conclusions<a class="headerlink" href="#conclusions" title="Permanent link">&para;</a></h2>

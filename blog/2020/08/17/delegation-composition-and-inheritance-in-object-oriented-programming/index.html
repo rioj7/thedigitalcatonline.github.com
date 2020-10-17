@@ -140,7 +140,6 @@
 <span class="n">cld</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span>
 </code></pre></div>
 
-
 <p>As you can see, <code>describe</code> is defined in <code>Parent</code>, so when the instance <code>cld</code> calls it, its class <code>Child</code> delegated the call to the class <code>Parent</code>. This, in turn, uses <code>_value</code> as if it was defined locally, while it is defined in <code>cld</code>. This works because, from the point of view of the state, <code>Parent</code> has complete access to the state of <code>Child</code>. Please note that the state is not even namespaced, as the state of the child class <em>becomes</em> the state of the parent class.</p>
 <p>Composition, on the other side, keeps the state completely private and makes the delegated object see only what is explicitly shared through message passing. A simple example of this is</p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">Logger</span><span class="p">:</span>
@@ -162,7 +161,6 @@
 
 <span class="n">prc</span><span class="o">.</span><span class="n">info</span><span class="p">()</span>
 </code></pre></div>
-
 
 <p>Here, <code>Process</code> objects have an attribute <code>_value</code> that is shared with <code>Logger</code> objects only when it comes to calling <code>Logger.log</code> inside their <code>info</code> method. <code>Logger</code> objects have no visibility of the state of <code>Process</code> objects unless it is explicitly shared.</p>
 <p>Note for advanced readers: I'm clearly mixing the concepts of instance and class here, and blatantly ignoring the resulting inconsistencies. The state of an instance is not the same thing as the state of a class, and it should also be mentioned that classes are themselves instances of metaclasses, at least in Python. What I want to point out here is that access to attributes is granted automatically to inherited classes because of the way <code>__getattribute__</code> and bound methods work, while in composition such mechanisms are not present and the effect is that the state is not shared.</p>
@@ -199,14 +197,12 @@
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Transparency is set to </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_transparency</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>       
 </code></pre></div>
 
-
 <p>At this point we can instantiate and use <code>TransparentWindow</code></p>
 <div class="highlight"><pre><span></span><code><span class="n">twin</span> <span class="o">=</span> <span class="n">TransparentWindow</span><span class="p">(</span><span class="s2">&quot;Terminal&quot;</span><span class="p">,</span> <span class="mi">640</span><span class="p">,</span> <span class="mi">480</span><span class="p">,</span> <span class="mi">80</span><span class="p">)</span>
 <span class="n">twin</span><span class="o">.</span><span class="n">info</span><span class="p">()</span>
 <span class="n">twin</span><span class="o">.</span><span class="n">change_transparency</span><span class="p">(</span><span class="mi">70</span><span class="p">)</span>
 <span class="n">twin</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="mi">800</span><span class="p">,</span> <span class="mi">600</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>When we call <code>twin.info</code>, Python is running <code>TransparentWindow</code>'s implementation of that method and is not automatically delegating anything to <code>Window</code> even though the latter has a method with that name. Indeed, we have to explicitly call it through <code>super</code> when we want to reuse it. When we use <code>resize</code>, though, the implicit delegation kicks in and we end up with the execution of <code>Window.resize</code>. Please note that this delegation doesn't propagate to the next calls, as when <code>Window.resize</code> calls <code>self.info</code> this runs <code>TransparentWindow.info</code>, as the original call was made from that class.</p>
 <p>Composition is on the other end of the spectrum, as any delegation performed through composed objects has to be explicit. Let's see an example</p>
@@ -232,12 +228,10 @@
         <span class="p">}</span>
 </code></pre></div>
 
-
 <p>When we instantiate a <code>Page</code> and call <code>info</code> everything works</p>
 <div class="highlight"><pre><span></span><code><span class="n">page</span> <span class="o">=</span> <span class="n">Page</span><span class="p">(</span><span class="s2">&quot;New post&quot;</span><span class="p">,</span> <span class="s2">&quot;Some text for an exciting new post&quot;</span><span class="p">)</span>
 <span class="n">page</span><span class="o">.</span><span class="n">info</span><span class="p">()</span>
 </code></pre></div>
-
 
 <p>but as you can see, <code>Page.info</code> has to explicitly mention <code>Body.info</code> through <code>self._body</code>, as we had to do when using inheritance with <code>super</code>. Composition is not different from inheritance when methods are overridden, at least in Python.</p>
 <h3 id="relationship-to-be-vs-to-have">Relationship: to be vs to have<a class="headerlink" href="#relationship-to-be-vs-to-have" title="Permanent link">&para;</a></h3>
@@ -258,7 +252,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_speed</span> <span class="o">=</span> <span class="n">speed</span>
 </code></pre></div>
 
-
 <p>Here, <code>SportsCar</code> <em>is</em> a <code>Car</code>, it can be initialised in the same way and has the same methods, though it can accelerate much more (wow, that might be a fun ride). Since the relationship between the two actors is best described by <em>to be</em> it is natural to use inheritance.</p>
 <p>Composition, on the other hand, implements the verb <em>to have</em> and describes an object that is "physically" made of other objects</p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">Employee</span><span class="p">:</span>
@@ -271,7 +264,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_ceo</span> <span class="o">=</span> <span class="n">Employee</span><span class="p">(</span><span class="n">ceo_name</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_cto</span> <span class="o">=</span> <span class="n">Employee</span><span class="p">(</span><span class="n">cto_name</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>We can say that a company is the sum of its employees (plus other things), and we easily recognise that the two classes <code>Employee</code> and <code>Company</code> have a very different nature. They don't have the same interface, and if they have methods with the same name is just by chance and not because they are serving the same purpose.</p>
 <h3 id="entities-classes-or-instances">Entities: classes or instances<a class="headerlink" href="#entities-classes-or-instances" title="Permanent link">&para;</a></h3>
@@ -286,7 +278,6 @@
 
 <span class="n">boeing747</span> <span class="o">=</span> <span class="n">Plane</span><span class="p">()</span>
 </code></pre></div>
-
 
 <p>Since <code>Plane</code> and <code>FlyingObject</code> share the same underlying nature, their relationship is valid for all objects of that type and it is thus established between classes, which are ideas that become concrete when instantiated.</p>
 <p>When we use composition, instead, we are putting into play a delegation that is not valid for all objects of that type, but only for those that we connected. For example, we can separate gears from the rest of a bicycle, and it is only when we put together <em>that</em> specific set of gears and <em>that</em> bicycle that the delegation happens. So, while we can think theoretically at bicycles and gears, the actual delegation happens only when dealing with concrete objects.</p>
@@ -314,7 +305,6 @@
 <span class="n">bicycle</span> <span class="o">=</span> <span class="n">Bicycle</span><span class="p">()</span>
 </code></pre></div>
 
-
 <p>As you can see here, an instance of <code>Bicycle</code> contains an instance of <code>Gears</code> and this allows us to create a delegation in the methods <code>gear_up</code> and <code>gear_down</code>. The delegation, however, happens between <code>bicycle</code> and <code>bicycle.gears</code> which are instances.</p>
 <p>It is also possible, at least in Python, to have composition using pure classes, which is useful when the class is a pure helper or a simple container of methods (I'm not going to discuss here the benefits or the disadvantages of such a solution)</p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">Gears</span><span class="p">:</span>
@@ -340,7 +330,6 @@
 
 <span class="n">bicycle</span> <span class="o">=</span> <span class="n">Bicycle</span><span class="p">()</span>
 </code></pre></div>
-
 
 <p>Now, when we run <code>bicycle.gear_up</code> the delegation happens between <code>bicycle</code>, and instance, and <code>Gears</code>, a class. We might extend this forward to have a class which class methods call class methods of another class, but I won't give an example of this because it sounds a bit convoluted and probably not very reasonable to do. But it can be done.</p>
 <p>So, we might devise a pattern here and say that in composition there is no rule that states the nature of the entities involved in the delegation, but that most of the time this happens between instances.</p>
@@ -379,7 +368,6 @@
 <span class="n">owner1</span> <span class="o">=</span> <span class="n">Owner</span><span class="p">(</span><span class="s2">&quot;John&quot;</span><span class="p">,</span> <span class="s2">&quot;Doe&quot;</span><span class="p">,</span> <span class="s2">&quot;Pear&quot;</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>Unfortunately, this automatically limits the number of companies owned by an <code>Owner</code> to one. If we want to relax that requirement, the best way to do it is to reverse the composition, and make the <code>Company</code> contain the <code>Owner</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">Owner</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">first_name</span><span class="p">,</span> <span class="n">last_name</span><span class="p">):</span>
@@ -394,7 +382,6 @@
 <span class="n">company1</span> <span class="o">=</span> <span class="n">Company</span><span class="p">(</span><span class="s2">&quot;Pear&quot;</span><span class="p">,</span> <span class="s2">&quot;John&quot;</span><span class="p">,</span> <span class="s2">&quot;Doe&quot;</span><span class="p">)</span>
 <span class="n">company2</span> <span class="o">=</span> <span class="n">Company</span><span class="p">(</span><span class="s2">&quot;Pulses&quot;</span><span class="p">,</span> <span class="s2">&quot;John&quot;</span><span class="p">,</span> <span class="s2">&quot;Doe&quot;</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>As you can see this is in direct contrast with the initial modelling that comes from our perception of the relationship between the two in the real world, which in turn comes from the specific word "owner" that I used. If I used a different word like "president" or "CEO", you would immediately accept the second solution as more natural, as the "president" is one of many employees.</p>
 <p>The code above is not satisfactory, though, as it initialises <code>Owner</code> every time we create a company, while we might want to use the same instance. Again, this is not mandatory, it depends on the data contained in the <code>Owner</code> objects and the level of consistency that we need. For example, if we add to the owner an attribute <code>online</code> to mark that they are currently using the website and can be reached on the internal chat, we don't want have to cycle between all companies and set the owner's online status for each of them if the owner is the same. So, we might want to change the way we compose them, passing an instance of <code>Owner</code> instead of the data used to initialise it.</p>
@@ -414,7 +401,6 @@
 <span class="n">company2</span> <span class="o">=</span> <span class="n">Company</span><span class="p">(</span><span class="s2">&quot;Pulses&quot;</span><span class="p">,</span> <span class="n">owner1</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>Clearly, if the class <code>Company</code> has no other purpose than having a name, using a class is overkill, so this design might be further reduced to an <code>Owner</code> with a list of company names.</p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">Owner</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">first_name</span><span class="p">,</span> <span class="n">last_name</span><span class="p">):</span>
@@ -425,7 +411,6 @@
 <span class="n">owner1</span> <span class="o">=</span> <span class="n">Owner</span><span class="p">(</span><span class="s2">&quot;John&quot;</span><span class="p">,</span> <span class="s2">&quot;Doe&quot;</span><span class="p">)</span>
 <span class="n">owner1</span><span class="o">.</span><span class="n">companies</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s2">&quot;Pear&quot;</span><span class="p">,</span> <span class="s2">&quot;Pulses&quot;</span><span class="p">])</span>
 </code></pre></div>
-
 
 <p>Can we use inheritance? Now I am stretching the example to its limit, but I can accept there might be a use case for something like this.</p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">Owner</span><span class="p">:</span>
@@ -442,7 +427,6 @@
 <span class="n">company2</span> <span class="o">=</span> <span class="n">Company</span><span class="p">(</span><span class="s2">&quot;Pulses&quot;</span><span class="p">,</span> <span class="s2">&quot;John&quot;</span><span class="p">,</span> <span class="s2">&quot;Doe&quot;</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>As I showed in the previous sections, though, this code smells as soon as we start adding something like the <code>email</code> address.</p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">Owner</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">first_name</span><span class="p">,</span> <span class="n">last_name</span><span class="p">,</span> <span class="n">email</span><span class="p">):</span>
@@ -458,7 +442,6 @@
 <span class="n">company1</span> <span class="o">=</span> <span class="n">Company</span><span class="p">(</span><span class="s2">&quot;Pear&quot;</span><span class="p">,</span> <span class="s2">&quot;John&quot;</span><span class="p">,</span> <span class="s2">&quot;Doe&quot;</span><span class="p">)</span>
 <span class="n">company2</span> <span class="o">=</span> <span class="n">Company</span><span class="p">(</span><span class="s2">&quot;Pulses&quot;</span><span class="p">,</span> <span class="s2">&quot;John&quot;</span><span class="p">,</span> <span class="s2">&quot;Doe&quot;</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>Is <code>email</code> that of the company or the personal one of its owner? There is a clash, and this is a good example of "state pollution": both attributes have the same name, but they represent different things and might need to coexist.</p>
 <p>In conclusion, as you can see we have to be very careful to discuss relationships between objects in the context of our domain and avoid losing connection with the business logic.</p>
@@ -481,7 +464,6 @@
 <span class="n">c</span>.<span class="n">is_even</span>()
 </code></pre></div>
 
-
 <p>This is a trivial example of an inheritance relationship between <code>Child</code> and <code>Parent</code>, where <code>Parent</code> provides the methods <code>__init__</code> and <code>info</code> and <code>Child</code> augments the interface with the method <code>is_even</code>.</p>
 <p>Let's have a look at the internals of the two classes. <code>Parent.__dict__</code> is</p>
 <div class="highlight"><pre><span></span><code><span class="n">mappingproxy</span><span class="p">({</span><span class="s1">&#39;__module__&#39;</span><span class="p">:</span> <span class="s1">&#39;__main__&#39;</span><span class="p">,</span>
@@ -492,13 +474,11 @@
               <span class="s1">&#39;__doc__&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
 </code></pre></div>
 
-
 <p>and <code>Child.__dict__</code> is</p>
 <div class="highlight"><pre><span></span><code><span class="n">mappingproxy</span><span class="p">({</span><span class="s1">&#39;__module__&#39;</span><span class="p">:</span> <span class="s1">&#39;__main__&#39;</span><span class="p">,</span>
               <span class="s1">&#39;is_even&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">function</span> <span class="n">__main__</span><span class="o">.</span><span class="n">Child</span><span class="o">.</span><span class="n">is_even</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">&gt;</span><span class="p">,</span>
               <span class="s1">&#39;__doc__&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">})</span>
 </code></pre></div>
-
 
 <p>Finally, the bond between the two is established through <code>Child.__bases__</code>, which has the value <code>(__main__.Parent,)</code>.</p>
 <p>So, when we call <code>c.is_even</code> the instance has a bound method that comes from the class <code>Child</code>, as its <code>__dict__</code> contains the function <code>is_even</code>. Conversely, when we call <code>c.info</code> Python has to fetch it from <code>Parent</code>, as <code>Child</code> can't provide it. This mechanism is implemented by the method <code>__getattribute__</code> that is the core of the Python inheritance system.</p>
@@ -523,7 +503,6 @@
 
 <span class="n">c</span> <span class="o">=</span> <span class="n">Child</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>Now, if we try to access <code>c.secret</code>, Python would raise an <code>AttributeError</code>, as neither <code>Child</code> nor <code>Parent</code> can provide that attribute. As a last resort, though, Python runs <code>c.__getattr__("secret")</code>, and the code of that method that we implemented in the class <code>Child</code> returns the string <code>"a_secret_string"</code>. Please note that the value of the argument <code>attr</code> is the <em>name</em> of the attribute as a string.</p>
 <p>Because of the catch-all nature of <code>__getattr__</code>, we eventually have to raise an <code>AttributeError</code> to keep the inheritance mechanism working, unless we actually need or want to implement something very special.</p>
@@ -551,7 +530,6 @@
 <span class="n">c</span><span class="o">.</span><span class="n">is_even</span><span class="p">()</span>
 </code></pre></div>
 
-
 <p>As you can see, here <code>Child</code> is composing <code>Parent</code> and there is no inheritance between the two. We can nevertheless access <code>c.value</code> and call <code>c.info</code>, thanks to the face that <code>Child.__getattr__</code> is delegating everything can't be found in <code>Child</code> to the instance of <code>Parent</code> stored in <code>self.parent</code>.</p>
 <p>Note: don't confuse <code>getattr</code> with <code>__getattr__</code>. The former is a builtin function that gets an attribute provided its name, a replacement for the dotted notation when the name of the attribute is known as a string. The latter is the hook into the inheritance mechanism that I described in this section.</p>
 <p>Now, this is very powerful, but is it also useful?</p>
@@ -577,7 +555,6 @@
     <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">value</span>
 </code></pre></div>
-
 
 <p>As you can easily see, the more <code>Child</code> wants to expose of the <code>Parent</code> interface, the more wrapper methods and properties you need. To be perfectly clear, in this example the code above smells, as there are too many one-liner wrappers, which tells me it would be better to use inheritance. But if the class <code>Child</code> had a dozen of its own methods, suddenly it would make sense to do something like this, and in that case, <code>__getattr__</code> might come in handy.</p>
 <h2 id="final-words">Final words<a class="headerlink" href="#final-words" title="Permanent link">&para;</a></h2>

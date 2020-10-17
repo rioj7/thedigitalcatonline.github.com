@@ -120,7 +120,6 @@
 <span class="n">res0</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">8</span>
 </code></pre></div>
 
-
 <h1 id="initial-thoughts">Initial thoughts<a class="headerlink" href="#initial-thoughts" title="Permanent link">&para;</a></h1>
 <p>This is the very first Scala problem, but a lot of topics are covered even by such a small task.</p>
 <p>First I have to learn how to define functions. Then the problem shows two data types, namely <code>List</code> and <code>Int</code>, but it does not state that the list has to contain integers. So another point is to understand if and how Scala can deal with generic containers (that is, a list, regardless of the type of the content).</p>
@@ -138,7 +137,6 @@
 <span class="o">}</span>
 </code></pre></div>
 
-
 <p>The equal sign has an important meaning, if I remember correctly. Omitting the equal sign makes the function automatically return a <code>Unit</code> type (that is, no output), so the point seems to be: ask yourself if your function shall return something or not. The <code>Unit</code> return type may be also explicitly stated, in which case you have to add the equal sign. And interesting clarification (with two different points of view) may be found <a href="https://stackoverflow.com/questions/944111/when-to-use-the-equals-sign-in-a-scala-method-declaration">here</a>. As a beginner, I prefer to be explicit.</p>
 <h1 id="type-variables">Type variables<a class="headerlink" href="#type-variables" title="Permanent link">&para;</a></h1>
 <p>I need to declare a function that accepts a list of any kind of things. This problem falls under the term <em>polymorphism</em>, and in Scala can be achieved with <em>type variables</em>. A very quick introduction to the matter may be found <a href="https://twitter.github.io/scala_school/type-basics.html">here</a>. Basically for my problem I simply have to use the following syntax</p>
@@ -146,7 +144,6 @@
     <span class="o">...</span>
 <span class="o">}</span>
 </code></pre></div>
-
 
 <p>where the starting <code>[A]</code> signals that the function is a sort of template with a free type <code>A</code>, unknown at the moment. The same type is used later to say that the parameter <code>l</code> is a <code>List</code> of things, and <code>A</code> is the type of each of them. Last, this function returns one value of the <code>A</code> type, since the problems requires to find one specific element of the list.</p>
 <h1 id="find-the-last-element-of-a-list">Find the last element of a list<a class="headerlink" href="#find-the-last-element-of-a-list" title="Permanent link">&para;</a></h1>
@@ -160,22 +157,19 @@
 <span class="o">}</span>
 </code></pre></div>
 
-
 <p>Since the body of the function is so small I can also omit the braces and write</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="n">last</span><span class="o">[</span><span class="kt">A</span><span class="o">](</span><span class="n">l</span><span class="k">:</span><span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">])</span><span class="k">:</span><span class="kt">A</span> <span class="o">=</span> <span class="n">l</span><span class="o">.</span><span class="n">last</span>
 </code></pre></div>
-
 
 <p>There is no check for an empty list because the <code>last()</code> method already throws the <code>NoSuchElementException</code> when no element is present.</p>
 <p>There is no need to use an explicit <code>return</code> statement, as functions always return the last expression.</p>
 <h1 id="the-recursive-solution">The recursive solution<a class="headerlink" href="#the-recursive-solution" title="Permanent link">&para;</a></h1>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="n">last</span><span class="o">[</span><span class="kt">A</span><span class="o">](</span><span class="n">l</span><span class="k">:</span><span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">])</span><span class="k">:</span><span class="kt">A</span> <span class="o">=</span> <span class="n">l</span> <span class="k">match</span> <span class="o">{</span>
-    <span class="k">case</span> <span class="n">h</span> <span class="o">::</span> <span class="nc">Nil</span> <span class="k">=&gt;</span> <span class="n">h</span>
-    <span class="k">case</span> <span class="k">_</span> <span class="o">::</span> <span class="n">tail</span> <span class="k">=&gt;</span> <span class="n">last</span><span class="o">(</span><span class="n">tail</span><span class="o">)</span>
-    <span class="k">case</span> <span class="k">_</span> <span class="k">=&gt;</span> <span class="k">throw</span> <span class="k">new</span> <span class="nc">NoSuchElementException</span>
+    <span class="k">case</span> <span class="n">h</span> <span class="o">::</span> <span class="nc">Nil</span> <span class="o">=&gt;</span> <span class="n">h</span>
+    <span class="k">case</span> <span class="k">_</span> <span class="o">::</span> <span class="n">tail</span> <span class="o">=&gt;</span> <span class="n">last</span><span class="o">(</span><span class="n">tail</span><span class="o">)</span>
+    <span class="k">case</span> <span class="k">_</span> <span class="o">=&gt;</span> <span class="k">throw</span> <span class="k">new</span> <span class="nc">NoSuchElementException</span>
 <span class="o">}</span>
 </code></pre></div>
-
 
 <p>The value returned by the function is <code>l match {}</code>, that is the execution of the pattern matching block on the input variable <code>l</code>.</p>
 <p>The first pattern divides the list in two parts: one head element (<code>h</code>) and a tail formed by nothing. This is the case in which the input list has only one element.</p>

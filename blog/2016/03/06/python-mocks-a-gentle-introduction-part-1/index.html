@@ -131,22 +131,18 @@
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">unittest</span> <span class="kn">import</span> <span class="n">mock</span>
 </code></pre></div>
 
-
 <p>If you are using Python 2 you have to install it and use</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">mock</span>
 </code></pre></div>
-
 
 <p>The main object that the library provides is <code>Mock</code> and you can instantiate it without any argument</p>
 <div class="highlight"><pre><span></span><code><span class="n">m</span> <span class="o">=</span> <span class="n">mock</span><span class="o">.</span><span class="n">Mock</span><span class="p">()</span>
 </code></pre></div>
 
-
 <p>This object has the peculiar property of creating methods and attributes on the fly when you require them. Let us first look inside the object to take a glance of what it provides</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="nb">dir</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
 <span class="go">[&#39;assert_any_call&#39;, &#39;assert_called_once_with&#39;, &#39;assert_called_with&#39;, &#39;assert_has_calls&#39;, &#39;attach_mock&#39;, &#39;call_args&#39;, &#39;call_args_list&#39;, &#39;call_count&#39;, &#39;called&#39;, &#39;configure_mock&#39;, &#39;method_calls&#39;, &#39;mock_add_spec&#39;, &#39;mock_calls&#39;, &#39;reset_mock&#39;, &#39;return_value&#39;, &#39;side_effect&#39;]</span>
 </code></pre></div>
-
 
 <p>As you can see there are some methods which are already defined into the <code>Mock</code> object. Let us read a non-existent attribute</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">some_attribute</span>
@@ -155,18 +151,15 @@
 <span class="go">[&#39;assert_any_call&#39;, &#39;assert_called_once_with&#39;, &#39;assert_called_with&#39;, &#39;assert_has_calls&#39;, &#39;attach_mock&#39;, &#39;call_args&#39;, &#39;call_args_list&#39;, &#39;call_count&#39;, &#39;called&#39;, &#39;configure_mock&#39;, &#39;method_calls&#39;, &#39;mock_add_spec&#39;, &#39;mock_calls&#39;, &#39;reset_mock&#39;, &#39;return_value&#39;, &#39;side_effect&#39;, &#39;some_attribute&#39;]</span>
 </code></pre></div>
 
-
 <p>Well, as you can see this class is somehow different from what you are accustomed to. First of all its instances do not raise an <code>AttributeError</code> when asked for a non-existent attribute, but they happily return another instance of <code>Mock</code> itself. Second, the attribute you tried to access has now been created inside the object and accessing it returns the same mock object as before.</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">some_attribute</span>
 <span class="go">&lt;Mock name=&#39;mock.some_attribute&#39; id=&#39;140222043808432&#39;&gt;</span>
 </code></pre></div>
 
-
 <p>Mock objects are callables, which means that they may act both as attributes and as methods. If you try to call the mock it just returns you another mock with a name that includes parentheses to signal its callable nature</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">some_attribute</span><span class="p">()</span>
 <span class="go">&lt;Mock name=&#39;mock.some_attribute()&#39; id=&#39;140247621475856&#39;&gt;</span>
 </code></pre></div>
-
 
 <p>As you can understand, such objects are the perfect tool to mimic other objects or systems, since they may expose any API without raising exceptions. To use them in tests, however, we need them to behave just like the original, which implies returning sensible values or performing operations.</p>
 <h1 id="return-value">Return value<a class="headerlink" href="#return-value" title="Permanent link">&para;</a></h1>
@@ -175,7 +168,6 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">some</span> <span class="n">attribute</span><span class="p">()</span>
 <span class="go">42</span>
 </code></pre></div>
-
 
 <p>Now the object does not return a mock object any more, instead it just returns the static value stored in the <code>return_value</code> attribute. Obviously you can also store a callable such as a function or an object, and the method will return it, but it will not run it. Let me give you an example</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">print_answer</span><span class="p">():</span>
@@ -186,7 +178,6 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">some_attribute</span><span class="p">()</span>
 <span class="go">&lt;function print_answer at 0x7f8df1e3f400&gt;</span>
 </code></pre></div>
-
 
 <p>As you can see calling <code>some_attribute()</code> just returns the value stored in <code>return_value</code>, that is the function itself. To return values that come from a function we have to use a slightly more complex attribute of mock objects called <code>side_effect</code>.</p>
 <h1 id="side-effect">Side effect<a class="headerlink" href="#side-effect" title="Permanent link">&para;</a></h1>
@@ -202,7 +193,6 @@
     <span class="k">raise</span> <span class="n">effect</span>
 <span class="gr">ValueError</span>: <span class="n">A custom value error</span>
 </code></pre></div>
-
 
 <p>If you pass an iterable, such as for example a generator, or a plain list, tuple, or similar objects, the mock will yield the values of that iterable, i.e. return every value contained in the iterable on subsequent calls of the mock. Let me give you an example</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">some_attribute</span><span class="o">.</span><span class="n">side_effect</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
@@ -222,7 +212,6 @@
 <span class="gr">StopIteration</span>
 </code></pre></div>
 
-
 <p>As promised, the mock just returns every object found in the iterable (in this case a <code>range</code> object) once at a time until the generator is exhausted. According to the iterator protocol (see <a href="https://www.thedigitalcatonline.com/blog/2013/03/25/python-generators-from-iterators-to-cooperative-multitasking/">this post</a>) once every item has been returned the object raises the <code>StopIteration</code> exception, which means that you can correctly use it in a loop.</p>
 <p>The last and perhaps most used case is that of passing a callable to <code>side_effect</code>, which shamelessly executes it with its own same parameters. This is very powerful, especially if you stop thinking about "functions" and start considering "callables". Indeed, <code>side_effect</code> also accepts a class and calls it, that is it can instantiate objects. Let us consider a simple example with a function without arguments</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">print_answer</span><span class="p">():</span>
@@ -232,7 +221,6 @@
 <span class="go">42</span>
 </code></pre></div>
 
-
 <p>A slightly more complex example: a function with arguments</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">print_number</span><span class="p">(</span><span class="n">num</span><span class="p">):</span>
 <span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Number:&quot;</span><span class="p">,</span> <span class="n">num</span><span class="p">)</span>
@@ -241,7 +229,6 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">some_attribute</span><span class="o">.</span><span class="n">side_effect</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
 <span class="go">Number: 5</span>
 </code></pre></div>
-
 
 <p>And finally an example with a class</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">Number</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -257,7 +244,6 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="n">n</span><span class="o">.</span><span class="n">print_value</span><span class="p">()</span>
 <span class="go">Value: 26</span>
 </code></pre></div>
-
 
 <h1 id="testing-with-mocks">Testing with mocks<a class="headerlink" href="#testing-with-mocks" title="Permanent link">&para;</a></h1>
 <p>Now we know how to build a mock and how to give it a static return value or make it call a callable object. It is time to see how to use a mock in a test and what facilities do mocks provide. I'm going to use <a href="http://pytest.org">pytest</a> as a testing framework. You can find a quick introduction to pytest and TDD <a href="/categories/tdd/">here</a>).</p>
@@ -276,7 +262,6 @@ touch myobj.py
 touch tests/test_mock.py
 <span class="nv">PYTHONPATH</span><span class="o">=</span><span class="s2">&quot;.&quot;</span> py.test
 </code></pre></div>
-
 
 <p>The <code>PYTHONPATH</code> environment variable is an easy way to avoid having to setup a whole Python project to just test some simple code.</p>
 <h2 id="the-three-test-types">The three test types<a class="headerlink" href="#the-three-test-types" title="Permanent link">&para;</a></h2>
@@ -301,7 +286,6 @@ touch tests/test_mock.py
     <span class="n">myobj</span><span class="o">.</span><span class="n">MyObj</span><span class="p">(</span><span class="n">external_obj</span><span class="p">)</span>
     <span class="n">external_obj</span><span class="o">.</span><span class="n">connect</span><span class="o">.</span><span class="n">assert_called_with</span><span class="p">()</span>
 </code></pre></div>
-
 
 <p>The <code>myobj.MyObj</code> class, in this simple example, needs to connect to an external object, for example a remote repository or a database. The only thing we need to know for testing purposes is if the class called the <code>connect()</code> method of the external object without any parameter.</p>
 <p>So the first thing we do in this test is to instantiate the mock object. This is a fake version of the external object, and its only purpose is to accept calls from the <code>MyObj</code> object under test and return sensible values. Then we instantiate the <code>MyObj</code> class passing the external object. We expect the class to call the <code>connect()</code> method so we express this expectation calling <code>external_obj.connect.assert_called_with()</code>.</p>
@@ -328,13 +312,11 @@ tests/test_mock.py:6: <span class="nv">AttributeError</span>
 $
 </code></pre></div>
 
-
 <p>Putting this code in <code>myobj.py</code> is enough to make the test pass</p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">MyObj</span><span class="p">():</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">repo</span><span class="p">):</span>
         <span class="n">repo</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
 </code></pre></div>
-
 
 <p>As you can see, the <code>__init__()</code> method actually calls <code>repo.connect()</code>, where <code>repo</code> is expected to be a full-featured external object that provides a given API. In this case (for the moment) the API is just its <code>connect()</code> method. Calling <code>repo.connect()</code> when <code>repo</code> is a mock object silently creates the method as a mock object, as shown before.</p>
 <p>The <code>assert_called_with()</code> method also allows us to check the parameters we passed when calling. To show this let us pretend that we expect the <code>MyObj.setup()</code> method to call <code>setup(cache=True, max_connections=256)</code> on the external object. As you can see we pass a couple of arguments (namely <code>cache</code> and <code>max_connections</code>) to the called method, and we want to be sure that the call was exactly in this form. The new test is thus</p>
@@ -344,7 +326,6 @@ $
     <span class="n">obj</span><span class="o">.</span><span class="n">setup</span><span class="p">()</span>
     <span class="n">external_obj</span><span class="o">.</span><span class="n">setup</span><span class="o">.</span><span class="n">assert_called_with</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">max_connections</span><span class="o">=</span><span class="mi">256</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>As usual the first run fails. Be sure to check this, it is part of the TDD methodology. You must have a test that DOES NOT PASS, then write some code that make it pass.</p>
 <div class="highlight"><pre><span></span><code>$ <span class="nv">PYTHONPATH</span><span class="o">=</span><span class="s2">&quot;.&quot;</span> py.test
@@ -369,7 +350,6 @@ tests/test_mock.py:14: <span class="nv">AttributeError</span>
 $
 </code></pre></div>
 
-
 <p>To show you what type of check the mock object provides let me implement a partially correct solution</p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">MyObj</span><span class="p">():</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">repo</span><span class="p">):</span>
@@ -380,12 +360,10 @@ $
         <span class="bp">self</span><span class="o">.</span><span class="n">_repo</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>As you can see the external object has been stored in <code>self._repo</code> and the call to <code>self._repo.setup()</code> is not exactly what the test expects, lacking the <code>max_connections</code> parameter. Running pytest we obtain the following result (I removed most of the pytest output)</p>
 <div class="highlight"><pre><span></span><code>E           AssertionError: Expected call: setup<span class="o">(</span><span class="nv">cache</span><span class="o">=</span>True, <span class="nv">max_connections</span><span class="o">=</span><span class="m">256</span><span class="o">)</span>
 E           Actual call: setup<span class="o">(</span><span class="nv">cache</span><span class="o">=</span>True<span class="o">)</span>
 </code></pre></div>
-
 
 <p>and you see that the error message is very clear about what we expected and what happened in our code.</p>
 <p>As you can read in the official documentation, the <code>Mock</code> object also provides the following methods and attributes: <code>assert_called_once_with</code>, <code>assert_any_call</code>, <code>assert_has_calls</code>, <code>assert_not_called</code>, <code>called</code>, <code>call_count</code>. Each of them explores a different aspect of the mock behaviour concerning calls, make sure to check their description and the examples provided along.</p>

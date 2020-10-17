@@ -122,7 +122,6 @@
     <span class="k">assert</span> <span class="n">result</span> <span class="o">==</span> <span class="mf">6.5</span>
 </code></pre></div>
 
-
 <p>The test suite fails with the usual error that signals a missing method. The implementation of this function is very simple as the <code>/</code> operator in Python performs a float division</p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">SimpleCalculator</span><span class="p">:</span>
     <span class="p">[</span><span class="o">...</span><span class="p">]</span>
@@ -130,7 +129,6 @@
     <span class="k">def</span> <span class="nf">div</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">a</span> <span class="o">/</span> <span class="n">b</span>
 </code></pre></div>
-
 
 <p><strong>Git tag:</strong> <a href="https://github.com/lgiordani/simple_calculator/tree/step-7-float-division">step-7-float-division</a></p>
 <p>If you run the test suite again all the test should pass. There is a second requirement about this operation, however, that states that division by zero shall return <code>inf</code>.</p>
@@ -143,7 +141,6 @@
 
     <span class="k">assert</span> <span class="n">result</span> <span class="o">==</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>And the test suite fails now with this message</p>
 <div class="highlight"><pre><span></span><code>__________________________ test_div_by_zero_returns_inf ___________________________
@@ -165,7 +162,6 @@ E       ZeroDivisionError: division by zero
 simple_calculator/main.py:17: ZeroDivisionError
 </code></pre></div>
 
-
 <p>Note that when an exception happens in the code and not in the test, the pytest output changes slightly. The first part of the message shows where the test fails, but then there is a second part that shows the internal code that raised the exception and provides information about the value of local variables on the first line (<code>self = &lt;simple_calculator.main.SimpleCalculator object at 0x7f0b0b733990&gt;, a = 5, b = 0</code>).</p>
 <p>We might implement two different solutions to satisfy this requirement and its test. The first one is to prevent <code>b</code> to be 0</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">div</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
@@ -175,7 +171,6 @@ simple_calculator/main.py:17: ZeroDivisionError
         <span class="k">return</span> <span class="n">a</span> <span class="o">/</span> <span class="n">b</span>
 </code></pre></div>
 
-
 <p>and the second one is to intercept the exception with a <code>try/except</code> block</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">div</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
@@ -183,7 +178,6 @@ simple_calculator/main.py:17: ZeroDivisionError
         <span class="k">except</span> <span class="ne">ZeroDivisionError</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>Both solutions make the test suite pass, so both are correct. I leave to you the decision about which is the best one, syntactically speaking.</p>
 <p><strong>Git tag:</strong> <a href="https://github.com/lgiordani/simple_calculator/tree/step-7-division-by-zero">step-7-division-by-zero</a></p>
@@ -202,7 +196,6 @@ simple_calculator/main.py:17: ZeroDivisionError
         <span class="n">calculator</span><span class="o">.</span><span class="n">mul</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>In this case, thus, pytest runs the line <code>calculator.mul(3, 0)</code>. If the method  doesn't raise the <code>ValueError</code> exception the test will fail. Indeed, if you run the test suite now, you will get the following failure</p>
 <div class="highlight"><pre><span></span><code>________________________ test_mul_by_zero_raises_exception ________________________
 
@@ -216,7 +209,6 @@ E           Failed: DID NOT RAISE &lt;class &#39;ValueError&#39;&gt;
 tests/test_main.py:81: Failed
 </code></pre></div>
 
-
 <p>which signals that the code didn't raise the expected exception.</p>
 <p>The code that makes the test pass needs to test if one of the inputs of the function <code>mul</code> is 0. This can be done with the help of the built-in function <code>all</code>, which accepts an iterable and returns <code>True</code> only if all the values contained in it are <code>True</code>. Since in Python the value <code>0</code> is not true, we may write</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">mul</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
@@ -224,7 +216,6 @@ tests/test_main.py:81: Failed
             <span class="k">raise</span> <span class="ne">ValueError</span>
         <span class="k">return</span> <span class="n">reduce</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">x</span><span class="o">*</span><span class="n">y</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>and make the test suite pass. The condition checks that there are no false values in the <code>args</code> tuple, that is there are no zeros.</p>
 <p><strong>Git tag:</strong> <a href="https://github.com/lgiordani/simple_calculator/tree/step-8-multiply-by-zero">step-8-multiply-by-zero</a></p>
@@ -254,7 +245,6 @@ tests/test_main.py:81: Failed
     <span class="k">assert</span> <span class="n">result</span> <span class="o">==</span> <span class="mf">29.25</span>
 </code></pre></div>
 
-
 <p>We feed the function <code>avg</code> a list of generic numbers, which average we calculated with an external tool. The first run of the test suite fails with the usual complaint about a missing function, and we can make the test pass with a simple use of <code>sum</code> and <code>len</code>, as both built-in functions work on iterables</p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">SimpleCalculator</span><span class="p">:</span>
     <span class="p">[</span><span class="o">...</span><span class="p">]</span>
@@ -262,7 +252,6 @@ tests/test_main.py:81: Failed
     <span class="k">def</span> <span class="nf">avg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">it</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">it</span><span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">it</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>Here, <code>it</code> stands for iterable, as this function works with anything that supports the loop protocol.</p>
 <p><strong>Git tag:</strong> <a href="https://github.com/lgiordani/simple_calculator/tree/step-9-1-average-of-an-iterable">step-9-1-average-of-an-iterable</a></p>
@@ -275,7 +264,6 @@ tests/test_main.py:81: Failed
 
     <span class="k">assert</span> <span class="n">result</span> <span class="o">==</span> <span class="n">pytest</span><span class="o">.</span><span class="n">approx</span><span class="p">(</span><span class="mf">6.333333</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>As you can see the <code>ut=90</code> parameter is supposed to remove the element <code>98</code> from the list and then compute the average of the remaining elements. Since the result has an infinite number of digits I used the function <code>pytest.approx</code> to check the result.</p>
 <p>The test suite fails because the function <code>avg</code> doesn't accept the parameter <code>ut</code></p>
@@ -290,7 +278,6 @@ E       TypeError: avg() got an unexpected keyword argument &#39;ut&#39;
 tests/test_main.py:95: TypeError
 </code></pre></div>
 
-
 <p>There are two problems now that we have to solve, as it happened for the second test we wrote in this project. The new <code>ut</code> argument needs a default value, so we have to manage that case, and then we have to make the upper threshold work. My solution is</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">avg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">it</span><span class="p">,</span> <span class="n">ut</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">ut</span><span class="p">:</span>
@@ -300,7 +287,6 @@ tests/test_main.py:95: TypeError
 
         <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">_it</span><span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">_it</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>The idea here is that <code>ut</code> is used to filter the iterable keeping all the elements that are less than or equal to the threshold. This means that the default value for the threshold has to be neutral with regards to this filtering operation. Using the maximum value of the iterable makes the whole algorithm work in every case, while for example using a big fixed value like <code>9999</code> would introduce a bug, as one of the elements of the iterable might be bigger than that value.</p>
 <p><strong>Git tag:</strong> <a href="https://github.com/lgiordani/simple_calculator/tree/step-9-2-upper-threshold">step-9-2-upper-threshold</a></p>
@@ -313,7 +299,6 @@ tests/test_main.py:95: TypeError
 
     <span class="k">assert</span> <span class="n">result</span> <span class="o">==</span> <span class="n">pytest</span><span class="o">.</span><span class="n">approx</span><span class="p">(</span><span class="mi">55</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>and the code of the function <code>avg</code> now becomes</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">avg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">it</span><span class="p">,</span> <span class="n">lt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ut</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -328,7 +313,6 @@ tests/test_main.py:95: TypeError
         <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">_it</span><span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">_it</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p><strong>Git tag:</strong> <a href="https://github.com/lgiordani/simple_calculator/tree/step-9-3-lower-threshold">step-9-3-lower-threshold</a></p>
 <h3 id="step-94-and-95-boundary-inclusion">Step 9.4 and 9.5 - Boundary inclusion<a class="headerlink" href="#step-94-and-95-boundary-inclusion" title="Permanent link">&para;</a></h3>
 <p>As you can see from the code of the function <code>avg</code>, the upper and lower threshold are included in the comparison, so we might consider the requirements as already satisfied. TDD, however, pushes you to write a test for each requirement (as we saw it's not unusual to actually have multiple tests per requirements), and this is what we are going to do. </p>
@@ -342,7 +326,6 @@ tests/test_main.py:95: TypeError
     <span class="k">assert</span> <span class="n">result</span> <span class="o">==</span> <span class="mf">29.25</span>
 </code></pre></div>
 
-
 <p><strong>Git tag:</strong> <a href="https://github.com/lgiordani/simple_calculator/tree/step-9-4-upper-threshold-is-included">step-9-4-upper-threshold-is-included</a></p>
 <p>while the test for the fifth one is</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_avg_lower_threshold_is_included</span><span class="p">():</span>
@@ -352,7 +335,6 @@ tests/test_main.py:95: TypeError
 
     <span class="k">assert</span> <span class="n">result</span> <span class="o">==</span> <span class="mf">29.25</span>
 </code></pre></div>
-
 
 <p><strong>Git tag:</strong> <a href="https://github.com/lgiordani/simple_calculator/tree/step-9-5-lower-threshold-is-included">step-9-5-lower-threshold-is-included</a></p>
 <p>And, as expected, both pass without any change in the code. Do you remember rule number 5? You should ask yourself why the tests don't fail. In this case we reasoned about that before, so we can accept that the new tests don't require any code change to pass.</p>
@@ -366,7 +348,6 @@ tests/test_main.py:95: TypeError
 
     <span class="k">assert</span> <span class="n">result</span> <span class="o">==</span> <span class="mi">0</span>
 </code></pre></div>
-
 
 <p>and the test suite fails with the following error</p>
 <div class="highlight"><pre><span></span><code>_______________________________ test_avg_empty_list _______________________________
@@ -389,7 +370,6 @@ E           ValueError: min() arg is an empty sequence
 simple_calculator/main.py:26: ValueError
 </code></pre></div>
 
-
 <p>The function <code>min</code> that we used to compute the default lower threshold doesn't work with an empty list, so the code raises an exception. The simplest solution is to check for the length of the iterable before computing the default thresholds</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">avg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">it</span><span class="p">,</span> <span class="n">lt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ut</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">it</span><span class="p">):</span>
@@ -406,7 +386,6 @@ simple_calculator/main.py:26: ValueError
         <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">_it</span><span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">_it</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p><strong>Git tag:</strong> <a href="https://github.com/lgiordani/simple_calculator/tree/step-9-6-empty-list">step-9-6-empty-list</a></p>
 <p>As you can see the function <code>avg</code> is already pretty rich, but at the same time it is well structured and understandable. This obviously happens because the example is trivial, but cleaner code is definitely among the benefits of TDD.</p>
 <h3 id="step-97-empty-list-after-applying-the-thresholds">Step 9.7 - Empty list after applying the thresholds<a class="headerlink" href="#step-97-empty-list-after-applying-the-thresholds" title="Permanent link">&para;</a></h3>
@@ -418,7 +397,6 @@ simple_calculator/main.py:26: ValueError
 
     <span class="k">assert</span> <span class="n">result</span> <span class="o">==</span> <span class="mi">0</span>
 </code></pre></div>
-
 
 <p>and the test suite fails with a <code>ZeroDivisionError</code>, because the length of the iterable is now 0.</p>
 <div class="highlight"><pre><span></span><code>________________ test_avg_manages_empty_list_after_outlier_removal ________________
@@ -451,7 +429,6 @@ E       ZeroDivisionError: division by zero
 simple_calculator/main.py:36: ZeroDivisionError
 </code></pre></div>
 
-
 <p>The easiest solution is to introduce a new check on the length of the iterable</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">avg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">it</span><span class="p">,</span> <span class="n">lt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ut</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">it</span><span class="p">):</span>
@@ -471,7 +448,6 @@ simple_calculator/main.py:36: ZeroDivisionError
         <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">_it</span><span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">_it</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>And this code makes the test suite pass. As I stated before, code that makes the tests pass is considered correct, but you are always allowed to improve it. In this case I don't really like the repetition of the length check, so I might try to refactor the function to get a cleaner solution. Since I have all the tests that show that the requirements are satisfied, I am free to try to change the code of the function.</p>
 <p>After some attempts I found this solution</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">avg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">it</span><span class="p">,</span> <span class="n">lt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ut</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -489,7 +465,6 @@ simple_calculator/main.py:36: ZeroDivisionError
         <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">_it</span><span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">_it</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>which looks reasonably clean, and makes the whole test suite pass.</p>
 <p><strong>Git tag:</strong> <a href="https://github.com/lgiordani/simple_calculator/tree/step-9-7-empty-list-after-thresholds">step-9-7-empty-list-after-thresholds</a></p>
 <h3 id="step-98-empty-list-before-applying-the-thresholds">Step 9.8 - Empty list before applying the thresholds<a class="headerlink" href="#step-98-empty-list-before-applying-the-thresholds" title="Permanent link">&para;</a></h3>
@@ -501,7 +476,6 @@ simple_calculator/main.py:36: ZeroDivisionError
 
     <span class="k">assert</span> <span class="n">result</span> <span class="o">==</span> <span class="mi">0</span>
 </code></pre></div>
-
 
 <p>This test doesn't fail. So, according to the TDD methodology, we should provide a reason why this happens and decide if we want to keep the test. The reason is because the two list comprehensions used to filter the elements work perfectly with empty lists. As for the test, it comes directly from a corner case, and it checks a behaviour which is not already covered by other tests. This makes me decide to keep the test.</p>
 <p><strong>Git tag:</strong> <a href="https://github.com/lgiordani/simple_calculator/tree/step-9-8-empty-list-before-thresholds">step-9-8-empty-list-before-thresholds</a></p>
@@ -519,12 +493,10 @@ simple_calculator/main.py:36: ZeroDivisionError
     <span class="k">assert</span> <span class="n">result</span> <span class="o">==</span> <span class="mf">0.5</span>
 </code></pre></div>
 
-
 <p>The reason is that the function <code>avg</code> contains a check like <code>if lt:</code>, which fails when <code>lt</code> is 0, as that is a false value. The check should be <code>if lt is not None:</code>, so that part of the function <code>avg</code> becomes</p>
 <div class="highlight"><pre><span></span><code>        <span class="k">if</span> <span class="n">lt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">_it</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">_it</span> <span class="k">if</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="n">lt</span><span class="p">]</span>
 </code></pre></div>
-
 
 <p>It is immediately clear that the upper threshold has the same issue, so the two tests I added are</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_avg_manages_zero_value_lower_outlier</span><span class="p">():</span>
@@ -543,7 +515,6 @@ simple_calculator/main.py:36: ZeroDivisionError
     <span class="k">assert</span> <span class="n">result</span> <span class="o">==</span> <span class="o">-</span><span class="mf">0.5</span>
 </code></pre></div>
 
-
 <p>and the final version of <code>avg</code> is</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">avg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">it</span><span class="p">,</span> <span class="n">lt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ut</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">_it</span> <span class="o">=</span> <span class="n">it</span><span class="p">[:]</span>
@@ -559,7 +530,6 @@ simple_calculator/main.py:36: ZeroDivisionError
 
         <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">_it</span><span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">_it</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p><strong>Git tag:</strong> <a href="https://github.com/lgiordani/simple_calculator/tree/step-9-9-zero-as-lower-upper-threshold">step-9-9-zero-as-lower-upper-threshold</a></p>
 <h2 id="recap-of-the-tdd-rules">Recap of the TDD rules<a class="headerlink" href="#recap-of-the-tdd-rules" title="Permanent link">&para;</a></h2>

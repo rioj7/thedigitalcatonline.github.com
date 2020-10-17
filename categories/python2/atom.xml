@@ -33,11 +33,9 @@
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ pytest -svv tests/test_calc.py::test_addition
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;which for example runs the &lt;code&gt;tests_addition&lt;/code&gt; test inside the &lt;code&gt;tests/test_calc.py&lt;/code&gt; file. You can also specify the file name only to run all the tests contained there&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ pytest -svv tests/test_calc.py
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;h1 id="skipping-tests"&gt;Skipping tests&lt;a class="headerlink" href="#skipping-tests" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;Sometimes it is useful to skip tests. The reason might be that some new code broke too many tests, and we want to face them one at a time, or that a specific feature had to be temporarily disabled. In all those cases the &lt;code&gt;pytest.mark.skip&lt;/code&gt; decorator is your friend. Remember that a decorator is something that changes the way the decorated function works (for the skilled reader: it's a function wrapper). Assuming we are working on a &lt;code&gt;tests/test_calc.py&lt;/code&gt; file the code might be&lt;/p&gt;
@@ -46,11 +44,9 @@
     &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="o"&gt;...&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;The result on the command line will be (after running &lt;code&gt;py.test -svv&lt;/code&gt;)&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;tests/test_calc.py::test_addition SKIPPED
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;h1 id="skipping-with-a-reason"&gt;Skipping with a reason&lt;a class="headerlink" href="#skipping-with-a-reason" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;The previous solution is good for a temporary skip, but if the test has to remain deactivated for a long time it's better to annotate a specific reason for the exclusion. In my experience 1 day is enough to forget small details like this, so my advice is to always put a well-written reason on skipped tests. To add it you can use the &lt;code&gt;reason&lt;/code&gt; attribute of the &lt;code&gt;skip&lt;/code&gt; decorator&lt;/p&gt;
@@ -58,7 +54,6 @@
 &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_test_addition&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
     &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="o"&gt;...&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;Remember to add the &lt;code&gt;-rs&lt;/code&gt; option to your command line to see the &lt;code&gt;r&lt;/code&gt;eason behind &lt;code&gt;s&lt;/code&gt;kipped tests. So after running &lt;code&gt;py.test -svv -rs&lt;/code&gt; we will get something like&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;tests/test_calc.py::test_addition SKIPPED
@@ -68,7 +63,6 @@ SKIP &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt
 
 &lt;span class="o"&gt;======================&lt;/span&gt; &lt;span class="m"&gt;12&lt;/span&gt; passed, &lt;span class="m"&gt;1&lt;/span&gt; skipped in &lt;span class="m"&gt;0&lt;/span&gt;.02 &lt;span class="nv"&gt;seconds&lt;/span&gt; &lt;span class="o"&gt;=======================&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;h1 id="skipping-tests-conditionally"&gt;Skipping tests conditionally&lt;a class="headerlink" href="#skipping-tests-conditionally" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;Well, most of the time we will skip tests not for a stable reason, but according to some other condition that we can retrieve from the system, like the Python version, or maybe the region in which a server is running. The decorator that we need to use in that case is &lt;code&gt;skipif&lt;/code&gt;, which accepts a condition (a boolean value) and a reason&lt;/p&gt;
@@ -83,18 +77,15 @@ SKIP &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt
     &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="o"&gt;...&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;With this code running &lt;code&gt;AWS_REGION=eu-west-1 py.test -svv -rs&lt;/code&gt; will run the &lt;code&gt;test_addition&lt;/code&gt; test, while running &lt;code&gt;AWS_REGION=us-west-2 py.test -svv -rs&lt;/code&gt; will skip it. The environment variable &lt;code&gt;AWS_REGION&lt;/code&gt; set in the previous command lines is an example that simulates the presence of the variable in the system.&lt;/p&gt;
 &lt;h1 id="run-tests-by-name"&gt;Run tests by name&lt;a class="headerlink" href="#run-tests-by-name" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;You can selectively run tests by name using &lt;code&gt;-k&lt;/code&gt;. This option accepts Python expressions that try to match the name of the test with the provided values. So&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ pytest -svv -k &lt;span class="s2"&gt;&amp;quot;test_addition&amp;quot;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;will run all those tests which name contains the substring &lt;code&gt;'addition'&lt;/code&gt;, like &lt;code&gt;test_addiiton&lt;/code&gt;, &lt;code&gt;test_addition_multiple_inputs&lt;/code&gt;, and &lt;code&gt;test_complex_addition&lt;/code&gt;. A more complex expression could be for example&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ pytest -svv -k &lt;span class="s2"&gt;&amp;quot;test_addition and not complex&amp;quot;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;which will run both &lt;code&gt;test_addition&lt;/code&gt; and &lt;code&gt;test_addition_multiple_inputs&lt;/code&gt; but not &lt;code&gt;test_complex_addition&lt;/code&gt;.&lt;/p&gt;
 &lt;h1 id="tagging-tests"&gt;Tagging tests&lt;a class="headerlink" href="#tagging-tests" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
@@ -113,11 +104,9 @@ SKIP &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt
     &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="o"&gt;...&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;In the above example &lt;code&gt;test_addition&lt;/code&gt; and &lt;code&gt;test_multiplication&lt;/code&gt; have been decorated with &lt;code&gt;pytest.mark.slow&lt;/code&gt; which tells pytest to label them with the &lt;code&gt;slow&lt;/code&gt; identifier. At this point we can run all the tests that are tagged with the &lt;code&gt;-m&lt;/code&gt; option&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ pytest -svv -m slow
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;Tests can be tagged multiple times&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nd"&gt;@pytest&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;mark&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;complex&lt;/span&gt;
@@ -126,17 +115,14 @@ SKIP &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt
     &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="o"&gt;...&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;In this case the test will be run both by &lt;code&gt;pytest -svv -m slow&lt;/code&gt; and by &lt;code&gt;pytest -svv -m complex&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;The &lt;code&gt;-m&lt;/code&gt; option supports complex expressions like&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ pytest -svv -m &lt;span class="s1"&gt;&amp;#39;not slow&amp;#39;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;which runs all the tests that are not tagged with &lt;code&gt;slow&lt;/code&gt;, or&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ pytest -svv -m &lt;span class="s1"&gt;&amp;#39;mac or linux&amp;#39;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;which runs all the tests tagged with &lt;code&gt;mac&lt;/code&gt; and all the tests tagged with &lt;code&gt;linux&lt;/code&gt;. Pay attention that &lt;code&gt;-m&lt;/code&gt; expressions refer to the tags of each single test, so &lt;code&gt;slow and complex&lt;/code&gt; will run only those tests that are tagged both with &lt;code&gt;slow&lt;/code&gt; and with &lt;code&gt;complex&lt;/code&gt;, and not all the tests marked with the first and all the tests marked with the second.&lt;/p&gt;
 &lt;h1 id="adding-a-command-line-option"&gt;Adding a command line option&lt;a class="headerlink" href="#adding-a-command-line-option" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
@@ -147,13 +133,11 @@ SKIP &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt
                      &lt;span class="n"&gt;help&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;run slow tests&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;The command line parser configuration will be stored into the &lt;code&gt;config&lt;/code&gt; attribute of the setup of each test. Thus we can use the &lt;code&gt;pytest_runtest_setup&lt;/code&gt; hook that runs before each test&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;pytest_runtest_setup&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;item&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
     &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;slow&amp;#39;&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;item&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;keywords&lt;/span&gt; &lt;span class="ow"&gt;and&lt;/span&gt; &lt;span class="ow"&gt;not&lt;/span&gt; &lt;span class="n"&gt;item&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;config&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getvalue&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;runslow&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
         &lt;span class="n"&gt;pytest&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;skip&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;need --runslow option to run&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;Here &lt;code&gt;item&lt;/code&gt; is the single test, so &lt;code&gt;item.keywords&lt;/code&gt; is the set of tags attached to the test, and &lt;code&gt;item.config&lt;/code&gt; is the configuration after the parser run on the command line. This makes the previous code match all the tests that are decorated with &lt;code&gt;@pytest.mark.slow&lt;/code&gt; and only when the &lt;code&gt;--runslow&lt;/code&gt; option has been specified on the command line. If both those conditions are satisfied the &lt;code&gt;pytest.skip&lt;/code&gt; function is run, which skips the current test adding the specified string as a reason.&lt;/p&gt;
 &lt;h1 id="coverage"&gt;Coverage&lt;a class="headerlink" href="#coverage" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
@@ -165,11 +149,9 @@ SKIP &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ pip install pytest-cov
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;and run pytest with&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ pytest -svv --cov&lt;span class="o"&gt;=&lt;/span&gt;&amp;lt;name&amp;gt; --cov-report&lt;span class="o"&gt;=&lt;/span&gt;term
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;where &lt;code&gt;&amp;lt;name&amp;gt;&lt;/code&gt; is the name of the Python module you are testing (actually the path where the code you are testing is). This gives you a nice report with the percentage of covered code file by file.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ py.test -svv --cov&lt;span class="o"&gt;=&lt;/span&gt;mypymodule --cov-report&lt;span class="o"&gt;=&lt;/span&gt;term
@@ -183,7 +165,6 @@ mypymodule/calc.py          &lt;span class="m"&gt;23&lt;/span&gt;      &lt;span 
 TOTAL                            &lt;span class="m"&gt;26&lt;/span&gt;      &lt;span class="m"&gt;0&lt;/span&gt;   &lt;span class="m"&gt;100&lt;/span&gt;%
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;You may also use the &lt;code&gt;term-missing&lt;/code&gt; report instad of just &lt;code&gt;term&lt;/code&gt;, that lists the code blocks that are not covered&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ py.test -svv --cov&lt;span class="o"&gt;=&lt;/span&gt;mypymodule --cov-report&lt;span class="o"&gt;=&lt;/span&gt;term-missing
 
@@ -195,7 +176,6 @@ mypymodule/calc.py          &lt;span class="m"&gt;23&lt;/span&gt;      &lt;span 
 -----------------------------------------------------------
 TOTAL                            &lt;span class="m"&gt;26&lt;/span&gt;      &lt;span class="m"&gt;2&lt;/span&gt;    &lt;span class="m"&gt;92&lt;/span&gt;%
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;Here I commented some of the tests to force the coverage percentage to drop. As you can see the report tells us that lines 6 and 11 of the &lt;code&gt;mypymodule/calc.py&lt;/code&gt; file are not covered by any test.&lt;/p&gt;
 &lt;h1 id="updates"&gt;Updates&lt;a class="headerlink" href="#updates" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
@@ -254,7 +234,6 @@ pip install cookiecutter
 cookiecutter https://github.com/audreyr/cookiecutter-pypackage
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Now answer the questions, then finish creating the project with the following code&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;deactivate
 rm -fR venv3
@@ -263,14 +242,12 @@ virtualenv venv3 -p python3
 &lt;span class="nb"&gt;source&lt;/span&gt; venv3/bin/activate
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Get rid of the &lt;code&gt;requirements_dev.txt&lt;/code&gt; file that Cookiecutter created for you. I usually store virtualenv requirements in different hierarchical files to separate production, development and testing environments, so create the &lt;code&gt;requirements&lt;/code&gt; directory and the relative files&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;mkdir requirements
 touch requirements/prod.txt
 touch requirements/dev.txt
 touch requirements/test.txt
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;The &lt;code&gt;test.txt&lt;/code&gt; file will contain specific packages used to test the project. Since to test the project you also need to install the packages for the production environment the file will first include the production one.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;-r prod.txt
@@ -281,7 +258,6 @@ coverage
 pytest-cov
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;The &lt;code&gt;dev.txt&lt;/code&gt; file will contain packages used during the development process and shall install also test and production package&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;-r test.txt
 
@@ -291,12 +267,10 @@ flake8
 Sphinx
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;(taking advantage of the fact that &lt;code&gt;test.txt&lt;/code&gt; already includes &lt;code&gt;prod.txt&lt;/code&gt;).&lt;/p&gt;
 &lt;p&gt;Last, the main &lt;code&gt;requirements.txt&lt;/code&gt; file of the project will just import &lt;code&gt;requirements/prod.txt&lt;/code&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;-r prod.txt
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;Obviously you are free to find the project structure that better suits your need or preferences. This is the structure we are going to use in this project but nothing forces you to follow it in your personal projects.&lt;/p&gt;
 &lt;p&gt;This separation allows you to install a full-fledged development environment on your machine, while installing only testing tools in a testing environment like the Travis platform and to further reduce the amount of dependencies in the production case. &lt;/p&gt;
@@ -304,7 +278,6 @@ Sphinx
 &lt;p&gt;Remember at this point to install the development requirements in your virtualenv&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ pip install -r requirements/dev.txt
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;h2 id="miscellaneous-configuration"&gt;Miscellaneous configuration&lt;a class="headerlink" href="#miscellaneous-configuration" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;The &lt;code&gt;pytest&lt;/code&gt; testing library needs to be configured. This is the &lt;code&gt;pytest.ini&lt;/code&gt; file that you can create in the root directory (where the &lt;code&gt;setup.py&lt;/code&gt; file is located)&lt;/p&gt;
@@ -314,16 +287,13 @@ norecursedirs = .git .tox venv* requirements*
 python_files = test*.py
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;To run the tests during the development of the project just execute&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ py.test -sv
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;If you want to check the coverage, i.e. the amount of code which is run by your tests or "covered", execute&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ py.test --cov-report term-missing --cov&lt;span class="o"&gt;=&lt;/span&gt;rentomatic
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;If you want to know more about test coverage check the official documentation of the &lt;a href="http://coverage.readthedocs.io/en/latest/"&gt;Coverage.py&lt;/a&gt; and the &lt;a href="http://pytest-cov.readthedocs.io/en/latest/index.html"&gt;pytest-cov&lt;/a&gt; packages.&lt;/p&gt;
 &lt;p&gt;I strongly suggest the use of the &lt;code&gt;flake8&lt;/code&gt; package to check that your Python code is PEP8 compliant. This is the &lt;code&gt;flake8&lt;/code&gt; configuration that you can put in your &lt;code&gt;setup.cfg&lt;/code&gt; file&lt;/p&gt;
@@ -333,11 +303,9 @@ exclude = .git, venv*, docs
 max-complexity = 10
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;To check the compliance of your code with the PEP8 standard execute&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ flake8
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;Flake8 documentation is available &lt;a href="http://flake8.pycqa.org/en/latest/"&gt;here&lt;/a&gt;.&lt;/p&gt;
 &lt;p&gt;Note that every step in this post produces tested code and a of coverage of 100%. One of the benefits of a clean architecture is the separation between layers, and this guarantees a great degree of testability. Note however that in this tutorial, in particular in the REST sections, some tests have been omitted in favour of a simpler description of the architecture. &lt;/p&gt;
@@ -379,7 +347,6 @@ max-complexity = 10
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;storageroom&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;latitude&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mf"&gt;51.75436293&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;With these two tests we ensure that our model can be initialized with the correct values and that can be created from a dictionary. In this first version all the parameters of the model are required. Later we could want to make some of them optional, and in that case we will have to add the relevant tests.&lt;/p&gt;
 &lt;p&gt;Now let's write the &lt;code&gt;StorageRoom&lt;/code&gt; class in the &lt;code&gt;rentomatic/domain/storageroom.py&lt;/code&gt; file. Do not forget to create the &lt;code&gt;__init__.py&lt;/code&gt; file in the subdirectories of the project, otherwise Python will not be able to import the modules.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;rentomatic.shared.domain_model&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;DomainModel&lt;/span&gt;
@@ -409,7 +376,6 @@ max-complexity = 10
 
 &lt;span class="n"&gt;DomainModel&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;register&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;StorageRoom&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;The model is very simple, and requires no further explanation. One of the benefits of a clean architecture is that each layer contains small pieces of code that, being isolated, shall perform simple tasks. In this case the model provides an initialization API and stores the information inside the class.&lt;/p&gt;
 &lt;p&gt;The &lt;code&gt;from_dict&lt;/code&gt; method comes in handy when we have to create a model from data coming from another layer (such as the database layer or the query string of the REST layer).&lt;/p&gt;
@@ -445,7 +411,6 @@ max-complexity = 10
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;storageroom1&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;storageroom2&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;and the new methods of the object in &lt;code&gt;rentomatic/domain/storageroom.py&lt;/code&gt; are&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;to_dict&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
         &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
@@ -459,7 +424,6 @@ max-complexity = 10
     &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__eq__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;other&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
         &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;to_dict&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;other&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;to_dict&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;h1 id="serializers"&gt;Serializers&lt;a class="headerlink" href="#serializers" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;&lt;strong&gt;Git tag: &lt;a href="https://github.com/lgiordani/rentomatic/tree/step03"&gt;step03&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
@@ -506,7 +470,6 @@ max-complexity = 10
         &lt;span class="n"&gt;json&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;dumps&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;datetime&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;datetime&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;now&lt;/span&gt;&lt;span class="p"&gt;(),&lt;/span&gt; &lt;span class="bp"&gt;cls&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;srs&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;StorageRoomEncoder&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Put in the &lt;code&gt;rentomatic/serializers/storageroom_serializer.py&lt;/code&gt; file the code that makes the test pass&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;json&lt;/span&gt;
 
@@ -526,7 +489,6 @@ max-complexity = 10
         &lt;span class="k"&gt;except&lt;/span&gt; &lt;span class="ne"&gt;AttributeError&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
             &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="nb"&gt;super&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;default&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;o&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;Providing a class that inherits from &lt;code&gt;json.JSONEncoder&lt;/code&gt; let us use the &lt;code&gt;json.dumps(room, cls=StorageRoomEncoder)&lt;/code&gt; syntax to serialize the model.&lt;/p&gt;
 &lt;p&gt;There is a certain degree of repetition in the code we wrote, and this is the annoying part of a clean architecture. Since we want to isolate layers as much as possible and create lightweight classes we end up somehow repeating certain types of actions. For example the serialization code that assigns attributes of a &lt;code&gt;StorageRoom&lt;/code&gt; to JSON attributes is very similar to that we use to create the object from a dictionary. Not exactly the same, obviously, but the two functions are very close.&lt;/p&gt;
@@ -592,7 +554,6 @@ max-complexity = 10
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;result&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;domain_storagerooms&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;The test is straightforward. First we mock the repository so that is provides a &lt;code&gt;list()&lt;/code&gt; method that returns the list of models we created above the test. Then we initialize the use case with the repo and execute it, collecting the result. The first thing we check is if the repository method was called without any parameter, and the second is the effective correctness of the result.&lt;/p&gt;
 &lt;p&gt;This is the implementation of the use case that makes the test pass. Put the code in the &lt;code&gt;rentomatic/use_cases/storageroom_use_case.py&lt;/code&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;StorageRoomListUseCase&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;object&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
@@ -603,7 +564,6 @@ max-complexity = 10
     &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;execute&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
         &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;repo&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;list&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;With such an implementation of the use case, however, we will soon experience issues. For starters, we do not have a standard way to transport the call parameters, which means that we do not have a standard way to check for their correctness either. The second problem is that we miss a standard way to return the call results and consequently we lack a way to communicate if the call was successful of if it failed, and in the latter case what are the reasons of the failure. This applies also to the case of bad parameters discussed in the previous point.&lt;/p&gt;
 &lt;p&gt;We want thus to introduce some structures to wrap input and outputs of our use cases. Those structures are called request and response objects.&lt;/p&gt;
@@ -628,7 +588,6 @@ max-complexity = 10
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="nb"&gt;bool&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;req&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;is&lt;/span&gt; &lt;span class="kc"&gt;True&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;While at the moment this request object is basically empty, it will come in handy as soon as we start having parameters for the list use case. The code of the &lt;code&gt;StorageRoomListRequestObject&lt;/code&gt; is the following and goes into the &lt;code&gt;rentomatic/use_cases/request_objects.py&lt;/code&gt; file&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;StorageRoomListRequestObject&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;object&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
     &lt;span class="nd"&gt;@classmethod&lt;/span&gt;
@@ -639,7 +598,6 @@ max-complexity = 10
         &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="kc"&gt;True&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;The response object is also very simple, since for the moment we just need a successful response. Unlike the request, the response is not linked to any particular use case, so the test file can be named &lt;code&gt;tests/shared/test_response_object.py&lt;/code&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;rentomatic.shared&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;response_object&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;ro&lt;/span&gt;
 
@@ -647,7 +605,6 @@ max-complexity = 10
 &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_response_success_is_true&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="nb"&gt;bool&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;ro&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ResponseSuccess&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt; &lt;span class="ow"&gt;is&lt;/span&gt; &lt;span class="kc"&gt;True&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;and the actual response object is in the file &lt;code&gt;rentomatic/shared/response_object.py&lt;/code&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;ResponseSuccess&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;object&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
@@ -660,7 +617,6 @@ max-complexity = 10
 
     &lt;span class="fm"&gt;__bool__&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;__nonzero__&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;h1 id="use-cases-part-2"&gt;Use cases (part 2)&lt;a class="headerlink" href="#use-cases-part-2" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;&lt;strong&gt;Git tag: &lt;a href="https://github.com/lgiordani/rentomatic/tree/step06"&gt;step06&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
@@ -727,7 +683,6 @@ max-complexity = 10
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;response_object&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;value&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;domain_storagerooms&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;The new version of the &lt;code&gt;rentomatic/use_case/storageroom_use_cases.py&lt;/code&gt; file is the following&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;rentomatic.shared&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;response_object&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;ro&lt;/span&gt;
 
@@ -741,7 +696,6 @@ max-complexity = 10
         &lt;span class="n"&gt;storage_rooms&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;repo&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;list&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
         &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;ro&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ResponseSuccess&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;storage_rooms&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;Let us consider what we have achieved with our clean architecture up to this point. We have a very lightweight model that can be serialized to JSON and which is completely independent from other parts of the system. The code also contains a use case that, given a repository that exposes a given API, extracts all the models and returns them contained in a structured object.&lt;/p&gt;
 &lt;p&gt;We are missing some objects, however. For example, we have not implemented any unsuccessful response object or validated the incoming request object.&lt;/p&gt;
@@ -803,7 +757,6 @@ max-complexity = 10
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="nb"&gt;bool&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;req&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;is&lt;/span&gt; &lt;span class="kc"&gt;False&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;As you can see I added the &lt;code&gt;assert req.filters is None&lt;/code&gt; check to the original two tests, then I added 5 tests to check if filters can be specified and to test the behaviour of the object with an invalid filter parameter.&lt;/p&gt;
 &lt;p&gt;To make the tests pass we have to change our &lt;code&gt;StorageRoomListRequestObject&lt;/code&gt; class. There are obviously multiple possible solutions that you can come up with, and I recommend you to try to find your own. This is the one I usually employ. The file &lt;code&gt;rentomatic/use_cases/request_object.py&lt;/code&gt; becomes&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;collections&lt;/span&gt;
@@ -856,7 +809,6 @@ max-complexity = 10
         &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;StorageRoomListRequestObject&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;filters&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;adict&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;filters&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kc"&gt;None&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Let me review this new code bit by bit.&lt;/p&gt;
 &lt;p&gt;First of all, two helper objects have been introduced, &lt;code&gt;ValidRequestObject&lt;/code&gt; and &lt;code&gt;InvalidRequestObject&lt;/code&gt;. They are different because an invalid request shall contain the validation errors, but both can be converted to booleans. &lt;/p&gt;
 &lt;p&gt;Second, the &lt;code&gt;StorageRoomListRequestObject&lt;/code&gt; accepts an optional &lt;code&gt;filters&lt;/code&gt; parameter when instantiated. There are no validation checks in the &lt;code&gt;__init__()&lt;/code&gt; method because this is considered to be an internal method that gets called when the parameters have already been validated.&lt;/p&gt;
@@ -888,7 +840,6 @@ max-complexity = 10
     &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;This is a response error&amp;#39;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;This is some boilerplate code, basically pytest fixtures that we will use in the following tests.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_response_success_is_true&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;response_value&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="nb"&gt;bool&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;res&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ResponseSuccess&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;response_value&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt; &lt;span class="ow"&gt;is&lt;/span&gt; &lt;span class="kc"&gt;True&lt;/span&gt;
@@ -898,14 +849,12 @@ max-complexity = 10
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="nb"&gt;bool&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;res&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ResponseFailure&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;response_type&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;response_message&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt; &lt;span class="ow"&gt;is&lt;/span&gt; &lt;span class="kc"&gt;False&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Two basic tests to check that both the old &lt;code&gt;ResponseSuccess&lt;/code&gt; and the new &lt;code&gt;ResponseFailure&lt;/code&gt; objects behave consistently when converted to boolean.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_response_success_contains_value&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;response_value&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
     &lt;span class="n"&gt;response&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;res&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ResponseSuccess&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;response_value&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;response&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;value&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;response_value&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;The &lt;code&gt;ResponseSuccess&lt;/code&gt; object contains the call result in the &lt;code&gt;value&lt;/code&gt; attribute.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_response_failure_has_type_and_message&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;response_type&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;response_message&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
@@ -920,7 +869,6 @@ max-complexity = 10
 
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;response&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;value&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;response_type&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;message&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;response_message&lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;These two tests ensure that the &lt;code&gt;ResponseFailure&lt;/code&gt; object provides the same interface provided by the successful one and that the &lt;code&gt;type&lt;/code&gt; and &lt;code&gt;message&lt;/code&gt; parameter are accessible.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_response_failure_initialization_with_exception&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
@@ -949,7 +897,6 @@ max-complexity = 10
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;response&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;message&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;path: Is mandatory&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s2"&gt;path: can&amp;#39;t be blank&amp;quot;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;We sometimes want to create responses from Python exceptions that can happen in the use case, so we test that &lt;code&gt;ResponseFailure&lt;/code&gt; objects can be initialized with a generic exception.&lt;/p&gt;
 &lt;p&gt;And last we have the tests for the &lt;code&gt;build_from_invalid_request_object()&lt;/code&gt; method that automate the initialization of the response from an invalid request. If the request contains errors (remember that the request validates itself), we need to put them into the response message.&lt;/p&gt;
 &lt;p&gt;The last test uses a class attribute to classify the error. The &lt;code&gt;ResponseFailure&lt;/code&gt; class will contain three predefined errors that can happen when running the use case, namely &lt;code&gt;RESOURCE_ERROR&lt;/code&gt;, &lt;code&gt;PARAMETERS_ERROR&lt;/code&gt;, and &lt;code&gt;SYSTEM_ERROR&lt;/code&gt;. This categorization is an attempt to capture the different types of issues that can happen when dealing with an external system through an API. &lt;code&gt;RESOURCE_ERROR&lt;/code&gt; contains all those errors that are related to the resources contained in the repository, for instance when you cannot find an entry given its unique id. &lt;code&gt;PARAMETERS_ERROR&lt;/code&gt; describes all those errors that occur when the request parameters are wrong or missing. &lt;code&gt;SYSTEM_ERROR&lt;/code&gt; encompass the errors that happen in the underlying system at operating system level, such as a failure in a filesystem operation, or a network connection error while fetching data from the database.&lt;/p&gt;
@@ -970,13 +917,11 @@ max-complexity = 10
         &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;msg&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Through the &lt;code&gt;_format_message()&lt;/code&gt; method we enable the class to accept both string messages and Python exceptions, which is very handy when dealing with external libraries that can raise exceptions we do not know or do not want to manage.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="nd"&gt;@property&lt;/span&gt;
     &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;value&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
         &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;type&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;message&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;message&lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;This property makes the class comply with the &lt;code&gt;ResponseSuccess&lt;/code&gt; API, providing the &lt;code&gt;value&lt;/code&gt; attribute, which is an aptly formatted dictionary.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;__nonzero__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
@@ -990,7 +935,6 @@ max-complexity = 10
                              &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;err&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;invalid_request_object&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;errors&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
         &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="bp"&gt;cls&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;cls&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;PARAMETERS_ERROR&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;message&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;As explained before, the &lt;code&gt;PARAMETERS_ERROR&lt;/code&gt; type encompasses all those errors that come from an invalid set of parameters, which is the case of this function, that shall be called whenever the request is wrong, which means that some parameters contain errors or are missing.&lt;/p&gt;
 &lt;p&gt;Since building failure responses is a common activity it is useful to have helper methods, so I add three tests for the building functions to the &lt;code&gt;tests/shared/test_response_object.py&lt;/code&gt; file&lt;/p&gt;
@@ -1018,7 +962,6 @@ max-complexity = 10
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;response&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;message&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;test message&amp;quot;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;We add the relevant methods to the class and change the &lt;code&gt;build_from_invalid_request_object()&lt;/code&gt; method to leverage the &lt;code&gt;build_parameters_error()&lt;/code&gt; new method. Change the &lt;code&gt;rentomatic/shared/response_object.py&lt;/code&gt; file to contain this code&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="nd"&gt;@classmethod&lt;/span&gt;
     &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;build_resource_error&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;cls&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;message&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="kc"&gt;None&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
@@ -1038,7 +981,6 @@ max-complexity = 10
                              &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;err&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;invalid_request_object&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;errors&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
         &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="bp"&gt;cls&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;build_parameters_error&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;message&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;h1 id="use-cases-part-3"&gt;Use cases (part 3)&lt;a class="headerlink" href="#use-cases-part-3" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;&lt;strong&gt;Git tag: &lt;a href="https://github.com/lgiordani/rentomatic/tree/step09"&gt;step09&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
@@ -1073,7 +1015,6 @@ max-complexity = 10
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;response_object&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;value&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;domain_storagerooms&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;This is the test we already wrote, but the &lt;code&gt;assert_called_with()&lt;/code&gt; method is called with &lt;code&gt;filters=None&lt;/code&gt; to reflect the added parameter. The import line has slightly changed as well, given that we are now importing both &lt;code&gt;response_objects&lt;/code&gt; and &lt;code&gt;request_objects&lt;/code&gt;. The &lt;code&gt;domain_storagerooms&lt;/code&gt; fixture has not changed and has been omitted from the code snippet to keep it short.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_storageroom_list_with_filters&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;domain_storagerooms&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
     &lt;span class="n"&gt;repo&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;mock&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Mock&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
@@ -1089,7 +1030,6 @@ max-complexity = 10
     &lt;span class="n"&gt;repo&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;list&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;assert_called_with&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;filters&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;qry_filters&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;response_object&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;value&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;domain_storagerooms&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;This test checks that the value of the &lt;code&gt;filters&lt;/code&gt; key in the dictionary used to create the request is actually used when calling the repository.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_storageroom_list_handles_generic_error&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
@@ -1123,7 +1063,6 @@ max-complexity = 10
     &lt;span class="p"&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;This last two tests check the behaviour of the use case when the repository raises an exception or when the request is badly formatted.&lt;/p&gt;
 &lt;p&gt;Change the file &lt;code&gt;rentomatic/use_cases/storageroom_use_cases.py&lt;/code&gt; to contain the new use case implementation that makes all the test pass&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;rentomatic.shared&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;response_object&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;res&lt;/span&gt;
@@ -1145,7 +1084,6 @@ max-complexity = 10
             &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;res&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ResponseFailure&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;build_system_error&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
                 &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="si"&gt;{}&lt;/span&gt;&lt;span class="s2"&gt;: &lt;/span&gt;&lt;span class="si"&gt;{}&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;exc&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="vm"&gt;__class__&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="vm"&gt;__name__&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="si"&gt;{}&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;exc&lt;/span&gt;&lt;span class="p"&gt;)))&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;As you can see the first thing that the &lt;code&gt;execute()&lt;/code&gt; method does is to check if the request is valid, otherwise returns a &lt;code&gt;ResponseFailure&lt;/code&gt; build with the same request object. Then the actual business logic is implemented, calling the repository and returning a success response. If something goes wrong in this phase the exception is caught and returned as an aptly formatted &lt;code&gt;ResponseFailure&lt;/code&gt;.&lt;/p&gt;
 &lt;h1 id="intermezzo-refactoring"&gt;Intermezzo: refactoring&lt;a class="headerlink" href="#intermezzo-refactoring" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
@@ -1173,7 +1111,6 @@ max-complexity = 10
         &lt;span class="s1"&gt;&amp;#39;NotImplementedError: process_request() not implemented by UseCase class&amp;#39;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;This test checks that the &lt;code&gt;UseCase&lt;/code&gt; class cannot be actually used to process incoming requests.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_use_case_can_process_invalid_requests_and_returns_response_failure&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
     &lt;span class="n"&gt;invalid_request_object&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;req&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;InvalidRequestObject&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
@@ -1186,7 +1123,6 @@ max-complexity = 10
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;response&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;type&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;res&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ResponseFailure&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;PARAMETERS_ERROR&lt;/span&gt;
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;response&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;message&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;someparam: somemessage&amp;#39;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;This test runs the use case with an invalid request and check if the response is correct. Since the request is wrong the response type is &lt;code&gt;PARAMETERS_ERROR&lt;/code&gt;, as this represents an issue in the request parameters.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_use_case_can_manage_generic_exception_from_process_request&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
@@ -1203,7 +1139,6 @@ max-complexity = 10
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;response&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;type&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;res&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ResponseFailure&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;SYSTEM_ERROR&lt;/span&gt;
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;response&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;message&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;TestException: somemessage&amp;#39;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;This test makes the use case raise an exception. This type of error is categorized as &lt;code&gt;SYSTEM_ERROR&lt;/code&gt;, which is a generic name for an exception which is not related to request parameters or actual entities.&lt;/p&gt;
 &lt;p&gt;As you can see in this last test the idea is that of exposing the &lt;code&gt;execute()&lt;/code&gt; method in the &lt;code&gt;UseCase&lt;/code&gt; class and to call the &lt;code&gt;process_request()&lt;/code&gt; method defined by each child class, which is the actual use case we are implementing.&lt;/p&gt;
@@ -1227,7 +1162,6 @@ max-complexity = 10
             &lt;span class="s2"&gt;&amp;quot;process_request() not implemented by UseCase class&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;While the &lt;code&gt;rentomatic/use_cases/storageroom_use_cases.py&lt;/code&gt; now contains the following code&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;rentomatic.shared&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;use_case&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;uc&lt;/span&gt;
 &lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;rentomatic.shared&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;response_object&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;res&lt;/span&gt;
@@ -1242,7 +1176,6 @@ max-complexity = 10
         &lt;span class="n"&gt;domain_storageroom&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;repo&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;list&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;filters&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;request_object&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;filters&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
         &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;res&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ResponseSuccess&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;domain_storageroom&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;h1 id="the-repository-layer"&gt;The repository layer&lt;a class="headerlink" href="#the-repository-layer" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;&lt;strong&gt;Git tag: &lt;a href="https://github.com/lgiordani/rentomatic/tree/step11"&gt;step11&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
@@ -1295,7 +1228,6 @@ max-complexity = 10
     &lt;span class="p"&gt;]&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Since the repository object will return domain models, we need a helper function to check the correctness of the results. The following function checks the length of the two lists, ensures that all the returned elements are domain models and compares the codes. Note that we can safely employ the &lt;code&gt;isinstance()&lt;/code&gt; built-in function since &lt;code&gt;DomainModel&lt;/code&gt; is an abstract base class and our models are registered (see the &lt;code&gt;rentomatic/domain/storagerooms.py&lt;/code&gt;)&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;_check_results&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;domain_models_list&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;data_list&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="nb"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;domain_models_list&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="nb"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;data_list&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
@@ -1303,7 +1235,6 @@ max-complexity = 10
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="nb"&gt;set&lt;/span&gt;&lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;dm&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;code&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;dm&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;domain_models_list&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
                &lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="nb"&gt;set&lt;/span&gt;&lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;d&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;code&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;d&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;data_list&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;We need to be able to initialize the repository with a list of dictionaries, and the &lt;code&gt;list()&lt;/code&gt; method without any parameter shall return the same list of entries.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_repository_list_without_parameters&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;storageroom_dicts&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
@@ -1314,7 +1245,6 @@ max-complexity = 10
         &lt;span class="n"&gt;storageroom_dicts&lt;/span&gt;
     &lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;The &lt;code&gt;list()&lt;/code&gt; method shall accept a &lt;code&gt;filters&lt;/code&gt; parameter, which is a dictionary. The dictionary keys shall be in the form &lt;code&gt;&amp;lt;attribute&amp;gt;__&amp;lt;operator&amp;gt;&lt;/code&gt;, similar to the syntax used by the Django ORM. So to express that the price shall be less than 65 we can write &lt;code&gt;filters={'price__lt': 60}&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;A couple of error conditions shall be checked: using an unknown key shall raise a &lt;code&gt;KeyError&lt;/code&gt; exception, and using a wrong operator shall raise a &lt;code&gt;ValueError&lt;/code&gt; exception.&lt;/p&gt;
@@ -1331,7 +1261,6 @@ max-complexity = 10
     &lt;span class="k"&gt;with&lt;/span&gt; &lt;span class="n"&gt;pytest&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;raises&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ne"&gt;ValueError&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
         &lt;span class="n"&gt;repo&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;list&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;filters&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;price__in&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;20&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;30&lt;/span&gt;&lt;span class="p"&gt;]})&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;Let us then test that the filtering mechanism actually works. We want the default operator to be &lt;code&gt;__eq&lt;/code&gt;, which means that if we do not put any operator an equality check shall be performed.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_repository_list_with_filters_price&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;storageroom_dicts&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
@@ -1410,7 +1339,6 @@ max-complexity = 10
     &lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;The implementation of the &lt;code&gt;MemRepo&lt;/code&gt; class is pretty simple, and I will not dive into it line by line.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;rentomatic.domain&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;storageroom&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;sr&lt;/span&gt;
 
@@ -1453,7 +1381,6 @@ max-complexity = 10
         &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;sr&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;StorageRoom&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;from_dict&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;result&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;h1 id="the-rest-layer-part1"&gt;The REST layer (part1)&lt;a class="headerlink" href="#the-rest-layer-part1" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;&lt;strong&gt;Git tag: &lt;a href="https://github.com/lgiordani/rentomatic/tree/step12"&gt;step12&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;This is the last step of our journey into the clean architecture. We created the domain models, the serializers, the use cases and the repository. We are actually missing an interface that glues everything together, that is gets the call parameters from the user, initializes a use case with a repository, runs the use case that fetches the domain models from the repository and converts them to a standard format. This layer can be represented by a wide number of interfaces and technologies. For example a command line interface (CLI) can implement exactly those steps, getting the parameters via command line switches, and returning the results as plain text on the console. The same underlying system, however, can be leveraged by a web page that gets the call parameters from a set of widgets, perform the steps described above, and parses the returned JSON data to show the result on the same page.&lt;/p&gt;
@@ -1470,7 +1397,6 @@ Sphinx
 Flask
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;And the &lt;code&gt;test.txt&lt;/code&gt; file will contain the pytest extension to work with Flask (more on this later)&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;-r prod.txt
 
@@ -1480,7 +1406,6 @@ coverage
 pytest-cov
 pytest-flask
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;Remember to run &lt;code&gt;pip install -r requirements/dev.txt&lt;/code&gt; again after those changes to actually install the new packages in your virtual environment.&lt;/p&gt;
 &lt;p&gt;The setup of a Flask application is not complex, but a lot of concepts are involved, and since this is not a tutorial on Flask I will run quickly through these steps. I will however provide links to the Flask documentation for every concept.&lt;/p&gt;
@@ -1514,7 +1439,6 @@ pytest-flask
     &lt;span class="n"&gt;DEBUG&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kc"&gt;True&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Read &lt;a href="https://flask.pocoo.org/docs/latest/config/"&gt;this page&lt;/a&gt; to know more about Flask configuration parameters. Now we need a function that initializes the Flask application (&lt;a href="https://flask.pocoo.org/docs/latest/patterns/appfactories/"&gt;documentation&lt;/a&gt;), configures it and registers the blueprints (&lt;a href="https://flask.pocoo.org/docs/latest/blueprints/"&gt;documentation&lt;/a&gt;). The file &lt;code&gt;rentomatic/app.py&lt;/code&gt; contains the following code&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;flask&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;Flask&lt;/span&gt;
 
@@ -1529,7 +1453,6 @@ pytest-flask
     &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;app&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;The application endpoints need to return a Flask &lt;code&gt;Response&lt;/code&gt; object, with the actual results and an HTTP status. The content of the response, in this case, is the JSON serialization of the use case response.&lt;/p&gt;
 &lt;p&gt;Let us write a test step by step, so that you can perfectly understand what is going to happen in the REST endpoint. The basic structure of the test is&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;[SOME PREPARATION]
@@ -1539,25 +1462,21 @@ pytest-flask
 [CHECK RESPONSE MIMETYPE]
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;So our first test &lt;code&gt;tests/rest/test_get_storagerooms_list.py&lt;/code&gt; is made of the following parts&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nd"&gt;@mock&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;patch&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;rentomatic.use_cases.storageroom_use_cases.StorageRoomListUseCase&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;mock_use_case&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;client&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
     &lt;span class="n"&gt;mock_use_case&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;execute&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;return_value&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;res&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ResponseSuccess&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;storagerooms&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Remember that we are not testing the use case here, so we can safely mock it. Here we make the use case return a &lt;code&gt;ResponseSuccess&lt;/code&gt; instance containing a list of domain models (that we didn't define yet).&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="n"&gt;http_response&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;client&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;/storagerooms&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;This is the actual API call. We are exposing the endpoint at the &lt;code&gt;/storagerooms&lt;/code&gt; address. Note the use of the &lt;code&gt;client&lt;/code&gt; fixture provided by &lt;code&gt;pytest-flask&lt;/code&gt;.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;json&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;loads&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;http_response&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;decode&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;UTF-8&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;storageroom1_dict&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;http_response&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;status_code&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;200&lt;/span&gt;
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;http_response&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;mimetype&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;application/json&amp;#39;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;These are the three checks previously mentioned. The second and the third ones are pretty straightforward, while the first one needs some explanations. We want to compare &lt;code&gt;http_response.data&lt;/code&gt; with &lt;code&gt;[storageroom1_dict]&lt;/code&gt;, which is a list with a Python dictionary containing the data of the &lt;code&gt;storageroom1_domain_model&lt;/code&gt; object. Flask &lt;code&gt;Response&lt;/code&gt; objects contain a binary representation of the data, so first we decode the bytes using UTF-8, then convert them in a Python object. It is much more convenient to compare Python objects, since pytest can deal with issues like the unordered nature of dictionaries, while this is not possible when comparing two strings.  &lt;/p&gt;
 &lt;p&gt;The final test file, with the test domain model and its dictionary is&lt;/p&gt;
@@ -1591,7 +1510,6 @@ pytest-flask
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;http_response&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;mimetype&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;application/json&amp;#39;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;If you run pytest you'll notice that the test suite fails because of the &lt;code&gt;app&lt;/code&gt; fixture, which is missing. The &lt;code&gt;pytest-flask&lt;/code&gt; plugin provides the &lt;code&gt;client&lt;/code&gt; fixture, but relies on the &lt;code&gt;app&lt;/code&gt; fixture which has to be provided. The best place to define it is in &lt;code&gt;tests/conftest.py&lt;/code&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;pytest&lt;/span&gt;
 
@@ -1604,7 +1522,6 @@ pytest-flask
 &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;app&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
     &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;create_app&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;TestConfig&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;It's time to write the endpoint, where we will finally see all the pieces of the architecture working together. &lt;/p&gt;
 &lt;p&gt;The minimal Flask endpoint we can put in &lt;code&gt;rentomatic/rest/storageroom.py&lt;/code&gt; is something like&lt;/p&gt;
@@ -1619,34 +1536,28 @@ pytest-flask
                     &lt;span class="n"&gt;status&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;STATUS&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;The first part of our logic is the creation of a &lt;code&gt;StorageRoomListRequestObject&lt;/code&gt;. For the moment we can ignore the optional querystring parameters and use an empty dictionary&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;storageroom&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
     &lt;span class="n"&gt;request_object&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;ro&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;StorageRoomListRequestObject&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;from_dict&lt;/span&gt;&lt;span class="p"&gt;({})&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;As you can see I'm creating the object from an empty dictionary, so querystring parameters are not taken into account for the moment. The second thing to do is to initialize the repository&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="n"&gt;repo&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;mr&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;MemRepo&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;The third thing the endpoint has to do is the initialization of the use case&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="n"&gt;use_case&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;uc&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;StorageRoomListUseCase&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;repo&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;And finally we run the use case passing the request object&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="n"&gt;response&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;use_case&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;execute&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;request_object&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;This response, however, is not yet an HTTP response, and we have to explicitly build it. The HTTP response will contain the JSON representation of the &lt;code&gt;response.value&lt;/code&gt; attribute.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;Response&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;json&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;dumps&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;response&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;value&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="bp"&gt;cls&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;ser&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;StorageRoomEncoder&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;
                     &lt;span class="n"&gt;mimetype&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;application/json&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
                     &lt;span class="n"&gt;status&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;200&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;Note that this function is obviously still incomplete, as it returns always a successful response (code 200). It is however enough to pass the test we wrote. The whole file is the following&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;json&lt;/span&gt;
@@ -1673,7 +1584,6 @@ pytest-flask
                     &lt;span class="n"&gt;mimetype&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;application/json&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
                     &lt;span class="n"&gt;status&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;200&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;This code demonstrates how the clean architecture works in a nutshell. The function we wrote is however not complete, as it doesn't consider querystring parameters and error cases.&lt;/p&gt;
 &lt;h1 id="the-server-in-action"&gt;The server in action&lt;a class="headerlink" href="#the-server-in-action" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
@@ -1705,11 +1615,9 @@ pytest-flask
 &lt;span class="p"&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;And then use them to initialise the repository&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="n"&gt;repo&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;mr&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;MemRepo&lt;/span&gt;&lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;storageroom1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;storageroom2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;storageroom3&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;To run the web server we need to create a &lt;code&gt;wsgi.py&lt;/code&gt; file in the main project folder (the folder where &lt;code&gt;setup.py&lt;/code&gt; is stored)&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;rentomatic.app&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;create_app&lt;/span&gt;
@@ -1718,11 +1626,9 @@ pytest-flask
 &lt;span class="n"&gt;app&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;create_app&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Now we can run the Flask development server&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ flask run
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;At this point, if you open your browser and navigate to &lt;a href="http://localhost:5000/storagerooms"&gt;http://localhost:5000/storagerooms&lt;/a&gt;, you can see the API call results. I recommend installing a formatter extension for the browser to better check the output. If you are using Chrome try &lt;a href="https://github.com/callumlocke/json-formatter"&gt;JSON Formatter&lt;/a&gt;.&lt;/p&gt;
 &lt;h1 id="the-rest-layer-part2"&gt;The REST layer (part2)&lt;a class="headerlink" href="#the-rest-layer-part2" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
@@ -1742,7 +1648,6 @@ pytest-flask
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;http_response&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;mimetype&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;application/json&amp;#39;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;This makes the use case return a failed response and check that the HTTP response contains a formatted version of the error. To make this test pass we have to introduce a proper mapping between domain responses codes and HTTP codes in the &lt;code&gt;rentomatic/rest/storageroom.py&lt;/code&gt; file&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;rentomatic.shared&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;response_object&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;res&lt;/span&gt;
 
@@ -1754,13 +1659,11 @@ pytest-flask
 &lt;span class="p"&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Then we need to create the Flask response with the correct code in the definition of the endpoint&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;Response&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;json&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;dumps&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;response&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;value&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="bp"&gt;cls&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;ser&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;StorageRoomEncoder&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;
                     &lt;span class="n"&gt;mimetype&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;application/json&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
                     &lt;span class="n"&gt;status&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;STATUS_CODES&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;response&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;type&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;The second and last test is a bit more complex. As before we will mock the use case, but this time we will also patch &lt;code&gt;StorageRoomListRequestObject&lt;/code&gt;. We do this because we need to know if the request object is initialized with the correct parameters from the command line. So, step by step&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nd"&gt;@mock&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;patch&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;rentomatic.use_cases.storageroom_use_cases.StorageRoomListUseCase&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
@@ -1768,11 +1671,9 @@ pytest-flask
     &lt;span class="n"&gt;mock_use_case&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;execute&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;return_value&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;res&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ResponseSuccess&lt;/span&gt;&lt;span class="p"&gt;([])&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;This is, like, before, a patch of the use case class that ensures the use case will return a &lt;code&gt;ResponseSuccess&lt;/code&gt; instance.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="n"&gt;internal_request_object&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;mock&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Mock&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;The request object will be internally created with &lt;code&gt;StorageRoomListRequestObject.from_dict&lt;/code&gt;, and we want that function to return a known mock object, which is the one we initialized here.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="n"&gt;request_object_class&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;rentomatic.use_cases.request_objects.StorageRoomListRequestObject&amp;#39;&lt;/span&gt;
@@ -1781,14 +1682,12 @@ pytest-flask
         &lt;span class="n"&gt;client&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;/storagerooms?filter_param1=value1&amp;amp;filter_param2=value2&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Here we patch &lt;code&gt;StorageRoomListRequestObject&lt;/code&gt; and we assign a known output to the &lt;code&gt;from_dict()&lt;/code&gt; method. Then we call the endpoint with some querystring parameters. What should happen is that the &lt;code&gt;from_dict()&lt;/code&gt; method of the request is called with the filter parameters and that the &lt;code&gt;execute()&lt;/code&gt; method of the use case instance is called with the &lt;code&gt;internal_request_object&lt;/code&gt;.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="n"&gt;mock_request_object&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;from_dict&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;assert_called_with&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
         &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;filters&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;param1&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;value1&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;param2&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;value2&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;}}&lt;/span&gt;
     &lt;span class="p"&gt;)&lt;/span&gt;
     &lt;span class="n"&gt;mock_use_case&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;execute&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;assert_called_with&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;internal_request_object&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;The endpoint function shall be changed somehow to reflect this new behaviour and to make the test pass. The whole code of the new &lt;code&gt;storageroom()&lt;/code&gt; Flask method is the following&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;json&lt;/span&gt;
@@ -1856,7 +1755,6 @@ pytest-flask
                     &lt;span class="n"&gt;status&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;STATUS_CODES&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;response&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;type&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Note that we extract the querystring parameters from the global &lt;code&gt;request&lt;/code&gt; object provided by Flask. Once the querystring parameters are in a dictionary, we just need to create the request object from it.&lt;/p&gt;
 &lt;h2 id="conclusions"&gt;Conclusions&lt;a class="headerlink" href="#conclusions" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;Well, that's all! Some tests are missing in the REST part, but as I said I just wanted to show a working implementation of a clean architecture and not a fully developed project. I suggest that you try to implement some changes, for example:&lt;/p&gt;
@@ -1901,7 +1799,6 @@ pytest-flask
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;fi&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;filename&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;filename&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;You can put them into the &lt;code&gt;tests/test_fileinfo.py&lt;/code&gt; file. The code that makes the tests pass could be something like&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;os&lt;/span&gt;
 
@@ -1912,7 +1809,6 @@ pytest-flask
         &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;filename&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;basename&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Up to now I didn't introduce any new feature. Now I want the &lt;code&gt;get_info()&lt;/code&gt; function to return a tuple with the file name, the original path the class was instantiated with, and the absolute path of the file.&lt;/p&gt;
 &lt;p&gt;You immediately realise that you have an issue in writing the test. There is no way to easily test something as "the absolute path", since the outcome of the function called in the test is supposed to vary with the path of the test itself. Let us write part of the test&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_get_info&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
@@ -1921,7 +1817,6 @@ pytest-flask
     &lt;span class="n"&gt;fi&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;FileInfo&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;original_path&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;fi&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;get_info&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;filename&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;original_path&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;???&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;where the '???' string highlights that I cannot put something sensible to test the absolute path of the file.&lt;/p&gt;
 &lt;p&gt;Patching is the way to solve this problem. You know that the function will use some code to get the absolute path of the file. So in the scope of the test only you can replace that code with different code and perform the test. Since the replacement code has a known outcome writing the test is now possible.&lt;/p&gt;
@@ -1941,7 +1836,6 @@ pytest-flask
         &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;fi&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;get_info&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;filename&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;original_path&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;test_abspath&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Remember that if you are using Python 2 you installed the &lt;code&gt;mock&lt;/code&gt; module with &lt;code&gt;pip&lt;/code&gt;, so your import statement becomes &lt;code&gt;from mock import patch&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;You clearly see the context in which the patching happens, as it is enclosed in a &lt;code&gt;with&lt;/code&gt; statement. Inside this statement the module &lt;code&gt;os.path.abspath&lt;/code&gt; will be replaced by a mock created by the function &lt;code&gt;patch&lt;/code&gt; and called &lt;code&gt;abspath_mock&lt;/code&gt;. We can now give the function a &lt;code&gt;return_value&lt;/code&gt; as we did with standard mocks in the first post and run the test.&lt;/p&gt;
 &lt;p&gt;The code that make the test pass is&lt;/p&gt;
@@ -1951,7 +1845,6 @@ pytest-flask
     &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;get_info&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
         &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;filename&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;original_path&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;abspath&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;filename&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;Obviously to write the test you have to know that you are going to use the &lt;code&gt;os.path.abspath&lt;/code&gt; function, so patching is somehow a "less pure" practice in TDD. In pure OOP/TDD you are only concerned with the external behaviour of the object, and not with its internal structure. This example, however, shows that you have to cope with some real world issues, and patching is a clean way to do it.&lt;/p&gt;
 &lt;h1 id="the-patching-decorator"&gt;The patching decorator&lt;a class="headerlink" href="#the-patching-decorator" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
@@ -1966,7 +1859,6 @@ pytest-flask
     &lt;span class="n"&gt;fi&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;FileInfo&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;original_path&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;fi&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;get_info&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;filename&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;original_path&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;test_abspath&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;As you can see the &lt;code&gt;patch&lt;/code&gt; decorator works like a big &lt;code&gt;with&lt;/code&gt; statement for the whole function. Obviously in this way you replace the target function &lt;code&gt;os.path.abspath&lt;/code&gt; in the scope of the whole function. It is then up to you to decide if you need to use &lt;code&gt;patch&lt;/code&gt; as a decorator or in a &lt;code&gt;with&lt;/code&gt; block.&lt;/p&gt;
 &lt;h1 id="multiple-patches"&gt;Multiple patches&lt;a class="headerlink" href="#multiple-patches" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
@@ -1988,7 +1880,6 @@ pytest-flask
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;fi&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;get_info&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;filename&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;original_path&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;test_abspath&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;test_size&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Please notice that the decorator which is nearest to the function is applied first. Always remember that the decorator syntax with &lt;code&gt;@&lt;/code&gt; is a shortcut to replace the function with the output of the decorator, so two decorators result in&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nd"&gt;@decorator1&lt;/span&gt;
 &lt;span class="nd"&gt;@decorator2&lt;/span&gt;
@@ -1996,13 +1887,11 @@ pytest-flask
     &lt;span class="k"&gt;pass&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;which is a shorcut for&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;myfunction&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
     &lt;span class="k"&gt;pass&lt;/span&gt;
 &lt;span class="n"&gt;myfunction&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;decorator1&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;decorator2&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;myfunction&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;This explains why, in the test code, the function receives first &lt;code&gt;abspath_mock&lt;/code&gt; and then &lt;code&gt;getsize_mock&lt;/code&gt;. The first decorator applied to the function is the patch of &lt;code&gt;os.path.abspath&lt;/code&gt;, which appends the mock that we call &lt;code&gt;abspath_mock&lt;/code&gt;. Then the patch of &lt;code&gt;os.path.getsize&lt;/code&gt; is applied and this appends its own mock.&lt;/p&gt;
 &lt;p&gt;The code that makes the test pass is&lt;/p&gt;
@@ -2012,7 +1901,6 @@ pytest-flask
     &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;get_info&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
         &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;filename&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;original_path&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;abspath&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;filename&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getsize&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;filename&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;We can write the above test using two &lt;code&gt;with&lt;/code&gt; statements as well&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_get_info&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
@@ -2031,7 +1919,6 @@ pytest-flask
             &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;fi&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;get_info&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;filename&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;original_path&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;test_abspath&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;test_size&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Using more than one &lt;code&gt;with&lt;/code&gt; statement, however, makes the code difficult to read, in my opinion, so in general I prefer to avoid complex &lt;code&gt;with&lt;/code&gt; trees if I do not need a limited scope of the patching.&lt;/p&gt;
 &lt;h1 id="patching-immutable-objects"&gt;Patching immutable objects&lt;a class="headerlink" href="#patching-immutable-objects" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;The most widespread version of Python is CPython, which is written, as the name suggests, in C. Part of the standard library is also written in C, while the rest is written in Python itself.&lt;/p&gt;
@@ -2043,7 +1930,6 @@ pytest-flask
   File &lt;span class="nb"&gt;&amp;quot;&amp;lt;stdin&amp;gt;&amp;quot;&lt;/span&gt;, line &lt;span class="m"&gt;1&lt;/span&gt;, in &lt;span class="n"&gt;&amp;lt;module&amp;gt;&lt;/span&gt;
 &lt;span class="gr"&gt;AttributeError&lt;/span&gt;: &lt;span class="n"&gt;&amp;#39;int&amp;#39; object attribute &amp;#39;conjugate&amp;#39; is read-only&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;Here I'm trying to replace a method with an integer, which is pointless, but nevertheless shows the issue we are facing.&lt;/p&gt;
 &lt;p&gt;What has this immutability to do with patching? What &lt;code&gt;patch&lt;/code&gt; does is actually to temporarily replace an attibute of an object (method of a class, class of a module, etc), so if that object is immutable the patching action fails.&lt;/p&gt;
@@ -2058,7 +1944,6 @@ pytest-flask
     &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;log&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;message&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
         &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;messages&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;append&lt;/span&gt;&lt;span class="p"&gt;((&lt;/span&gt;&lt;span class="n"&gt;datetime&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;datetime&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;now&lt;/span&gt;&lt;span class="p"&gt;(),&lt;/span&gt; &lt;span class="n"&gt;message&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;This is pretty simple, but testing this code is problematic, because the &lt;code&gt;log()&lt;/code&gt; method produces results that depend on the actual execution time.&lt;/p&gt;
 &lt;p&gt;If we try to write a test patching &lt;code&gt;datetime.datetime.now&lt;/code&gt; we have a bitter surprise. This is the test code, that you can put in &lt;code&gt;tests/test_logger.py&lt;/code&gt;&lt;/p&gt;
@@ -2081,7 +1966,6 @@ pytest-flask
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;messages&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="p"&gt;[(&lt;/span&gt;&lt;span class="n"&gt;test_now&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;test_message&lt;/span&gt;&lt;span class="p"&gt;)]&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;and the execution of pytest returns a &lt;code&gt;TypeError: can't set attributes of built-in/extension type 'datetime.datetime'&lt;/code&gt;, which is exactly a problem of immutability.&lt;/p&gt;
 &lt;p&gt;There are several ways to address this problem, but all of them leverage the fact that, when you import of subclass an immutable object what you get is a "copy" of that is now mutable.&lt;/p&gt;
 &lt;p&gt;The easiest example in this case is the module &lt;code&gt;datetime&lt;/code&gt; itself. In the &lt;code&gt;test_log&lt;/code&gt; function we try to patch directly the &lt;code&gt;datetime.datetime.now&lt;/code&gt; object, affecting the builtin module &lt;code&gt;datetime&lt;/code&gt;. The file &lt;code&gt;logger.py&lt;/code&gt;, however, does import &lt;code&gt;datetime&lt;/code&gt;, so that the latter becomes a local symbol in the &lt;code&gt;logger&lt;/code&gt; module. This is exactly the key for our patching. Let us change the code to&lt;/p&gt;
@@ -2095,7 +1979,6 @@ pytest-flask
     &lt;span class="n"&gt;l&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;log&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;test_message&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
     &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;messages&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="p"&gt;[(&lt;/span&gt;&lt;span class="n"&gt;test_now&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;test_message&lt;/span&gt;&lt;span class="p"&gt;)]&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;As you see running the test now the patching works. What we did was to patch &lt;code&gt;logger.datetime.datetime&lt;/code&gt; instead of &lt;code&gt;datetime.datetime.now&lt;/code&gt;. Two things changed, thus, in our test. First, we are patching the module imported in the &lt;code&gt;logger.py&lt;/code&gt; file and not the module provided globally by the Python interpreter. Second, we have to patch the whole module because this is what is imported by the &lt;code&gt;logger.py&lt;/code&gt; file. If you try to patch &lt;code&gt;logger.datetime.datetime.now&lt;/code&gt; you will find that it is still immutable.&lt;/p&gt;
 &lt;p&gt;Another possible solution to this problem is to create a function that invokes the immutable object and returns its value. This last function can be easily patched, because it just uses the builtin objects and thus is not immutable. This solution, however, requires to change the source code to allow testing, which is far from being desirable. Obviously it is better to introduce a small change in the code and have it tested than to leave it untested, but whenever is possible I avoid solutions that introduce code which wouldn't be required without tests.&lt;/p&gt;
@@ -2124,7 +2007,6 @@ pytest-flask
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;pip install punch.py
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;and you will have the &lt;code&gt;punch&lt;/code&gt; executable available.&lt;/p&gt;
 &lt;h4 id="useful-links"&gt;Useful links&lt;a class="headerlink" href="#useful-links" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
 &lt;ul&gt;
@@ -2144,7 +2026,6 @@ pytest-flask
     &lt;span class="o"&gt;...&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;does not check if the object is a &lt;code&gt;list&lt;/code&gt; or a &lt;code&gt;dictionary&lt;/code&gt; (both would allow the &lt;code&gt;[1]&lt;/code&gt; notation), but if the object can be accessed by key (or index). When you accept a parameter in a function Python does not specify the type (leaving aside type hints) because you are not interested in accepting a given type or one of its derived types. You are interested in accepting something that provides the methods you will use.&lt;/p&gt;
 &lt;p&gt;The behaviour, in an object-oriented environment, is the run-time interface of the object. This is different from the static interface, which is the collection of the methods provided by the object. The run-time interface is the actual interface the object shows when it is used, and this encompasses the methods provided by its class, but also methods provided by parent classes, the metaclass and other entry points provided by &lt;code&gt;__getattr__&lt;/code&gt;.&lt;/p&gt;
 &lt;h2 id="complex-checks"&gt;Complex checks&lt;a class="headerlink" href="#complex-checks" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
@@ -2160,7 +2041,6 @@ pytest-flask
     &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="o"&gt;...&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;which tries to cover the methods a list-like object shall provide. This test, however, accepts objects that do not really behave like a list such as&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;FakeList&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
     &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;fakemethod&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
@@ -2171,12 +2051,10 @@ pytest-flask
             &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;fakemethod&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;It is unlikely that you will write such a class, but this shows you one of the potential pitfalls of the previous test, which is wrong because it tries to rely on the structure instead of testing the behaviour. The temptation to rely on &lt;code&gt;isinstance()&lt;/code&gt; is big&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="nb"&gt;isinstance&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;someobj&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;list&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
     &lt;span class="o"&gt;...&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;If possible this approach is worse than before, since it tests the exact type. Even if &lt;code&gt;isinstance()&lt;/code&gt; and &lt;code&gt;issubclass()&lt;/code&gt; are smart enough to walk through the hierarchy of parent classes, this excludes evary class that behaves like a list does not inherit from it.&lt;/p&gt;
 &lt;h2 id="back-to-delegation"&gt;Back to delegation&lt;a class="headerlink" href="#back-to-delegation" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
@@ -2184,11 +2062,9 @@ pytest-flask
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nb"&gt;issubclass&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;myclass&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;someclass&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;does no more perform a pure external check of the relationship between &lt;code&gt;someclass&lt;/code&gt; and &lt;code&gt;myclass&lt;/code&gt;. The first thing that &lt;code&gt;issubclass()&lt;/code&gt; does now is the following&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;someclass&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="fm"&gt;__subclasscheck__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;myclass&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;This is very natural because, after all, &lt;code&gt;someclass&lt;/code&gt; is the best source of judgement about being a subclass of itself.&lt;/p&gt;
 &lt;h2 id="a-new-type-of-subclass"&gt;A new type of subclass&lt;a class="headerlink" href="#a-new-type-of-subclass" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
@@ -2197,11 +2073,9 @@ pytest-flask
     &lt;span class="k"&gt;pass&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;or can be a &lt;em&gt;virtual&lt;/em&gt; subclass, obtained through registration&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;ParentClass&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;register&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;ChildClass&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;The difference between a real and a virtual subclass is very simple: a real subclass knows its relationship with the parent class through its &lt;code&gt;__bases__&lt;/code&gt; attribute, and can thus implicitly delegate the resolution of missing methods. A virtual subclass knows nothing about the class that registered it, and nowhere in the subclass will you find something that links it to the parent class. Thus, a virtual parent class is useful only as a categorization.&lt;/p&gt;
 &lt;h2 id="abstract-base-classes"&gt;Abstract Base Classes&lt;a class="headerlink" href="#abstract-base-classes" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
@@ -2221,7 +2095,6 @@ pytest-flask
 &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="o"&gt;...&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Where the &lt;code&gt;Sequence&lt;/code&gt; and the &lt;code&gt;MutableSequence&lt;/code&gt; ABCs register some built-in types of Python.&lt;/p&gt;
 &lt;p&gt;It is very important to understand that registering a class does not imply any form of check about methods or attributes. Registering is just the &lt;em&gt;promise&lt;/em&gt; that a given behaviour is provided by the registered class.&lt;/p&gt;
 &lt;p&gt;To demonstrate this let me provide you a very simple example made using one of the &lt;code&gt;collections&lt;/code&gt; classes&lt;/p&gt;
@@ -2238,7 +2111,6 @@ pytest-flask
 &lt;span class="go"&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;As you can see, the &lt;code&gt;MyClass&lt;/code&gt; class is initially not recognized as a subclass of &lt;code&gt;collections.Sequence&lt;/code&gt;, but after the registration &lt;code&gt;issubclass()&lt;/code&gt; returns &lt;code&gt;True&lt;/code&gt;, even if the class is still empty.&lt;/p&gt;
 &lt;h2 id="how-to-create-abcs"&gt;How to create ABCs&lt;a class="headerlink" href="#how-to-create-abcs" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;The example given by the official documentation is very simple and clear&lt;/p&gt;
@@ -2253,7 +2125,6 @@ pytest-flask
 &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="nb"&gt;isinstance&lt;/span&gt;&lt;span class="p"&gt;((),&lt;/span&gt; &lt;span class="n"&gt;MyABC&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;All you need to do is to create a class and use the &lt;code&gt;ABCMeta&lt;/code&gt; metaclass provided by the &lt;code&gt;abc&lt;/code&gt; module and you will obtain a class that has the &lt;code&gt;register()&lt;/code&gt; method and a suitable implementation of &lt;code&gt;__subclasscheck__()&lt;/code&gt; and &lt;code&gt;__instancecheck__()&lt;/code&gt;. Checking again the &lt;code&gt;_collections_abc.py&lt;/code&gt; file you can see that this is exactly the way the &lt;code&gt;collections&lt;/code&gt; classes are implemented&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="o"&gt;...&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
 
@@ -2265,7 +2136,6 @@ pytest-flask
 
 &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="o"&gt;...&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;h2 id="are-you-scared-of-metaclasses"&gt;Are you scared of metaclasses?&lt;a class="headerlink" href="#are-you-scared-of-metaclasses" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;Metaclasses are a strange topic in Python. Most of the times the advice given to the novice is "Don't use them", like they were an error of the language and something that shall be avoided.&lt;/p&gt;
@@ -2289,7 +2159,6 @@ pytest-flask
 &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;c&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;answer&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;42&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Now, when you build a class you use a metaclass (like a blueprint) and the metaclass can put things into the class.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# Metaclass definition&lt;/span&gt;
 &lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;NewType&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;type&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
@@ -2303,7 +2172,6 @@ pytest-flask
 &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="n"&gt;Child&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;answer&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;42&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Sounds complex? Not at all, in my opinion. If you check the two examples you will see that they are exactly the same thing, the first referring to the instance-class relationship, the second to the class-metaclass one.&lt;/p&gt;
 &lt;p&gt;This is all you need to understand metaclasses. When you build a class you need to put things into it, for example you need to put the &lt;code&gt;__getattribute__&lt;/code&gt; or the &lt;code&gt;__new__()&lt;/code&gt; methods. This is done by the metaclass, which is usually &lt;code&gt;type&lt;/code&gt; for every class. Indeed, if you check the &lt;code&gt;__class__&lt;/code&gt; attribute into a class you get exactly this&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="nb"&gt;int&lt;/span&gt;
@@ -2312,7 +2180,6 @@ pytest-flask
 &lt;span class="go"&gt;&amp;lt;class &amp;#39;type&amp;#39;&amp;gt;&lt;/span&gt;
 &lt;span class="go"&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;h2 id="metaclasses-and-mro"&gt;Metaclasses and MRO&lt;a class="headerlink" href="#metaclasses-and-mro" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;A slightly advanced annotation: when I say that the metaclass &lt;em&gt;puts&lt;/em&gt; the methods into the class I'm simplifying the whole thing. As a matter of fact, like a class provides methods to the instance at runtime through the &lt;code&gt;__class__&lt;/code&gt; attribute and the MRO protocol, the metaclass provides methods for the class. Attributes, instead, are put inside the class by the &lt;code&gt;__new__&lt;/code&gt; or &lt;code&gt;__init__&lt;/code&gt; methods of the metaclass.&lt;/p&gt;
@@ -2325,7 +2192,6 @@ pytest-flask
 &lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Child&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Parent&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt; &lt;span class="k"&gt;pass&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;calling the method &lt;code&gt;get_name()&lt;/code&gt; on an instance of &lt;code&gt;Child&lt;/code&gt; will look for it first into the &lt;code&gt;Child&lt;/code&gt; class, then into &lt;code&gt;Parent&lt;/code&gt; and &lt;code&gt;GrandParent&lt;/code&gt;, in this order. Finally, it will check &lt;code&gt;object&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;What happens to the MRO when a class of this hierarchy defines a different metaclass? For example&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;NewType&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;type&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt; &lt;span class="k"&gt;pass&lt;/span&gt;
@@ -2337,7 +2203,6 @@ pytest-flask
 &lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Child&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Parent&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;metaclass&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;NewType&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt; &lt;span class="k"&gt;pass&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;In this case everything works as usual, but after checking &lt;code&gt;object&lt;/code&gt; the MRO will also check the &lt;code&gt;NewType&lt;/code&gt; metaclass (and its ancestors).&lt;/p&gt;
 &lt;p&gt;So, metaclasses can act as mixins, and they are queried only at the end of the usual MRO. This is exactly what happens using multiple inheritance if &lt;code&gt;NewType&lt;/code&gt; were a standard parent class that does not have &lt;code&gt;Parent&lt;/code&gt; or &lt;code&gt;GrandParent&lt;/code&gt; as ancestors.&lt;/p&gt;
 &lt;p&gt;Metaclasses are not part of the MRO however, since the MRO just deals with standard inheritance. If you check the MRO of the &lt;code&gt;Child&lt;/code&gt; class, you will see that the metaclass is not included&lt;/p&gt;
@@ -2347,7 +2212,6 @@ pytest-flask
 &lt;span class="go"&gt;&amp;lt;class &amp;#39;__main__.NewType&amp;#39;&amp;gt;&lt;/span&gt;
 &lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;h2 id="abstract-methods"&gt;Abstract methods&lt;a class="headerlink" href="#abstract-methods" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;Why are ABC called &lt;code&gt;abstract&lt;/code&gt;? ABCs can be instantiated, so they are after all not pure interfaces (like Java ones, for example)&lt;/p&gt;
@@ -2359,14 +2223,12 @@ pytest-flask
 &lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;They may however define some methods as &lt;em&gt;abstract&lt;/em&gt;, using the &lt;code&gt;abc.abstractmethod&lt;/code&gt; decorator, which prevents the class from being instantiated if the method is not implemented. Let me give you a simple example: I define an Abstract Base Class with and abstract method&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;MyABC&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;metaclass&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;abc&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ABCMeta&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
     &lt;span class="nd"&gt;@abc&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;abstractmethod&lt;/span&gt;
     &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
         &lt;span class="k"&gt;pass&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;and try to instantiate it. Python complains&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;MyABC&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
@@ -2375,19 +2237,16 @@ pytest-flask
 &lt;span class="gr"&gt;TypeError&lt;/span&gt;: &lt;span class="n"&gt;Can&amp;#39;t instantiate abstract class MyABC with abstract methods get&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;I am forced to create a new class that inherits from &lt;code&gt;MyABC&lt;/code&gt; and implements the method&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Concrete&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;MyABC&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
     &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
         &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Now I can instantiate the class.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Concrete&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
 &lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;Check the official documentation of Abstract Base Classes for a complete description of &lt;code&gt;@abstractmethod&lt;/code&gt; and &lt;code&gt;@abstractproperty&lt;/code&gt;.&lt;/p&gt;
 &lt;h2 id="what-about-the-behaviour"&gt;What about the behaviour?&lt;a class="headerlink" href="#what-about-the-behaviour" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
@@ -2418,22 +2277,18 @@ pytest-flask
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;unittest&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;mock&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;If you are using Python 2 you have to install it and use&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;mock&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;The main object that the library provides is &lt;code&gt;Mock&lt;/code&gt; and you can instantiate it without any argument&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;mock&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Mock&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;This object has the peculiar property of creating methods and attributes on the fly when you require them. Let us first look inside the object to take a glance of what it provides&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="nb"&gt;dir&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;m&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;span class="go"&gt;[&amp;#39;assert_any_call&amp;#39;, &amp;#39;assert_called_once_with&amp;#39;, &amp;#39;assert_called_with&amp;#39;, &amp;#39;assert_has_calls&amp;#39;, &amp;#39;attach_mock&amp;#39;, &amp;#39;call_args&amp;#39;, &amp;#39;call_args_list&amp;#39;, &amp;#39;call_count&amp;#39;, &amp;#39;called&amp;#39;, &amp;#39;configure_mock&amp;#39;, &amp;#39;method_calls&amp;#39;, &amp;#39;mock_add_spec&amp;#39;, &amp;#39;mock_calls&amp;#39;, &amp;#39;reset_mock&amp;#39;, &amp;#39;return_value&amp;#39;, &amp;#39;side_effect&amp;#39;]&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;As you can see there are some methods which are already defined into the &lt;code&gt;Mock&lt;/code&gt; object. Let us read a non-existent attribute&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="n"&gt;m&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;some_attribute&lt;/span&gt;
@@ -2442,18 +2297,15 @@ pytest-flask
 &lt;span class="go"&gt;[&amp;#39;assert_any_call&amp;#39;, &amp;#39;assert_called_once_with&amp;#39;, &amp;#39;assert_called_with&amp;#39;, &amp;#39;assert_has_calls&amp;#39;, &amp;#39;attach_mock&amp;#39;, &amp;#39;call_args&amp;#39;, &amp;#39;call_args_list&amp;#39;, &amp;#39;call_count&amp;#39;, &amp;#39;called&amp;#39;, &amp;#39;configure_mock&amp;#39;, &amp;#39;method_calls&amp;#39;, &amp;#39;mock_add_spec&amp;#39;, &amp;#39;mock_calls&amp;#39;, &amp;#39;reset_mock&amp;#39;, &amp;#39;return_value&amp;#39;, &amp;#39;side_effect&amp;#39;, &amp;#39;some_attribute&amp;#39;]&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Well, as you can see this class is somehow different from what you are accustomed to. First of all its instances do not raise an &lt;code&gt;AttributeError&lt;/code&gt; when asked for a non-existent attribute, but they happily return another instance of &lt;code&gt;Mock&lt;/code&gt; itself. Second, the attribute you tried to access has now been created inside the object and accessing it returns the same mock object as before.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="n"&gt;m&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;some_attribute&lt;/span&gt;
 &lt;span class="go"&gt;&amp;lt;Mock name=&amp;#39;mock.some_attribute&amp;#39; id=&amp;#39;140222043808432&amp;#39;&amp;gt;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Mock objects are callables, which means that they may act both as attributes and as methods. If you try to call the mock it just returns you another mock with a name that includes parentheses to signal its callable nature&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="n"&gt;m&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;some_attribute&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
 &lt;span class="go"&gt;&amp;lt;Mock name=&amp;#39;mock.some_attribute()&amp;#39; id=&amp;#39;140247621475856&amp;#39;&amp;gt;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;As you can understand, such objects are the perfect tool to mimic other objects or systems, since they may expose any API without raising exceptions. To use them in tests, however, we need them to behave just like the original, which implies returning sensible values or performing operations.&lt;/p&gt;
 &lt;h1 id="return-value"&gt;Return value&lt;a class="headerlink" href="#return-value" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
@@ -2462,7 +2314,6 @@ pytest-flask
 &lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="n"&gt;m&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;some&lt;/span&gt; &lt;span class="n"&gt;attribute&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
 &lt;span class="go"&gt;42&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;Now the object does not return a mock object any more, instead it just returns the static value stored in the &lt;code&gt;return_value&lt;/code&gt; attribute. Obviously you can also store a callable such as a function or an object, and the method will return it, but it will not run it. Let me give you an example&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;print_answer&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
@@ -2473,7 +2324,6 @@ pytest-flask
 &lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="n"&gt;m&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;some_attribute&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
 &lt;span class="go"&gt;&amp;lt;function print_answer at 0x7f8df1e3f400&amp;gt;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;As you can see calling &lt;code&gt;some_attribute()&lt;/code&gt; just returns the value stored in &lt;code&gt;return_value&lt;/code&gt;, that is the function itself. To return values that come from a function we have to use a slightly more complex attribute of mock objects called &lt;code&gt;side_effect&lt;/code&gt;.&lt;/p&gt;
 &lt;h1 id="side-effect"&gt;Side effect&lt;a class="headerlink" href="#side-effect" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
@@ -2489,7 +2339,6 @@ pytest-flask
     &lt;span class="k"&gt;raise&lt;/span&gt; &lt;span class="n"&gt;effect&lt;/span&gt;
 &lt;span class="gr"&gt;ValueError&lt;/span&gt;: &lt;span class="n"&gt;A custom value error&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;If you pass an iterable, such as for example a generator, or a plain list, tuple, or similar objects, the mock will yield the values of that iterable, i.e. return every value contained in the iterable on subsequent calls of the mock. Let me give you an example&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="n"&gt;m&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;some_attribute&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;side_effect&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;range&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
@@ -2509,7 +2358,6 @@ pytest-flask
 &lt;span class="gr"&gt;StopIteration&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;As promised, the mock just returns every object found in the iterable (in this case a &lt;code&gt;range&lt;/code&gt; object) once at a time until the generator is exhausted. According to the iterator protocol (see &lt;a href="https://www.thedigitalcatonline.com/blog/2013/03/25/python-generators-from-iterators-to-cooperative-multitasking/"&gt;this post&lt;/a&gt;) once every item has been returned the object raises the &lt;code&gt;StopIteration&lt;/code&gt; exception, which means that you can correctly use it in a loop.&lt;/p&gt;
 &lt;p&gt;The last and perhaps most used case is that of passing a callable to &lt;code&gt;side_effect&lt;/code&gt;, which shamelessly executes it with its own same parameters. This is very powerful, especially if you stop thinking about "functions" and start considering "callables". Indeed, &lt;code&gt;side_effect&lt;/code&gt; also accepts a class and calls it, that is it can instantiate objects. Let us consider a simple example with a function without arguments&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;print_answer&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
@@ -2519,7 +2367,6 @@ pytest-flask
 &lt;span class="go"&gt;42&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;A slightly more complex example: a function with arguments&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;print_number&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;num&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
 &lt;span class="gp"&gt;... &lt;/span&gt;    &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Number:&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;num&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
@@ -2528,7 +2375,6 @@ pytest-flask
 &lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="n"&gt;m&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;some_attribute&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;side_effect&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;span class="go"&gt;Number: 5&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;And finally an example with a class&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Number&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;object&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
@@ -2544,7 +2390,6 @@ pytest-flask
 &lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;print_value&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
 &lt;span class="go"&gt;Value: 26&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;h1 id="testing-with-mocks"&gt;Testing with mocks&lt;a class="headerlink" href="#testing-with-mocks" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;Now we know how to build a mock and how to give it a static return value or make it call a callable object. It is time to see how to use a mock in a test and what facilities do mocks provide. I'm going to use &lt;a href="http://pytest.org"&gt;pytest&lt;/a&gt; as a testing framework. You can find a quick introduction to pytest and TDD &lt;a href="/categories/tdd/"&gt;here&lt;/a&gt;).&lt;/p&gt;
@@ -2563,7 +2408,6 @@ touch myobj.py
 touch tests/test_mock.py
 &lt;span class="nv"&gt;PYTHONPATH&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;.&amp;quot;&lt;/span&gt; py.test
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;The &lt;code&gt;PYTHONPATH&lt;/code&gt; environment variable is an easy way to avoid having to setup a whole Python project to just test some simple code.&lt;/p&gt;
 &lt;h2 id="the-three-test-types"&gt;The three test types&lt;a class="headerlink" href="#the-three-test-types" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
@@ -2588,7 +2432,6 @@ touch tests/test_mock.py
     &lt;span class="n"&gt;myobj&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;MyObj&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;external_obj&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
     &lt;span class="n"&gt;external_obj&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;connect&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;assert_called_with&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;The &lt;code&gt;myobj.MyObj&lt;/code&gt; class, in this simple example, needs to connect to an external object, for example a remote repository or a database. The only thing we need to know for testing purposes is if the class called the &lt;code&gt;connect()&lt;/code&gt; method of the external object without any parameter.&lt;/p&gt;
 &lt;p&gt;So the first thing we do in this test is to instantiate the mock object. This is a fake version of the external object, and its only purpose is to accept calls from the &lt;code&gt;MyObj&lt;/code&gt; object under test and return sensible values. Then we instantiate the &lt;code&gt;MyObj&lt;/code&gt; class passing the external object. We expect the class to call the &lt;code&gt;connect()&lt;/code&gt; method so we express this expectation calling &lt;code&gt;external_obj.connect.assert_called_with()&lt;/code&gt;.&lt;/p&gt;
@@ -2615,13 +2458,11 @@ tests/test_mock.py:6: &lt;span class="nv"&gt;AttributeError&lt;/span&gt;
 $
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;Putting this code in &lt;code&gt;myobj.py&lt;/code&gt; is enough to make the test pass&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;MyObj&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
     &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;repo&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
         &lt;span class="n"&gt;repo&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;connect&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;As you can see, the &lt;code&gt;__init__()&lt;/code&gt; method actually calls &lt;code&gt;repo.connect()&lt;/code&gt;, where &lt;code&gt;repo&lt;/code&gt; is expected to be a full-featured external object that provides a given API. In this case (for the moment) the API is just its &lt;code&gt;connect()&lt;/code&gt; method. Calling &lt;code&gt;repo.connect()&lt;/code&gt; when &lt;code&gt;repo&lt;/code&gt; is a mock object silently creates the method as a mock object, as shown before.&lt;/p&gt;
 &lt;p&gt;The &lt;code&gt;assert_called_with()&lt;/code&gt; method also allows us to check the parameters we passed when calling. To show this let us pretend that we expect the &lt;code&gt;MyObj.setup()&lt;/code&gt; method to call &lt;code&gt;setup(cache=True, max_connections=256)&lt;/code&gt; on the external object. As you can see we pass a couple of arguments (namely &lt;code&gt;cache&lt;/code&gt; and &lt;code&gt;max_connections&lt;/code&gt;) to the called method, and we want to be sure that the call was exactly in this form. The new test is thus&lt;/p&gt;
@@ -2631,7 +2472,6 @@ $
     &lt;span class="n"&gt;obj&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;setup&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
     &lt;span class="n"&gt;external_obj&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;setup&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;assert_called_with&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cache&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="kc"&gt;True&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;max_connections&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;256&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;As usual the first run fails. Be sure to check this, it is part of the TDD methodology. You must have a test that DOES NOT PASS, then write some code that make it pass.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ &lt;span class="nv"&gt;PYTHONPATH&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;.&amp;quot;&lt;/span&gt; py.test
@@ -2656,7 +2496,6 @@ tests/test_mock.py:14: &lt;span class="nv"&gt;AttributeError&lt;/span&gt;
 $
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;To show you what type of check the mock object provides let me implement a partially correct solution&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;MyObj&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
     &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;repo&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
@@ -2667,12 +2506,10 @@ $
         &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_repo&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;setup&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cache&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="kc"&gt;True&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;As you can see the external object has been stored in &lt;code&gt;self._repo&lt;/code&gt; and the call to &lt;code&gt;self._repo.setup()&lt;/code&gt; is not exactly what the test expects, lacking the &lt;code&gt;max_connections&lt;/code&gt; parameter. Running pytest we obtain the following result (I removed most of the pytest output)&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;E           AssertionError: Expected call: setup&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;cache&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;True, &lt;span class="nv"&gt;max_connections&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;256&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
 E           Actual call: setup&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;cache&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;True&lt;span class="o"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;and you see that the error message is very clear about what we expected and what happened in our code.&lt;/p&gt;
 &lt;p&gt;As you can read in the official documentation, the &lt;code&gt;Mock&lt;/code&gt; object also provides the following methods and attributes: &lt;code&gt;assert_called_once_with&lt;/code&gt;, &lt;code&gt;assert_any_call&lt;/code&gt;, &lt;code&gt;assert_has_calls&lt;/code&gt;, &lt;code&gt;assert_not_called&lt;/code&gt;, &lt;code&gt;called&lt;/code&gt;, &lt;code&gt;call_count&lt;/code&gt;. Each of them explores a different aspect of the mock behaviour concerning calls, make sure to check their description and the examples provided along.&lt;/p&gt;
@@ -2724,19 +2561,16 @@ E           Actual call: setup&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class
 &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt; &lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="n"&gt;l&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
 &lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="n"&gt;l&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;append&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="n"&gt;l&lt;/span&gt;
 &lt;span class="go"&gt;[1, 2, 3, 4, 5]&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;From the right end you can also easily get values&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nv"&gt;user=&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;peek &lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt; &lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
 &lt;span class="mi"&gt;5&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="n"&gt;l&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
 &lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="n"&gt;l&lt;/span&gt;
@@ -2747,14 +2581,12 @@ E           Actual call: setup&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class
 &lt;span class="go"&gt;[1, 2, 3, 4]&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;So Clojure vectors and Python lists are LIFO queues (Last In First Out), otherwise known as &lt;em&gt;stacks&lt;/em&gt;. In Clojure &lt;code&gt;peek&lt;/code&gt; takes the role of the classic &lt;code&gt;pop&lt;/code&gt; operation, but remember that being collections immutable, what you get is a new value. That is, while in Python &lt;code&gt;pop()&lt;/code&gt; modifies the list, in Clojure &lt;code&gt;peek&lt;/code&gt; doesn't alter the vector.&lt;/p&gt;
 &lt;h3 id="subvectors"&gt;Subvectors&lt;a class="headerlink" href="#subvectors" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h3&gt;
 &lt;p&gt;Just like Python lists, vectors can be sliced with the &lt;code&gt;subvec&lt;/code&gt; function&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nv"&gt;user=&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;subvec &lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="ss"&gt;:a&lt;/span&gt; &lt;span class="ss"&gt;:b&lt;/span&gt; &lt;span class="ss"&gt;:c&lt;/span&gt; &lt;span class="ss"&gt;:d&lt;/span&gt; &lt;span class="ss"&gt;:e&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt; &lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="ss"&gt;:c&lt;/span&gt; &lt;span class="ss"&gt;:d&lt;/span&gt; &lt;span class="ss"&gt;:e&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;Subvectors are however different from Python list slices. When you slice a list in Python you get a new object containing part of the same references you can find in the source list. That is, slicing a list actually builds a new list copying the reference of each object contained in the slice.&lt;/p&gt;
 &lt;p&gt;Let us briefly review this important concept. For this example I build a list of mutable objects, in this case dictionaries.&lt;/p&gt;
@@ -2763,13 +2595,11 @@ E           Actual call: setup&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class
 &lt;span class="go"&gt;[{&amp;#39;b&amp;#39;: 2, &amp;#39;a&amp;#39;: 1}, {&amp;#39;c&amp;#39;: 3, &amp;#39;d&amp;#39;: 4}, {&amp;#39;f&amp;#39;: 6, &amp;#39;e&amp;#39;: 5}]&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;then take a slice of it, a list containing the second element only&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="n"&gt;s&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
 &lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="n"&gt;s&lt;/span&gt;
 &lt;span class="go"&gt;[{&amp;#39;c&amp;#39;: 3, &amp;#39;d&amp;#39;: 4}]&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;The original list &lt;code&gt;l&lt;/code&gt; and the slice &lt;code&gt;s&lt;/code&gt; are different objects, as shown by their memory address&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="nb"&gt;id&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;l&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
@@ -2777,7 +2607,6 @@ E           Actual call: setup&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class
 &lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="nb"&gt;id&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;s&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;span class="go"&gt;3061925100&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;but there is still a link between them, as you can see if you change the value of the element contained in the slice. This change affects the original list too&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="n"&gt;s&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;][&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;c&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;100&lt;/span&gt;
@@ -2787,7 +2616,6 @@ E           Actual call: setup&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class
 &lt;span class="go"&gt;[{&amp;#39;b&amp;#39;: 2, &amp;#39;a&amp;#39;: 1}, {&amp;#39;c&amp;#39;: 100, &amp;#39;d&amp;#39;: 4}, {&amp;#39;f&amp;#39;: 6, &amp;#39;e&amp;#39;: 5}]&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;In Clojure a subvector is a complete reference to the source vector, with a special annotation of the slice boundaries. This gives you a very fast way to create subvectors, which is independent from the size of the vector itself (aka O(1) or constant time). On the other hand this gives you a structure which is a bit slower when accessed, due to the math involved in computing the actual offset. This handicap however does not propagate to subvectors of subvectors, so it can be considered a (little) constant slowdown of every subvector.&lt;/p&gt;
 &lt;h3 id="appending-values-push"&gt;Appending values (push)&lt;a class="headerlink" href="#appending-values-push" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h3&gt;
 &lt;p&gt;You find two different functions that can append values to a Clojure vector, &lt;code&gt;into&lt;/code&gt; and &lt;code&gt;conj&lt;/code&gt;, implementing the &lt;code&gt;push&lt;/code&gt; operation of classic stacks. Clojure is not an object-oriented language, so these functions are not methods of the vector type. Those methods however behave in a different way according to the destination type.&lt;/p&gt;
@@ -2796,7 +2624,6 @@ E           Actual call: setup&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nv"&gt;user=&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;conj &lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;5&lt;/span&gt; &lt;span class="mi"&gt;6&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
 &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;5&lt;/span&gt; &lt;span class="mi"&gt;6&lt;/span&gt;&lt;span class="p"&gt;]]&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;Just like &lt;code&gt;into&lt;/code&gt;, &lt;code&gt;conj&lt;/code&gt; relies on the destination type to perform the actual append operation.&lt;/p&gt;
 &lt;p&gt;In Python you can find a similar situation if you consider the two methods &lt;code&gt;extend()&lt;/code&gt; and &lt;code&gt;append()&lt;/code&gt; of lists. The first one expects an argument that exposes the sequential protocol, and pushes into the destination list each of its elements&lt;/p&gt;
@@ -2808,7 +2635,6 @@ E           Actual call: setup&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class
 &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;6&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;On the other hand, &lt;code&gt;append()&lt;/code&gt; pushes into the list the whole argument, just like &lt;code&gt;conj&lt;/code&gt; does for vectors in Clojure, and thus is mostly used to append single elements, for example in for loops.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="o"&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
 &lt;span class="o"&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;append&lt;/span&gt;&lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;6&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
@@ -2816,19 +2642,16 @@ E           Actual call: setup&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class
 &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;6&lt;/span&gt;&lt;span class="p"&gt;]]&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;h3 id="getting-values-pop"&gt;Getting values (pop)&lt;a class="headerlink" href="#getting-values-pop" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h3&gt;
 &lt;p&gt;The &lt;code&gt;pop&lt;/code&gt; operation of classic stacks is also implemented by two different functions, &lt;code&gt;peek&lt;/code&gt; and &lt;code&gt;pop&lt;/code&gt;. The first one returns the last element of the vector, being thus the Clojure's equivalent of Python's &lt;code&gt;pop()&lt;/code&gt; as shown in a previous example. Clojure's &lt;code&gt;pop&lt;/code&gt;, instead, removes the last element and returns the resulting vector.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nv"&gt;user=&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;pop &lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt; &lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
 &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;The Python equivalent could be a slice&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="gp"&gt;&amp;gt;&amp;gt;&amp;gt; &lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;][:&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
 &lt;span class="go"&gt;[1, 2, 3, 4]&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;The &lt;code&gt;last&lt;/code&gt; function will return the same value as &lt;code&gt;peek&lt;/code&gt;, but is very inefficient for vectors. The &lt;a href="https://clojuredocs.org/clojure.core/peek"&gt;official documentation&lt;/a&gt; gives an example for a vector of ten thousand elements where &lt;code&gt;last&lt;/code&gt; is around 25 times slower than &lt;code&gt;peek&lt;/code&gt;. This is mainly due to the fact that &lt;code&gt;last&lt;/code&gt; scans the whole sequence to find the last element, that is works in linear time O(n) (see the &lt;a href="https://github.com/clojure/clojure/blob/clojure-1.7.0/src/clj/clojure/core.clj#L249"&gt;source code&lt;/a&gt;).&lt;/p&gt;
 &lt;p&gt;A final note about looking for values. The Python &lt;code&gt;in&lt;/code&gt; operator has no direct equivalent for Clojure vectors. Beware that the &lt;code&gt;contains?&lt;/code&gt; function does check the collection keys (indices of the vector) and not the values. The &lt;a href="https://clojuredocs.org/clojure.core/contains_q"&gt;official documentation&lt;/a&gt; of &lt;code&gt;contains?&lt;/code&gt; gives some hints about this problem. I strongly suggest you to check them.&lt;/p&gt;
@@ -2839,18 +2662,15 @@ E           Actual call: setup&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class
 &lt;span class="s1"&gt;&amp;#39;of&amp;#39;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;where the indexing syntax works also for slices. In Clojure you can use the &lt;code&gt;nth&lt;/code&gt; function&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nv"&gt;user=&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;nth &lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;a&amp;quot;&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;vector&amp;quot;&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;of&amp;quot;&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;strings&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;span class="s"&gt;&amp;quot;of&amp;quot;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-
 &lt;p&gt;For vectors the &lt;code&gt;get&lt;/code&gt; function maps to &lt;code&gt;nth&lt;/code&gt;, since vectors are after all ordered dictionaries with the position indices as keys. Vectors in Clojure can also be directly used as functions, which aliases the use of &lt;code&gt;nth&lt;/code&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nv"&gt;user=&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;a&amp;quot;&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;vector&amp;quot;&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;of&amp;quot;&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;strings&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;span class="s"&gt;&amp;quot;of&amp;quot;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;h2 id="lists-in-clojure"&gt;Lists in Clojure&lt;a class="headerlink" href="#lists-in-clojure" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;Being Clojure a LISP, lists are of paramount importance and a complete discussion about them will surely span more than a small post on a blog. So in this section I will try to stay focused on the differences with Python lists (and Clojure vectors), rather than give you a complete overview of this incredibly powerful tool. The most important thing I will not review here is that lists in Clojure are part of the syntax itself and in the following section I will only consider lists as data containers. The fact that LISPs consider code as data is outside the scope of this work.&lt;/p&gt;
@@ -2869,7 +2689,6 @@ E           Actual call: setup&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class
 &lt;span class="nv"&gt;user=&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;pop &lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
 &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 
 &lt;p&gt;I think this is simple to remember and easy to deal with in algorithms. As you can see lists behave somehow like mirrored vectors. Beware, however, that functions such as &lt;code&gt;first&lt;/code&gt; and &lt;code&gt;last&lt;/code&gt; still work in the same way. That is, lists are not reversed vectors.&lt;/p&gt;
 &lt;p&gt;As happened for vectors there are some performance considerations to do for lists. Even for lists the &lt;code&gt;last&lt;/code&gt; function performs in linear time, but while vectors can use &lt;code&gt;peek&lt;/code&gt; to perform the same service, lists cannot. This is a big asymmetry and one of the reasons you could prefer vectors over lists for your data. While accessing the first element is blazing fast both for lists and vectors, accessing the last can be very fast for vectors through the &lt;code&gt;peek&lt;/code&gt; function but is performed in linear time on lists.&lt;/p&gt;

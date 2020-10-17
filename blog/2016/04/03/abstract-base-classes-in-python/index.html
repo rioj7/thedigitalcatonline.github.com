@@ -118,7 +118,6 @@
     <span class="o">...</span>
 </code></pre></div>
 
-
 <p>does not check if the object is a <code>list</code> or a <code>dictionary</code> (both would allow the <code>[1]</code> notation), but if the object can be accessed by key (or index). When you accept a parameter in a function Python does not specify the type (leaving aside type hints) because you are not interested in accepting a given type or one of its derived types. You are interested in accepting something that provides the methods you will use.</p>
 <p>The behaviour, in an object-oriented environment, is the run-time interface of the object. This is different from the static interface, which is the collection of the methods provided by the object. The run-time interface is the actual interface the object shows when it is used, and this encompasses the methods provided by its class, but also methods provided by parent classes, the metaclass and other entry points provided by <code>__getattr__</code>.</p>
 <h2 id="complex-checks">Complex checks<a class="headerlink" href="#complex-checks" title="Permanent link">&para;</a></h2>
@@ -134,7 +133,6 @@
     <span class="p">[</span><span class="o">...</span><span class="p">]</span>
 </code></pre></div>
 
-
 <p>which tries to cover the methods a list-like object shall provide. This test, however, accepts objects that do not really behave like a list such as</p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">FakeList</span><span class="p">:</span>
     <span class="k">def</span> <span class="nf">fakemethod</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -145,12 +143,10 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fakemethod</span>
 </code></pre></div>
 
-
 <p>It is unlikely that you will write such a class, but this shows you one of the potential pitfalls of the previous test, which is wrong because it tries to rely on the structure instead of testing the behaviour. The temptation to rely on <code>isinstance()</code> is big</p>
 <div class="highlight"><pre><span></span><code><span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">someobj</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
     <span class="o">...</span>
 </code></pre></div>
-
 
 <p>If possible this approach is worse than before, since it tests the exact type. Even if <code>isinstance()</code> and <code>issubclass()</code> are smart enough to walk through the hierarchy of parent classes, this excludes evary class that behaves like a list does not inherit from it.</p>
 <h2 id="back-to-delegation">Back to delegation<a class="headerlink" href="#back-to-delegation" title="Permanent link">&para;</a></h2>
@@ -158,11 +154,9 @@
 <div class="highlight"><pre><span></span><code><span class="nb">issubclass</span><span class="p">(</span><span class="n">myclass</span><span class="p">,</span> <span class="n">someclass</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>does no more perform a pure external check of the relationship between <code>someclass</code> and <code>myclass</code>. The first thing that <code>issubclass()</code> does now is the following</p>
 <div class="highlight"><pre><span></span><code><span class="n">someclass</span><span class="o">.</span><span class="fm">__subclasscheck__</span><span class="p">(</span><span class="n">myclass</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>This is very natural because, after all, <code>someclass</code> is the best source of judgement about being a subclass of itself.</p>
 <h2 id="a-new-type-of-subclass">A new type of subclass<a class="headerlink" href="#a-new-type-of-subclass" title="Permanent link">&para;</a></h2>
@@ -171,11 +165,9 @@
     <span class="k">pass</span>
 </code></pre></div>
 
-
 <p>or can be a <em>virtual</em> subclass, obtained through registration</p>
 <div class="highlight"><pre><span></span><code><span class="n">ParentClass</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">ChildClass</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>The difference between a real and a virtual subclass is very simple: a real subclass knows its relationship with the parent class through its <code>__bases__</code> attribute, and can thus implicitly delegate the resolution of missing methods. A virtual subclass knows nothing about the class that registered it, and nowhere in the subclass will you find something that links it to the parent class. Thus, a virtual parent class is useful only as a categorization.</p>
 <h2 id="abstract-base-classes">Abstract Base Classes<a class="headerlink" href="#abstract-base-classes" title="Permanent link">&para;</a></h2>
@@ -195,7 +187,6 @@
 <span class="p">[</span><span class="o">...</span><span class="p">]</span>
 </code></pre></div>
 
-
 <p>Where the <code>Sequence</code> and the <code>MutableSequence</code> ABCs register some built-in types of Python.</p>
 <p>It is very important to understand that registering a class does not imply any form of check about methods or attributes. Registering is just the <em>promise</em> that a given behaviour is provided by the registered class.</p>
 <p>To demonstrate this let me provide you a very simple example made using one of the <code>collections</code> classes</p>
@@ -212,7 +203,6 @@
 <span class="go">&gt;&gt;&gt;</span>
 </code></pre></div>
 
-
 <p>As you can see, the <code>MyClass</code> class is initially not recognized as a subclass of <code>collections.Sequence</code>, but after the registration <code>issubclass()</code> returns <code>True</code>, even if the class is still empty.</p>
 <h2 id="how-to-create-abcs">How to create ABCs<a class="headerlink" href="#how-to-create-abcs" title="Permanent link">&para;</a></h2>
 <p>The example given by the official documentation is very simple and clear</p>
@@ -227,7 +217,6 @@
 <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">((),</span> <span class="n">MyABC</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>All you need to do is to create a class and use the <code>ABCMeta</code> metaclass provided by the <code>abc</code> module and you will obtain a class that has the <code>register()</code> method and a suitable implementation of <code>__subclasscheck__()</code> and <code>__instancecheck__()</code>. Checking again the <code>_collections_abc.py</code> file you can see that this is exactly the way the <code>collections</code> classes are implemented</p>
 <div class="highlight"><pre><span></span><code><span class="p">[</span><span class="o">...</span><span class="p">]</span>
 
@@ -239,7 +228,6 @@
 
 <span class="p">[</span><span class="o">...</span><span class="p">]</span>
 </code></pre></div>
-
 
 <h2 id="are-you-scared-of-metaclasses">Are you scared of metaclasses?<a class="headerlink" href="#are-you-scared-of-metaclasses" title="Permanent link">&para;</a></h2>
 <p>Metaclasses are a strange topic in Python. Most of the times the advice given to the novice is "Don't use them", like they were an error of the language and something that shall be avoided.</p>
@@ -263,7 +251,6 @@
 <span class="k">assert</span> <span class="n">c</span><span class="o">.</span><span class="n">answer</span> <span class="o">==</span> <span class="mi">42</span>
 </code></pre></div>
 
-
 <p>Now, when you build a class you use a metaclass (like a blueprint) and the metaclass can put things into the class.</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Metaclass definition</span>
 <span class="k">class</span> <span class="nc">NewType</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
@@ -277,7 +264,6 @@
 <span class="k">assert</span> <span class="n">Child</span><span class="o">.</span><span class="n">answer</span> <span class="o">==</span> <span class="mi">42</span>
 </code></pre></div>
 
-
 <p>Sounds complex? Not at all, in my opinion. If you check the two examples you will see that they are exactly the same thing, the first referring to the instance-class relationship, the second to the class-metaclass one.</p>
 <p>This is all you need to understand metaclasses. When you build a class you need to put things into it, for example you need to put the <code>__getattribute__</code> or the <code>__new__()</code> methods. This is done by the metaclass, which is usually <code>type</code> for every class. Indeed, if you check the <code>__class__</code> attribute into a class you get exactly this</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="nb">int</span>
@@ -286,7 +272,6 @@
 <span class="go">&lt;class &#39;type&#39;&gt;</span>
 <span class="go">&gt;&gt;&gt;</span>
 </code></pre></div>
-
 
 <h2 id="metaclasses-and-mro">Metaclasses and MRO<a class="headerlink" href="#metaclasses-and-mro" title="Permanent link">&para;</a></h2>
 <p>A slightly advanced annotation: when I say that the metaclass <em>puts</em> the methods into the class I'm simplifying the whole thing. As a matter of fact, like a class provides methods to the instance at runtime through the <code>__class__</code> attribute and the MRO protocol, the metaclass provides methods for the class. Attributes, instead, are put inside the class by the <code>__new__</code> or <code>__init__</code> methods of the metaclass.</p>
@@ -299,7 +284,6 @@
 <span class="k">class</span> <span class="nc">Child</span><span class="p">(</span><span class="n">Parent</span><span class="p">):</span> <span class="k">pass</span>
 </code></pre></div>
 
-
 <p>calling the method <code>get_name()</code> on an instance of <code>Child</code> will look for it first into the <code>Child</code> class, then into <code>Parent</code> and <code>GrandParent</code>, in this order. Finally, it will check <code>object</code>.</p>
 <p>What happens to the MRO when a class of this hierarchy defines a different metaclass? For example</p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">NewType</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span> <span class="k">pass</span>
@@ -311,7 +295,6 @@
 <span class="k">class</span> <span class="nc">Child</span><span class="p">(</span><span class="n">Parent</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">NewType</span><span class="p">):</span> <span class="k">pass</span>
 </code></pre></div>
 
-
 <p>In this case everything works as usual, but after checking <code>object</code> the MRO will also check the <code>NewType</code> metaclass (and its ancestors).</p>
 <p>So, metaclasses can act as mixins, and they are queried only at the end of the usual MRO. This is exactly what happens using multiple inheritance if <code>NewType</code> were a standard parent class that does not have <code>Parent</code> or <code>GrandParent</code> as ancestors.</p>
 <p>Metaclasses are not part of the MRO however, since the MRO just deals with standard inheritance. If you check the MRO of the <code>Child</code> class, you will see that the metaclass is not included</p>
@@ -321,7 +304,6 @@
 <span class="go">&lt;class &#39;__main__.NewType&#39;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span>
 </code></pre></div>
-
 
 <h2 id="abstract-methods">Abstract methods<a class="headerlink" href="#abstract-methods" title="Permanent link">&para;</a></h2>
 <p>Why are ABC called <code>abstract</code>? ABCs can be instantiated, so they are after all not pure interfaces (like Java ones, for example)</p>
@@ -333,14 +315,12 @@
 <span class="gp">&gt;&gt;&gt; </span>
 </code></pre></div>
 
-
 <p>They may however define some methods as <em>abstract</em>, using the <code>abc.abstractmethod</code> decorator, which prevents the class from being instantiated if the method is not implemented. Let me give you a simple example: I define an Abstract Base Class with and abstract method</p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">MyABC</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span><span class="p">):</span>
     <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
     <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span>
 </code></pre></div>
-
 
 <p>and try to instantiate it. Python complains</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">m</span> <span class="o">=</span> <span class="n">MyABC</span><span class="p">()</span>
@@ -349,19 +329,16 @@
 <span class="gr">TypeError</span>: <span class="n">Can&#39;t instantiate abstract class MyABC with abstract methods get</span>
 </code></pre></div>
 
-
 <p>I am forced to create a new class that inherits from <code>MyABC</code> and implements the method</p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">Concrete</span><span class="p">(</span><span class="n">MyABC</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="mi">1</span>
 </code></pre></div>
 
-
 <p>Now I can instantiate the class.</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">Concrete</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span>
 </code></pre></div>
-
 
 <p>Check the official documentation of Abstract Base Classes for a complete description of <code>@abstractmethod</code> and <code>@abstractproperty</code>.</p>
 <h2 id="what-about-the-behaviour">What about the behaviour?<a class="headerlink" href="#what-about-the-behaviour" title="Permanent link">&para;</a></h2>

@@ -154,12 +154,10 @@
         <span class="n">l</span><span class="o">.</span><span class="n">discard_type</span><span class="p">(</span><span class="n">clex</span><span class="o">.</span><span class="n">LITERAL</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>As you can see the idea is for both methods to require a parameter, either the token or the type. The code that passes these tests is made by a custom exception in <code>smallcalc/calc_lexer.py</code></p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">TokenError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; The expected token cannot be found &quot;&quot;&quot;</span>
 </code></pre></div>
-
 
 <p>and, in the <code>CalcLexer</code> class in the same file</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">discard</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">):</span>
@@ -179,7 +177,6 @@
                 <span class="p">))</span>
 </code></pre></div>
 
-
 <p>As I am satisfied with the code that I have now, I will move on to add new features.</p>
 <h2 id="level-13-variables">Level 13 - Variables<a class="headerlink" href="#level-13-variables" title="Permanent link">&para;</a></h2>
 <p><em>I have been assigned by my strength and cunning.</em> - Up (2009)</p>
@@ -197,7 +194,6 @@
         <span class="n">token</span><span class="o">.</span><span class="n">Token</span><span class="p">(</span><span class="n">clex</span><span class="o">.</span><span class="n">EOF</span><span class="p">)</span>
     <span class="p">]</span>
 </code></pre></div>
-
 
 <p>This test checks only the support for lowercase letters. Since we want to support also uppercase letters and underscores we need another pair of test</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_get_tokens_understands_uppercase_letters</span><span class="p">():</span>
@@ -224,7 +220,6 @@
     <span class="p">]</span>
 </code></pre></div>
 
-
 <p>If you wonder why I created two tests instead of just one with both uppercase letters and underscores, the reason is that I generally prefer to have tests that focus on one specific feature. This obviously depends on the level of granularity that you want, and in this case we are discussing very simple features, so I would not argue if I saw both tested at the same time.</p>
 <h3 id="parser">Parser<a class="headerlink" href="#parser" title="Permanent link">&para;</a></h3>
 <p>To support variables in expressions we need to change the behaviour of <code>parse_factor</code>, which is the method where we parse the building blocks like integers of unary operators. The test you need to add to <code>tests/test_calc_parser.py</code> is</p>
@@ -239,7 +234,6 @@
         <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="s1">&#39;somevar&#39;</span>
     <span class="p">}</span>
 </code></pre></div>
-
 
 <p>After this we want to provide support for variable assignments. Working on the parser we need only to output the correct node so the test is pretty straightforward</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_parse_assignment</span><span class="p">():</span>
@@ -257,7 +251,6 @@
         <span class="p">}</span>
     <span class="p">}</span>
 </code></pre></div>
-
 
 <p>This test tries to assign the value <code>5</code> to the variable <code>x</code>, but in general we want to support assignment with expressions, so we should test this behaviour as well, including the presence of variables</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_parse_assignment_with_expression</span><span class="p">():</span>
@@ -325,7 +318,6 @@
     <span class="p">}</span>
 </code></pre></div>
 
-
 <h3 id="visitor">Visitor<a class="headerlink" href="#visitor" title="Permanent link">&para;</a></h3>
 <p>It is now time to implement the code that actually stores and retrieves variables, which is what happens in the visitor when an <code>assignment</code> or a <code>variable</code> node are processed. For the moment we do not have specific requirements for variables and we can treat the storage space as a big global dictionary.</p>
 <p>The test we want to pass specifies the initial API of the storage space when we assign a value to a variable</p>
@@ -345,7 +337,6 @@
     <span class="k">assert</span> <span class="n">v</span><span class="o">.</span><span class="n">valueof</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">5</span>
     <span class="k">assert</span> <span class="n">v</span><span class="o">.</span><span class="n">typeof</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;integer&#39;</span>
 </code></pre></div>
-
 
 <p>We want the visitor to provide three new methods, <code>isvariable</code>, <code>valueof</code>, and <code>typeof</code>, that allow us to interact with the variables we defined.</p>
 <p>The last change that the visitor requires is some code that allows it to read the value of variables to be able to use them when computing the result of an expression. The test is then</p>
@@ -369,7 +360,6 @@
     <span class="k">assert</span> <span class="n">v</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">read_ast</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="mi">123</span><span class="p">,</span> <span class="s1">&#39;integer&#39;</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>where two different ASTs have been created. The first one assigns a value to the variable, the second one reads it and returns its value. Note that the visitor returns both value and type of the variable, which seems reasonable to implement later checks of equality or other operations on variables.</p>
 <hr>
 <h3 id="solution">Solution<a class="headerlink" href="#solution" title="Permanent link">&para;</a></h3>
@@ -390,7 +380,6 @@
             <span class="n">token</span><span class="o">.</span><span class="n">Token</span><span class="p">(</span><span class="n">NAME</span><span class="p">,</span> <span class="n">token_string</span><span class="p">)</span>
         <span class="p">)</span>
 </code></pre></div>
-
 
 <p>and then added it to the method <code>get_token</code>. The new version of the latter is then</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">get_token</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -417,7 +406,6 @@
             <span class="k">return</span> <span class="n">literal</span>
 </code></pre></div>
 
-
 <p>At this point to pass the remaining tests <code>test_get_tokens_understands_uppercase_letters</code> and <code>test_get_tokens_understands_names_with_underscores</code> it is sufficient to change the regular expression we use in <code>_process_name</code></p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">_process_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">regexp</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s1">&#39;[a-zA-Z_]+&#39;</span><span class="p">)</span>
@@ -436,13 +424,11 @@
         <span class="p">)</span>
 </code></pre></div>
 
-
 <p>The required change to <code>parse_factor</code> is simple, but since we will be returning a new type of node we have to define it</p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">VariableNode</span><span class="p">(</span><span class="n">ValueNode</span><span class="p">):</span>
 
     <span class="n">node_type</span> <span class="o">=</span> <span class="s1">&#39;variable&#39;</span>
 </code></pre></div>
-
 
 <p>We can then add the required <code>if</code> statement in <code>parse_factor</code>, which becomes</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">parse_factor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -466,7 +452,6 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_integer</span><span class="p">()</span>
 </code></pre></div>
 
-
 <p>The second test that we have to pass checks if the parser can understand variable assignments. First of all we need to define <code>AssignmentNode</code> which is the node we will return to the visitor.</p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">AssignmentNode</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
 
@@ -484,13 +469,11 @@
         <span class="p">}</span>
 </code></pre></div>
 
-
 <p>At this point we need a method to parse a variable in <code>CalcParser</code>. This method is very similar to <code>_parse_symbol</code> and <code>parse_integer</code></p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">_parse_variable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lexer</span><span class="o">.</span><span class="n">get_token</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">VariableNode</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>Since the test is running <code>parse_assignment</code> we just need to add that method. We want the assignment to have a variable as its left member and an expression as its right member</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">parse_assignment</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -500,7 +483,6 @@
 
         <span class="k">return</span> <span class="n">AssignmentNode</span><span class="p">(</span><span class="n">variable</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>This code makes both the <code>test_parse_assignment</code> and the <code>test_parse_assignment_with_expression</code> tests pass.</p>
 <p>As discussed in the introductory text before the test code the variable storage space can be a simple dictionary. The key will be the name of the variable, and the content will be another dictionary with <code>value</code> and <code>type</code>. This is sufficient for the moment and should be also extensible when future requirements will arise.</p>
@@ -557,7 +539,6 @@
             <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
 </code></pre></div>
 
-
 <p>To pass the second test we need only to change the method <code>visit</code> adding an <code>if</code> statement for the <code>variable</code> nodes. The new version of the method is</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">visit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">node</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;integer&#39;</span><span class="p">:</span>
@@ -600,7 +581,6 @@
             <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
 </code></pre></div>
 
-
 <hr>
 <h2 id="level-14-parsing-expressions-and-assignments">Level 14 - Parsing expressions and assignments<a class="headerlink" href="#level-14-parsing-expressions-and-assignments" title="Permanent link">&para;</a></h2>
 <p><em>Speak words we can all understand!</em> - The Lord of the Rings: The Fellowship of the Ring (2001)</p>
@@ -639,7 +619,6 @@
     <span class="p">}</span>
 </code></pre></div>
 
-
 <p>and checks that <code>parse_line</code> can parse expressions (which can be solved just wrapping <code>parse_expression</code> with it). The second test checks that <code>parse_line</code> can parse variable assignments and goes in the same file</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_parse_line_supports_assigment</span><span class="p">():</span>
     <span class="n">p</span> <span class="o">=</span> <span class="n">cpar</span><span class="o">.</span><span class="n">CalcParser</span><span class="p">()</span>
@@ -656,7 +635,6 @@
         <span class="p">}</span>
     <span class="p">}</span>
 </code></pre></div>
-
 
 <p>At this point we can change the entry point in the CLI, using <code>parse_line</code> instead of <code>parse_expression</code>. The new CLI is then</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">smallcalc</span> <span class="kn">import</span> <span class="n">calc_parser</span> <span class="k">as</span> <span class="n">cpar</span>
@@ -689,7 +667,6 @@
     <span class="n">main</span><span class="p">()</span>
 </code></pre></div>
 
-
 <p>Try to fire the CLI and enjoy a calculator with variables! Everything works, but you now know it is not magic, but the outcome of a good amount of code. And you wrote it, so you may proudly say that you created a simple but working programming language.</p>
 <hr>
 <h3 id="solution_1">Solution<a class="headerlink" href="#solution_1" title="Permanent link">&para;</a></h3>
@@ -697,7 +674,6 @@
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">parse_line</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_expression</span><span class="p">()</span>
 </code></pre></div>
-
 
 <p>The second test requires some changes to <code>parse_line</code>. As I do not know if the next token is an expression or an assignment I decided to stash the status and try one of the two. In case of error I just pop the state and try with the second option</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">parse_line</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -709,7 +685,6 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_expression</span><span class="p">()</span>
 </code></pre></div>
 
-
 <p>At the same time <code>parse_assignment</code> has to be changed. The current code parses a variable and then discards a literal, which is too generic, as an expression like <code>x * 2</code> will not raise an error. The new code for that method is then</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">parse_assignment</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">variable</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_variable</span><span class="p">()</span>
@@ -718,7 +693,6 @@
 
         <span class="k">return</span> <span class="n">AssignmentNode</span><span class="p">(</span><span class="n">variable</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>where I explicitly discard a literal <code>=</code> sign.</p>
 <hr>

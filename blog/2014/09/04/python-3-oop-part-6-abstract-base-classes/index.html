@@ -131,7 +131,6 @@
     <span class="p">[</span><span class="o">...</span><span class="p">]</span>
 </code></pre></div>
 
-
 <p>where the methods of the <code>list</code> type are accessed (not called) just to force the object to raise the <code>AttributeError</code> exception if they are not present. This code, however, is not only ugly but also wrong. If you recall the "Enter the Composition" section of the <a href="https://www.thedigitalcatonline.com/blog/2014/08/20/python-3-oop-part-3-delegation-composition-and-inheritance/">third post</a> of this series, you know that in Python you can always customize the <code>__getattr__()</code> method, which is called whenever the requested attribute is not found in the object. So I could write a class that passes the test but actually does not act like a list</p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">FakeList</span><span class="p">:</span>
     <span class="k">def</span> <span class="nf">fakemethod</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -141,7 +140,6 @@
         <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;append&#39;</span><span class="p">,</span> <span class="s1">&#39;count&#39;</span><span class="p">,</span> <span class="s1">&#39;extend&#39;</span><span class="p">,</span> <span class="s1">&#39;index&#39;</span><span class="p">,</span> <span class="s1">&#39;insert&#39;</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fakemethod</span>
 </code></pre></div>
-
 
 <p>This is obviously just an example, and no one will ever write such a class, but this demonstrates that just accessing methods does not guarantee that a class <em>acts</em> like the one we are expecting.</p>
 <p>There are many examples that could be done leveraging the highly dynamic nature of Python and its rich object model. I would summarize them by saying that sometimes you'd better to check the type of the incoming object.</p>
@@ -166,7 +164,6 @@
 <span class="go">True</span>
 </code></pre></div>
 
-
 <p>As you can see the function can also walk the class hierarchy, so the check is not so trivial like the one you would obtain by directly using <code>type()</code>.</p>
 <p>The <code>isinstance()</code> function, however, does not completely solve the problem. If we write a class that actually <em>acts</em> like a <code>list</code> but does not inherit from it, <code>isinstance()</code> does not recognize the fact that the two may be considered the same thing. The following code returns <code>False</code> regardless the content of the <code>MyList</code> class</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">MyList</span><span class="p">:</span>
@@ -176,7 +173,6 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">ml</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span>
 <span class="go">False</span>
 </code></pre></div>
-
 
 <p>since <code>isinstance()</code> does not check the content of the class or its behaviour, it just considers the class and its ancestors.</p>
 <p>The problem, thus, may be summed up with the following question: what is the best way to test that an object exposes a given interface? Here, the word <em>interface</em> is used for its natural meaning, without any reference to other programming solutions, which however address the same problem.</p>
@@ -197,7 +193,6 @@
    <span class="p">[</span><span class="o">...</span><span class="p">]</span>
 </code></pre></div>
 
-
 <p>where <code>cls</code> is the class where they are injected, that is the one representing the promised behaviour. The two built-ins, however, have a reversed argument order, where the behaviour comes after the tested object: when you write <code>isinstance([], list)</code> you want to check if the <code>[]</code> instance has the <code>list</code> behaviour. This is the reason behind the name choice: just calling the methods <code>__isinstance__()</code> and <code>__issubclass__()</code> and passing arguments in a reversed order would have been confusing.</p>
 <h4 id="this-is-abc">This is ABC<a class="headerlink" href="#this-is-abc" title="Permanent link">&para;</a></h4>
 <p>The proposed solution is thus called Abstract Base Classes, as it provides a way to attach to a concrete class a virtual class with the only purpose of signaling a promised behaviour to anyone inspecting it with <code>isinstance()</code> or <code>issubclass()</code>.</p>
@@ -214,7 +209,6 @@
 <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">((),</span> <span class="n">MyABC</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>Here, the <code>MyABC</code> class is provided the <code>ABCMeta</code> metaclass. This puts the two <code>__instancecheck__()</code> and <code>__subclasscheck__()</code> methods inside <code>MyABC</code> so that, when issuing <code>isinstance()</code>, what Python actually ececutes is</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">MyABC</span><span class="p">)</span>
@@ -227,13 +221,11 @@
 <span class="go">True</span>
 </code></pre></div>
 
-
 <p>After the definition of <code>MyABC</code> we need a way to signal that a given class is an instance of the Abstract Base Class and this happens through the <code>register()</code> method, provided by the <code>ABCMeta</code> metaclass. Calling <code>MyABC.register(tuple)</code> we record inside <code>MyABC</code> the fact that the <code>tuple</code> class shall be identified as a subclass of <code>MyABC</code> itself. This is analogous to saying that <code>tuple</code> inherits from <code>MyABC</code> but not quite the same. As already said registering a class in an Abstract Base Class with <code>register()</code> does not affect the class hierarchy. Indeed, the whole <code>tuple</code> class is unchanged.</p>
 <p>The current implementation of ABCs stores the registered types inside the <code>_abc_registry</code> attribute. Actually it stores there weak references to the registered types (this part is outside the scope of this article, so I'm not detailing it)</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">MyABC</span><span class="o">.</span><span class="n">_abc_registry</span><span class="o">.</span><span class="n">data</span>
 <span class="go">{&lt;weakref at 0xb682966c; to &#39;type&#39; at 0x83dcca0 (tuple)&gt;}</span>
 </code></pre></div>
-
 
 <h2 id="movie-trivia">Movie Trivia<a class="headerlink" href="#movie-trivia" title="Permanent link">&para;</a></h2>
 <p>Section titles come from the following movies: <em>The Breakfast Club (1985)</em>, <em>E.T. the Extra-Terrestrial (1982)</em>, <em>Who Framed Roger Rabbit (1988)</em>, <em>Trading Places (1983)</em>, <em>This is Spinal Tap (1984)</em>.</p>

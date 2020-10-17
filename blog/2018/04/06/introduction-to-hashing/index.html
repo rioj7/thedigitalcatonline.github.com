@@ -120,7 +120,6 @@
 <div class="highlight"><pre><span></span><code><span class="nb">echo</span> <span class="s2">&quot;This is a simple input string&quot;</span> <span class="p">|</span> md5sum
 </code></pre></div>
 
-
 <p>and the result will be <code>8a7cc3b47880b5ef880ac6ef30785a1a</code>, independently of your operating system.</p>
 <p>MD5 is one of many <em>hash functions</em> that have been invented to deal with problems like the one I exemplified. Recently I had the need to synchronise daily two AWS S3 buckets containing more than 60 gigabytes of files. Without hash functions it would be impossible to quickly identify the files that need to be copied.</p>
 <p>The rest of the post is dedicated to the exploration of such an important and intriguing part of contemporary technology.</p>
@@ -140,7 +139,6 @@
 <span class="err">&quot;The quick brown fox&quot; == 54 68 65 20 71 75 69 63 6b 20 62 72 6f 77 6e 20 66 6f 78 =&gt; 54 68 65 20</span>
 <span class="err">&quot;The lazy dog&quot; == 54 68 65 20 6c 61 7a 79 20 64 6f 67 =&gt; 54 68 65 20</span>
 </code></pre></div>
-
 
 <p>As you can see we have multiple input strings with different lengths, and while the first three produce different output values the last one produces the same value as the third one. This is straightforward, as the two strings start with the same four characters and our hash function considers only those to compute its result.</p>
 <p>Such an event is called <em>collision</em> and it is a direct effect of the non-uniqueness of hash values. <strong>It will always happen, with hash functions, that different values produce the same output</strong>, and it is important to understand that this is not because our hash function is trivial, but this is in <em>the very nature of hash functions</em>, for strict mathematical reasons.</p>
@@ -166,7 +164,6 @@
 <span class="err">The quick brown fox jumps over the lazy cog =&gt; 15546a0bcace46fd5e12ec29adca5e70</span>
 </code></pre></div>
 
-
 <p>As you can see when a single input byte is different (the letter <code>d</code> becomes a <code>c</code>), the whole result changes.</p>
 <p>This implies that every part of the hash function's output is computed considering all the bits of the input. A function that returns the first <code>n</code> bits of the input does not have a good diffusion, as two different strings may return exactly the same hash if they have the same first <code>n</code> bits (see the example given above when I spoke about uniqueness). This property is important for cryptographic hash function.</p>
 <h2 id="minimal-change-continuity">Minimal change (continuity)<a class="headerlink" href="#minimal-change-continuity" title="Permanent link">&para;</a></h2>
@@ -188,14 +185,13 @@
 <p>Obviously, a hash function that provides interesting properties when dealing with theoretical inputs will show the same properties when applied to practical inputs, but often such functions are complex and slow. Not to mention that it is very difficult to create them.</p>
 <p>Let me show you an example. As we saw above, a hash function that returns the first letter of a string is not a very good one. It lacks the diffusion property, for instance, an its uniformity is questionable, as all the strings that begin with the same letter will produce the same hash, leading to a large number of collisions. This is bad for data structures, so such a function is in theory not optimal.</p>
 <p>However, if we are working on a set of strings like</p>
-<div class="highlight"><pre><span></span><code><span class="err">A poor workman blames his tool</span>
-<span class="err">Barking dogs seldom bite</span>
-<span class="err">Common sense ain&#39;t common</span>
-<span class="err">Doctors make the worst patients</span>
-<span class="err">...</span>
-<span class="err">You can&#39;t teach an old dog new tricks</span>
+<div class="highlight"><pre><span></span><code><span class="n">A</span> <span class="n">poor</span> <span class="n">workman</span> <span class="n">blames</span> <span class="n">his</span> <span class="k">tool</span>
+<span class="n">Barking</span> <span class="n">dogs</span> <span class="n">seldom</span> <span class="n">bite</span>
+<span class="n">Common</span> <span class="n">sense</span> <span class="n">ain</span><span class="s1">&#39;t common</span>
+<span class="n">Doctors</span> <span class="n">make</span> <span class="n">the</span> <span class="n">worst</span> <span class="n">patients</span>
+<span class="o">...</span>
+<span class="n">You</span> <span class="n">can</span><span class="s1">&#39;t teach an old dog new tricks</span>
 </code></pre></div>
-
 
 <p>where it is known (or evident) that each string begins with a different letter, suddenly our hash function becomes a perfect choice to build a searchable data structure, because <strong>given this input set</strong> there are no collisions. So, an analysis of the practical inputs is always paramount when we consider hash functions, as theoretically poor functions may perform very well on specific sets of inputs.</p>
 <p>A very good example of such an analysis can be found in the source code of the Python language. The implementation of dictionaries contains an in-depth discussion of the choices made when implementing the hashing mechanism behind those structures. You can find it <a href="https://github.com/python/cpython/blob/v3.6.5/Objects/dictobject.c#L132">here</a>. If you never approached data structures I recommend starting from a simpler explanation, however, as you might be intimidated by that discussion. You will find a good basic tutorial on hash tables in any data structures course or textbook.</p>

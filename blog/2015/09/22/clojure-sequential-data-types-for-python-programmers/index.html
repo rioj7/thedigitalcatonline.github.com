@@ -145,19 +145,16 @@
 <span class="p">[</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span> <span class="mi">5</span><span class="p">]</span>
 </code></pre></div>
 
-
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">l</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">l</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">l</span>
 <span class="go">[1, 2, 3, 4, 5]</span>
 </code></pre></div>
 
-
 <p>From the right end you can also easily get values</p>
 <div class="highlight"><pre><span></span><code><span class="nv">user=&gt;</span> <span class="p">(</span><span class="nb">peek </span><span class="p">[</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span> <span class="mi">5</span><span class="p">])</span>
 <span class="mi">5</span>
 </code></pre></div>
-
 
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">l</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">l</span>
@@ -168,14 +165,12 @@
 <span class="go">[1, 2, 3, 4]</span>
 </code></pre></div>
 
-
 <p>So Clojure vectors and Python lists are LIFO queues (Last In First Out), otherwise known as <em>stacks</em>. In Clojure <code>peek</code> takes the role of the classic <code>pop</code> operation, but remember that being collections immutable, what you get is a new value. That is, while in Python <code>pop()</code> modifies the list, in Clojure <code>peek</code> doesn't alter the vector.</p>
 <h3 id="subvectors">Subvectors<a class="headerlink" href="#subvectors" title="Permanent link">&para;</a></h3>
 <p>Just like Python lists, vectors can be sliced with the <code>subvec</code> function</p>
 <div class="highlight"><pre><span></span><code><span class="nv">user=&gt;</span> <span class="p">(</span><span class="nb">subvec </span><span class="p">[</span><span class="ss">:a</span> <span class="ss">:b</span> <span class="ss">:c</span> <span class="ss">:d</span> <span class="ss">:e</span><span class="p">]</span> <span class="mi">2</span> <span class="mi">5</span><span class="p">)</span>
 <span class="p">[</span><span class="ss">:c</span> <span class="ss">:d</span> <span class="ss">:e</span><span class="p">]</span>
 </code></pre></div>
-
 
 <p>Subvectors are however different from Python list slices. When you slice a list in Python you get a new object containing part of the same references you can find in the source list. That is, slicing a list actually builds a new list copying the reference of each object contained in the slice.</p>
 <p>Let us briefly review this important concept. For this example I build a list of mutable objects, in this case dictionaries.</p>
@@ -184,13 +179,11 @@
 <span class="go">[{&#39;b&#39;: 2, &#39;a&#39;: 1}, {&#39;c&#39;: 3, &#39;d&#39;: 4}, {&#39;f&#39;: 6, &#39;e&#39;: 5}]</span>
 </code></pre></div>
 
-
 <p>then take a slice of it, a list containing the second element only</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">l</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">s</span>
 <span class="go">[{&#39;c&#39;: 3, &#39;d&#39;: 4}]</span>
 </code></pre></div>
-
 
 <p>The original list <code>l</code> and the slice <code>s</code> are different objects, as shown by their memory address</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="nb">id</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
@@ -198,7 +191,6 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">id</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
 <span class="go">3061925100</span>
 </code></pre></div>
-
 
 <p>but there is still a link between them, as you can see if you change the value of the element contained in the slice. This change affects the original list too</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;c&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">100</span>
@@ -208,7 +200,6 @@
 <span class="go">[{&#39;b&#39;: 2, &#39;a&#39;: 1}, {&#39;c&#39;: 100, &#39;d&#39;: 4}, {&#39;f&#39;: 6, &#39;e&#39;: 5}]</span>
 </code></pre></div>
 
-
 <p>In Clojure a subvector is a complete reference to the source vector, with a special annotation of the slice boundaries. This gives you a very fast way to create subvectors, which is independent from the size of the vector itself (aka O(1) or constant time). On the other hand this gives you a structure which is a bit slower when accessed, due to the math involved in computing the actual offset. This handicap however does not propagate to subvectors of subvectors, so it can be considered a (little) constant slowdown of every subvector.</p>
 <h3 id="appending-values-push">Appending values (push)<a class="headerlink" href="#appending-values-push" title="Permanent link">&para;</a></h3>
 <p>You find two different functions that can append values to a Clojure vector, <code>into</code> and <code>conj</code>, implementing the <code>push</code> operation of classic stacks. Clojure is not an object-oriented language, so these functions are not methods of the vector type. Those methods however behave in a different way according to the destination type.</p>
@@ -217,7 +208,6 @@
 <div class="highlight"><pre><span></span><code><span class="nv">user=&gt;</span> <span class="p">(</span><span class="nb">conj </span><span class="p">[</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">]</span> <span class="p">[</span><span class="mi">5</span> <span class="mi">6</span><span class="p">])</span>
 <span class="p">[</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span> <span class="p">[</span><span class="mi">5</span> <span class="mi">6</span><span class="p">]]</span>
 </code></pre></div>
-
 
 <p>Just like <code>into</code>, <code>conj</code> relies on the destination type to perform the actual append operation.</p>
 <p>In Python you can find a similar situation if you consider the two methods <code>extend()</code> and <code>append()</code> of lists. The first one expects an argument that exposes the sequential protocol, and pushes into the destination list each of its elements</p>
@@ -229,7 +219,6 @@
 <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">]</span>
 </code></pre></div>
 
-
 <p>On the other hand, <code>append()</code> pushes into the list the whole argument, just like <code>conj</code> does for vectors in Clojure, and thus is mostly used to append single elements, for example in for loops.</p>
 <div class="highlight"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="n">l</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">l</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">])</span>
@@ -237,19 +226,16 @@
 <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">]]</span>
 </code></pre></div>
 
-
 <h3 id="getting-values-pop">Getting values (pop)<a class="headerlink" href="#getting-values-pop" title="Permanent link">&para;</a></h3>
 <p>The <code>pop</code> operation of classic stacks is also implemented by two different functions, <code>peek</code> and <code>pop</code>. The first one returns the last element of the vector, being thus the Clojure's equivalent of Python's <code>pop()</code> as shown in a previous example. Clojure's <code>pop</code>, instead, removes the last element and returns the resulting vector.</p>
 <div class="highlight"><pre><span></span><code><span class="nv">user=&gt;</span> <span class="p">(</span><span class="nb">pop </span><span class="p">[</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span> <span class="mi">5</span><span class="p">])</span>
 <span class="p">[</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">]</span>
 </code></pre></div>
 
-
 <p>The Python equivalent could be a slice</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">][:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 <span class="go">[1, 2, 3, 4]</span>
 </code></pre></div>
-
 
 <p>The <code>last</code> function will return the same value as <code>peek</code>, but is very inefficient for vectors. The <a href="https://clojuredocs.org/clojure.core/peek">official documentation</a> gives an example for a vector of ten thousand elements where <code>last</code> is around 25 times slower than <code>peek</code>. This is mainly due to the fact that <code>last</code> scans the whole sequence to find the last element, that is works in linear time O(n) (see the <a href="https://github.com/clojure/clojure/blob/clojure-1.7.0/src/clj/clojure/core.clj#L249">source code</a>).</p>
 <p>A final note about looking for values. The Python <code>in</code> operator has no direct equivalent for Clojure vectors. Beware that the <code>contains?</code> function does check the collection keys (indices of the vector) and not the values. The <a href="https://clojuredocs.org/clojure.core/contains_q">official documentation</a> of <code>contains?</code> gives some hints about this problem. I strongly suggest you to check them.</p>
@@ -260,18 +246,15 @@
 <span class="s1">&#39;of&#39;</span>
 </code></pre></div>
 
-
 <p>where the indexing syntax works also for slices. In Clojure you can use the <code>nth</code> function</p>
 <div class="highlight"><pre><span></span><code><span class="nv">user=&gt;</span> <span class="p">(</span><span class="nb">nth </span><span class="p">[</span><span class="s">&quot;a&quot;</span> <span class="s">&quot;vector&quot;</span> <span class="s">&quot;of&quot;</span> <span class="s">&quot;strings&quot;</span><span class="p">]</span> <span class="mi">2</span><span class="p">)</span>
 <span class="s">&quot;of&quot;</span>
 </code></pre></div>
 
-
 <p>For vectors the <code>get</code> function maps to <code>nth</code>, since vectors are after all ordered dictionaries with the position indices as keys. Vectors in Clojure can also be directly used as functions, which aliases the use of <code>nth</code></p>
 <div class="highlight"><pre><span></span><code><span class="nv">user=&gt;</span> <span class="p">([</span><span class="s">&quot;a&quot;</span> <span class="s">&quot;vector&quot;</span> <span class="s">&quot;of&quot;</span> <span class="s">&quot;strings&quot;</span><span class="p">]</span> <span class="mi">2</span><span class="p">)</span>
 <span class="s">&quot;of&quot;</span>
 </code></pre></div>
-
 
 <h2 id="lists-in-clojure">Lists in Clojure<a class="headerlink" href="#lists-in-clojure" title="Permanent link">&para;</a></h2>
 <p>Being Clojure a LISP, lists are of paramount importance and a complete discussion about them will surely span more than a small post on a blog. So in this section I will try to stay focused on the differences with Python lists (and Clojure vectors), rather than give you a complete overview of this incredibly powerful tool. The most important thing I will not review here is that lists in Clojure are part of the syntax itself and in the following section I will only consider lists as data containers. The fact that LISPs consider code as data is outside the scope of this work.</p>
@@ -290,7 +273,6 @@
 <span class="nv">user=&gt;</span> <span class="p">(</span><span class="nb">pop </span><span class="p">[</span><span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">])</span>
 <span class="p">[</span><span class="mi">2</span> <span class="mi">3</span><span class="p">]</span>
 </code></pre></div>
-
 
 <p>I think this is simple to remember and easy to deal with in algorithms. As you can see lists behave somehow like mirrored vectors. Beware, however, that functions such as <code>first</code> and <code>last</code> still work in the same way. That is, lists are not reversed vectors.</p>
 <p>As happened for vectors there are some performance considerations to do for lists. Even for lists the <code>last</code> function performs in linear time, but while vectors can use <code>peek</code> to perform the same service, lists cannot. This is a big asymmetry and one of the reasons you could prefer vectors over lists for your data. While accessing the first element is blazing fast both for lists and vectors, accessing the last can be very fast for vectors through the <code>peek</code> function but is performed in linear time on lists.</p>

@@ -127,7 +127,6 @@
 <span class="go">&gt;&gt;&gt;</span>
 </code></pre></div>
 
-
 <p>Given that, Python does nothing special to treat functions like first-class citizens, it simply recognizes that they are objects just like any other thing.</p>
 <h3 id="callables">Callables<a class="headerlink" href="#callables" title="Permanent link">&para;</a></h3>
 <p>While Python has the well-defined <code>function</code> class seen in the above example, it relies more on the presence of the <code>__call__</code> method. That is, in Python any object can act as a function, provided that it has this method, which is invoked when the object is "called".</p>
@@ -139,7 +138,6 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="fm">__call__</span>
 <span class="go">&lt;method-wrapper &#39;__call__&#39; of function object at 0xb6709fa4&gt;</span>
 </code></pre></div>
-
 
 <h2 id="metaprogramming">Metaprogramming<a class="headerlink" href="#metaprogramming" title="Permanent link">&para;</a></h2>
 <p>While this is not a post on languages theory, it is worth spending a couple of words about metaprogramming. Usually "programming" can be seen as the task of applying transformations to data. Data and functions can be put together by an object-oriented approach, but they still are two different things. But you soon realize that, as you may run some code to change data, you may also run some code to change the code itself.</p>
@@ -160,14 +158,12 @@
     <span class="k">pass</span>
 </code></pre></div>
 
-
 <p>where <code>dec</code> is the name of the decorator and the function <code>func</code> is said to be <em>decorated</em> by it. As you can see any reader can quickly identify that the function has a special label attached, thus being altered in its behaviour.</p>
 <p>This form, however, is just a simplification of the more generic form</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
     <span class="k">pass</span>
 <span class="n">func</span> <span class="o">=</span> <span class="n">dec</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>But what actually ARE the changes that you may want do to functions or classes? Let us stick for the moment to a very simple task: adding attributes. This is by no means a meaningless task, since there are many practical use cases that make use of it. Let us first test how we can add attributes to functions in plain Python</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">func</span><span class="p">():</span>
@@ -177,7 +173,6 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="n">func</span><span class="o">.</span><span class="n">attr</span>
 <span class="go">&#39;a custom function attribute&#39;</span>
 </code></pre></div>
-
 
 <p>and to classes</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">SomeClass</span><span class="p">:</span>
@@ -190,7 +185,6 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">attr</span>
 <span class="go">&#39;a custom class attribute&#39;</span>
 </code></pre></div>
-
 
 <p>As you can see adding attributes to a class correctly results in a class attribute, which is thus shared by any instance of that class (check <a href="https://www.thedigitalcatonline.com/blog/2014/08/20/python-3-oop-part-2-classes-and-members/">this post</a> for some explanations about class attributes and sharing).</p>
 <h2 id="class-based-decorators-without-arguments">Class-based decorators without arguments<a class="headerlink" href="#class-based-decorators-without-arguments" title="Permanent link">&para;</a></h2>
@@ -205,7 +199,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">obj</span><span class="p">()</span>
 </code></pre></div>
 
-
 <p>As you can see there is already a lot of things that shall be clarified. First of all the class, when used as a decorator, is initialized with the object that is going to be decorated, here called <code>obj</code> (most of the time it is just called <code>f</code> for function, but you know that this is only a special case).</p>
 <p>While the <code>__init__()</code> method is called at decoration time, the <code>__call__()</code> method of the decorator is called instead of the same method of the decorated object. In this case (decorator without arguments), the <code>__call__()</code> method of the decorator does not receive any argument. In this example we just "redirect" the call to the original function, which was stored during the initialization step.</p>
 <p>So you see that in this case we have two different moments in which we may alter the behaviour of the decorated objects. The first is at its definition and the second is when it is actually called.</p>
@@ -215,7 +208,6 @@
     <span class="k">pass</span>
 </code></pre></div>
 
-
 <p>When Python parses the file and defines the function <code>func</code> the code it executes under the hood is</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">func</span><span class="p">():</span>
     <span class="k">pass</span>
@@ -223,19 +215,16 @@
 <span class="n">func</span> <span class="o">=</span> <span class="n">CustomAttr</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>according to the definition of decorator. This is why the class shall accept the decorated object as a parameter in its <code>__init__()</code> method.</p>
 <p>Note that in this case the <code>func</code> object we obtain after the decoration is no more a function but a <code>CustomAttr</code> object</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">func</span>
 <span class="go">&lt;__main__.CustomAttr object at 0xb6f5ea8c&gt;</span>
 </code></pre></div>
 
-
 <p>and this is why in the <code>__init__()</code> method I attached the <code>attr</code> attribute to the class instance <code>self</code> and not to <code>obj</code>, so that now this works</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">func</span><span class="o">.</span><span class="n">attr</span>
 <span class="go">&#39;a custom function attribute&#39;</span>
 </code></pre></div>
-
 
 <p>This replacement is also the reason why you shall also redefine <code>__call__()</code>. When you write <code>func()</code> you are not executing the function but calling the instance of <code>CustomAttr</code> returned by the decoration.</p>
 <h2 id="class-based-decorators-with-arguments">Class-based decorators with arguments<a class="headerlink" href="#class-based-decorators-with-arguments" title="Permanent link">&para;</a></h2>
@@ -254,7 +243,6 @@
 <span class="k">def</span> <span class="nf">func</span><span class="p">():</span>
     <span class="k">pass</span>
 </code></pre></div>
-
 
 <p>Now the <code>__init__()</code> method shall accept some arguments, with the standard rules of Python functions for named and default arguments. The <code>__call__()</code> method receives the decorated object, which in the previous case was passed to the <code>__init__()</code> method.</p>
 <p>The biggest change, however is that <code>__call__()</code> is not run when you call the decorated object, but immediately after <code>__init__()</code> during the decoration phase. This results in the following difference: while in the previous case the decorated object was no more itself, but an instance of the decorator, now the decorated objects becomes the return value of the <code>__call__()</code> method.</p>
@@ -277,7 +265,6 @@
     <span class="k">pass</span>
 </code></pre></div>
 
-
 <p>Here the returned object is no more the decorated one, but a new function <code>wrap()</code> defined locally. It is interesting to show how Python identifies it</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="nd">@CustomAttrArg</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 <span class="gp">... </span><span class="k">def</span> <span class="nf">func</span><span class="p">():</span>
@@ -286,7 +273,6 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="n">func</span>
 <span class="go">&lt;function CustomAttrArg.__call__.&lt;locals&gt;.wrap at 0xb70185cc&gt;</span>
 </code></pre></div>
-
 
 <p>This pattern enables you to do every sort of things with the decorated object. Not only to change it (adding attributes, for example), but also pre- or post- filtering its results. You may start to understand that what we called metaprogramming may be very useful for everyday tasks, and not only for some obscure wizardry.</p>
 <h3 id="decorators-and-prototypes">Decorators and prototypes<a class="headerlink" href="#decorators-and-prototypes" title="Permanent link">&para;</a></h3>
@@ -305,7 +291,6 @@
     <span class="k">pass</span>
 </code></pre></div>
 
-
 <p>This behaves like the equivalent case with classes. The function is passed as an argument to the <code>decorate()</code> function by the decoration process that calls it passing the decorated object. When you actually call the function, however, you are actually calling <code>wrap()</code>.</p>
 <p>As happens for class-based decorators, the parametrization changes the calling procedure. This is the code</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">decorate</span><span class="p">(</span><span class="n">arg1</span><span class="p">):</span>
@@ -319,7 +304,6 @@
 <span class="k">def</span> <span class="nf">func</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
     <span class="k">pass</span>
 </code></pre></div>
-
 
 <p>As you see it is not really straightforward, and this is the reason I preferred to discuss it as the last case. Recall what we learned about class-based decorators: the first call to the <code>decorate()</code> function happens when the decorator is called with an argument. Thus <code>@decorate(1)</code> calls <code>decorate()</code> passing <code>1</code> as <code>arg1</code>, and this function returns the <code>wrap()</code> local function.</p>
 <p>This second function accepts another function as an argument, and indeed it is used in the actual decoration process, which can be represented by the code <code>func = wrap(func)</code>. This <code>wrap()</code> function, being used to decorate <code>func()</code>, wants to return a compatible object, that is in this case a function that accepts a single argument. This is why, in turn, <code>wrap()</code> defines and returns a <code>_wrap()</code> local function, which eventually uses both the argument passed to <code>func()</code> and the argument passed to the decorator.</p>
@@ -346,7 +330,6 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">&lt;</span> <span class="n">other</span><span class="o">.</span><span class="n">name</span>
 </code></pre></div>
 
-
 <p>This is a simple class that defines the <code>==</code> and <code>&lt;</code> comparison methods.</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">p1</span> <span class="o">=</span> <span class="n">Person</span><span class="p">(</span><span class="s1">&#39;Bob&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">p2</span> <span class="o">=</span> <span class="n">Person</span><span class="p">(</span><span class="s1">&#39;Alice&#39;</span><span class="p">)</span>
@@ -360,7 +343,6 @@
     <span class="n">p1</span> <span class="o">&gt;=</span> <span class="n">p2</span>
 <span class="gr">TypeError</span>: <span class="n">unorderable types: Person() &gt;= Person()</span>
 </code></pre></div>
-
 
 <p>A big warning: Python doesn't complain if you try to perform the <code>&gt;</code> and <code>!=</code> comparisons but lacking the dedicated methods it does perform a "standard" comparison. This means that, as the documentation states <a href="https://docs.python.org/2/reference/datamodel.html#object.__lt__">here</a>, "There are no implied relationships among the comparison operators. The truth of x==y does not imply that x!=y is false."</p>
 <p>With the <code>total_ordering</code> decorator, however, all six comparisons become available</p>
@@ -378,7 +360,6 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">&lt;</span> <span class="n">other</span><span class="o">.</span><span class="n">name</span>
 </code></pre></div>
 
-
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">p1</span> <span class="o">=</span> <span class="n">Person</span><span class="p">(</span><span class="s1">&#39;Bob&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">p2</span> <span class="o">=</span> <span class="n">Person</span><span class="p">(</span><span class="s1">&#39;Alice&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">p1</span> <span class="o">==</span> <span class="n">p2</span>
@@ -394,7 +375,6 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="n">p1</span> <span class="o">&lt;=</span> <span class="n">p2</span>
 <span class="go">False</span>
 </code></pre></div>
-
 
 <h2 id="final-words">Final words<a class="headerlink" href="#final-words" title="Permanent link">&para;</a></h2>
 <p>Decorators are a very powerful tool, and they are worth learning. This may be for you just the first step into the amazing world of metaprogramming or just an advanced technique you may use to simplify your code. Whatever you do with them be sure to understand the difference between the two cases (with and without arguments) and don't avoid function-based decorators just because their syntax is a bit complex.</p>

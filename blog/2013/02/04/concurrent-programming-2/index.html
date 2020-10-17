@@ -126,19 +126,16 @@
 <span class="cp">#endif</span>
 </code></pre></div>
 
-
 <p>As you can see the definition of the type is protected by multiple header inclusion, as usual in the C world. The underlying <code>__pid_t</code> type is then defined <a href="https://sourceware.org/git/?p=glibc.git;a=blob;f=bits/types.h;h=dc7b784f965749c44257bf030508d6642c07dec7;hb=HEAD">here</a></p>
 <div class="highlight"><pre><span></span><code><span class="cp">#define __STD_TYPE typedef</span>
 <span class="cp">#define __S32_TYPE int</span>
 <span class="n">__STD_TYPE</span> <span class="n">__PID_T_TYPE</span> <span class="n">__pid_t</span><span class="p">;</span> <span class="cm">/* Type of process identifications.  */</span>
 </code></pre></div>
 
-
 <p>Notice that even the typedef keyword is defined by a macro (remember that the C preprocessor is a little more than a text macro replacement tool); this definition in particular avoids compiler warning when using the <code>long long</code> type which is not supported by all versions of the C standard. <code>S32</code> stands for “signed 32 bits” as you can read in the code documentation.</p>
 <p>The last macro <code>__PID_T_TYPE</code> can be found <a href="https://sourceware.org/git/?p=glibc.git;a=blob;f=bits/typesizes.h;h=8268b90276700a382db37331be1d8ef5a516403d;hb=HEAD">here</a></p>
 <div class="highlight"><pre><span></span><code><span class="cp">#define __PID_T_TYPE            __S32_TYPE</span>
 </code></pre></div>
-
 
 <p>The heavy use of defines and compiler features made by glibc code allows the library to be compiled on very different architectures.</p>
 <h2 id="telling-the-pid">Telling the PID<a class="headerlink" href="#telling-the-pid" title="Permanent link">&para;</a></h2>
@@ -146,14 +143,12 @@
 <div class="highlight"><pre><span></span><code><span class="kt">pid_t</span> <span class="nf">getpid</span> <span class="p">(</span><span class="kt">void</span><span class="p">);</span>
 </code></pre></div>
 
-
 <p>which is defined with <code>pid_t</code> in <code>unistd.h</code> and <code>sys/types.h</code>. The libc simply uses the system call called <code>getpid</code> and its real implementation can be found in the <a href="http://git.kernel.org/?p=linux/kernel/git/torvalds/linux.git;a=blob;f=kernel/timer.c;h=367d008584823a6fe01ed013cda8c3693fcfd761;hb=HEAD">kernel source</a></p>
 <div class="highlight"><pre><span></span><code><span class="n">SYSCALL_DEFINE0</span><span class="p">(</span><span class="n">getpid</span><span class="p">)</span>
 <span class="p">{</span>
-    <span class="k">return</span> <span class="n">task_tgid_vnr</span><span class="p">(</span><span class="n">current</span><span class="p">);</span>
+    <span class="k">return</span> <span class="nf">task_tgid_vnr</span><span class="p">(</span><span class="n">current</span><span class="p">);</span>
 <span class="p">}</span>
 </code></pre></div>
-
 
 <p>We can now write a program whose aim is to print on the standard output its own pid. With an editor of your choice write the following code</p>
 <div class="highlight"><pre><span></span><code><span class="cp">#include</span> <span class="cpf">&lt;unistd.h&gt;</span><span class="cp"></span>
@@ -169,12 +164,10 @@
 <span class="p">}</span>
 </code></pre></div>
 
-
 <p><a href="/code/print_pid.c">source code</a></p>
 <p>Save the program as print_pid.c and compile it</p>
 <div class="highlight"><pre><span></span><code>gcc -o print_pid print_pid.c
 </code></pre></div>
-
 
 <p>If this operation returns errors make sure you installed gcc and libc headers; refer to your distribution knowledge base to solve this task.</p>
 <p>The compiler will build an executable named <code>print_pid</code> (since the current directory is probably not in the system path you can run it with <code>./print_pid</code>). Executing the program we will have no great surprises: it prints out a positive number and if you executes it more than once this number will likely increase progressively; this is not mandatory, however, because another process could be created between two executions of <code>print_pid</code>. Try for example to execute <code>print_pid</code>, then <code>ps</code> and then <code>print_pid</code> again.</p>
@@ -184,7 +177,6 @@
 <p>So, when a program (running as process A) creates another process (B) the two are identical, that is they have the same code, the memory full of the same data (not the same memory, since the memory regions are different) and the same processor status. From this point on the two can continue in two different ways, just like our cloning organisms, for example depending on the user's input or some other data. The process A is called the <strong>parent</strong> process while B is the <strong>child</strong> process; now you can begin to understand better the name <em>parent of all the processes</em> given to init. The function which creates a new process is</p>
 <div class="highlight"><pre><span></span><code><span class="kt">pid_t</span> <span class="n">fork</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>The number returned is a pid, but it deserves a particular attention. We said that the first process duplicates itself splitting in a parent and a child, which will then execute interlacing themselves with the other running processes, doing different works; but immediately after the duplication which process will be executed, the parent or the child?</p>
 <p>Well, the answer is as simple as unuseful: one of the two. The decision about which process has to be executed is taken by a part of the operating system called scheduler, and it pays no attention if a process is the parent or the child, following an algorithm based on other parameters.</p>
@@ -213,7 +205,6 @@
 <span class="p">}</span>
 </code></pre></div>
 
-
 <p>It's time to write the first real example of multitasking code: you can save it in a <code>fork_demo.c</code> file and compile it as we did before.</p>
 <p>The program will fork itself, and both the parent and the child will write something on the screen; the final output will be the interlaced output of the two (if all goes right).</p>
 <div class="highlight"><pre><span></span><code><span class="cp">#include</span> <span class="cpf">&lt;unistd.h&gt;</span><span class="cp"></span>
@@ -241,7 +232,6 @@
 <span class="p">}</span>
 </code></pre></div>
 
-
 <p><a href="/code/fork_demo.c">source code</a></p>
 <p>Lines number 01-03 contain the includes for the necessary libraries (standard I/O, multitasking).</p>
 <p>The main function returns an integer (as always in GNU), which normally is zero if the program reached the end without errors or an error code if something goes wrong; let us state this time all will run without errors (we can later add some error control code, when the basic concepts will be clear).</p>
@@ -251,14 +241,12 @@
 <div class="highlight"><pre><span></span><code><span class="n">sleep</span><span class="p">(</span><span class="n">rand</span><span class="p">()</span><span class="o">%</span><span class="mi">4</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>this make the program sleep for a random number of seconds between 0 and 3. Now the child code looks like</p>
 <div class="highlight"><pre><span></span><code><span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">8</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
     <span class="n">sleep</span> <span class="p">(</span><span class="n">rand</span><span class="p">()</span><span class="o">%</span><span class="mi">4</span><span class="p">);</span>
     <span class="n">printf</span><span class="p">(</span><span class="s">&quot;-child-</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
 <span class="p">}</span>
 </code></pre></div>
-
 
 <p>and the same for the parent's code. Save it as <code>fork_demo2.c</code>, compile and execute. It is slower now, and we notice a difference in the output string order, and more differences between an execution and the previous one. For example my output is</p>
 <div class="highlight"><pre><span></span><code>$ ./fork_demo2
@@ -279,7 +267,6 @@
 +parent+
 +parent+
 </code></pre></div>
-
 
 <p>As always when dealing with multitasking code, your output is probably different from mine and will also be different between consecutive executions. Try also to change the parameters of the program, such as the sleep time or the number of loops.</p>
 <h2 id="why-forking">Why forking<a class="headerlink" href="#why-forking" title="Permanent link">&para;</a></h2>
