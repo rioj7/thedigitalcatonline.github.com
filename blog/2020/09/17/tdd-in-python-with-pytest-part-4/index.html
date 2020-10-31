@@ -17,7 +17,7 @@
 		<script src="https://kit.fontawesome.com/15214b60ba.js" crossorigin="anonymous"></script>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,400italic,600italic|Roboto+Slab:400,700">
 
-        <link rel="stylesheet" href="/theme/css/main.min.css?59943907">
+        <link rel="stylesheet" href="/theme/css/main.min.css?2b9f5c19">
 
         
         <link href="/images/global/favicon.jpg" rel="icon">
@@ -299,8 +299,8 @@
 </code></pre></div>
 
 <p>the test will fail with the following error</p>
-<div class="highlight"><pre><span></span><code>E           AssertionError: Expected call: setup<span class="o">(</span><span class="nv">cache</span><span class="o">=</span>True, <span class="nv">max_connections</span><span class="o">=</span><span class="m">256</span><span class="o">)</span>
-E           Actual call: setup<span class="o">(</span><span class="nv">cache</span><span class="o">=</span>True<span class="o">)</span>
+<div class="highlight"><pre><span></span><code>E           AssertionError: Expected call: setup(cache=True, max_connections=256)
+E           Actual call: setup(cache=True)
 </code></pre></div>
 
 <p>Which I consider a very clear explanation of what went wrong during the test execution.</p>
@@ -377,7 +377,7 @@ E           Actual call: setup<span class="o">(</span><span class="nv">cache</sp
 
 <p>This little test contains, however, two big issues. First of all the method <code>get_data</code> is supposed to use the Internet connection to get the data from the server. This is a typical example of an outgoing query, as we are not trying to change the state of the web server providing the data. You already know that you should not test the return value of an outgoing query, but you can see here why you shouldn't use real data when testing either. The data coming from the server can change in time, and this can invalidate your tests. </p>
 <p>Testing such a case becomes very simple with mocks. Since the class has a public method <code>get_data</code> that interacts with the external component, it is enough to temporarily replace it with a mock that provides sensible values. Create the file <code>tests/test_meteorites.py</code> and put this code in it</p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">unittest</span> <span class="kn">import</span> <span class="n">mock</span>
+<div class="highlight"><span class="filename">tests/test_meteorites.py</span><pre><span></span><code><span class="kn">from</span> <span class="nn">unittest</span> <span class="kn">import</span> <span class="n">mock</span>
 
 <span class="kn">from</span> <span class="nn">simple_calculator.meteorites</span> <span class="kn">import</span> <span class="n">MeteoriteStats</span>
 
@@ -425,7 +425,7 @@ E           Actual call: setup<span class="o">(</span><span class="nv">cache</sp
 
 <p>When we run this test we are not testing that the external server provides the correct data. We are testing the process implemented by <code>average_mass</code>, feeding the algorithm some known input. This is not different from the first tests that we implemented: in that case we were testing an addition, here we are testing a more complex algorithm, but the concept is the same.</p>
 <p>We can now write a class that passes this test. Put the following code in <code>simple_calculator/meteorites.py</code> alongside with <code>main.py</code></p>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">urllib.request</span>
+<div class="highlight"><span class="filename">simple_calculator/meteorites.py</span><pre><span></span><code><span class="kn">import</span> <span class="nn">urllib.request</span>
 <span class="kn">import</span> <span class="nn">json</span>
 
 <span class="kn">from</span> <span class="nn">simple_calculator.main</span> <span class="kn">import</span> <span class="n">SimpleCalculator</span>

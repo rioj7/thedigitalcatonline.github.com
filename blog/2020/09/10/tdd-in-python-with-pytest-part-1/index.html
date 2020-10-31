@@ -17,7 +17,7 @@
 		<script src="https://kit.fontawesome.com/15214b60ba.js" crossorigin="anonymous"></script>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,400italic,600italic|Roboto+Slab:400,700">
 
-        <link rel="stylesheet" href="/theme/css/main.min.css?59943907">
+        <link rel="stylesheet" href="/theme/css/main.min.css?2b9f5c19">
 
         
         <link href="/images/global/favicon.jpg" rel="icon">
@@ -150,7 +150,7 @@
 <li>The function accepts two integers</li>
 <li>Passing 4 and 5 as inputs, the output of the function will be 9.</li>
 </ul>
-<p>Pay attention that at this stage there is no code that implements the <code>sum</code> function, the tests will fail for sure.</p>
+<p>Pay attention that at this stage there is no code that implements the function <code>sum</code>, the tests will fail for sure.</p>
 <p>As we will see with a practical example in the next chapter, what I explained in this section will become a set of rules of the methodology.</p>
 <h2 id="a-simple-tdd-project">A simple TDD project<a class="headerlink" href="#a-simple-tdd-project" title="Permanent link">&para;</a></h2>
 <p>The project we are going to develop is available at <a href="https://github.com/lgiordani/simple_calculator">https://github.com/lgiordani/simple_calculator</a>.</p>
@@ -158,7 +158,7 @@
 <p>Methodologies are like sports or arts: you cannot learn them just by reading their description on a book. You have to practice them. Thus, you should avoid as much as possible to just follow this chapter reading the code passively. Instead, you should try to write the code and to try new solutions to the problems that I discuss. This is very important, as it actually makes you use TDD. This way, at the end of the chapter you will have a personal experience of what TDD is like.</p>
 <p>The repository is tagged, and at the end of each section you will find a link to the relative tag that contains the working solution.</p>
 <h2 id="setup-the-project">Setup the project<a class="headerlink" href="#setup-the-project" title="Permanent link">&para;</a></h2>
-<p>Clone the project repository and move to the <code>develop</code> branch. The <code>master</code> branch contains the full solution, and I use it to maintain the repository, but if you want to code along you need to start from scratch. If you prefer, you can clearly clone it on GitHub and make your own copy of the repository.</p>
+<p>Clone the project repository and move to the branch <code>develop</code>. The branch <code>master</code> contains the full solution, and I use it to maintain the repository, but if you want to code along you need to start from scratch. If you prefer, you can clearly clone it on GitHub and make your own copy of the repository.</p>
 <div class="highlight"><pre><span></span><code>git clone https://github.com/lgiordani/simple_calculator
 <span class="nb">cd</span> simple_calculator
 git checkout --track origin/develop
@@ -189,7 +189,7 @@ collected 0 items
 <p>As you can see the requirements are pretty simple, and a couple of them are definitely not "good" requirements, like the behaviour of division and multiplication. I added those requirements for the sake of example, to show how to deal with exceptions when developing in TDD.</p>
 <h2 id="step-1-adding-two-numbers">Step 1 - Adding two numbers<a class="headerlink" href="#step-1-adding-two-numbers" title="Permanent link">&para;</a></h2>
 <p>The first test we are going to write is one that checks if the class <code>SimpleCalculator</code> can perform an addition. Add the following code to the file <code>tests/test_main.py</code></p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">simple_calculator.main</span> <span class="kn">import</span> <span class="n">SimpleCalculator</span>
+<div class="highlight"><span class="filename">tests/test_main.py</span><pre><span></span><code><span class="kn">from</span> <span class="nn">simple_calculator.main</span> <span class="kn">import</span> <span class="n">SimpleCalculator</span>
 
 <span class="k">def</span> <span class="nf">test_add_two_numbers</span><span class="p">():</span>
     <span class="n">calculator</span> <span class="o">=</span> <span class="n">SimpleCalculator</span><span class="p">()</span>
@@ -201,7 +201,7 @@ collected 0 items
 
 <p>As you can see the first thing we do is to import the class <code>SimpleCalculator</code> that we are supposed to write. This class doesn't exist yet, don't worry, you didn't skip any passage.</p>
 <p>The test is a standard function (this is how pytest works), and the function name shall begin with <code>test_</code> so that pytest can automatically discover all the tests. I tend to give my tests a descriptive name, so it is easier later to come back and understand what the test is about with a quick glance. You are free to follow the style you prefer but in general remember that naming components in a proper way is one of the most difficult things in programming. So better to get a handle on it as soon as possible.</p>
-<p>The body of the test function is pretty simple. The class <code>SimpleCalculator</code> is instantiated, and the method <code>add</code> of the instance is called with two numbers, 4 and 5. The result is stored in the variable <code>result</code>, which is later the subject of the test itself. The statement <code>assert result == 9</code> first computes <code>result == 9</code> which is a boolean, with a value that is either <code>True</code> or <code>False</code>. The <code>assert</code> keyword, then, silently passes if the argument is <code>True</code>, but raises an exception if it is <code>False</code>.</p>
+<p>The body of the test function is pretty simple. The class <code>SimpleCalculator</code> is instantiated, and the method <code>add</code> of the instance is called with two numbers, 4 and 5. The result is stored in the variable <code>result</code>, which is later the subject of the test itself. The statement <code>assert result == 9</code> first computes <code>result == 9</code> which is a boolean, with a value that is either <code>True</code> or <code>False</code>. The keyword <code>assert</code>, then, silently passes if the argument is <code>True</code>, but raises an exception if it is <code>False</code>.</p>
 <p>And this is how you write tests in pytest: if your code doesn't raise any exception the test passes, otherwise it fails. The keyword <code>assert</code> is used to force an exception in case of wrong result. Remember that pytest doesn't consider the return value of the function, so it can detect a failure only if it raises an exception.</p>
 <p>Save the file and go back to the terminal. Execute <code>py.test -svv</code> and you should receive the following error message</p>
 <div class="highlight"><pre><span></span><code>===================================== ERRORS ======================================
@@ -222,7 +222,7 @@ E   ImportError: cannot import name &#39;SimpleCalculator&#39; from &#39;simple_
 </blockquote>
 <p>This, by the way, is not yet an error in a test. The error happens very soon, during the tests collection phase (as shown by the message in the bottom line <code>Interrupted: 1 errors during collection</code>). Given this, the methodology is still valid, as we wrote a test and it fails because of an error or a missing feature in the code.</p>
 <p>Let's fix this issue. Open the file <code>simple_calculator/main.py</code> and add this code</p>
-<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">SimpleCalculator</span><span class="p">:</span>
+<div class="highlight"><span class="filename">simple_calculator/main.py</span><pre><span></span><code><span class="k">class</span> <span class="nc">SimpleCalculator</span><span class="p">:</span>
     <span class="k">pass</span>
 </code></pre></div>
 
@@ -287,7 +287,7 @@ tests/test_main.py:9: AttributeError
 
 <p>For each failing test, pytest shows a header with the name of the test and the part of the code that raised the exception. At the end of each box, pytest shows the line of the test file where the error happened.</p>
 <p>Back to the project. The new error is no surprise, as the test uses the method <code>add</code> that wasn't defined in the class. I bet you already guessed what I'm going to do, didn't you? This is the code that you should add to the class</p>
-<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">SimpleCalculator</span><span class="p">:</span>
+<div class="highlight"><span class="filename">simple_calculator/main.py</span><pre><span></span><code><span class="k">class</span> <span class="nc">SimpleCalculator</span><span class="p">:</span>
     <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span>
 </code></pre></div>
@@ -305,7 +305,7 @@ tests/test_main.py:9: TypeError
 </code></pre></div>
 
 <p>The function we defined doesn't accept any argument other than <code>self</code> (<code>def add(self)</code>), but in the test we pass three of them (<code>calculator.add(4, 5)</code>. Remember that in Python <code>self</code> is implicit. Our move at this point is to change the function to accept the parameters that it is supposed to receive, namely two numbers. The code now becomes</p>
-<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">SimpleCalculator</span><span class="p">:</span>
+<div class="highlight"><span class="filename">simple_calculator/main.py</span><pre><span></span><code><span class="k">class</span> <span class="nc">SimpleCalculator</span><span class="p">:</span>
     <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
         <span class="k">pass</span>
 </code></pre></div>
@@ -328,7 +328,7 @@ tests/test_main.py:11: AssertionError
 
 <p>The function returns <code>None</code>, as it doesn't contain any code, while the test expects it to return <code>9</code>. What do you think is the minimum code you can add to pass this test?</p>
 <p>Well, the answer is</p>
-<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">SimpleCalculator</span><span class="p">:</span>
+<div class="highlight"><span class="filename">simple_calculator/main.py</span><pre><span></span><code><span class="k">class</span> <span class="nc">SimpleCalculator</span><span class="p">:</span>
     <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
         <span class="k">return</span> <span class="mi">9</span>
 </code></pre></div>
@@ -342,7 +342,7 @@ tests/test_main.py:11: AssertionError
 <p><strong>Git tag:</strong> <a href="https://github.com/lgiordani/simple_calculator/tree/step-1-adding-two-numbers">step-1-adding-two-numbers</a></p>
 <h2 id="step-2-adding-three-numbers">Step 2 - Adding three numbers<a class="headerlink" href="#step-2-adding-three-numbers" title="Permanent link">&para;</a></h2>
 <p>The requirements state that "Addition and multiplication shall accept multiple arguments". This means that we should be able to execute not only <code>add(4, 5)</code> like we did, but also <code>add(4, 5, 11)</code>, <code>add(4, 5, 11, 2)</code>, and so on. We can start testing this behaviour with the following test, that you should put in <code>tests/test_main.py</code>, after the previous test that we wrote.</p>
-<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_add_three_numbers</span><span class="p">():</span>
+<div class="highlight"><span class="filename">tests/test_main.py</span><pre><span></span><code><span class="k">def</span> <span class="nf">test_add_three_numbers</span><span class="p">():</span>
     <span class="n">calculator</span> <span class="o">=</span> <span class="n">SimpleCalculator</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">calculator</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
@@ -364,7 +364,7 @@ tests/test_main.py:18: TypeError
 
 <p>for the obvious reason that the function we wrote in the previous section accepts only 2 arguments other than <code>self</code>. What is the minimum code that you can write to fix this test?</p>
 <p>Well, the simplest solution is to add another argument, so my first attempt is</p>
-<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">SimpleCalculator</span><span class="p">:</span>
+<div class="highlight"><span class="filename">simple_calculator/main.py</span><pre><span></span><code><span class="k">class</span> <span class="nc">SimpleCalculator</span><span class="p">:</span>
     <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
         <span class="k">return</span> <span class="mi">9</span>
 </code></pre></div>
@@ -390,12 +390,12 @@ E       TypeError: add() missing 1 required positional argument: &#39;c&#39;
 tests/test_main.py:10: TypeError
 </code></pre></div>
 
-<p>The first test now fails because the new <code>add</code> method requires three arguments and we are passing only two. The second tests fails because the <code>add</code> method returns <code>9</code> and not <code>15</code> as expected by the test.</p>
+<p>The first test now fails because the new <code>add</code> method requires three arguments and we are passing only two. The second tests fails because the method <code>add</code> returns <code>9</code> and not <code>15</code> as expected by the test.</p>
 <p>When multiple tests fail it's easy to feel discomforted and lost. Where are you supposed to start fixing this? Well, one possible solution is to undo the previous change and to try a different solution, but in general you should try to get to a situation in which only one test fails.</p>
 <blockquote>
 <p><strong>TDD rule number 3:</strong> You shouldn't have more than one failing test at a time</p>
 </blockquote>
-<p>This is very important as it allows you to focus on one single test and thus one single problem. And remember, commenting tests to make them inactive is a perfectly valid way to have only one failing test. Pytest, however, has a smarter solution: you can use the <code>-k</code> option that allows you to specify a matching name. That option has a lot of expressive power, but for now we can just give it the name of the test that we want to run</p>
+<p>This is very important as it allows you to focus on one single test and thus one single problem. And remember, commenting tests to make them inactive is a perfectly valid way to have only one failing test. Pytest, however, has a smarter solution: you can use the option <code>-k</code> that allows you to specify a matching name. That option has a lot of expressive power, but for now we can just give it the name of the test that we want to run</p>
 <div class="highlight"><pre><span></span><code>pytest -svv -k test_add_two_numbers
 </code></pre></div>
 
@@ -411,8 +411,8 @@ E       TypeError: add() missing 1 required positional argument: &#39;c&#39;
 tests/test_main.py:10: TypeError
 </code></pre></div>
 
-<p>To fix this error we can obviously revert the addition of the third argument, but this would mean going back to the previous solution. Obviously, though tests focus on a very small part of the code, we have to keep in mind what we are doing in terms of the big picture. A better solution is to add to the third argument a default value. The additive identity is <code>0</code>, so the new code of the <code>add</code> method is</p>
-<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">SimpleCalculator</span><span class="p">:</span>
+<p>To fix this error we can obviously revert the addition of the third argument, but this would mean going back to the previous solution. Obviously, though tests focus on a very small part of the code, we have to keep in mind what we are doing in terms of the big picture. A better solution is to add to the third argument a default value. The additive identity is <code>0</code>, so the new code of the method <code>add</code> is</p>
+<div class="highlight"><span class="filename">simple_calculator/main.py</span><pre><span></span><code><span class="k">class</span> <span class="nc">SimpleCalculator</span><span class="p">:</span>
     <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="k">return</span> <span class="mi">9</span>
 </code></pre></div>
@@ -436,7 +436,7 @@ tests/test_main.py:20: AssertionError
 <p>The second test still fails, because the returned value that we hard coded doesn't match the expected one. At this point the tests show that our previous solution (<code>return 9</code>) is not sufficient anymore, and we have to try to implement something more complex.</p>
 <p>I want to stress this. You should implement the minimal change in the code that makes tests pass, if that solution is not enough there will be a test that shows it. Now, as you can see, the addition of a new requirement changes the tests, adding a new one, and the old solution is not sufficient any more.</p>
 <p>How can we solve this? We know that writing <code>return 15</code> will make the first test fail (you may try, if you want), so here we have to be a bit smarter and try a better solution, that in this case is actually to implement a real sum</p>
-<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">SimpleCalculator</span><span class="p">:</span>
+<div class="highlight"><span class="filename">simple_calculator/main.py</span><pre><span></span><code><span class="k">class</span> <span class="nc">SimpleCalculator</span><span class="p">:</span>
     <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span> <span class="o">+</span> <span class="n">c</span>
 </code></pre></div>
@@ -455,7 +455,7 @@ tests/test_main.py:20: AssertionError
 
 <p>as it is not <em>generic</em>, it is just covering a greater amount of inputs (9, in this case, but not 10 or more).</p>
 <p>That said, a good test might be the following</p>
-<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_add_many_numbers</span><span class="p">():</span>
+<div class="highlight"><span class="filename">tests/test_main.py</span><pre><span></span><code><span class="k">def</span> <span class="nf">test_add_many_numbers</span><span class="p">():</span>
     <span class="n">numbers</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
 
     <span class="n">calculator</span> <span class="o">=</span> <span class="n">SimpleCalculator</span><span class="p">()</span>
@@ -480,13 +480,13 @@ tests/test_main.py:28: TypeError
 </code></pre></div>
 
 <p>The minimum amount of code that we can add, this time, will not be so trivial, as we have to pass three tests. This is actually the greatest advantage of TDD: the tests that we wrote are still there and will check that the previous conditions are still satisfied. And since tests are committed with the code they will always be there.</p>
-<p>The Python way to support a generic number of arguments (technically called <em>variadic functions</em>) is through the use of the <code>*args</code> syntax, which stores in <code>args</code> a tuple that contains all the arguments.</p>
-<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">SimpleCalculator</span><span class="p">:</span>
+<p>The Python way to support a generic number of arguments (technically called <em>variadic functions</em>) is through the use of the syntax <code>*args</code>, which stores in <code>args</code> a tuple that contains all the arguments.</p>
+<div class="highlight"><span class="filename">simple_calculator/main.py</span><pre><span></span><code><span class="k">class</span> <span class="nc">SimpleCalculator</span><span class="p">:</span>
     <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
 </code></pre></div>
 
-<p>At that point we can use the <code>sum</code> built-in function to sum all the arguments. This solution makes the whole test suite pass without errors, so it is correct.</p>
+<p>At that point we can use the built-in function <code>sum</code> to sum all the arguments. This solution makes the whole test suite pass without errors, so it is correct.</p>
 <p><strong>Git tag:</strong> <a href="https://github.com/lgiordani/simple_calculator/tree/step-3-adding-multiple-numbers">step-3-adding-multiple-numbers</a></p>
 <p>Pay attention here, please. In TDD a solution is not correct when it is beautiful, when it is smart, or when it uses the latest feature of the language. All these things are good, but TDD wants your code to pass the tests. So, your code might be ugly, convoluted, and slow, but if it passes the test it is correct. This in turn means that TDD doesn't cover all the needs of your software project. Delivering fast routines, for example, might be part of the advantage you have on your competitors, but it is not really testable with the TDD methodology (typically, performance testing is done in a completely different way).</p>
 <p>Part of the TDD methodology, then, deals with "refactoring", which means changing the code in a way that doesn't change the outputs, which in turns means that all your tests keep passing. Once you have a proper test suite in place, you can focus on the beauty of the code, or you can introduce smart solutions according to what the language allows you to do. We will discuss refactoring further later in this post.</p>
@@ -495,7 +495,7 @@ tests/test_main.py:28: TypeError
 </blockquote>
 <h2 id="step-4-subtraction">Step 4 - Subtraction<a class="headerlink" href="#step-4-subtraction" title="Permanent link">&para;</a></h2>
 <p>From the requirements we know that we have to implement a function to subtract numbers, but this doesn't mention multiple arguments (as it would be complex to define what subtracting 3 of more numbers actually means). The tests that implements this requirements is</p>
-<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_subtract_two_numbers</span><span class="p">():</span>
+<div class="highlight"><span class="filename">tests/test_main.py</span><pre><span></span><code><span class="k">def</span> <span class="nf">test_subtract_two_numbers</span><span class="p">():</span>
     <span class="n">calculator</span> <span class="o">=</span> <span class="n">SimpleCalculator</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">calculator</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
@@ -516,7 +516,7 @@ tests/test_main.py:36: AttributeError
 </code></pre></div>
 
 <p>Now that you understood the TDD process, and that you know you should avoid over-engineering, you can also skip some of the passages that we run through in the previous sections. A good solution for this test is</p>
-<div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">sub</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+<div class="highlight"><span class="filename">simple_calculator/main.py</span><pre><span></span><code>    <span class="k">def</span> <span class="nf">sub</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">a</span> <span class="o">-</span> <span class="n">b</span>
 </code></pre></div>
 
@@ -525,7 +525,7 @@ tests/test_main.py:36: AttributeError
 <h2 id="step-5-multiplication">Step 5 - Multiplication<a class="headerlink" href="#step-5-multiplication" title="Permanent link">&para;</a></h2>
 <p>It's time to move to multiplication, which has many similarities to addition. The requirements state that we have to provide a function to multiply numbers and that this function shall allow us to multiply multiple arguments. In TDD you should try to tackle problems one by one, possibly dividing a bigger requirement in multiple smaller ones.</p>
 <p>In this case the first test can be the multiplication of two numbers, as it was for addition.</p>
-<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_mul_two_numbers</span><span class="p">():</span>
+<div class="highlight"><span class="filename">tests/test_main.py</span><pre><span></span><code><span class="k">def</span> <span class="nf">test_mul_two_numbers</span><span class="p">():</span>
     <span class="n">calculator</span> <span class="o">=</span> <span class="n">SimpleCalculator</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">calculator</span><span class="o">.</span><span class="n">mul</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
@@ -548,13 +548,13 @@ tests/test_main.py:44: AttributeError
 <p>We face now a classical TDD dilemma. Shall we implement the solution to this test as a function that multiplies two numbers, knowing that the next test will invalidate it, or shall we already consider that the target is that of implementing a variadic function and thus use <code>*args</code> directly?</p>
 <p>In this case the choice is not really important, as we are dealing with very simple functions. In other cases, however, it might be worth recognising that we are facing the same issue we solved in a similar case and try to implement a smarter solution from the very beginning. In general, however, you should not implement anything that you don't plan to test in one of the next few tests that you will write.</p>
 <p>If we decide to follow the strict TDD, that is implement the simplest first solution, the bare minimum code that passes the test would be</p>
-<div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">mul</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+<div class="highlight"><span class="filename">simple_calculator/main.py</span><pre><span></span><code>    <span class="k">def</span> <span class="nf">mul</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">a</span> <span class="o">*</span> <span class="n">b</span>
 </code></pre></div>
 
 <p><strong>Git tag:</strong> <a href="https://github.com/lgiordani/simple_calculator/tree/step-5-multiply-two-numbers">step-5-multiply-two-numbers</a></p>
 <p>To show you how to deal with redundant tests I will in this case choose the second path, and implement a smarter solution for the present test. Keep in mind however that it is perfectly correct to implement that solution shown above and then move on and try to solve the problem of multiple arguments later.</p>
-<p>The problem of multiplying a tuple of numbers can be solved in Python using the <code>reduce</code> function. This function implements a typical algorithm that "reduces" an array to a single number, applying a given function. The algorithm steps are the following</p>
+<p>The problem of multiplying a tuple of numbers can be solved in Python using the function <code>reduce</code>. This function implements a typical algorithm that "reduces" an array to a single number, applying a given function. The algorithm steps are the following</p>
 <ol>
 <li>Apply the function to the first two elements</li>
 <li>Remove the first two elements from the array</li>
@@ -582,8 +582,8 @@ tests/test_main.py:44: AttributeError
 <li>Apply the function to 384 (result of the previous step) and 3 (first element of the array). The new result is <code>384 * 3</code>, that is 1152</li>
 <li>Remove the first element, the array is now empty and the procedure ends</li>
 </ol>
-<p>Going back to our class <code>SimpleCalculator</code>, we might import <code>reduce</code> from the <code>functools</code> module and use it on the <code>args</code> array. We need to provide a function that we can define in the <code>mul</code> function itself.</p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">reduce</span>
+<p>Going back to our class <code>SimpleCalculator</code>, we might import <code>reduce</code> from the module <code>functools</code> and use it on the array <code>args</code>. We need to provide a function that we can define in the function <code>mul</code> itself.</p>
+<div class="highlight"><span class="filename">simple_calculator/main.py</span><pre><span></span><code><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">reduce</span>
 
 
 <span class="k">class</span> <span class="nc">SimpleCalculator</span><span class="p">:</span>
@@ -597,9 +597,9 @@ tests/test_main.py:44: AttributeError
 </code></pre></div>
 
 <p><strong>Git tag:</strong> <a href="https://github.com/lgiordani/simple_calculator/tree/step-5-multiply-two-numbers-smart">step-5-multiply-two-numbers-smart</a></p>
-<p>More information about the <code>reduce</code> algorithm can be found on the MapReduce Wikipedia page <a href="https://en.wikipedia.org/wiki/MapReduce">https://en.wikipedia.org/wiki/MapReduce</a>. The Python function documentation can be found at <a href="https://docs.python.org/3.6/library/functools.html#functools.reduce">https://docs.python.org/3.6/library/functools.html#functools.reduce</a>.</p>
+<p>More information about the algorithm <code>reduce</code> can be found on the MapReduce Wikipedia page <a href="https://en.wikipedia.org/wiki/MapReduce">https://en.wikipedia.org/wiki/MapReduce</a>. The Python function documentation can be found at <a href="https://docs.python.org/3.6/library/functools.html#functools.reduce">https://docs.python.org/3.6/library/functools.html#functools.reduce</a>.</p>
 <p>The above code makes the test suite pass, so we can move on and address the next problem. As happened with addition we cannot properly test that the function accepts a potentially infinite number of arguments, so we can test a reasonably high number of inputs.</p>
-<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_mul_many_numbers</span><span class="p">():</span>
+<div class="highlight"><span class="filename">tests/test_main.py</span><pre><span></span><code><span class="k">def</span> <span class="nf">test_mul_many_numbers</span><span class="p">():</span>
     <span class="n">numbers</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
 
     <span class="n">calculator</span> <span class="o">=</span> <span class="n">SimpleCalculator</span><span class="p">()</span>
@@ -622,9 +622,9 @@ tests/test_main.py:44: AttributeError
 <p>Previously, I introduced the concept of refactoring, which means changing the code without altering the results. How can you be sure you are not altering the behaviour of your code? Well, this is what the tests are for. If the new code keeps passing the test suite you can be sure that you didn't remove any feature.</p>
 <p>In theory, refactoring shouldn't add any new behaviour to the code, as it should be an idempotent transformation. There is no real practical way to check this, and we will not bother with it now. You should be concerned with this if you are discussing security, as your code shouldn't add any entry point you don't want to be there. In this case you will need tests that check the absence of features instead of their presence.</p>
 <p>This means that if you have no tests you shouldn't refactor. But, after all, if you have no tests you shouldn't have any code, either, so refactoring shouldn't be a problem you have. If you have some code without tests (I know you have it, I do), you should seriously consider writing tests for it, at least before changing it. More on this in a later section.</p>
-<p>For the time being, let's see if we can work on the code of the class <code>SimpleCalculator</code> without altering the results. I do not really like the definition of the function <code>mul2</code> inside the <code>mul</code> one. It is obviously perfectly fine and valid, but for the sake of example I will pretend we have to get rid of it.</p>
-<p>Python provides support for anonymous functions with the <code>lambda</code> operator, so I might replace the <code>mul</code> code with</p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">reduce</span>
+<p>For the time being, let's see if we can work on the code of the class <code>SimpleCalculator</code> without altering the results. I do not really like the definition of the function <code>mul2</code> inside the function <code>mul</code>. It is obviously perfectly fine and valid, but for the sake of example I will pretend we have to get rid of it.</p>
+<p>Python provides support for anonymous functions with the operator <code>lambda</code>, so I might replace the code of <code>mul</code> with</p>
+<div class="highlight"><span class="filename">simple_calculator/main.py</span><pre><span></span><code><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">reduce</span>
 
 
 <span class="k">class</span> <span class="nc">SimpleCalculator</span><span class="p">:</span>

@@ -18,7 +18,7 @@
 		<script src="https://kit.fontawesome.com/15214b60ba.js" crossorigin="anonymous"></script>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,400italic,600italic|Roboto+Slab:400,700">
 
-        <link rel="stylesheet" href="/theme/css/main.min.css?59943907">
+        <link rel="stylesheet" href="/theme/css/main.min.css?2b9f5c19">
 
         
         <link href="/images/global/favicon.jpg" rel="icon">
@@ -116,12 +116,11 @@
   <section id="content">
     <p>In this series of posts I explore the development of a Flask project with a setup that is built with efficiency and tidiness in mind, using TDD, Docker and Postgres.</p>
 <h2 id="catch-up">Catch-up<a class="headerlink" href="#catch-up" title="Permanent link">&para;</a></h2>
-<p>In the <a href="https://www.thedigitalcatonline.com/blog/2020/07/05/flask-project-setup-tdd-docker-postgres-and-more-part-1/">previous post</a> we started from an empty project and learned how to add the minimal code to run a Flask project. Then we created a static configuration file and a management script that wraps the <code>flask</code> and <code>docker-compose</code> commands to run the application with a specific configuration</p>
+<p>In the <a href="https://www.thedigitalcatonline.com/blog/2020/07/05/flask-project-setup-tdd-docker-postgres-and-more-part-1/">previous post</a> we started from an empty project and learned how to add the minimal code to run a Flask project. Then we created a static configuration file and a management script that wraps the coomands <code>flask</code> and <code>docker-compose</code> to run the application with a specific configuration</p>
 <p>In this post I will show you how to run a production-ready database alongside your code in a Docker container, both in your development setup and for the tests.</p>
 <h2 id="step-1-adding-a-database-container">Step 1 - Adding a database container<a class="headerlink" href="#step-1-adding-a-database-container" title="Permanent link">&para;</a></h2>
 <p>A database is an integral part of a web application, so in this step I will add my database of choice, Postgres, to the project setup. To do this I need to add a service in the docker-compose configuration file</p>
-<p>File: <code>docker/development.yml</code></p>
-<div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span> <span class="s">&#39;3.4&#39;</span>
+<div class="highlight"><span class="filename">docker/development.yml</span><pre><span></span><code><span class="nt">version</span><span class="p">:</span> <span class="s">&#39;3.4&#39;</span>
 
 <span class="nt">services</span><span class="p">:</span>
   <span class="nt">db</span><span class="p">:</span>
@@ -153,10 +152,9 @@
 </code></pre></div>
 
 <p>The variables starting with <code>POSTGRES_</code> are requested by the PostgreSQL Docker image. In particular, remember that <code>POSTGRESQL_DB</code> is the database that gets created by default when you create the image, and also the one that contains data on other databases as well, so for the application we usually want to use a different one.</p>
-<p>Notice also that for the <code>db</code> service I'm creating a persistent volume, so that the content of the database is not lost when we tear down the container. For this service I'm using the default image, so no build step is needed.</p>
+<p>Notice also that for the service <code>db</code> I'm creating a persistent volume, so that the content of the database is not lost when we tear down the container. For this service I'm using the default image, so no build step is needed.</p>
 <p>To orchestrate this setup we need to add those variables to the JSON configuration</p>
-<p>File: <code>config/development.json</code></p>
-<div class="highlight"><pre><span></span><code><span class="p">[</span>
+<div class="highlight"><span class="filename">config/development.json</span><pre><span></span><code><span class="p">[</span>
   <span class="p">{</span>
     <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;FLASK_ENV&quot;</span><span class="p">,</span>
     <span class="nt">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;development&quot;</span>
@@ -189,23 +187,21 @@
 </code></pre></div>
 
 <p>These are all development variables so there are no secrets. In production we will need a way to keep the secrets in a safe place and convert them into environment variables. The AWS Secret Manager for example can directly map secrets into environment variables passed to the containers, saving you from having to explicitly connect to the service with the API.</p>
-<p>We can run the <code>./manage.py compose up -d</code> and <code>./manage.py compose down</code> here to check that the database container works properly. Please note that the first time you run the command <code>compose -d</code> Docker will create the volume and build the Postgres image, and this might take some time.</p>
+<p>We can run the commands <code>./manage.py compose up -d</code> and <code>./manage.py compose down</code> here to check that the database container works properly. Please note that the first time you run the command <code>compose -d</code> Docker will create the volume and build the Postgres image, and this might take some time.</p>
 <div class="highlight"><pre><span></span><code>CONTAINER ID  IMAGE       COMMAND                 ...  PORTS                   NAMES
 9b5828dccd1c  docker_web  &quot;flask run --host 0.…&quot;  ...  0.0.0.0:5000-&gt;5000/tcp  docker_web_1
 4440a18a1527  postgres    &quot;docker-entrypoint.s…&quot;  ...  0.0.0.0:5432-&gt;5432/tcp  docker_db_1
 </code></pre></div>
 
 <p>Now we need to connect the application to the database and to do this we can leverage flask-postgresql. As we will use this at every stage of the life of the application, the requirement goes among the production ones. We also need psycopg2 as it is the library used to connect to Postgres.</p>
-<p>File: <code>requirements/production.txt</code></p>
-<div class="highlight"><pre><span></span><code>Flask
+<div class="highlight"><span class="filename">requirements/production.txt</span><pre><span></span><code>Flask
 flask-sqlalchemy
 psycopg2
 </code></pre></div>
 
 <p>Remember to run <code>pip install -r requirements/development.txt</code> to install the requirements locally and <code>./manage.py compose build web</code> to rebuild the image.</p>
-<p>At this point I need to create a connection string in the configuration of the application. The connection string parameters come fromt he same environment variables used to spin up the <code>db</code> container</p>
-<p>File: <code>application/config.py</code></p>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">os</span>
+<p>At this point I need to create a connection string in the configuration of the application. The connection string parameters come fromt he same environment variables used to spin up the container <code>db</code></p>
+<div class="highlight"><span class="filename">application/config.py</span><pre><span></span><code><span class="kn">import</span> <span class="nn">os</span>
 
 <span class="n">basedir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
 
@@ -240,8 +236,7 @@ psycopg2
 </code></pre></div>
 
 <p>As you can see, here I use the variable <code>APPLICATION_DB</code> and not <code>POSTGRES_DB</code>, so I need to specify that as well in the config file</p>
-<p>File: <code>config/development.json</code></p>
-<div class="highlight"><pre><span></span><code><span class="p">[</span>
+<div class="highlight"><span class="filename">config/development.json</span><pre><span></span><code><span class="p">[</span>
   <span class="p">{</span>
     <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;FLASK_ENV&quot;</span><span class="p">,</span>
     <span class="nt">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;development&quot;</span>
@@ -278,8 +273,7 @@ psycopg2
 </code></pre></div>
 
 <p>At this point the application container needs to access some of the Postgres environment variables and the <code>APPLICATION_DB</code> one</p>
-<p>File: <code>docker/development.yml</code></p>
-<div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span> <span class="s">&#39;3.4&#39;</span>
+<div class="highlight"><span class="filename">docker/development.yml</span><pre><span></span><code><span class="nt">version</span><span class="p">:</span> <span class="s">&#39;3.4&#39;</span>
 
 <span class="nt">services</span><span class="p">:</span>
   <span class="nt">db</span><span class="p">:</span>
@@ -352,14 +346,12 @@ postgres=#
 </ul>
 <h2 id="step-2-connecting-the-application-and-the-database">Step 2 - Connecting the application and the database<a class="headerlink" href="#step-2-connecting-the-application-and-the-database" title="Permanent link">&para;</a></h2>
 <p>To connect the Flask application with the database running in the container I need to initialise an <code>SQLAlchemy</code> object and add it to the application factory.</p>
-<p>File: <code>application/models.py</code></p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">flask_sqlalchemy</span> <span class="kn">import</span> <span class="n">SQLAlchemy</span>
+<div class="highlight"><span class="filename">application/models.py</span><pre><span></span><code><span class="kn">from</span> <span class="nn">flask_sqlalchemy</span> <span class="kn">import</span> <span class="n">SQLAlchemy</span>
 
 <span class="n">db</span> <span class="o">=</span> <span class="n">SQLAlchemy</span><span class="p">()</span>
 </code></pre></div>
 
-<p>File: <code>application/app.py</code></p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span>
+<div class="highlight"><span class="filename">application/app.py</span><pre><span></span><code><span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span>
 
 
 <span class="k">def</span> <span class="nf">create_app</span><span class="p">(</span><span class="n">config_name</span><span class="p">):</span>
@@ -384,26 +376,23 @@ postgres=#
 <p>A pretty standard way to manage the database in Flask is to use flask-migrate, that adds some commands that allow us to create migrations and apply them.</p>
 <p>With flask-migrate you have to create the migrations folder once and for all with <code>flask db init</code> and then, every time you change your models, run <code>flask db migrate -m "Some message"</code> and <code>flask db upgrade</code>. As both <code>db init</code> and <code>db migrate</code> create files in the current directory we now face a problem that every Docker-based setup has to face: file permissions.</p>
 <p>The situation is the following: the application is running in the Docker container as root, and there is no connection between the users namespace in the container and that of the host. The result is that if the Docker container creates files in a directory that is mounted from the host (like the one that contains the application code in our example), those files will result as belonging to <code>root</code>. While this doesn't make impossible to work (we usually can become <code>root</code> on our devlopment machines), it is annoying to say the least. The solution is to run those commands from outside the container, but this requires the Flask application to be configured.</p>
-<p>Fortunately I wrapped the <code>flask</code> command in the <code>manage.py</code> script, which loads all the required environment variables. Let's add falsk-migrate to the production requirements, together </p>
-<p>File: <code>requirements/production.txt</code></p>
-<div class="highlight"><pre><span></span><code>Flask
+<p>Fortunately I wrapped the command <code>flask</code> in the script <code>manage.py</code>, which loads all the required environment variables. Let's add falsk-migrate to the production requirements, together </p>
+<div class="highlight"><span class="filename">requirements/production.txt</span><pre><span></span><code>Flask
 flask-sqlalchemy
 psycopg2
 flask-migrate
 </code></pre></div>
 
-<p>Remember to run <code>pip install -r requirements/development.txt</code> to install the requirements locally and <code>./manage.py compose build web</code> to rebuild the image. Please note that you need the <code>pg_config</code> executable and some other development tools installed in your system. If you get an error message from <code>pip</code> please check the documentation of your operating system to find out what to do to install the required packages. For Ubuntu Linux I had to run <code>sudo apt install build-essential python3-dev libpq-dev</code>.</p>
+<p>Remember to run <code>pip install -r requirements/development.txt</code> to install the requirements locally and <code>./manage.py compose build web</code> to rebuild the image. Please note that you need the executable <code>pg_config</code> and some other development tools installed in your system. If you get an error message from <code>pip</code> please check the documentation of your operating system to find out what to do to install the required packages. For Ubuntu Linux I had to run <code>sudo apt install build-essential python3-dev libpq-dev</code>.</p>
 <p>Now we can initialise a <code>Migrate</code> object and add it to the application factory</p>
-<p>File: <code>application/models.py</code></p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">flask_sqlalchemy</span> <span class="kn">import</span> <span class="n">SQLAlchemy</span>
+<div class="highlight"><span class="filename">application/models.py</span><pre><span></span><code><span class="kn">from</span> <span class="nn">flask_sqlalchemy</span> <span class="kn">import</span> <span class="n">SQLAlchemy</span>
 <span class="kn">from</span> <span class="nn">flask_migrate</span> <span class="kn">import</span> <span class="n">Migrate</span>
 
 <span class="n">db</span> <span class="o">=</span> <span class="n">SQLAlchemy</span><span class="p">()</span>
 <span class="n">migrate</span> <span class="o">=</span> <span class="n">Migrate</span><span class="p">()</span>
 </code></pre></div>
 
-<p>File: <code>application/app.py</code></p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span>
+<div class="highlight"><span class="filename">application/app.py</span><pre><span></span><code><span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span>
 
 
 <span class="k">def</span> <span class="nf">create_app</span><span class="p">(</span><span class="n">config_name</span><span class="p">):</span>
@@ -458,18 +447,16 @@ flask-migrate
 <p>Another advantage of this setup is it that we might need other things during the test, e.g. Celery, other databases, other servers. They can all be created through the docker-compose file.</p>
 <p>Generally speaking testing is an umbrella under which many different things can happen. As I will use pytest I can run the full suite, but I might want to select specific tests, mentioning a single file or using the powerful <code>-k</code> option that allows me to select tests by pattern-matching their name. For this reason I want to map the management command line to that of pytest.</p>
 <p>Let's add pytest to the testing requirements</p>
-<p>File: <code>requirements/testing.txt</code></p>
-<div class="highlight"><pre><span></span><code><span class="o">-</span><span class="n">r</span> <span class="n">production</span><span class="p">.</span><span class="n">txt</span>
+<div class="highlight"><span class="filename">requirements/testing.txt</span><pre><span></span><code>-r production.txt
 
-<span class="n">pytest</span>
-<span class="n">coverage</span>
-<span class="n">pytest</span><span class="o">-</span><span class="n">cov</span>
+pytest
+coverage
+pytest-cov
 </code></pre></div>
 
 <p>As you can see I also use the coverage plugin to keep an eye on how well I cover the code with the tests. Remember to run <code>pip install -r requirements/development.txt</code> to install the requirements locally and <code>./manage.py compose build web</code> to rebuild the image.</p>
 <p>Warning: before you change the script <code>manage.py</code> make sure you terminate all the running containers running <code>./manage.py compose down</code>. The next version will change the naming convention for containers and you might end up with some stale containers and run into issues with the database.</p>
-<p>File: <code>manage.py</code></p>
-<div class="highlight"><pre><span></span><code><span class="ch">#! /usr/bin/env python</span>
+<div class="highlight"><span class="filename">manage.py</span><pre><span></span><code><span class="ch">#! /usr/bin/env python</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">json</span>
@@ -579,12 +566,11 @@ flask-migrate
 <p>Notable changes are</p>
 <ul>
 <li>The environment configuration code is now in the function <code>configure_app</code>. This allows me to force the variable <code>APPLICATION_CONFIG</code> inside the script and then configure the environment, which saves me from having to call tests with <code>APPLICATION_CONFIG=testing flask test</code>.</li>
-<li>Both commands <code>flask</code> and <code>compose</code> use the <code>development</code> configuration. Since that is the default value of the <code>APPLICATION_CONFIG</code> variable they just have to call the <code>configure_app</code> function.</li>
-<li>The docker-compose command line is needed both in the <code>compose</code> and in the <code>test</code> commands, so I isolated some code into a function called <code>docker_compose_cmdline</code> which returns a list as needed by <code>subprocess</code> functions. The command line now uses also the <code>-p</code> (project name) option to give a prefix to the containers. This way we can run tests while running the development server.</li>
-<li>The <code>test</code> command forces <code>APPLICATION_CONFIG</code> to be <code>testing</code>, which loads the file <code>config/testing.json</code>, then runs docker-compose using the file <code>docker/testing.yml</code> (both file have not bee created yet), runs the pytest command line, and tears down the testing database container. Before running the tests the script waits for the service to be available. Postgres doesn't allow connection until the database is ready to accept them.</li>
+<li>Both commands <code>flask</code> and <code>compose</code> use the configuration <code>development</code>. Since that is the default value of the variable <code>APPLICATION_CONFIG</code> they just have to call the function <code>configure_app</code>.</li>
+<li>The docker-compose command line is needed both in the commands <code>compose</code> and in <code>test</code>, so I isolated some code into a function called <code>docker_compose_cmdline</code> which returns a list as needed by <code>subprocess</code> functions. The command line now uses also the option <code>-p</code> (project name) to give a prefix to the containers. This way we can run tests while running the development server.</li>
+<li>The command <code>test</code> forces <code>APPLICATION_CONFIG</code> to be <code>testing</code>, which loads the file <code>config/testing.json</code>, then runs docker-compose using the file <code>docker/testing.yml</code> (both file have not bee created yet), runs the pytest command line, and tears down the testing database container. Before running the tests the script waits for the service to be available. Postgres doesn't allow connection until the database is ready to accept them.</li>
 </ul>
-<p>File: <code>config/testing.json</code></p>
-<div class="highlight"><pre><span></span><code><span class="p">[</span>
+<div class="highlight"><span class="filename">config/testing.json</span><pre><span></span><code><span class="p">[</span>
   <span class="p">{</span>
     <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;FLASK_ENV&quot;</span><span class="p">,</span>
     <span class="nt">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;production&quot;</span>
@@ -620,10 +606,9 @@ flask-migrate
 <span class="p">]</span>
 </code></pre></div>
 
-<p>Note that here I specified <code>5433</code> for the <code>POSTGRES_PORT</code>. This allows us to spin up the test database container while the development one is running, as that will use port <code>5432</code> and you can't have two different containers using the same port on the host. A more general solution could be to leave Docker pick a random host port for the container and then use that, but this requires a bit more code to be properly implemented, so I will come back to this problem when setting up the scenarios.</p>
+<p>Note that here I specified the value <code>5433</code> for <code>POSTGRES_PORT</code>. This allows us to spin up the test database container while the development one is running, as that will use port <code>5432</code> and you can't have two different containers using the same port on the host. A more general solution could be to leave Docker pick a random host port for the container and then use that, but this requires a bit more code to be properly implemented, so I will come back to this problem when setting up the scenarios.</p>
 <p>The last piece of setup that we need is the orchestration configuration for docker-compose</p>
-<p>File: <code>docker/testing.yml</code></p>
-<div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span> <span class="s">&#39;3.4&#39;</span>
+<div class="highlight"><span class="filename">docker/testing.yml</span><pre><span></span><code><span class="nt">version</span><span class="p">:</span> <span class="s">&#39;3.4&#39;</span>
 
 <span class="nt">services</span><span class="p">:</span>
   <span class="nt">db</span><span class="p">:</span>
@@ -676,8 +661,7 @@ flask-migrate
 <h2 id="step-4-initialise-the-testing-database">Step 4 - Initialise the testing database<a class="headerlink" href="#step-4-initialise-the-testing-database" title="Permanent link">&para;</a></h2>
 <p>When you develop a web application and then run it in production, you typically create the database once and then upgrade it through migrations. When running tests we need to create the database every time, so I need to add a way to run SQL commands on the testing database before I run pytest.</p>
 <p>As running sql commands directly on the the database is often useful I will create a function that wraps the boilerplate for the connection. The command that creates the initial database at that point will be trivial.</p>
-<p>File: <code>manage.py</code></p>
-<div class="highlight"><pre><span></span><code><span class="ch">#! /usr/bin/env python</span>
+<div class="highlight"><span class="filename">manage.py</span><pre><span></span><code><span class="ch">#! /usr/bin/env python</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">json</span>
@@ -819,10 +803,10 @@ flask-migrate
     <span class="n">cli</span><span class="p">()</span>
 </code></pre></div>
 
-<p>As you can see I took the opportunity to write the <code>create_initial_db</code> command as well, that just runs the very same SQL command that creates the testing database, but in any configuration I will use. </p>
-<p>Before moving on I think it's time to refactor the <code>manage.py</code> file. Refactoring is not mandatory, but I feel like some parts of the script are not generic enough, and when I will add the scenarios I will definitely need my functions to be flexible.</p>
+<p>As you can see I took the opportunity to write the command <code>create_initial_db</code> as well, that just runs the very same SQL command that creates the testing database, but in any configuration I will use. </p>
+<p>Before moving on I think it's time to refactor the file <code>manage.py</code>. Refactoring is not mandatory, but I feel like some parts of the script are not generic enough, and when I will add the scenarios I will definitely need my functions to be flexible.</p>
 <p>The new script is</p>
-<div class="highlight"><pre><span></span><code><span class="ch">#! /usr/bin/env python</span>
+<div class="highlight"><span class="filename">manage.py</span><pre><span></span><code><span class="ch">#! /usr/bin/env python</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">json</span>
@@ -988,8 +972,8 @@ flask-migrate
 <p>Notable changes:</p>
 <ul>
 <li>I created two new functions <code>app_config_file</code> and <code>docker_compose_file</code> that encapsulate the creation of the file paths.</li>
-<li>I isolated the code that waits for a message in the database container logs, creating the <code>wait_for_logs</code> function.</li>
-<li>The <code>docker_compose_cmdline</code> now receives a string and converts it into a list internally. This way expressing commands is more natural, as it doesn't require the ugly list syntax that subprocess works with.</li>
+<li>I isolated the code that waits for a message in the database container logs, creating the function <code>wait_for_logs</code>.</li>
+<li>The command <code>docker_compose_cmdline</code> now receives a string and converts it into a list internally. This way expressing commands is more natural, as it doesn't require the ugly list syntax that subprocess works with.</li>
 </ul>
 <h4 id="git-commit_3">Git commit<a class="headerlink" href="#git-commit_3" title="Permanent link">&para;</a></h4>
 <p>You can see the changes made in this step through <a href="https://github.com/lgiordani/flask_project_setup/commit/2ece6780955de7694d7b31ab31151181044440a9">this Git commit</a> or <a href="https://github.com/lgiordani/flask_project_setup/tree/2ece6780955de7694d7b31ab31151181044440a9">browse the files</a>.</p>
@@ -999,8 +983,7 @@ flask-migrate
 </ul>
 <h2 id="step-5-fixtures-for-tests">Step 5 - Fixtures for tests<a class="headerlink" href="#step-5-fixtures-for-tests" title="Permanent link">&para;</a></h2>
 <p>Pytest uses fixtures for tests, so we should prepare some basic ones that will be generally useful. First let's include pytest-flask, which provides already some basic fixtures</p>
-<p>File: <code>requirements/testing.txt</code></p>
-<div class="highlight"><pre><span></span><code>-r production.txt
+<div class="highlight"><span class="filename">requirements/testing.txt</span><pre><span></span><code>-r production.txt
 
 pytest
 coverage
@@ -1008,9 +991,8 @@ pytest-cov
 pytest-flask
 </code></pre></div>
 
-<p>Then add the <code>app</code> and the <code>database</code> fixtures to the <code>tests/conftest.py</code> file. The first is required by pytest-flask itself (it's used by other fixtures) and the second one is useful every time you need to interact with the database itself.</p>
-<p>File: <code>tests/conftest.py</code></p>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">pytest</span>
+<p>Then add the fixtures <code>app</code> and <code>database</code> to the file <code>tests/conftest.py</code>. The first is required by pytest-flask itself (it's used by other fixtures) and the second one is useful every time you need to interact with the database itself.</p>
+<div class="highlight"><span class="filename">tests/conftest.py</span><pre><span></span><code><span class="kn">import</span> <span class="nn">pytest</span>
 
 <span class="kn">from</span> <span class="nn">application.app</span> <span class="kn">import</span> <span class="n">create_app</span>
 <span class="kn">from</span> <span class="nn">application.models</span> <span class="kn">import</span> <span class="n">db</span>
@@ -1033,7 +1015,7 @@ pytest-flask
 </code></pre></div>
 
 <p>Remember to create the empty file <code>tests/__init__.py</code> to make pytest correctly load the code.</p>
-<p>As you can see, the <code>database</code> fixture uses the <code>drop_all</code> and <code>create_all</code> methods to reset the database. The reason is that this fixture is recreated for each function, and we can't be sure a previous function left the database clean. As a matter of fact, we might be almost sure of the opposite.</p>
+<p>As you can see, the fixture <code>database</code> uses the methods <code>drop_all</code> and <code>create_all</code> to reset the database. The reason is that this fixture is recreated for each function, and we can't be sure a previous function left the database clean. As a matter of fact, we might be almost sure of the opposite.</p>
 <h4 id="git-commit_4">Git commit<a class="headerlink" href="#git-commit_4" title="Permanent link">&para;</a></h4>
 <p>You can see the changes made in this step through <a href="https://github.com/lgiordani/flask_project_setup/commit/ea2702fc9805bbe99687561161d04691a4b4be13">this Git commit</a> or <a href="https://github.com/lgiordani/flask_project_setup/tree/ea2702fc9805bbe99687561161d04691a4b4be13">browse the files</a>.</p>
 <h4 id="resources_4">Resources<a class="headerlink" href="#resources_4" title="Permanent link">&para;</a></h4>
@@ -1045,8 +1027,7 @@ pytest-flask
 <h2 id="bonus-step-a-full-tdd-example">Bonus step - A full TDD example<a class="headerlink" href="#bonus-step-a-full-tdd-example" title="Permanent link">&para;</a></h2>
 <p>Before wrapping up this post, I want to give you a full example of the TDD process that I would follow given the current state of the setup, which is already complete enough to start the development of an application. Let's pretend my goal is that of adding a <code>User</code> model that can be created with an <code>id</code> (primary key) and an <code>email</code> fields.</p>
 <p>First of all I write a test that creates a user in the database and then retrieves it, checking its attributes</p>
-<p>File: <code>tests/test_user.py</code></p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">application.models</span> <span class="kn">import</span> <span class="n">User</span>
+<div class="highlight"><span class="filename">tests/test_user.py</span><pre><span></span><code><span class="kn">from</span> <span class="nn">application.models</span> <span class="kn">import</span> <span class="n">User</span>
 
 
 <span class="k">def</span> <span class="nf">test__create_user</span><span class="p">(</span><span class="n">database</span><span class="p">):</span>
@@ -1060,7 +1041,7 @@ pytest-flask
     <span class="k">assert</span> <span class="n">user</span><span class="o">.</span><span class="n">email</span> <span class="o">==</span> <span class="n">email</span>
 </code></pre></div>
 
-<p>Running this test results in an error, because the <code>User</code> model does not exist</p>
+<p>Running this test results in an error, because the module <code>User</code> does not exist</p>
 <div class="highlight"><pre><span></span><code>$ ./manage.py <span class="nb">test</span>
 Creating network <span class="s2">&quot;testing_default&quot;</span> with the default driver
 Creating testing_db_1 ... <span class="k">done</span>
@@ -1107,8 +1088,7 @@ $
 </code></pre></div>
 
 <p>I won't show here all the steps of the strict TDD methodology, and implement directly the final solution, which is</p>
-<p>File: <code>application/models.py</code></p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">flask_sqlalchemy</span> <span class="kn">import</span> <span class="n">SQLAlchemy</span>
+<div class="highlight"><span class="filename">application/models.py</span><pre><span></span><code><span class="kn">from</span> <span class="nn">flask_sqlalchemy</span> <span class="kn">import</span> <span class="n">SQLAlchemy</span>
 <span class="kn">from</span> <span class="nn">flask_migrate</span> <span class="kn">import</span> <span class="n">Migrate</span>
 
 <span class="n">db</span> <span class="o">=</span> <span class="n">SQLAlchemy</span><span class="p">()</span>
@@ -1152,7 +1132,7 @@ Removing network testing_default
 $ 
 </code></pre></div>
 
-<p>Please not that this is a very simple example and that in a real case I would add some other tests before accepting this code. In particular we should check that the <code>email</code> field can be empty, and maybe also test some validation on that field.</p>
+<p>Please not that this is a very simple example and that in a real case I would add some other tests before accepting this code. In particular we should check that the field <code>email</code> can be empty, and maybe also test some validation on that field.</p>
 <p>Once we are satisfied by the code we can generate the migration in the database. Spin up the development environment with</p>
 <div class="highlight"><pre><span></span><code>$ ./manage.py compose up -d
 </code></pre></div>
@@ -1233,7 +1213,7 @@ Indexes:
 <h2 id="final-words">Final words<a class="headerlink" href="#final-words" title="Permanent link">&para;</a></h2>
 <p>I hope this post already showed you why a good setup can make the difference. The project is clean and wrapping the command in the management script plus the centralised config proved to be a good choice as it allowed me to solve the problem of migrations and testing in (what I think is) an elegant way. In the next post I'll show you how to easily create scenarios where you can test queries with only specific data in the database. If you find my posts useful please share them with whoever you thing might be interested.</p>
 <h2 id="updates">Updates<a class="headerlink" href="#updates" title="Permanent link">&para;</a></h2>
-<p>2020-07-13 [Vlad Pavlichek}(https://github.com/Alladin9393) found and fixed a typo in the post, where <code>manage.py</code> was missing the <code>.py</code> extension. Thanks Vlad!</p>
+<p>2020-07-13 [Vlad Pavlichek}(https://github.com/Alladin9393) found and fixed a typo in the post, where <code>manage.py</code> was missing the extension <code>.py</code>. Thanks Vlad!</p>
 <h2 id="feedback">Feedback<a class="headerlink" href="#feedback" title="Permanent link">&para;</a></h2>
 <p>Feel free to reach me on <a href="https://twitter.com/thedigicat">Twitter</a> if you have questions. The <a href="https://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues">GitHub issues</a> page is the best place to submit corrections.</p>
   </section>
