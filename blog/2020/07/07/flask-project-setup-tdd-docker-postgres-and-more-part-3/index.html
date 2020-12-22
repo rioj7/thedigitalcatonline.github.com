@@ -119,9 +119,9 @@
 <p>In this post I will show you how to easily create scenarios, that is databases created on the fly with custom data, so that it is possible to test queries in isolation, either with the Flask application or with the command line. I will also show you how to define a configuration for production and give some hints for the deployment.</p>
 <h2 id="step-1-creating-scenarios">Step 1 - Creating scenarios<a class="headerlink" href="#step-1-creating-scenarios" title="Permanent link">&para;</a></h2>
 <p>The idea of scenarios is simple. Sometimes you need to investigate specific use cases for bugs, or maybe increase the performances of some database queries, and you might need to do this on a customised database. This is a scenario, a Python file that populates the database with a specific set of data and that allows you to run the application or the database shell on it.</p>
-<p>Often the development database is a copy of the production one, maybe with sensitive data stripped to avoid leaking private information, and while this gives us a realistic case where to test queries (e.g. how does the query perform on 1 million lines?) it might not help during the initial investigations, where you need to have all the data in fron of you to properly understand what happens. Whoever learned how joins work in relational databases understands what I mean here.</p>
+<p>Often the development database is a copy of the production one, maybe with sensitive data stripped to avoid leaking private information, and while this gives us a realistic case where to test queries (e.g. how does the query perform on 1 million lines?) it might not help during the initial investigations, where you need to have all the data in front of you to properly understand what happens. Whoever learned how joins work in relational databases understands what I mean here.</p>
 <p>In principle, to create a scenario we just need to spin up an empty database and to run the scenario code against it. In practice, things are not much more complicated, but there are a couple of minor issues that we need to solve.</p>
-<p>First, I am already running a database for the development and one for the testing. The second is ephemeral, but I decided to setup the project so that I can run the tests while the development database is up, and the way I did it was using port 5432 (the standard Postgres one) for development and 5433 for testing. Spinning up scenarios adds more databases to the equation. Clearly I do not expect to run 5 scenrios at the same time while running the development and the test databases, but I make myself a rule to make something generic as soon I do it for the third time.</p>
+<p>First, I am already running a database for the development and one for the testing. The second is ephemeral, but I decided to setup the project so that I can run the tests while the development database is up, and the way I did it was using port 5432 (the standard Postgres one) for development and 5433 for testing. Spinning up scenarios adds more databases to the equation. Clearly I do not expect to run 5 scenarios at the same time while running the development and the test databases, but I make myself a rule to make something generic as soon I do it for the third time.</p>
 <p>This means that I won't create a database for a scenario on port 5434 and will instead look for a more generic solution. This is offered me by the Docker networking model, where I can map a container port to the host but avoid assigning the destination port, and it will be chose randomly by Docker itself among the unprivileged ones. This means that I can create a Postgres container mapping port 5432 (the port in the container) and having Docker connect it to port 32838 in the host (for example). As long as the application knows which port to use this is absolutely the same as using port 5432.</p>
 <p>Unfortunately the Docker interface is not extremely script-friendly when it comes to providing information and I have to parse the output a bit. Practically speaking, after I spin up the containers, I will run the command <code>docker-compose port db 5432</code> which will return a string like <code>0.0.0.0:32838</code>, and I will extract the port from it. Nothing major, but these are the (sometimes many) issues you face when you orchestrate different systems together.</p>
 <p>The new management script is</p>
@@ -379,7 +379,6 @@
     <span class="nt">environment</span><span class="p">:</span>
       <span class="nt">POSTGRES_DB</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">${POSTGRES_DB}</span>
       <span class="nt">POSTGRES_USER</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">${POSTGRES_USER}</span>
-      <span class="nt">POSTGRES_HOSTNAME</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">${POSTGRES_HOSTNAME}</span>
       <span class="nt">POSTGRES_PASSWORD</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">${POSTGRES_PASSWORD}</span>
     <span class="nt">ports</span><span class="p">:</span>
       <span class="p p-Indicator">-</span> <span class="s">&quot;5432&quot;</span>
@@ -392,7 +391,7 @@
       <span class="nt">FLASK_CONFIG</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">${FLASK_CONFIG}</span>
       <span class="nt">APPLICATION_DB</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">${APPLICATION_DB}</span>
       <span class="nt">POSTGRES_USER</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">${POSTGRES_USER}</span>
-      <span class="nt">POSTGRES_HOSTNAME</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">${POSTGRES_HOSTNAME}</span>
+      <span class="nt">POSTGRES_HOSTNAME</span><span class="p">:</span> <span class="s">&quot;db&quot;</span>
       <span class="nt">POSTGRES_PASSWORD</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">${POSTGRES_PASSWORD}</span>
     <span class="nt">command</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">flask run --host 0.0.0.0</span>
     <span class="nt">volumes</span><span class="p">:</span>
@@ -437,7 +436,7 @@
 
 <p>which doesn't add anything new to what I already did for development and testing. </p>
 <h4 id="git-commit">Git commit<a class="headerlink" href="#git-commit" title="Permanent link">&para;</a></h4>
-<p>You can see the changes made in this step through <a href="https://github.com/lgiordani/flask_project_setup/commit/7f88f82a8cd6aea0519962326cb3a27d393e6cfb">this Git commit</a> or <a href="https://github.com/lgiordani/flask_project_setup/tree/7f88f82a8cd6aea0519962326cb3a27d393e6cfb">browse the files</a>.</p>
+<p>You can see the changes made in this step through <a href="https://github.com/lgiordani/flask_project_setup/commit/dbb54d31af17866f9336199c65f1b495d879eb70">this Git commit</a> or <a href="https://github.com/lgiordani/flask_project_setup/tree/dbb54d31af17866f9336199c65f1b495d879eb70">browse the files</a>.</p>
 <h4 id="resources">Resources<a class="headerlink" href="#resources" title="Permanent link">&para;</a></h4>
 <ul>
 <li><a href="https://docs.docker.com/compose/compose-file/#ports">Expose ports in docker-compose</a></li>
@@ -495,7 +494,7 @@ application=#
 <p>And inside the database we find the database <code>application</code> created explicitly for the scenario (the name is specified in <code>config/scenario.json</code>). If you don't know <code>psql</code> you can exit with <code>\q</code> or <code>Ctrl-d</code>.</p>
 <p>Before tearing down the scenario have a look at the two files <code>config/scenario_foo.json</code> and <code>docker/scenario_foo.yml</code>. They are just copies of <code>config/scenario.json</code> and <code>docker/scenario.yml</code> but I think seeing them there might help to understand how the whole thing works. When you are done run <code>./manage.py scenario down foo</code>.</p>
 <h4 id="git-commit_1">Git commit<a class="headerlink" href="#git-commit_1" title="Permanent link">&para;</a></h4>
-<p>You can see the changes made in this step through <a href="https://github.com/lgiordani/flask_project_setup/commit/16330e0e7c8e842f2afb474fb2045c735ff194b2">this Git commit</a> or <a href="https://github.com/lgiordani/flask_project_setup/tree/16330e0e7c8e842f2afb474fb2045c735ff194b2">browse the files</a>.</p>
+<p>You can see the changes made in this step through <a href="https://github.com/lgiordani/flask_project_setup/commit/9d9601508cfa7dc5d718d76cd0827396069035fd">this Git commit</a> or <a href="https://github.com/lgiordani/flask_project_setup/tree/9d9601508cfa7dc5d718d76cd0827396069035fd">browse the files</a>.</p>
 <h3 id="scenario-example-2">Scenario example 2<a class="headerlink" href="#scenario-example-2" title="Permanent link">&para;</a></h3>
 <p>Let's do something a bit more interesting. The new scenario is contained in <code>scenarios/users.py</code></p>
 <div class="highlight"><span class="filename">scenarios/users.py</span><pre><span></span><code><span class="kn">from</span> <span class="nn">application.app</span> <span class="kn">import</span> <span class="n">create_app</span>
@@ -554,7 +553,7 @@ application=# \q
 </code></pre></div>
 
 <h4 id="git-commit_2">Git commit<a class="headerlink" href="#git-commit_2" title="Permanent link">&para;</a></h4>
-<p>You can see the changes made in this step through <a href="https://github.com/lgiordani/flask_project_setup/commit/2e65ebd1336a6ba4635f5d4dd0048bb7c1903318">this Git commit</a> or <a href="https://github.com/lgiordani/flask_project_setup/tree/2e65ebd1336a6ba4635f5d4dd0048bb7c1903318">browse the files</a>.</p>
+<p>You can see the changes made in this step through <a href="https://github.com/lgiordani/flask_project_setup/commit/b475c5e3d455098691fa1c736de573182d0e44ec">this Git commit</a> or <a href="https://github.com/lgiordani/flask_project_setup/tree/b475c5e3d455098691fa1c736de573182d0e44ec">browse the files</a>.</p>
 <h2 id="step-2-simulating-the-production-environment">Step 2 - Simulating the production environment<a class="headerlink" href="#step-2-simulating-the-production-environment" title="Permanent link">&para;</a></h2>
 <p>As I stated at the very beginning of this mini series of posts, one of my goals was to run in development the same database that I run in production, and for this reason I went through the configuration steps that allowed me to have a Postgres container running both in development and during tests. In a real production scenario Postgres would probably run in a separate instance, for example on the RDS service in AWS, but as long as you have the connection parameters nothing changes in the configuration.</p>
 <p>Docker actually allows us to easily simulate the production environment as well. Well, if our notebook was connected 24/7 we might as well host the production there directly. Not that I recommend this nowadays, but this is how many important companies begun many years ago when cloud computing had not been here yet. Instead of installing a LAMP stack we configure containers, but the idea doesn't change.</p>
@@ -576,7 +575,6 @@ gunicorn
     <span class="nt">environment</span><span class="p">:</span>
       <span class="nt">POSTGRES_DB</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">${POSTGRES_DB}</span>
       <span class="nt">POSTGRES_USER</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">${POSTGRES_USER}</span>
-      <span class="nt">POSTGRES_HOSTNAME</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">${POSTGRES_HOSTNAME}</span>
       <span class="nt">POSTGRES_PASSWORD</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">${POSTGRES_PASSWORD}</span>
     <span class="nt">ports</span><span class="p">:</span>
       <span class="p p-Indicator">-</span> <span class="s">&quot;${POSTGRES_PORT}:5432&quot;</span>
@@ -591,7 +589,7 @@ gunicorn
       <span class="nt">FLASK_CONFIG</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">${FLASK_CONFIG}</span>
       <span class="nt">APPLICATION_DB</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">${APPLICATION_DB}</span>
       <span class="nt">POSTGRES_USER</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">${POSTGRES_USER}</span>
-      <span class="nt">POSTGRES_HOSTNAME</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">${POSTGRES_HOSTNAME}</span>
+      <span class="nt">POSTGRES_HOSTNAME</span><span class="p">:</span> <span class="s">&quot;db&quot;</span>
       <span class="nt">POSTGRES_PASSWORD</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">${POSTGRES_PASSWORD}</span>
       <span class="nt">POSTGRES_PORT</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">${POSTGRES_PORT}</span>
     <span class="nt">command</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">gunicorn -w 4 -b 0.0.0.0 wsgi:app</span>
@@ -662,13 +660,13 @@ RUN pip install -r /opt/requirements/production.txt
 </code></pre></div>
 
 <h4 id="git-commit_3">Git commit<a class="headerlink" href="#git-commit_3" title="Permanent link">&para;</a></h4>
-<p>You can see the changes made in this step through <a href="https://github.com/lgiordani/flask_project_setup/commit/66fe80edb61f3f8ca3303856f29d70f76923c30b">this Git commit</a> or <a href="https://github.com/lgiordani/flask_project_setup/tree/66fe80edb61f3f8ca3303856f29d70f76923c30b">browse the files</a>.</p>
+<p>You can see the changes made in this step through <a href="https://github.com/lgiordani/flask_project_setup/commit/1c0fcf13c54ea13bb6e1307452de00529dbd57af">this Git commit</a> or <a href="https://github.com/lgiordani/flask_project_setup/tree/1c0fcf13c54ea13bb6e1307452de00529dbd57af">browse the files</a>.</p>
 <h4 id="resources_1">Resources<a class="headerlink" href="#resources_1" title="Permanent link">&para;</a></h4>
 <ul>
 <li><a href="https://gunicorn.org/">Gunicorn</a> - A Python WSGI HTTP Server</li>
 </ul>
 <h2 id="step-3-scale-up">Step 3 - Scale up<a class="headerlink" href="#step-3-scale-up" title="Permanent link">&para;</a></h2>
-<p>Mapping the container port to the host is not a great idea, though, as it makes it impossible to scale up and down to serve more load, which is the main point of running containers in production. This might be solved in many ways in the cloud, for example in AWS you might run the container in AWS Fargate and register them in an Application Load Balancer. Another way to do it on a sinlge host is to run a Web Server in front of your HTTP server, and this might be easily implemented  with docker-compose</p>
+<p>Mapping the container port to the host is not a great idea, though, as it makes it impossible to scale up and down to serve more load, which is the main point of running containers in production. This might be solved in many ways in the cloud, for example in AWS you might run the container in AWS Fargate and register them in an Application Load Balancer. Another way to do it on a single host is to run a Web Server in front of your HTTP server, and this might be easily implemented  with docker-compose</p>
 <p>I will add nginx and serve HTTP from there, reverse proxying the application containers through docker-compose networking. First of all the new configuration for docker-compose</p>
 <div class="highlight"><span class="filename">docker/production.yml</span><pre><span></span><code><span class="nt">version</span><span class="p">:</span> <span class="s">&#39;3.4&#39;</span>
 
@@ -678,7 +676,6 @@ RUN pip install -r /opt/requirements/production.txt
     <span class="nt">environment</span><span class="p">:</span>
       <span class="nt">POSTGRES_DB</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">${POSTGRES_DB}</span>
       <span class="nt">POSTGRES_USER</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">${POSTGRES_USER}</span>
-      <span class="nt">POSTGRES_HOSTNAME</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">${POSTGRES_HOSTNAME}</span>
       <span class="nt">POSTGRES_PASSWORD</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">${POSTGRES_PASSWORD}</span>
     <span class="nt">ports</span><span class="p">:</span>
       <span class="p p-Indicator">-</span> <span class="s">&quot;${POSTGRES_PORT}:5432&quot;</span>
@@ -693,7 +690,7 @@ RUN pip install -r /opt/requirements/production.txt
       <span class="nt">FLASK_CONFIG</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">${FLASK_CONFIG}</span>
       <span class="nt">APPLICATION_DB</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">${APPLICATION_DB}</span>
       <span class="nt">POSTGRES_USER</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">${POSTGRES_USER}</span>
-      <span class="nt">POSTGRES_HOSTNAME</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">${POSTGRES_HOSTNAME}</span>
+      <span class="nt">POSTGRES_HOSTNAME</span><span class="p">:</span> <span class="s">&quot;db&quot;</span>
       <span class="nt">POSTGRES_PASSWORD</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">${POSTGRES_PASSWORD}</span>
       <span class="nt">POSTGRES_PORT</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">${POSTGRES_PORT}</span>
     <span class="nt">command</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">gunicorn -w 4 -b 0.0.0.0 wsgi:app</span>
@@ -764,7 +761,7 @@ Creating production_web_3 ... <span class="k">done</span>
 </code></pre></div>
 
 <h4 id="git-commit_4">Git commit<a class="headerlink" href="#git-commit_4" title="Permanent link">&para;</a></h4>
-<p>You can see the changes made in this step through <a href="https://github.com/lgiordani/flask_project_setup/commit/56278af7d3af1650b691b15c268cfa112d031657">this Git commit</a> or <a href="https://github.com/lgiordani/flask_project_setup/tree/56278af7d3af1650b691b15c268cfa112d031657">browse the files</a>.</p>
+<p>You can see the changes made in this step through <a href="https://github.com/lgiordani/flask_project_setup/commit/2794ea1ca6e7c56a823ddf30201e69700f596bf2">this Git commit</a> or <a href="https://github.com/lgiordani/flask_project_setup/tree/2794ea1ca6e7c56a823ddf30201e69700f596bf2">browse the files</a>.</p>
 <h4 id="resources_2">Resources<a class="headerlink" href="#resources_2" title="Permanent link">&para;</a></h4>
 <ul>
 <li><a href="https://nginx.org/en/">Nginx</a> - An HTTP and reverse proxy server (and more)</li>
@@ -842,6 +839,8 @@ root@33cbaea369be:/#
 <p>When you create your deploy pipeline you need to do much more than just creating the image and running it, at least for real applications. You need to decide when to apply database migrations and if you have a web front-end you will also need to compile and install the JavaScript assets. Since you don't want to have downtime when you deploy you will need to look into blue/green deployments, and in general to strategies that allow you to run different versions of the application at the same time, at least for short periods of time. Or for longer periods, if you want to perform A/B testing or zonal deployments.</p>
 <h2 id="final-words">Final words<a class="headerlink" href="#final-words" title="Permanent link">&para;</a></h2>
 <p>This is the last post of this short series. I hope you learned something useful, and that it encouraged you to properly setup your projects and to investigate technologies like Docker. As always, feel free to send me feedback or questions, and if you find my posts useful please share them with whoever you thing might be interested.</p>
+<h2 id="updates">Updates<a class="headerlink" href="#updates" title="Permanent link">&para;</a></h2>
+<p>2020-12-22 I reviewed the whole tutorial and corrected several typos</p>
 <h2 id="feedback">Feedback<a class="headerlink" href="#feedback" title="Permanent link">&para;</a></h2>
 <p>Feel free to reach me on <a href="https://twitter.com/thedigicat">Twitter</a> if you have questions. The <a href="https://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues">GitHub issues</a> page is the best place to submit corrections.</p>
   </section>
