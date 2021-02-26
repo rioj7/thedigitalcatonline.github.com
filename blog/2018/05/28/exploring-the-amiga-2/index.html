@@ -20,7 +20,7 @@
 
         <link rel="stylesheet" href="/theme/css/main.min.css?0fd2251d">
 
-<link rel="stylesheet" href="/theme/css/retro.min.css?d93687f1">
+<link id="style-retro" rel="stylesheet" href="/theme/css/retro.min.css?d93687f1">
         
         <link href="/images/global/favicon.jpg" rel="icon">
 
@@ -59,7 +59,7 @@
 	  "@id": "https://www.thedigitalcatonline.com/blog/2018/05/28/exploring-the-amiga-2/"
       },
       "datePublished" : "28/05/2018",
-      "dateModified" : "12/02/2019",
+      "dateModified" : "26/02/2021",
       "image" : "https://www.thedigitalcatonline.com/images/exploring-the-amiga-2.jpg",
       "description" : "The jump table of libraries in the Amiga system, types and structures of Kickstart 1.3",
       "headline" : "The jump table of libraries in the Amiga system, types and structures of Kickstart 1.3",
@@ -103,7 +103,7 @@
 
     <span class="fas fa-calendar-alt"></span> <time datetime="2018-05-28T15:00:00+01:00"> 28/05/2018</time>
 
-    <span class="fas fa-edit"></span> <time datetime="2019-02-12T20:00:00+00:00"> 12/02/2019</time>
+    <span class="fas fa-edit"></span> <time datetime="2021-02-26T08:00:00+00:00"> 26/02/2021</time>
 
     <span class="fas fa-tags"></span>
     <a class="tag" href="/categories/assembly/">assembly</a>    <a class="tag" href="/categories/amiga/">amiga</a>    <a class="tag" href="/categories/retroprogramming/">retroprogramming</a>    <br>
@@ -115,252 +115,182 @@
   </section>
 
   <section id="content">
-    <h1 id="the-library-jump-table">The library jump table<a class="headerlink" href="#the-library-jump-table" title="Permanent link">&para;</a></h1>
-<p>As already mentioned when a library is loaded in memory a jump table is created just before the library base address. This table contains the addresses of the functions exposed by the library, and Exec itself has one.</p>
-<p>The jump table functions order for the Exec library is specified in one of the include files provided by the NDK, namely <code>include_i/exec/exec_lib.i</code>.</p>
-<div class="highlight"><pre><span></span><code>    FUNCDEF Supervisor
+    <p><button onclick="hideStyle()">Toggle retro style</button></p><h1 id="h1-the%20library%20jump-13983793">The library jump table</h1><p>As already mentioned when a library is loaded in memory a jump table is created just before the library base address. This table contains the addresses of the functions exposed by the library, and Exec itself has one.</p><p>The jump table functions order for the Exec library is specified in one of the include files provided by the NDK, namely <code>include_i/exec/exec_lib.i</code>.</p><div class="code"><div class="content"><div class="highlight"><pre><span></span>    FUNCDEF Supervisor
     FUNCDEF execPrivate1
     FUNCDEF execPrivate2
     FUNCDEF execPrivate3
     ...
     FUNCDEF OpenLibrary
     ...
-</code></pre></div>
-
-<p>As you can see this file makes use of the <code>FUNCDEF</code> macro, which is not provided and has to be implemented by the coder. The idea of the macro is very simple: as the order of the jump table does not change we can just replace the first <code>FUNCDEF</code> with the offset of the first function in the library and then increment this offset with the default size of the jump address. The expected output of the macro is</p>
-<div class="highlight"><pre><span></span><code>    _LVOSupervisor     EQU     -30
+</pre></div>
+</div></div><p>As you can see this file makes use of the <code>FUNCDEF</code> macro, which is not provided and has to be implemented by the coder. The idea of the macro is very simple: as the order of the jump table does not change we can just replace the first <code>FUNCDEF</code> with the offset of the first function in the library and then increment this offset with the default size of the jump address. The expected output of the macro is</p><div class="code"><div class="content"><div class="highlight"><pre><span></span>    _LVOSupervisor     EQU     -30
     _LVOexecPrivate1   EQU     -36
     _LVOexecPrivate2   EQU     -42
     _LVOexecPrivate3   EQU     -48
     ...
     _LVOOpenLibrary    EQU     -552
     ...
-</code></pre></div>
+</pre></div>
+</div></div><p>Please note that the name of the function has been replaced by another string prepending <code>_LVO</code> to avoid clashes with the actual function definition (LVO stands for Library Vector Offset).</p><p>The above figures come from the "Special Constants" section contained in the <code>include_i/exec/libraries.i</code> file</p><div class="code"><div class="content"><div class="highlight"><pre><span></span>*------ Special Constants ---------------------------------------
+LIB_VECTSIZE    EQU 6       ;Each library entry takes 6 bytes
+LIB_RESERVED    EQU 4       ;Exec reserves the first 4 vectors
+LIB_BASE        EQU -LIB_VECTSIZE
+LIB_USERDEF     EQU LIB_BASE-(LIB_RESERVED*LIB_VECTSIZE) ;First user func
+LIB_NONSTD      EQU LIB_USERDEF
+</pre></div>
+</div></div><p>AS you can see from the comments, Exec reserves the first 4 vectors, so the first function's address is <code>LIB_USERDEF</code>. To understand why the addresses are negative and how the offset is computed let's get a snapshot of the library once it has been loaded in memory</p><div class="code"><div class="content"><div class="highlight"><pre><span></span>                               HIGHER MEMORY ADDRESSES
+                             +-------------------------+
+Last byte of the             | End of the library      |
+library loaded in ---------&gt; +-------------------------+
+memory                       | [...]                   |
+                             +-------------------------+
+                             | Content of the library  |
+                             +-------------------------+
+                             | Library structure       |
+Library base address ------&gt; +-------------------------+
+                             | 1st reserved vector     | 
+                             +-------------------------+ &lt;--- LIB_BASE
+                             | 2nd reserved vector     | 
+                             +-------------------------+ &lt;--+
+                             | 3rd reserved vector     |    | LIB_VECTSIZE
+                             +-------------------------+ &lt;--+
+                             | 4th reserved vector     | 
+                             +-------------------------+ 
+                             | 1st defined function    | 
+                             +-------------------------+ &lt;--- LIB_USERDEF
+                             | 2nd defined function    |
+                             +-------------------------+
+                             | [...]                   |
+                             +-------------------------+
+First byte of the            | End of the jump table   |
+library loaded in ---------&gt; +-------------------------+
+memory                         LOWER MEMORY ADDRESSES
+</pre></div>
+</div></div><p>You can find an official version of this in the <a href="http://amigadev.elowar.com/read/ADCD_2.1/AmigaMail_Vol2_guide/node0189.html">documentation</a>. Pay attention that the picture in the documentation represents memory upside down, with lower memory addresses towards the top of the page.</p><p>As you can see the library is loaded as expected from the base address towards the higher memory addresses, but at the same time the jump table is prefixed <em>in reverse order</em>. This is done to allow you to find the address of a function with a simple (negative) indexing instead of a more complex algorithm. Function number 1 is at address <code>-1 * address_size</code>, function number 2 at address <code>-2 * address_size</code>, etc.</p><p>This is why we use negative offsets to call library functions but positive ones to access the library data and structures.</p><p>You can also see from the figure where the Special Constants <code>LIB_BASE</code> and <code>LIB_USERDEF</code> are located. The actual values are</p><div class="code"><div class="content"><div class="highlight"><pre><span></span>LIB_BASE    EQU -6
+LIB_USERDEF EQU -30
+</pre></div>
+</div></div><p>A good definition of the <code>FUNCDEF</code> macro, thus, is the following</p><div class="code"><div class="content"><div class="highlight"><pre><span></span>    INCLUDE &quot;exec/libraries.i&quot;
 
-<p>Please note that the name of the function has been replaced by another string prepending <code>_LVO</code> to avoid clashes with the actual function definition (LVO stands for Library Vector Offset).</p>
-<p>The above figures come from the "Special Constants" section contained in the <code>include_i/exec/libraries.i</code> file</p>
-<div class="highlight"><pre><span></span><code><span class="err">*------ Special Constants ---------------------------------------</span>
-<span class="err">LIB_VECTSIZE    EQU 6       ;Each library entry takes 6 bytes</span>
-<span class="err">LIB_RESERVED    EQU 4       ;Exec reserves the first 4 vectors</span>
-<span class="err">LIB_BASE        EQU -LIB_VECTSIZE</span>
-<span class="err">LIB_USERDEF     EQU LIB_BASE-(LIB_RESERVED*LIB_VECTSIZE) ;First user func</span>
-<span class="err">LIB_NONSTD      EQU LIB_USERDEF</span>
-</code></pre></div>
+    MACRO   FUNCDEF
+_LVO\1      EQU      FUNC_CNT
+FUNC_CNT    SET      FUNC_CNT-LIB_VECTSIZE
+    ENDM
 
-<p>AS you can see from the comments, Exec reserves the first 4 vectors, so the first function's address is <code>LIB_USERDEF</code>. To understand why the addresses are negative and how the offset is computed let's get a snapshot of the library once it has been loaded in memory</p>
-<div class="highlight"><pre><span></span><code>                               <span class="n">HIGHER</span> <span class="n">MEMORY</span> <span class="n">ADDRESSES</span>
-                             <span class="o">+-------------------------+</span>
-<span class="n">Last</span> <span class="n">byte</span> <span class="n">of</span> <span class="n">the</span>             <span class="o">|</span> <span class="n">End</span> <span class="n">of</span> <span class="n">the</span> <span class="n">library</span>      <span class="o">|</span>
-<span class="n">library</span> <span class="n">loaded</span> <span class="n">in</span> <span class="o">---------&gt;</span> <span class="o">+-------------------------+</span>
-<span class="n">memory</span>                       <span class="o">|</span> <span class="p">[...]</span>                   <span class="o">|</span>
-                             <span class="o">+-------------------------+</span>
-                             <span class="o">|</span> <span class="n">Content</span> <span class="n">of</span> <span class="n">the</span> <span class="n">library</span>  <span class="o">|</span>
-                             <span class="o">+-------------------------+</span>
-                             <span class="o">|</span> <span class="n">Library</span> <span class="n">structure</span>       <span class="o">|</span>
-<span class="n">Library</span> <span class="n">base</span> <span class="n">address</span> <span class="o">------&gt;</span> <span class="o">+-------------------------+</span>
-                             <span class="o">|</span> <span class="mi">1</span><span class="n">st</span> <span class="n">reserved</span> <span class="n">vector</span>     <span class="o">|</span> 
-                             <span class="o">+-------------------------+</span> <span class="o">&lt;---</span> <span class="n">LIB_BASE</span>
-                             <span class="o">|</span> <span class="mi">2</span><span class="n">nd</span> <span class="n">reserved</span> <span class="n">vector</span>     <span class="o">|</span> 
-                             <span class="o">+-------------------------+</span> <span class="o">&lt;--+</span>
-                             <span class="o">|</span> <span class="mi">3</span><span class="n">rd</span> <span class="n">reserved</span> <span class="n">vector</span>     <span class="o">|</span>    <span class="o">|</span> <span class="n">LIB_VECTSIZE</span>
-                             <span class="o">+-------------------------+</span> <span class="o">&lt;--+</span>
-                             <span class="o">|</span> <span class="mi">4</span><span class="n">th</span> <span class="n">reserved</span> <span class="n">vector</span>     <span class="o">|</span> 
-                             <span class="o">+-------------------------+</span> 
-                             <span class="o">|</span> <span class="mi">1</span><span class="n">st</span> <span class="n">defined</span> <span class="n">function</span>    <span class="o">|</span> 
-                             <span class="o">+-------------------------+</span> <span class="o">&lt;---</span> <span class="n">LIB_USERDEF</span>
-                             <span class="o">|</span> <span class="mi">2</span><span class="n">nd</span> <span class="n">defined</span> <span class="n">function</span>    <span class="o">|</span>
-                             <span class="o">+-------------------------+</span>
-                             <span class="o">|</span> <span class="p">[...]</span>                   <span class="o">|</span>
-                             <span class="o">+-------------------------+</span>
-<span class="n">First</span> <span class="n">byte</span> <span class="n">of</span> <span class="n">the</span>            <span class="o">|</span> <span class="n">End</span> <span class="n">of</span> <span class="n">the</span> <span class="n">jump</span> <span class="n">table</span>   <span class="o">|</span>
-<span class="n">library</span> <span class="n">loaded</span> <span class="n">in</span> <span class="o">---------&gt;</span> <span class="o">+-------------------------+</span>
-<span class="n">memory</span>                         <span class="n">LOWER</span> <span class="n">MEMORY</span> <span class="n">ADDRESSES</span>
-</code></pre></div>
+FUNC_CNT    SET      LIB_USERDEF
+</pre></div>
+</div></div><p>The last line initialises the <code>FUNC_CNT</code> symbol with the <code>LIB_USERDEF</code> value. Then each call of the <code>FUNCDEF &lt;arg&gt;</code> macro does two things:</p><ol><li>Creates the <code>_LVO&lt;arg&gt;</code> symbol with value <code>FUNC_CNT</code> (e.g. <code>_LVOSupervisor EQU -30</code>)</li><li>Decrements the <code>FUNC_CNT</code> symbol by <code>LIB_VECTSIZE</code></li></ol><p>Please note that the example <code>FUNCDEF</code> that you can find (commented) in <code>libraries.i</code> won't work out of the box as <code>FUNC_CNT</code> is defined inside the macro itself, while it has to be already defined before the first use of the macro.</p><div class="code"><div class="content"><div class="highlight"><pre><span></span>*------ FUNCDEF is used to parse library offset tables.  Many applications
+*------ need a special version of FUNCDEF - you provide your own macro
+*------ to match your needs.  Here is an example:
+*
+*    FUNCDEF     MACRO
+*    _LVO\1      EQU    FUNC_CNT
+*    FUNC_CNT    SET    FUNC_CNT-6  * Standard offset-6 bytes each
+*    FUNC_CNT    EQU    LIB_USERDEF * Skip 4 standard vectors
+*                ENDM
+</pre></div>
+</div></div><p>You can put the <code>FUNCDEF</code> macro code in a local include file like <code>funcdef.i</code>. Including it your code allows you to use <code>_LVO</code> prefixed labels for the functions that you want to load</p><div class="code"><div class="content"><div class="highlight"><pre><span></span>    INCLUDE &quot;funcdef.i&quot;
+    INCLUDE &quot;exec/exec_lib.i&quot;
 
-<p>You can find an official version of this in the <a href="http://amigadev.elowar.com/read/ADCD_2.1/AmigaMail_Vol2_guide/node0189.html">documentation</a>. Pay attention that the picture in the documentation represents memory upside down, with lower memory addresses towards the top of the page.</p>
-<p>As you can see the library is loaded as expected from the base address towards the higher memory addresses, but at the same time the jump table is prefixed <em>in reverse order</em>. This is done to allow you to find the address of a function with a simple (negative) indexing instead of a more complex algorithm. Function number 1 is at address <code>-1 * address_size</code>, function number 2 at address <code>-2 * address_size</code>, etc.</p>
-<p>This is why we use negative offsets to call library functions but positive ones to access the library data and structures.</p>
-<p>You can also see from the figure where the Special Constants <code>LIB_BASE</code> and <code>LIB_USERDEF</code> are located. The actual values are</p>
-<div class="highlight"><pre><span></span><code><span class="err">LIB_BASE    EQU -6</span>
-<span class="err">LIB_USERDEF EQU -30</span>
-</code></pre></div>
+    move.l  4.w,a6
+    clr.l   d0
+    move.l  #libname,a1
+    jsr     _LVOOpenLibrary(a6)
 
-<p>A good definition of the <code>FUNCDEF</code> macro, thus, is the following</p>
-<div class="highlight"><pre><span></span><code>    <span class="n">INCLUDE</span> <span class="ss">&quot;exec/libraries.i&quot;</span>
+libname:
+    dc.b &quot;somename.library&quot;,0
+</pre></div>
+</div></div><p>Finally, if you want to be even more explicit you can use the <code>CALLLIB</code> macro defined in <code>libraries.i</code> and write</p><div class="code"><div class="content"><div class="highlight"><pre><span></span>    INCLUDE &quot;funcdef.i&quot;
+    INCLUDE &quot;exec/exec_lib.i&quot;
+    INCLUDE &quot;exec/libraries.i&quot;
 
-    <span class="n">MACRO</span>   <span class="n">FUNCDEF</span>
-<span class="n">_LVO</span><span class="err">\</span><span class="mi">1</span>      <span class="n">EQU</span>      <span class="n">FUNC_CNT</span>
-<span class="n">FUNC_CNT</span>    <span class="k">SET</span>      <span class="n">FUNC_CNT</span><span class="o">-</span><span class="n">LIB_VECTSIZE</span>
-    <span class="n">ENDM</span>
+    move.l  4.w,a6
+    clr.l   d0
+    move.l  #libname,a1
+    CALLLIB _LVOOpenLibrary
 
-<span class="n">FUNC_CNT</span>    <span class="k">SET</span>      <span class="n">LIB_USERDEF</span>
-</code></pre></div>
+libname:
+    dc.b &quot;somename.library&quot;,0
+</pre></div>
+</div></div><h1 id="h1-the%20four%20reserve-13983793">The four reserved vectors</h1><p>As we saw, the Amiga system reserves 4 vectors at the beginning of the jump table of a library. These 4 spaces host 3 standard functions that shall be provided by any library, <code>Open()</code>, <code>Close()</code>, and <code>Expunge()</code>. The fourth slot is kept for possible future expansions and must contain a function that returns 0.</p><p>The offsets of these functions are contained in the <code>include_i/exec/libraries.i</code> file</p><div class="code"><div class="content"><div class="highlight"><pre><span></span>*----------------------------------------------------------------
+*
+*   Standard Library Functions
+*
+*----------------------------------------------------------------
 
-<p>The last line initializes the <code>FUNC_CNT</code> symbol with the <code>LIB_USERDEF</code> value. Then each call of the <code>FUNCDEF &lt;arg&gt;</code> macro does two things:</p>
-<ol>
-<li>Creates the <code>_LVO&lt;arg&gt;</code> symbol with value <code>FUNC_CNT</code> (e.g. <code>_LVOSupervisor EQU -30</code>)</li>
-<li>Decrements the <code>FUNC_CNT</code> symbol by <code>LIB_VECTSIZE</code></li>
-</ol>
-<p>Please note that the example <code>FUNCDEF</code> that you can find (commented) in <code>libraries.i</code> won't work out of the box as <code>FUNC_CNT</code> is defined inside the macro itself, while it has to be already defined before the first use of the macro.</p>
-<div class="highlight"><pre><span></span><code><span class="err">*------ FUNCDEF is used to parse library offset tables.  Many applications</span>
-<span class="err">*------ need a special version of FUNCDEF - you provide your own macro</span>
-<span class="err">*------ to match your needs.  Here is an example:</span>
-<span class="err">*</span>
-<span class="err">*    FUNCDEF     MACRO</span>
-<span class="err">*    _LVO\1      EQU    FUNC_CNT</span>
-<span class="err">*    FUNC_CNT    SET    FUNC_CNT-6  * Standard offset-6 bytes each</span>
-<span class="err">*    FUNC_CNT    EQU    LIB_USERDEF * Skip 4 standard vectors</span>
-<span class="err">*                ENDM</span>
-</code></pre></div>
+    LIBINIT LIB_BASE
 
-<p>You can put the <code>FUNCDEF</code> macro code in a local include file like <code>funcdef.i</code>. Including it your code allows you to use <code>_LVO</code> prefixed labels for the functions that you want to load</p>
-<div class="highlight"><pre><span></span><code>    <span class="n">INCLUDE</span> <span class="ss">&quot;funcdef.i&quot;</span>
-    <span class="n">INCLUDE</span> <span class="ss">&quot;exec/exec_lib.i&quot;</span>
-
-    <span class="k">move</span><span class="p">.</span><span class="n">l</span>  <span class="mi">4</span><span class="p">.</span><span class="n">w</span><span class="p">,</span><span class="n">a6</span>
-    <span class="n">clr</span><span class="p">.</span><span class="n">l</span>   <span class="n">d0</span>
-    <span class="k">move</span><span class="p">.</span><span class="n">l</span>  <span class="o">#</span><span class="n">libname</span><span class="p">,</span><span class="n">a1</span>
-    <span class="n">jsr</span>     <span class="n">_LVOOpenLibrary</span><span class="p">(</span><span class="n">a6</span><span class="p">)</span>
-
-<span class="n">libname</span><span class="p">:</span>
-    <span class="n">dc</span><span class="p">.</span><span class="n">b</span> <span class="ss">&quot;somename.library&quot;</span><span class="p">,</span><span class="mi">0</span>
-</code></pre></div>
-
-<p>Finally, if you want to be even more explicit you can use the <code>CALLLIB</code> macro defined in <code>libraries.i</code> and write</p>
-<div class="highlight"><pre><span></span><code>    <span class="n">INCLUDE</span> <span class="ss">&quot;funcdef.i&quot;</span>
-    <span class="n">INCLUDE</span> <span class="ss">&quot;exec/exec_lib.i&quot;</span>
-    <span class="n">INCLUDE</span> <span class="ss">&quot;exec/libraries.i&quot;</span>
-
-    <span class="k">move</span><span class="p">.</span><span class="n">l</span>  <span class="mi">4</span><span class="p">.</span><span class="n">w</span><span class="p">,</span><span class="n">a6</span>
-    <span class="n">clr</span><span class="p">.</span><span class="n">l</span>   <span class="n">d0</span>
-    <span class="k">move</span><span class="p">.</span><span class="n">l</span>  <span class="o">#</span><span class="n">libname</span><span class="p">,</span><span class="n">a1</span>
-    <span class="n">CALLLIB</span> <span class="n">_LVOOpenLibrary</span>
-
-<span class="n">libname</span><span class="p">:</span>
-    <span class="n">dc</span><span class="p">.</span><span class="n">b</span> <span class="ss">&quot;somename.library&quot;</span><span class="p">,</span><span class="mi">0</span>
-</code></pre></div>
-
-<h1 id="the-four-reserved-vectors">The four reserved vectors<a class="headerlink" href="#the-four-reserved-vectors" title="Permanent link">&para;</a></h1>
-<p>As we saw, the Amiga system reserves 4 vectors at the beginning of the jump table of a library. These 4 spaces host 3 standard functions that shall be provided by any library, <code>Open()</code>, <code>Close()</code>, and <code>Expunge()</code>. The fourth slot is kept for possible future expansions and must contain a function that returns 0.</p>
-<p>The offsets of these functions are contained in the <code>include_i/exec/libraries.i</code> file</p>
-<div class="highlight"><pre><span></span><code><span class="o">*</span><span class="c1">----------------------------------------------------------------</span>
-<span class="o">*</span>
-<span class="o">*</span>   <span class="n">Standard</span> <span class="n">Library</span> <span class="n">Functions</span>
-<span class="o">*</span>
-<span class="o">*</span><span class="c1">----------------------------------------------------------------</span>
-
-    <span class="n">LIBINIT</span> <span class="n">LIB_BASE</span>
-
-    <span class="n">LIBDEF</span>  <span class="n">LIB_OPEN</span>
-    <span class="n">LIBDEF</span>  <span class="n">LIB_CLOSE</span>
-    <span class="n">LIBDEF</span>  <span class="n">LIB_EXPUNGE</span> <span class="p">;</span> <span class="n">must</span> <span class="n">exist</span> <span class="k">in</span> <span class="k">all</span> <span class="n">libraries</span>
-    <span class="n">LIBDEF</span>  <span class="n">LIB_EXTFUNC</span> <span class="p">;</span> <span class="k">for</span> <span class="n">future</span> <span class="n">expansion</span> <span class="o">-</span> <span class="n">must</span> <span class="k">return</span> <span class="n">zero</span><span class="p">.</span>
-</code></pre></div>
-
-<p>the effect of the above macros with the previous constants is</p>
-<div class="highlight"><pre><span></span><code><span class="err">LIB_OPEN        EQU     -6</span>
-<span class="err">LIB_CLOSE       EQU     -12</span>
-<span class="err">LIB_EXPUNGE     EQU     -18</span>
-<span class="err">LIB_EXTFUNC     EQU     -24</span>
-</code></pre></div>
-
-<p>You can try to follow the definitions of the <code>LIBINIT</code> and <code>LIBDEF</code> macros to obtain the same result.</p>
-<h1 id="types-and-structures">Types and structures<a class="headerlink" href="#types-and-structures" title="Permanent link">&para;</a></h1>
-<p>Let's see how the Exec library defines its types, which are the base components of the Amiga system. The main entry point for this investigation is the <code>include_i/exec/types.i</code> file.</p>
-<p>When working with data structures in Assembly, everything is expressed in terms of offsets. The main idea behind structures is to create something like this</p>
-<div class="highlight"><pre><span></span><code><span class="err">STRUCT1         EQU     0</span>
-<span class="err">OFFS            SET     0</span>
-<span class="err">FIELD1          EQU     OFFS</span>
-<span class="err">OFFS            EQU     OFFS+SIZE_OF_FIELD1</span>
-<span class="err">FIELD2          EQU     OFFS</span>
-<span class="err">OFFS            EQU     OFFS+SIZE_OF_FIELD2</span>
-<span class="err">; ...</span>
-<span class="err">STRUCT1_SIZE    EQU     OFFS</span>
-</code></pre></div>
-
-<p>which, once run through the macro expansion, creates the following code</p>
-<div class="highlight"><pre><span></span><code><span class="err">STRUCT1         EQU     0</span>
-<span class="err">FIELD1          EQU     0</span>
-<span class="err">FIELD2          EQU     SIZE_OF_FIELD1</span>
-<span class="err">FIIELD3         EQU     SIZE_OF_FIELD1+SIZE_OF_FIELD2</span>
-<span class="err">; ...</span>
-<span class="err">STRUCT1_SIZE    EQU     SIZE_OF_FIELD1+...+SIZE_OF_FIELDn</span>
-</code></pre></div>
-
-<p>So, the type macros are all defined with code like this</p>
-<div class="highlight"><pre><span></span><code><span class="err">TYPENAME    MACRO</span>
-<span class="err">\1          EQU     SOFFSET</span>
-<span class="err">SOFFSET     SET     SOFFSET+SIZE_OF_TYPE</span>
-<span class="err">            ENDM</span>
-</code></pre></div>
-
-<p>For example the <code>BYTE</code> macro is</p>
-<div class="highlight"><pre><span></span><code><span class="err">BYTE        MACRO       ; byte (8 bits)</span>
-<span class="err">\1          EQU     SOFFSET</span>
-<span class="err">SOFFSET     SET     SOFFSET+1</span>
-<span class="err">            ENDM</span>
-</code></pre></div>
-
-<p>Note that the field is defined with <code>EQU</code> to avoid unwanted overwrites, while <code>SOFFSET</code> uses <code>SET</code> that allows to redefine the symbol.</p>
-<p>Let's see now how a real structure is defined. A good example is <code>LN</code> defined in <code>include_i/exec/nodes.i</code> which represents a node of a linked list.</p>
-<div class="highlight"><pre><span></span><code><span class="err">   STRUCTURE    LN,0    ; List Node</span>
-<span class="err">    APTR    LN_SUCC ; Pointer to next (successor)</span>
-<span class="err">    APTR    LN_PRED ; Pointer to previous (predecessor)</span>
-<span class="err">    UBYTE   LN_TYPE</span>
-<span class="err">    BYTE    LN_PRI  ; Priority, for sorting</span>
-<span class="err">    APTR    LN_NAME ; ID string, null terminated</span>
-<span class="err">    LABEL   LN_SIZE ; Note: word aligned</span>
-</code></pre></div>
-
-<p>The <code>STRUCTURE</code> macro is defined in <code>types.i</code> as</p>
-<div class="highlight"><pre><span></span><code><span class="err">STRUCTURE   MACRO       ; structure name, initial offset</span>
-<span class="err">\1          EQU     0</span>
-<span class="err">SOFFSET     SET     \2</span>
-<span class="err">            ENDM</span>
-</code></pre></div>
-
-<p>And the resulting declarations, once the macros have been expanded, are the following</p>
-<div class="highlight"><pre><span></span><code><span class="err">LN          EQU     0</span>
-<span class="err">LN_SUCC     EQU     0</span>
-<span class="err">LN_PRED     EQU     4</span>
-<span class="err">LN_TYPE     EQU     8</span>
-<span class="err">LN_PRI      EQU     9</span>
-<span class="err">LN_NAME     EQU     10</span>
-<span class="err">LN_SIZE     EQU     14</span>
-</code></pre></div>
-
-<p>As you can see the field names are just offsets inside the structure, and there is no specific padding at the end to align the structure. In this case there is no need, as the structure size is already a multiple of a word (14 bytes).</p>
-<h2 id="how-to-align-structures">How to align structures<a class="headerlink" href="#how-to-align-structures" title="Permanent link">&para;</a></h2>
-<p>If we need to align the bytes however we can use a little binary trick. If you ignore the least significant bit of a binary number you convert it to the nearest even number (downwards). An example in Python is</p>
-<div class="highlight"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="nb">bin</span><span class="p">(</span><span class="mi">13</span><span class="p">)</span>
+    LIBDEF  LIB_OPEN
+    LIBDEF  LIB_CLOSE
+    LIBDEF  LIB_EXPUNGE ; must exist in all libraries
+    LIBDEF  LIB_EXTFUNC ; for future expansion - must return zero.
+</pre></div>
+</div></div><p>the effect of the above macros with the previous constants is</p><div class="code"><div class="content"><div class="highlight"><pre><span></span>LIB_OPEN        EQU     -6
+LIB_CLOSE       EQU     -12
+LIB_EXPUNGE     EQU     -18
+LIB_EXTFUNC     EQU     -24
+</pre></div>
+</div></div><p>You can try to follow the definitions of the <code>LIBINIT</code> and <code>LIBDEF</code> macros to obtain the same result.</p><h1 id="h1-types%20and%20struct-13983793">Types and structures</h1><p>Let's see how the Exec library defines its types, which are the base components of the Amiga system. The main entry point for this investigation is the <code>include_i/exec/types.i</code> file.</p><p>When working with data structures in Assembly, everything is expressed in terms of offsets. The main idea behind structures is to create something like this</p><div class="code"><div class="content"><div class="highlight"><pre><span></span>STRUCT1         EQU     0
+OFFS            SET     0
+FIELD1          EQU     OFFS
+OFFS            EQU     OFFS+SIZE_OF_FIELD1
+FIELD2          EQU     OFFS
+OFFS            EQU     OFFS+SIZE_OF_FIELD2
+; ...
+STRUCT1_SIZE    EQU     OFFS
+</pre></div>
+</div></div><p>which, once run through the macro expansion, creates the following code</p><div class="code"><div class="content"><div class="highlight"><pre><span></span>STRUCT1         EQU     0
+FIELD1          EQU     0
+FIELD2          EQU     SIZE_OF_FIELD1
+FIIELD3         EQU     SIZE_OF_FIELD1+SIZE_OF_FIELD2
+; ...
+STRUCT1_SIZE    EQU     SIZE_OF_FIELD1+...+SIZE_OF_FIELDn
+</pre></div>
+</div></div><p>So, the type macros are all defined with code like this</p><div class="code"><div class="content"><div class="highlight"><pre><span></span>TYPENAME    MACRO
+\1          EQU     SOFFSET
+SOFFSET     SET     SOFFSET+SIZE_OF_TYPE
+            ENDM
+</pre></div>
+</div></div><p>For example the <code>BYTE</code> macro is</p><div class="code"><div class="content"><div class="highlight"><pre><span></span>BYTE        MACRO       ; byte (8 bits)
+\1          EQU     SOFFSET
+SOFFSET     SET     SOFFSET+1
+            ENDM
+</pre></div>
+</div></div><p>Note that the field is defined with <code>EQU</code> to avoid unwanted overwrites, while <code>SOFFSET</code> uses <code>SET</code> that allows to redefine the symbol.</p><p>Let's see now how a real structure is defined. A good example is <code>LN</code> defined in <code>include_i/exec/nodes.i</code> which represents a node of a linked list.</p><div class="code"><div class="content"><div class="highlight"><pre><span></span>   STRUCTURE    LN,0    ; List Node
+    APTR    LN_SUCC ; Pointer to next (successor)
+    APTR    LN_PRED ; Pointer to previous (predecessor)
+    UBYTE   LN_TYPE
+    BYTE    LN_PRI  ; Priority, for sorting
+    APTR    LN_NAME ; ID string, null terminated
+    LABEL   LN_SIZE ; Note: word aligned
+</pre></div>
+</div></div><p>The <code>STRUCTURE</code> macro is defined in <code>types.i</code> as</p><div class="code"><div class="content"><div class="highlight"><pre><span></span>STRUCTURE   MACRO       ; structure name, initial offset
+\1          EQU     0
+SOFFSET     SET     \2
+            ENDM
+</pre></div>
+</div></div><p>And the resulting declarations, once the macros have been expanded, are the following</p><div class="code"><div class="content"><div class="highlight"><pre><span></span>LN          EQU     0
+LN_SUCC     EQU     0
+LN_PRED     EQU     4
+LN_TYPE     EQU     8
+LN_PRI      EQU     9
+LN_NAME     EQU     10
+LN_SIZE     EQU     14
+</pre></div>
+</div></div><p>As you can see the field names are just offsets inside the structure, and there is no specific padding at the end to align the structure. In this case there is no need, as the structure size is already a multiple of a word (14 bytes).</p><h2 id="h2-how%20to%20align%20s-13983793">How to align structures</h2><p>If we need to align the bytes however we can use a little binary trick. If you ignore the least significant bit of a binary number you convert it to the nearest even number (downwards). An example in Python is</p><div class="code"><div class="content"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="nb">bin</span><span class="p">(</span><span class="mi">13</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="s1">&#39;0b1101&#39;</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="nb">bin</span><span class="p">(</span><span class="mi">12</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="s1">&#39;0b1100&#39;</span>
-</code></pre></div>
-
-<p>You can ignore the least significant bits with a simple bitwise AND</p>
-<div class="highlight"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="nb">bin</span><span class="p">(</span><span class="mi">14</span><span class="p">)</span>
+</pre></div>
+</div></div><p>You can ignore the least significant bits with a simple bitwise AND</p><div class="code"><div class="content"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="nb">bin</span><span class="p">(</span><span class="mi">14</span><span class="p">)</span>
 <span class="s1">&#39;0b1110&#39;</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="mi">14</span><span class="o">&amp;</span><span class="mb">0b1100</span>
 <span class="mi">12</span>
-</code></pre></div>
-
-<p>So if we get the current offset, we increase it by one and round down to the nearest integer we are aligning the offset to multiples of a word (2 bytes). The <code>ALIGNWORD</code> macro in the <code>include_i/exec/types.i</code> file implements exactly this algorithm</p>
-<div class="highlight"><pre><span></span><code><span class="err">ALIGNWORD   MACRO       ; Align structure offset to nearest word</span>
-<span class="err">SOFFSET     SET     (SOFFSET+1)&amp;$fffffffe</span>
-<span class="err">            ENDM</span>
-</code></pre></div>
-
-<p>This can be seen in action in the <code>CardHandle</code> structure defined in <code>include_i/resources/card.i</code>. The same algorithm is implemented in other parts of the Kickstart code, for example in the <code>AddMemList</code> function that adds memory space to the free memory pool.</p>
-<h1 id="whats-next">What's next<a class="headerlink" href="#whats-next" title="Permanent link">&para;</a></h1>
-<p>The next article will describe in depth how the jump table of the Exec library is created through the <code>MakeFunctions</code> routine. This will be shown step by step discussing the reverse engineering method followed to discover the mechanism and the relevant code.</p>
-<h1 id="resources">Resources<a class="headerlink" href="#resources" title="Permanent link">&para;</a></h1>
-<ul>
-<li>Amiga System Programmers Guide, Abacus (<a href="https://archive.org/details/Amiga_System_Programmers_Guide_1988_Abacus">pdf here</a>)</li>
-<li><a href="http://amigadev.elowar.com">AmigaOS Developer Docs</a></li>
-</ul>
-<h1 id="feedback">Feedback<a class="headerlink" href="#feedback" title="Permanent link">&para;</a></h1>
-<p>Feel free to reach me on <a href="https://twitter.com/thedigicat">Twitter</a> if you have questions. The <a href="https://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues">GitHub issues</a> page is the best place to submit corrections.</p>
+</pre></div>
+</div></div><p>So if we get the current offset, we increase it by one and round down to the nearest integer we are aligning the offset to multiples of a word (2 bytes). The <code>ALIGNWORD</code> macro in the <code>include_i/exec/types.i</code> file implements exactly this algorithm</p><div class="code"><div class="content"><div class="highlight"><pre><span></span>ALIGNWORD   MACRO       ; Align structure offset to nearest word
+SOFFSET     SET     (SOFFSET+1)&amp;$fffffffe
+            ENDM
+</pre></div>
+</div></div><p>This can be seen in action in the <code>CardHandle</code> structure defined in <code>include_i/resources/card.i</code>. The same algorithm is implemented in other parts of the Kickstart code, for example in the <code>AddMemList</code> function that adds memory space to the free memory pool.</p><h1 id="h1-what%27s%20next-13983793">What's next</h1><p>The next article will describe in depth how the jump table of the Exec library is created through the <code>MakeFunctions</code> routine. This will be shown step by step discussing the reverse engineering method followed to discover the mechanism and the relevant code.</p><h1 id="h1-resources-13983793">Resources</h1><ul><li>Amiga System Programmers Guide, Abacus - <a href="https://archive.org/details/Amiga">https://archive.org/details/Amiga</a><em>System</em>Programmers<em>Guide</em>1988_Abacus</li><li><a href="http://amigadev.elowar.com">AmigaOS Developer Docs</a></li></ul><h1 id="h1-feedback-13983793">Feedback</h1><p>Feel free to reach me on <a href="https://twitter.com/thedigicat">Twitter</a> if you have questions. The <a href="https://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues">GitHub issues</a> page is the best place to submit corrections.</p>
   </section>
 
   <section class="footer">
@@ -756,6 +686,8 @@
 			<script src="/theme/js/browser.min.js"></script>
 			<script src="/theme/js/breakpoints.min.js"></script>
             <script src="/theme/js/packed.js?fa89ff81"></script>
+
+<script src="/theme/js/retro.min.js?eb49ee0b"></script>
 
 	</body>
 </html>

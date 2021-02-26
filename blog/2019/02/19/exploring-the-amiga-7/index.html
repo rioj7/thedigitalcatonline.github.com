@@ -20,7 +20,7 @@
 
         <link rel="stylesheet" href="/theme/css/main.min.css?0fd2251d">
 
-<link rel="stylesheet" href="/theme/css/retro.min.css?d93687f1">
+<link id="style-retro" rel="stylesheet" href="/theme/css/retro.min.css?d93687f1">
         
         <link href="/images/global/favicon.jpg" rel="icon">
 
@@ -59,7 +59,7 @@
 	  "@id": "https://www.thedigitalcatonline.com/blog/2019/02/19/exploring-the-amiga-7/"
       },
       "datePublished" : "19/02/2019",
-      "dateModified" : "19/02/2019",
+      "dateModified" : "26/02/2021",
       "image" : "https://www.thedigitalcatonline.com/images/exploring-the-amiga-7.jpg",
       "description" : "The complete Exec vector table, list management in Kickstart 1.3",
       "headline" : "The complete Exec vector table, list management in Kickstart 1.3",
@@ -103,6 +103,7 @@
 
     <span class="fas fa-calendar-alt"></span> <time datetime="2019-02-19T13:00:00+01:00"> 19/02/2019</time>
 
+    <span class="fas fa-edit"></span> <time datetime="2021-02-26T08:00:00+00:00"> 26/02/2021</time>
 
     <span class="fas fa-tags"></span>
     <a class="tag" href="/categories/assembly/">assembly</a>    <a class="tag" href="/categories/amiga/">amiga</a>    <a class="tag" href="/categories/retroprogramming/">retroprogramming</a>    <br>
@@ -114,943 +115,252 @@
   </section>
 
   <section id="content">
-    <h1 id="the-complete-exec-vector-table">The complete Exec vector table<a class="headerlink" href="#the-complete-exec-vector-table" title="Permanent link">&para;</a></h1>
-<p>In <a href="https://www.thedigitalcatonline.com/blog/2018/06/08/exploring-the-amiga-3/">the 3rd post</a> of this series I showed the Exec vectors table and the way <code>MakeFunctions</code> creates the jump table when Exec is installed in memory. In that post I focused on the first 4 reserved vectors, but it is useful to have the full table while reading the Kickstart code. This is the full vectors table for Exec 34.2 (28 Oct 1987).</p>
-<p>The <strong>Relative offset</strong> column contains the offset of the function in the jump table once the library has been installed, which allows any Amiga program to call Exec functions through the <code>offset(a6)</code> syntax (e.g. <code>OpenLibrary</code> can be called by <code>jsr -0x228(a6)</code>). <strong>Vector position</strong> is the offset of the vector in the Kickstart 1.3 ROM (i.e. <code>0x0001a7c</code> is the position of the vector table itself), <strong>Relative address</strong> is the hexadecimal value stored in the table before the relocation, <strong>Absolute address</strong> is the function position after relocation (i.e. the wrapped sum between the table address and the relative address), and <strong>Function</strong> is the function name according to the include files and the Amiga documentation.</p>
-<table>
-<thead>
-<tr>
-<th>Relative offset</th>
-<th>Vector position</th>
-<th>Relative address</th>
-<th>Absolute address</th>
-<th>Function</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>-0x00</td>
-<td>00001a7c</td>
-<td>08a0</td>
-<td>0000231c</td>
-<td>Open()</td>
-</tr>
-<tr>
-<td>-0x06</td>
-<td>00001a7e</td>
-<td>08a8</td>
-<td>00002324</td>
-<td>Close()</td>
-</tr>
-<tr>
-<td>-0x12</td>
-<td>00001a80</td>
-<td>08ac</td>
-<td>00002328</td>
-<td>Expunge()</td>
-</tr>
-<tr>
-<td>-0x18</td>
-<td>00001a82</td>
-<td>08ac</td>
-<td>00002328</td>
-<td>Reserved for future use</td>
-</tr>
-<tr>
-<td>-0x1e</td>
-<td>00001a84</td>
-<td>ee6a</td>
-<td>000008e6</td>
-<td>Supervisor()</td>
-</tr>
-<tr>
-<td>-0x24</td>
-<td>00001a86</td>
-<td>f420</td>
-<td>00000e9c</td>
-<td>ExitIntr()</td>
-</tr>
-<tr>
-<td>-0x2a</td>
-<td>00001a88</td>
-<td>f446</td>
-<td>00000ec2</td>
-<td>Schedule()</td>
-</tr>
-<tr>
-<td>-0x30</td>
-<td>00001a8a</td>
-<td>04f8</td>
-<td>00001f74</td>
-<td>Reschedule()</td>
-</tr>
-<tr>
-<td>-0x36</td>
-<td>00001a8c</td>
-<td>f4a0</td>
-<td>00000f1c</td>
-<td>Switch()</td>
-</tr>
-<tr>
-<td>-0x3c</td>
-<td>00001a8e</td>
-<td>f4ea</td>
-<td>00000f66</td>
-<td>Dispatch()</td>
-</tr>
-<tr>
-<td>-0x42</td>
-<td>00001a90</td>
-<td>f58e</td>
-<td>0000100a</td>
-<td>Exception()</td>
-</tr>
-<tr>
-<td>-0x48</td>
-<td>00001a92</td>
-<td>f0b0</td>
-<td>00000b2c</td>
-<td>InitCode()</td>
-</tr>
-<tr>
-<td>-0x4e</td>
-<td>00001a94</td>
-<td>f188</td>
-<td>00000c04</td>
-<td>InitStruct()</td>
-</tr>
-<tr>
-<td>-0x54</td>
-<td>00001a96</td>
-<td>faac</td>
-<td>00001528</td>
-<td>MakeLibrary()</td>
-</tr>
-<tr>
-<td>-0x5a</td>
-<td>00001a98</td>
-<td>fb36</td>
-<td>000015b2</td>
-<td>MakeFunctions()</td>
-</tr>
-<tr>
-<td>-0x60</td>
-<td>00001a9a</td>
-<td>f080</td>
-<td>00000afc</td>
-<td>FindResident()</td>
-</tr>
-<tr>
-<td>-0x66</td>
-<td>00001a9c</td>
-<td>f0e8</td>
-<td>00000b64</td>
-<td>InitResident()</td>
-</tr>
-<tr>
-<td>-0x6c</td>
-<td>00001a9e</td>
-<td>1596</td>
-<td>00003012</td>
-<td>Alert()</td>
-</tr>
-<tr>
-<td>-0x72</td>
-<td>00001aa0</td>
-<td>08ee</td>
-<td>0000236a</td>
-<td>Debug()</td>
-</tr>
-<tr>
-<td>-0x78</td>
-<td>00001aa2</td>
-<td>f9ac</td>
-<td>00001428</td>
-<td>Disable()</td>
-</tr>
-<tr>
-<td>-0x7e</td>
-<td>00001aa4</td>
-<td>f9ba</td>
-<td>00001436</td>
-<td>Enable()</td>
-</tr>
-<tr>
-<td>-0x84</td>
-<td>00001aa6</td>
-<td>051a</td>
-<td>00001f96</td>
-<td>Forbid()</td>
-</tr>
-<tr>
-<td>-0x8a</td>
-<td>00001aa8</td>
-<td>0520</td>
-<td>00001f9c</td>
-<td>Permit()</td>
-</tr>
-<tr>
-<td>-0x90</td>
-<td>00001aaa</td>
-<td>f6e2</td>
-<td>0000115e</td>
-<td>SetSR()</td>
-</tr>
-<tr>
-<td>-0x96</td>
-<td>00001aac</td>
-<td>f708</td>
-<td>00001184</td>
-<td>SuperState()</td>
-</tr>
-<tr>
-<td>-0x9c</td>
-<td>00001aae</td>
-<td>f734</td>
-<td>000011b0</td>
-<td>UserState()</td>
-</tr>
-<tr>
-<td>-0xa2</td>
-<td>00001ab0</td>
-<td>f74e</td>
-<td>000011ca</td>
-<td>SetIntVector()</td>
-</tr>
-<tr>
-<td>-0xa8</td>
-<td>00001ab2</td>
-<td>f794</td>
-<td>00001210</td>
-<td>AddIntServer()</td>
-</tr>
-<tr>
-<td>-0xae</td>
-<td>00001ab4</td>
-<td>f7d4</td>
-<td>00001250</td>
-<td>RemIntServer()</td>
-</tr>
-<tr>
-<td>-0xb4</td>
-<td>00001ab6</td>
-<td>f8e0</td>
-<td>0000135c</td>
-<td>Cause()</td>
-</tr>
-<tr>
-<td>-0xba</td>
-<td>00001ab8</td>
-<td>fc5c</td>
-<td>000016d8</td>
-<td>Allocate()</td>
-</tr>
-<tr>
-<td>-0xc0</td>
-<td>00001ac0</td>
-<td>fcc4</td>
-<td>00001740</td>
-<td>Deallocate()</td>
-</tr>
-<tr>
-<td>-0xc6</td>
-<td>00001abc</td>
-<td>fd54</td>
-<td>000017d0</td>
-<td>AllocMem()</td>
-</tr>
-<tr>
-<td>-0xcc</td>
-<td>00001abe</td>
-<td>fe00</td>
-<td>0000187c</td>
-<td>AllocAbs()</td>
-</tr>
-<tr>
-<td>-0xd2</td>
-<td>00001ac0</td>
-<td>fdb0</td>
-<td>0000182c</td>
-<td>FreeMem()</td>
-</tr>
-<tr>
-<td>-0xd8</td>
-<td>00001ac2</td>
-<td>fe90</td>
-<td>0000190c</td>
-<td>AvailMem()</td>
-</tr>
-<tr>
-<td>-0xde</td>
-<td>00001ac4</td>
-<td>fede</td>
-<td>0000195a</td>
-<td>AllocEntry()</td>
-</tr>
-<tr>
-<td>-0xe4</td>
-<td>00001ac6</td>
-<td>ff6c</td>
-<td>000019e8</td>
-<td>FreeEntry()</td>
-</tr>
-<tr>
-<td>-0xea</td>
-<td>00001ac8</td>
-<td>fb6c</td>
-<td>000015e8</td>
-<td>Insert()</td>
-</tr>
-<tr>
-<td>-0xf0</td>
-<td>00001aca</td>
-<td>fb98</td>
-<td>00001614</td>
-<td>AddHead()</td>
-</tr>
-<tr>
-<td>-0xf6</td>
-<td>00001acc</td>
-<td>fba8</td>
-<td>00001624</td>
-<td>AddTail()</td>
-</tr>
-<tr>
-<td>-0xfc</td>
-<td>00001ace</td>
-<td>fbc0</td>
-<td>0000163c</td>
-<td>Remove()</td>
-</tr>
-<tr>
-<td>-0x102</td>
-<td>00001ad0</td>
-<td>fbce</td>
-<td>0000164a</td>
-<td>RemHead()</td>
-</tr>
-<tr>
-<td>-0x108</td>
-<td>00001ad2</td>
-<td>fbde</td>
-<td>0000165a</td>
-<td>RemTail()</td>
-</tr>
-<tr>
-<td>-0x10e</td>
-<td>00001ad4</td>
-<td>fbf4</td>
-<td>00001670</td>
-<td>Enqueue()</td>
-</tr>
-<tr>
-<td>-0x114</td>
-<td>00001ad6</td>
-<td>fc1a</td>
-<td>00001696</td>
-<td>FindName()</td>
-</tr>
-<tr>
-<td>-0x11a</td>
-<td>00001ad8</td>
-<td>0208</td>
-<td>00001c84</td>
-<td>AddTask()</td>
-</tr>
-<tr>
-<td>-0x120</td>
-<td>00001ada</td>
-<td>02b4</td>
-<td>00001d30</td>
-<td>RemTask()</td>
-</tr>
-<tr>
-<td>-0x126</td>
-<td>00001adc</td>
-<td>0334</td>
-<td>00001db0</td>
-<td>FindTask()</td>
-</tr>
-<tr>
-<td>-0x12c</td>
-<td>00001ade</td>
-<td>0388</td>
-<td>00001e04</td>
-<td>SetTaskPri()</td>
-</tr>
-<tr>
-<td>-0x132</td>
-<td>00001ae0</td>
-<td>03e2</td>
-<td>00001e5e</td>
-<td>SetSignal()</td>
-</tr>
-<tr>
-<td>-0x138</td>
-<td>00001ae2</td>
-<td>03d8</td>
-<td>00001e54</td>
-<td>SetExcept()</td>
-</tr>
-<tr>
-<td>-0x13e</td>
-<td>00001ae4</td>
-<td>0490</td>
-<td>00001f0c</td>
-<td>Wait()</td>
-</tr>
-<tr>
-<td>-0x144</td>
-<td>00001ae6</td>
-<td>0408</td>
-<td>00001e84</td>
-<td>Signal()</td>
-</tr>
-<tr>
-<td>-0x14a</td>
-<td>00001ae8</td>
-<td>0584</td>
-<td>00002000</td>
-<td>AllocSignal()</td>
-</tr>
-<tr>
-<td>-0x150</td>
-<td>00001aea</td>
-<td>05bc</td>
-<td>00002038</td>
-<td>FreeSignal()</td>
-</tr>
-<tr>
-<td>-0x156</td>
-<td>00001aec</td>
-<td>054e</td>
-<td>00001fca</td>
-<td>AllocTrap()</td>
-</tr>
-<tr>
-<td>-0x15c</td>
-<td>00001aee</td>
-<td>0574</td>
-<td>00001ff0</td>
-<td>FreeTrap()</td>
-</tr>
-<tr>
-<td>-0x162</td>
-<td>00001af0</td>
-<td>00d8</td>
-<td>00001b54</td>
-<td>AddPort()</td>
-</tr>
-<tr>
-<td>-0x168</td>
-<td>00001af2</td>
-<td>00f0</td>
-<td>00001b6c</td>
-<td>RemPort()</td>
-</tr>
-<tr>
-<td>-0x16e</td>
-<td>00001af4</td>
-<td>00f4</td>
-<td>00001b70</td>
-<td>PutMsg()</td>
-</tr>
-<tr>
-<td>-0x174</td>
-<td>00001af6</td>
-<td>016e</td>
-<td>00001bea</td>
-<td>GetMsg()</td>
-</tr>
-<tr>
-<td>-0x17a</td>
-<td>00001af8</td>
-<td>019c</td>
-<td>00001c18</td>
-<td>ReplyMsg()</td>
-</tr>
-<tr>
-<td>-0x180</td>
-<td>00001afa</td>
-<td>01b6</td>
-<td>00001c32</td>
-<td>WaitPort()</td>
-</tr>
-<tr>
-<td>-0x186</td>
-<td>00001afc</td>
-<td>01de</td>
-<td>00001c5a</td>
-<td>FindPort()</td>
-</tr>
-<tr>
-<td>-0x18c</td>
-<td>00001afe</td>
-<td>f9cc</td>
-<td>00001448</td>
-<td>AddLibrary()</td>
-</tr>
-<tr>
-<td>-0x192</td>
-<td>00001b00</td>
-<td>f9da</td>
-<td>00001456</td>
-<td>RemLibrary()</td>
-</tr>
-<tr>
-<td>-0x198</td>
-<td>00001b02</td>
-<td>f9f0</td>
-<td>0000146c</td>
-<td>OldOpenLibrary()</td>
-</tr>
-<tr>
-<td>-0x19e</td>
-<td>00001b04</td>
-<td>fa26</td>
-<td>000014a2</td>
-<td>CloseLibrary()</td>
-</tr>
-<tr>
-<td>-0x1a4</td>
-<td>00001b06</td>
-<td>fa3a</td>
-<td>000014b6</td>
-<td>SetFunction()</td>
-</tr>
-<tr>
-<td>-0x1aa</td>
-<td>00001b08</td>
-<td>fa58</td>
-<td>000014d4</td>
-<td>SumLibrary()</td>
-</tr>
-<tr>
-<td>-0x1b0</td>
-<td>00001b0a</td>
-<td>ec14</td>
-<td>00000690</td>
-<td>AddDevice()</td>
-</tr>
-<tr>
-<td>-0x1b6</td>
-<td>00001b0c</td>
-<td>ec22</td>
-<td>0000069e</td>
-<td>RemDevice()</td>
-</tr>
-<tr>
-<td>-0x1bc</td>
-<td>00001b0e</td>
-<td>ec26</td>
-<td>000006a2</td>
-<td>OpenDevice()</td>
-</tr>
-<tr>
-<td>-0x1c2</td>
-<td>00001b10</td>
-<td>ec74</td>
-<td>000006f0</td>
-<td>CloseDevice()</td>
-</tr>
-<tr>
-<td>-0x1c8</td>
-<td>00001b12</td>
-<td>ec9c</td>
-<td>00000718</td>
-<td>DoIO()</td>
-</tr>
-<tr>
-<td>-0x1ce</td>
-<td>00001b14</td>
-<td>ec8a</td>
-<td>00000706</td>
-<td>SendIO()</td>
-</tr>
-<tr>
-<td>-0x1d4</td>
-<td>00001b16</td>
-<td>ed0e</td>
-<td>0000078a</td>
-<td>CheckIO()</td>
-</tr>
-<tr>
-<td>-0x1da</td>
-<td>00001b18</td>
-<td>ecb2</td>
-<td>0000072e</td>
-<td>WaitIO()</td>
-</tr>
-<tr>
-<td>-0x1e0</td>
-<td>00001b1a</td>
-<td>ed2a</td>
-<td>000007a6</td>
-<td>AbortIO()</td>
-</tr>
-<tr>
-<td>-0x1e6</td>
-<td>00001b1c</td>
-<td>01e8</td>
-<td>00001c64</td>
-<td>AddResource()</td>
-</tr>
-<tr>
-<td>-0x1ec</td>
-<td>00001b1e</td>
-<td>01f0</td>
-<td>00001c6c</td>
-<td>RemResource()</td>
-</tr>
-<tr>
-<td>-0x1f2</td>
-<td>00001b20</td>
-<td>01f4</td>
-<td>00001c70</td>
-<td>OpenResource()</td>
-</tr>
-<tr>
-<td>-0x1f8</td>
-<td>00001b22</td>
-<td>07b8</td>
-<td>00002234</td>
-<td>execPrivate7()</td>
-</tr>
-<tr>
-<td>-0x1fe</td>
-<td>00001b24</td>
-<td>07c2</td>
-<td>0000223e</td>
-<td>execPrivate8()</td>
-</tr>
-<tr>
-<td>-0x204</td>
-<td>00001b26</td>
-<td>07ee</td>
-<td>0000226a</td>
-<td>execPrivate9()</td>
-</tr>
-<tr>
-<td>-0x20a</td>
-<td>00001b28</td>
-<td>06a8</td>
-<td>00002124</td>
-<td>RawDoFmt()</td>
-</tr>
-<tr>
-<td>-0x210</td>
-<td>00001b2a</td>
-<td>f700</td>
-<td>0000117c</td>
-<td>GetCC()</td>
-</tr>
-<tr>
-<td>-0x216</td>
-<td>00001b2c</td>
-<td>fdda</td>
-<td>00001856</td>
-<td>TypeOfMem()</td>
-</tr>
-<tr>
-<td>-0x21c</td>
-<td>00001b2e</td>
-<td>131c</td>
-<td>00002d98</td>
-<td>Procure()</td>
-</tr>
-<tr>
-<td>-0x222</td>
-<td>00001b30</td>
-<td>1332</td>
-<td>00002dae</td>
-<td>Vacate()</td>
-</tr>
-<tr>
-<td>-0x228</td>
-<td>00001b32</td>
-<td>f9f8</td>
-<td>00001474</td>
-<td>OpenLibrary()</td>
-</tr>
-<tr>
-<td>-0x22e</td>
-<td>00001b34</td>
-<td>1354</td>
-<td>00002dd0</td>
-<td>InitSemaphore()</td>
-</tr>
-<tr>
-<td>-0x234</td>
-<td>00001b36</td>
-<td>1374</td>
-<td>00002df0</td>
-<td>ObtainSemaphore()</td>
-</tr>
-<tr>
-<td>-0x23a</td>
-<td>00001b38</td>
-<td>13c4</td>
-<td>00002e40</td>
-<td>ReleaseSemaphore()</td>
-</tr>
-<tr>
-<td>-0x240</td>
-<td>00001b3a</td>
-<td>1428</td>
-<td>00002ea4</td>
-<td>AttemptSemaphore()</td>
-</tr>
-<tr>
-<td>-0x246</td>
-<td>00001b3c</td>
-<td>1458</td>
-<td>00002ed4</td>
-<td>ObtainSemaphoreList()</td>
-</tr>
-<tr>
-<td>-0x24c</td>
-<td>00001b3e</td>
-<td>14ce</td>
-<td>00002f4a</td>
-<td>ReleaseSemaphoreList()</td>
-</tr>
-<tr>
-<td>-0x252</td>
-<td>00001b40</td>
-<td>14f4</td>
-<td>00002f70</td>
-<td>FindSemaphore()</td>
-</tr>
-<tr>
-<td>-0x258</td>
-<td>00001b42</td>
-<td>14e4</td>
-<td>00002f60</td>
-<td>AddSemaphore()</td>
-</tr>
-<tr>
-<td>-0x25e</td>
-<td>00001b44</td>
-<td>14f0</td>
-<td>00002f6c</td>
-<td>RemSemaphore()</td>
-</tr>
-<tr>
-<td>-0x264</td>
-<td>00001b46</td>
-<td>effc</td>
-<td>00000a78</td>
-<td>SumKickData()</td>
-</tr>
-<tr>
-<td>-0x26a</td>
-<td>00001b48</td>
-<td>ffaa</td>
-<td>00001a26</td>
-<td>AddMemList()</td>
-</tr>
-<tr>
-<td>-0x270</td>
-<td>00001b4a</td>
-<td>1504</td>
-<td>00002f80</td>
-<td>CopyMem()</td>
-</tr>
-<tr>
-<td>-0x276</td>
-<td>00001b4c</td>
-<td>1500</td>
-<td>00002f7c</td>
-<td>CopyMemQuick()</td>
-</tr>
-</tbody>
-</table>
-<h1 id="the-memory-list-header">The memory list header<a class="headerlink" href="#the-memory-list-header" title="Permanent link">&para;</a></h1>
-<p>Before we dig into the code of the <code>AddMemList</code> function to see how the memory space is added to the free memory list, let's have a look at the status of the memory list itself, as we need to be familiar with its structure to understand the rest of the process.</p>
-<p>You might recall from the <a href="https://www.thedigitalcatonline.com/blog/2018/06/25/exploring-the-amiga-5/">fifth article</a> that the <code>MemList</code> structure is created <code>0x142</code> bytes after ExecBase, and that the structure is the following</p>
-<div class="highlight"><pre><span></span><code>    <span class="mh">0xe</span> <span class="o">+-------+</span> <span class="mh">0x150</span>
-        <span class="o">|</span>       <span class="o">|</span>
-    <span class="mh">0xd</span> <span class="o">+-------+</span> <span class="mh">0x14f</span> <span class="p">(</span><span class="n">LH_pad</span><span class="p">)</span>
-        <span class="o">|</span> <span class="mh">0xa</span>   <span class="o">|</span>
-    <span class="mh">0xc</span> <span class="o">+-------+</span> <span class="mh">0x14e</span> <span class="p">(</span><span class="n">LH_TYPE</span><span class="p">)</span>
-        <span class="o">|</span> <span class="mh">0x142</span> <span class="o">|</span>
-    <span class="mh">0x8</span> <span class="o">+-------+</span> <span class="mh">0x14a</span> <span class="p">(</span><span class="n">LH_TAILPRED</span><span class="p">)</span>
-        <span class="o">|</span> <span class="mh">0x0</span>   <span class="o">|</span>
-    <span class="mh">0x4</span> <span class="o">+-------+</span> <span class="mh">0x146</span> <span class="p">(</span><span class="n">LH_TAIL</span><span class="p">)</span>
-        <span class="o">|</span> <span class="mh">0x146</span> <span class="o">|</span>
-    <span class="mh">0x0</span> <span class="o">+-------+</span> <span class="mh">0x142</span> <span class="p">(</span><span class="n">LH_HEAD</span><span class="p">)</span>
-</code></pre></div>
-
-<p>This means that we can access the memory list with <code>lea 0x142(a6),a0</code>, as <code>0x142</code> is the relative address, i.e. assuming ExecBase is 0. Once the absolute address is in one of the address registers we can access the first node through <code>(a0)</code>, which is the Motorola Assembly version of the C pointer dereference operation (Address Register Indirect Mode). With <code>(a0)</code> we do not use the content of <code>a0</code>, but the content of the memory location which address is contained in <code>a0</code>.</p>
-<p>So if <code>a0</code> is <code>0x142</code> in the previous figure, <code>(a0)</code> is <code>0x0</code> (<code>0x142</code> contains <code>0x146</code>, <code>0x146</code> contains <code>0x0</code>). It's thus convenient to think of <code>a0</code> as the pointer, and of <code>(a0)</code> as the value.</p>
-<p>It is also interesting to note that the structure at <code>0x146</code> is very similar to the <code>LN</code> structure. Recall that the latter is defined in <code>include_i/exec/nodes.i</code> as</p>
-<div class="highlight"><pre><span></span><code><span class="err"> STRUCTURE    LN,0    ; List Node</span>
-<span class="err">    APTR    LN_SUCC ; Pointer to next (successor)</span>
-<span class="err">    APTR    LN_PRED ; Pointer to previous (predecessor)</span>
-<span class="err">    UBYTE   LN_TYPE</span>
-<span class="err">    BYTE    LN_PRI  ; Priority, for sorting</span>
-<span class="err">    APTR    LN_NAME ; ID string, null terminated</span>
-<span class="err">    LABEL   LN_SIZE ; Note: word aligned</span>
-</code></pre></div>
-
-<p>and as you can see <code>LH_TAIL</code>, <code>LH_TAILPRED</code>, and <code>LH_TYPE</code> can act as a proper node of a linked list. This is done on purpose (obviously), as the tail of the list has to be processed by the code that manages linked lists.</p>
-<h1 id="adding-free-memory-to-the-system-list">Adding free memory to the system list<a class="headerlink" href="#adding-free-memory-to-the-system-list" title="Permanent link">&para;</a></h1>
-<p>At the end of the <a href="https://www.thedigitalcatonline.com/blog/2018/06/25/exploring-the-amiga-6/">previous post</a> we left Exec just after its code prepared the parameters of the free memory that was available on the system. As we saw in that post, this operation is always executed for the chip memory, and optionally for the fast memory if the hardware expansion is installed.</p>
-<p>The <code>AddMemList</code> function at <code>0x1a26</code> is called with the following prototype</p>
-<div class="highlight"><pre><span></span><code><span class="err">size = AddMemList(size, attributes, pri, base, name)</span>
-<span class="err">D0                D0    D1          D2   A0    A1</span>
-</code></pre></div>
-
-<p>with the purpose of adding the given memory <code>size</code>, starting from the <code>base</code> address, to the system pool. The memory <code>attributes</code> will be store in the memory block and the priority (<code>pri</code>) will be used to find the insertion point. The name is also added to the memory node to identify it.</p>
-<p>We can split the memory addition in two different parts. <code>AddMemList</code> will create a node that contain the parameters of the memory region, then will call <code>Enqueue</code> to add it to the <code>MemList</code> linked list. When Exec bootstraps the system the memory list is empty, but these functions must work in a generic case. Actually when the system has a memory expansion (fast memory), this is the first that is added to the list, but it's immediately followed by the chip memory.</p>
-<p>To help you to follow what happens in the function, this is a depiction of the memory area that we want to add to the system pool at the end of <code>AddMemList</code>, just before the call to <code>Enqueue</code>. The area contains a header made of three structures, <code>LN</code> (linked list node), <code>MH</code> (memory header), and <code>MC</code> (memory chunk)</p>
-<div class="highlight"><pre><span></span><code>   <span class="n">SIZE</span> <span class="o">+---------------+</span>
-        <span class="o">|</span> <span class="n">Free</span> <span class="n">memory</span>   <span class="o">|</span>
-        <span class="o">+---------------+</span>
-        <span class="o">|</span> <span class="p">...</span>           <span class="o">|</span>
-        <span class="o">+---------------+</span>
-        <span class="o">|</span> <span class="n">Free</span> <span class="n">memory</span>   <span class="o">|</span>
-   <span class="mh">0x2c</span> <span class="o">+---------------+</span> <span class="o">&lt;-+</span>
-        <span class="o">|</span> <span class="n">MC_SIZE</span>       <span class="o">|</span>   <span class="o">|</span>
-   <span class="mh">0x28</span> <span class="o">+---------------+</span>   <span class="o">|</span>
-        <span class="o">|</span> <span class="n">MC_BYTES</span>      <span class="o">|</span>   <span class="o">|</span> <span class="n">MC</span>
-   <span class="mh">0x24</span> <span class="o">+---------------+</span>   <span class="o">|</span>
-        <span class="o">|</span> <span class="n">MC_NEXT</span>       <span class="o">|</span>   <span class="o">|</span>
-   <span class="mh">0x20</span> <span class="o">+---------------+</span> <span class="o">&lt;-+</span>
-        <span class="o">|</span> <span class="n">MH_FREE</span>       <span class="o">|</span>   <span class="o">|</span>
-   <span class="mh">0x1c</span> <span class="o">+---------------+</span>   <span class="o">|</span>
-        <span class="o">|</span> <span class="n">MH_UPPER</span>      <span class="o">|</span>   <span class="o">|</span>
-   <span class="mh">0x18</span> <span class="o">+---------------+</span>   <span class="o">|</span>
-        <span class="o">|</span> <span class="n">MH_LOWER</span>      <span class="o">|</span>   <span class="o">|</span> <span class="n">MH</span>
-   <span class="mh">0x14</span> <span class="o">+---------------+</span>   <span class="o">|</span>
-        <span class="o">|</span> <span class="n">MH_FIRST</span>      <span class="o">|</span>   <span class="o">|</span>
-   <span class="mh">0x10</span> <span class="o">+---------------+</span>   <span class="o">|</span>
-        <span class="o">|</span> <span class="n">MH_ATTRIBUTES</span> <span class="o">|</span>   <span class="o">|</span>
-    <span class="mh">0xe</span> <span class="o">+---------------+</span> <span class="o">&lt;-+</span>
-        <span class="o">|</span> <span class="n">LN_NAME</span>       <span class="o">|</span>   <span class="o">|</span>
-    <span class="mh">0xa</span> <span class="o">+---------------+</span>   <span class="o">|</span>
-        <span class="o">|</span> <span class="n">LN_PRI</span>        <span class="o">|</span>   <span class="o">|</span>
-    <span class="mh">0x9</span> <span class="o">+---------------+</span>   <span class="o">|</span>
-        <span class="o">|</span> <span class="n">LN_TYPE</span>       <span class="o">|</span>   <span class="o">|</span> <span class="n">LN</span>
-    <span class="mh">0x8</span> <span class="o">+---------------+</span>   <span class="o">|</span>
-        <span class="o">|</span> <span class="n">LN_PRED</span>       <span class="o">|</span>   <span class="o">|</span>
-    <span class="mh">0x4</span> <span class="o">+---------------+</span>   <span class="o">|</span>
-        <span class="o">|</span> <span class="n">LN_SUCC</span>       <span class="o">|</span>   <span class="o">|</span>
-    <span class="mh">0x0</span> <span class="o">+---------------+</span> <span class="o">&lt;-+</span>
-</code></pre></div>
-
-<p>It is interesting to note that, since we are managing the system memory, we cannot store information about it other than in the memory itself. The presence of management structures, then, is reducing the amount of free memory. This has to taken into account when designing a memory management system, but will not be considered in this article.</p>
-<p>When we create the structure shown in figure, we need to ensure that the actual free memory is a multiple of a long word (8 bytes), as this is generally desirable. The memory space we are dealing with starts from 0 in the picture, but can actually be anywhere in the system memory, so it is not guaranteed that either the beginning or the end of the free memory space are aligned with long words.</p>
-<p>The code of <code>AddMemList</code> performs the alignment in two steps. First it aligns the address of <code>MC</code> to the upper nearest long word (multiple of 8), then aligns the total size to the lower nearest long word. For example, if the starting point was 0 and the total size 64 bytes, we would leave all the values untouched:<code>LN_SUCC</code> at <code>0x0</code>, <code>MC_NEXT</code> at <code>0x20</code>, and the total size of the chunk (structure 'MC' + free memory) would be 32 bytes.</p>
-<div class="highlight"><pre><span></span><code>   <span class="mh">0x40</span> <span class="o">+---------------+</span> <span class="o">&lt;-+</span>
-        <span class="o">|</span> <span class="n">Free</span> <span class="n">memory</span>   <span class="o">|</span>   <span class="o">|</span>
-        <span class="o">+---------------+</span>   <span class="o">|</span> <span class="mi">32</span> <span class="n">bytes</span>
-        <span class="o">|</span> <span class="n">MC</span>            <span class="o">|</span>   <span class="o">|</span>
-   <span class="mh">0x20</span> <span class="o">+---------------+</span> <span class="o">&lt;-+</span>
-        <span class="o">|</span> <span class="n">MH</span>            <span class="o">|</span>   <span class="o">|</span>
-        <span class="o">+---------------+</span>   <span class="o">|</span> <span class="mi">32</span> <span class="n">bytes</span>
-        <span class="o">|</span> <span class="n">LN</span>            <span class="o">|</span>   <span class="o">|</span>
-    <span class="mh">0x0</span> <span class="o">+---------------+</span> <span class="o">&lt;-+</span>
-</code></pre></div>
-
-<p>If the starting point was 1 and the total size 65 bytes, however, the result would be: <code>LN_SUCC</code> at <code>0x1</code>, <code>MC_NEXT</code> at <code>0x28</code> (upper long word), and the total size of the memory would be 56 bytes (65-7 gives 58, rounded down to a multiple of 8), which means a chunk of 24 bytes</p>
-<div class="highlight"><pre><span></span><code>   <span class="mh">0x42</span> <span class="o">+---------------+</span> <span class="o">&lt;-+</span>
-        <span class="o">|</span> <span class="n">Ignored</span>       <span class="o">|</span>   <span class="o">|</span> <span class="mi">2</span> <span class="n">bytes</span>
-   <span class="mh">0x40</span> <span class="o">+---------------+</span> <span class="o">&lt;-+</span>
-        <span class="o">|</span> <span class="n">Free</span> <span class="n">memory</span>   <span class="o">|</span>   <span class="o">|</span>
-        <span class="o">+---------------+</span>   <span class="o">|</span> <span class="mi">24</span> <span class="n">bytes</span>
-        <span class="o">|</span> <span class="n">MC</span>            <span class="o">|</span>   <span class="o">|</span>
-   <span class="mh">0x28</span> <span class="o">+---------------+</span> <span class="o">&lt;-+</span>
-        <span class="o">|</span> <span class="n">EMPTY</span>         <span class="o">|</span>   <span class="o">|</span> <span class="mi">7</span> <span class="n">bytes</span>
-   <span class="mh">0x21</span> <span class="o">+---------------+</span> <span class="o">&lt;-+</span>
-        <span class="o">|</span> <span class="n">MH</span>            <span class="o">|</span>   <span class="o">|</span>
-        <span class="o">+---------------+</span>   <span class="o">|</span> <span class="mi">32</span> <span class="n">bytes</span>
-        <span class="o">|</span> <span class="n">LN</span>            <span class="o">|</span>   <span class="o">|</span>
-    <span class="mh">0x1</span> <span class="o">+---------------+</span> <span class="o">&lt;-+</span>
-</code></pre></div>
-
-<h1 id="addmemlist-internals"><code>AddMemList</code> internals<a class="headerlink" href="#addmemlist-internals" title="Permanent link">&para;</a></h1>
-<p>According to the Exec vectors table, <code>AddMemList</code> can be found at <code>00001a26</code>, and ends at <code>00001a78</code>. It is immediately followed by a padding word <code>0000</code> and the vectors table itself</p>
-<div class="highlight"><pre><span></span><code><span class="mi">00001</span><span class="n">a26</span><span class="o">:</span> <span class="mi">2149</span> <span class="mi">000</span><span class="n">a</span>                 <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">a1</span><span class="o">,</span><span class="mh">0xa</span><span class="o">(</span><span class="n">a0</span><span class="o">)</span>
-<span class="mi">00001</span><span class="n">a2a</span><span class="o">:</span> <span class="mi">43</span><span class="n">e8</span> <span class="mi">0020</span>                 <span class="n">lea</span>     <span class="mh">0x20</span><span class="o">(</span><span class="n">a0</span><span class="o">),</span><span class="n">a1</span>
-<span class="mi">00001</span><span class="n">a2e</span><span class="o">:</span> <span class="mi">117</span><span class="n">c</span> <span class="mi">000</span><span class="n">a</span> <span class="mi">0008</span>            <span class="n">move</span><span class="o">.</span><span class="na">b</span>  <span class="err">#</span><span class="mh">0xa</span><span class="o">,</span><span class="mh">0x8</span><span class="o">(</span><span class="n">a0</span><span class="o">)</span>
-<span class="mi">00001</span><span class="n">a34</span><span class="o">:</span> <span class="mi">1142</span> <span class="mi">0009</span>                 <span class="n">move</span><span class="o">.</span><span class="na">b</span>  <span class="n">d2</span><span class="o">,</span><span class="mh">0x9</span><span class="o">(</span><span class="n">a0</span><span class="o">)</span>
-<span class="mi">00001</span><span class="n">a38</span><span class="o">:</span> <span class="mi">3141</span> <span class="mi">000</span><span class="n">e</span>                 <span class="n">move</span><span class="o">.</span><span class="na">w</span>  <span class="n">d1</span><span class="o">,</span><span class="mh">0xe</span><span class="o">(</span><span class="n">a0</span><span class="o">)</span>
-<span class="mi">00001</span><span class="n">a3c</span><span class="o">:</span> <span class="mi">2209</span>                      <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">a1</span><span class="o">,</span><span class="n">d1</span>
-<span class="mi">00001</span><span class="n">a3e</span><span class="o">:</span> <span class="mi">5</span><span class="n">e81</span>                      <span class="n">addq</span><span class="o">.</span><span class="na">l</span>  <span class="err">#</span><span class="mh">0x7</span><span class="o">,</span><span class="n">d1</span>
-<span class="mi">00001</span><span class="n">a40</span><span class="o">:</span> <span class="mi">0201</span> <span class="mi">00</span><span class="n">f8</span>                 <span class="n">andi</span><span class="o">.</span><span class="na">b</span>  <span class="err">#</span><span class="o">-</span><span class="mh">0x8</span><span class="o">,</span><span class="n">d1</span>
-<span class="mi">00001</span><span class="n">a44</span><span class="o">:</span> <span class="n">c389</span>                      <span class="n">exg</span>     <span class="n">d1</span><span class="o">,</span><span class="n">a1</span>
-<span class="mi">00001</span><span class="n">a46</span><span class="o">:</span> <span class="mi">9289</span>                      <span class="n">sub</span><span class="o">.</span><span class="na">l</span>   <span class="n">a1</span><span class="o">,</span><span class="n">d1</span>
-<span class="mi">00001</span><span class="n">a48</span><span class="o">:</span> <span class="n">d081</span>                      <span class="n">add</span><span class="o">.</span><span class="na">l</span>   <span class="n">d1</span><span class="o">,</span><span class="n">d0</span>
-<span class="mi">00001</span><span class="n">a4a</span><span class="o">:</span> <span class="mi">0200</span> <span class="mi">00</span><span class="n">f8</span>                 <span class="n">andi</span><span class="o">.</span><span class="na">b</span>  <span class="err">#</span><span class="o">-</span><span class="mh">0x8</span><span class="o">,</span><span class="n">d0</span>
-<span class="mi">00001</span><span class="n">a4e</span><span class="o">:</span> <span class="mi">0480</span> <span class="mi">0000</span> <span class="mi">0020</span>            <span class="n">subi</span><span class="o">.</span><span class="na">l</span>  <span class="err">#</span><span class="mh">0x20</span><span class="o">,</span><span class="n">d0</span>
-<span class="mi">00001</span><span class="n">a54</span><span class="o">:</span> <span class="mi">2149</span> <span class="mi">0010</span>                 <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">a1</span><span class="o">,</span><span class="mh">0x10</span><span class="o">(</span><span class="n">a0</span><span class="o">)</span>
-<span class="mi">00001</span><span class="n">a58</span><span class="o">:</span> <span class="mi">2149</span> <span class="mi">0014</span>                 <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">a1</span><span class="o">,</span><span class="mh">0x14</span><span class="o">(</span><span class="n">a0</span><span class="o">)</span>
-<span class="mi">00001</span><span class="n">a5c</span><span class="o">:</span> <span class="mi">2209</span>                      <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">a1</span><span class="o">,</span><span class="n">d1</span>
-<span class="mi">00001</span><span class="n">a5e</span><span class="o">:</span> <span class="n">d280</span>                      <span class="n">add</span><span class="o">.</span><span class="na">l</span>   <span class="n">d0</span><span class="o">,</span><span class="n">d1</span>
-<span class="mi">00001</span><span class="n">a60</span><span class="o">:</span> <span class="mi">2141</span> <span class="mi">0018</span>                 <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">d1</span><span class="o">,</span><span class="mh">0x18</span><span class="o">(</span><span class="n">a0</span><span class="o">)</span>
-<span class="mi">00001</span><span class="n">a64</span><span class="o">:</span> <span class="mi">2140</span> <span class="mi">001</span><span class="n">c</span>                 <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">d0</span><span class="o">,</span><span class="mh">0x1c</span><span class="o">(</span><span class="n">a0</span><span class="o">)</span>
-<span class="mi">00001</span><span class="n">a68</span><span class="o">:</span> <span class="mi">2340</span> <span class="mi">0004</span>                 <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">d0</span><span class="o">,</span><span class="mh">0x4</span><span class="o">(</span><span class="n">a1</span><span class="o">)</span>
-<span class="mi">00001</span><span class="n">a6c</span><span class="o">:</span> <span class="mi">4291</span>                      <span class="n">clr</span><span class="o">.</span><span class="na">l</span>   <span class="o">(</span><span class="n">a1</span><span class="o">)</span>
-<span class="mi">00001</span><span class="n">a6e</span><span class="o">:</span> <span class="mi">2248</span>                      <span class="n">movea</span><span class="o">.</span><span class="na">l</span> <span class="n">a0</span><span class="o">,</span><span class="n">a1</span>
-<span class="mi">00001</span><span class="n">a70</span><span class="o">:</span> <span class="mi">41</span><span class="n">ee</span> <span class="mi">0142</span>                 <span class="n">lea</span>     <span class="mh">0x142</span><span class="o">(</span><span class="n">a6</span><span class="o">),</span><span class="n">a0</span>
-<span class="mi">00001</span><span class="n">a74</span><span class="o">:</span> <span class="mi">6100</span> <span class="n">fc48</span>                 <span class="n">bsr</span><span class="o">.</span><span class="na">w</span>   <span class="mh">0x16be</span>
-<span class="mi">00001</span><span class="n">a78</span><span class="o">:</span> <span class="mi">4</span><span class="n">e75</span>                      <span class="n">rts</span>     
-</code></pre></div>
-
-<p>Let's comment the function line by line. I will refer to the fields shown in the picture above by name, mentioning the offsets for clarity.</p>
-<div class="highlight"><pre><span></span><code><span class="mi">00001</span><span class="n">a26</span><span class="o">:</span> <span class="mi">2149</span> <span class="mi">000</span><span class="n">a</span>                 <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">a1</span><span class="o">,</span><span class="mh">0xa</span><span class="o">(</span><span class="n">a0</span><span class="o">)</span>
-</code></pre></div>
-
-<p>This code stores the address of the memory area name in <code>LN_NAME</code> (<code>0xa(a0)</code>).</p>
-<div class="highlight"><pre><span></span><code><span class="mi">00001</span><span class="n">a2a</span><span class="o">:</span> <span class="mi">43</span><span class="n">e8</span> <span class="mi">0020</span>                 <span class="n">lea</span>     <span class="mh">0x20</span><span class="o">(</span><span class="n">a0</span><span class="o">),</span><span class="n">a1</span>
-</code></pre></div>
-
-<p>This loads the absolute address of the memory chunk (structure <code>MC</code>). The purpose of this is to align the memory chunk to a long word later in the code.</p>
-<div class="highlight"><pre><span></span><code><span class="mi">00001</span><span class="n">a2e</span><span class="o">:</span> <span class="mi">117</span><span class="n">c</span> <span class="mi">000</span><span class="n">a</span> <span class="mi">0008</span>            <span class="n">move</span><span class="o">.</span><span class="na">b</span>  <span class="err">#</span><span class="mh">0xa</span><span class="o">,</span><span class="mh">0x8</span><span class="o">(</span><span class="n">a0</span><span class="o">)</span>
-<span class="mi">00001</span><span class="n">a34</span><span class="o">:</span> <span class="mi">1142</span> <span class="mi">0009</span>                 <span class="n">move</span><span class="o">.</span><span class="na">b</span>  <span class="n">d2</span><span class="o">,</span><span class="mh">0x9</span><span class="o">(</span><span class="n">a0</span><span class="o">)</span>
-<span class="mi">00001</span><span class="n">a38</span><span class="o">:</span> <span class="mi">3141</span> <span class="mi">000</span><span class="n">e</span>                 <span class="n">move</span><span class="o">.</span><span class="na">w</span>  <span class="n">d1</span><span class="o">,</span><span class="mh">0xe</span><span class="o">(</span><span class="n">a0</span><span class="o">)</span>
-</code></pre></div>
-
-<p>This stores <code>0xa</code> in the <code>LN_TYPE</code> field (<code>0x8(a0)</code>). This corresponds to <code>NT_MEMORY</code> (see <code>include_i/exec/nodes.i</code>). It then copies the list priority into the <code>LN_PRI</code> field (<code>0x9(a0)</code>), and the memory attributes in the <code>MH_ATTRIBUTES</code> field (<code>0xe(a0)</code>).</p>
-<div class="highlight"><pre><span></span><code><span class="mi">00001</span><span class="n">a3c</span><span class="o">:</span> <span class="mi">2209</span>                      <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">a1</span><span class="o">,</span><span class="n">d1</span>
-<span class="mi">00001</span><span class="n">a3e</span><span class="o">:</span> <span class="mi">5</span><span class="n">e81</span>                      <span class="n">addq</span><span class="o">.</span><span class="na">l</span>  <span class="err">#</span><span class="mh">0x7</span><span class="o">,</span><span class="n">d1</span>
-<span class="mi">00001</span><span class="n">a40</span><span class="o">:</span> <span class="mi">0201</span> <span class="mi">00</span><span class="n">f8</span>                 <span class="n">andi</span><span class="o">.</span><span class="na">b</span>  <span class="err">#</span><span class="o">-</span><span class="mh">0x8</span><span class="o">,</span><span class="n">d1</span>
-<span class="mi">00001</span><span class="n">a4e</span><span class="o">:</span> <span class="mi">0480</span> <span class="mi">0000</span> <span class="mi">0020</span>            <span class="n">subi</span><span class="o">.</span><span class="na">l</span>  <span class="err">#</span><span class="mh">0x20</span><span class="o">,</span><span class="n">d0</span>
-</code></pre></div>
-
-<p>These three lines of code align the address of <code>MC</code> (<code>a1</code>) to a long word, adding 7 and removing the least significant 3 bits. Then the size of the headers (<code>0x20</code>) is removed from the total size of the memory region that was passed as an argument.</p>
-<div class="highlight"><pre><span></span><code><span class="mi">00001</span><span class="n">a54</span><span class="o">:</span> <span class="mi">2149</span> <span class="mi">0010</span>                 <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">a1</span><span class="o">,</span><span class="mh">0x10</span><span class="o">(</span><span class="n">a0</span><span class="o">)</span>
-<span class="mi">00001</span><span class="n">a58</span><span class="o">:</span> <span class="mi">2149</span> <span class="mi">0014</span>                 <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">a1</span><span class="o">,</span><span class="mh">0x14</span><span class="o">(</span><span class="n">a0</span><span class="o">)</span>
-</code></pre></div>
-
-<p>Store the first free memory location (<code>a1</code>) in <code>MH_FIRST</code> (<code>0x10(a0)</code>) and in <code>MH_LOWER</code> (<code>0x14(a0)</code>).</p>
-<div class="highlight"><pre><span></span><code><span class="mi">00001</span><span class="n">a5c</span><span class="o">:</span> <span class="mi">2209</span>                      <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">a1</span><span class="o">,</span><span class="n">d1</span>
-<span class="mi">00001</span><span class="n">a5e</span><span class="o">:</span> <span class="n">d280</span>                      <span class="n">add</span><span class="o">.</span><span class="na">l</span>   <span class="n">d0</span><span class="o">,</span><span class="n">d1</span>
-<span class="mi">00001</span><span class="n">a60</span><span class="o">:</span> <span class="mi">2141</span> <span class="mi">0018</span>                 <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">d1</span><span class="o">,</span><span class="mh">0x18</span><span class="o">(</span><span class="n">a0</span><span class="o">)</span>
-<span class="mi">00001</span><span class="n">a64</span><span class="o">:</span> <span class="mi">2140</span> <span class="mi">001</span><span class="n">c</span>                 <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">d0</span><span class="o">,</span><span class="mh">0x1c</span><span class="o">(</span><span class="n">a0</span><span class="o">)</span>
-</code></pre></div>
-
-<p>The size of the free memory is then added to the first free address and stored in <code>MH_UPPER</code> (<code>0x18(a0)</code>). The size of the free memory is stored in <code>MH_FREE</code> (<code>0x1c(a0)</code>).</p>
-<div class="highlight"><pre><span></span><code><span class="mi">00001</span><span class="n">a68</span><span class="o">:</span> <span class="mi">2340</span> <span class="mi">0004</span>                 <span class="n">move</span><span class="o">.</span><span class="na">l</span>  <span class="n">d0</span><span class="o">,</span><span class="mh">0x4</span><span class="o">(</span><span class="n">a1</span><span class="o">)</span>
-<span class="mi">00001</span><span class="n">a6c</span><span class="o">:</span> <span class="mi">4291</span>                      <span class="n">clr</span><span class="o">.</span><span class="na">l</span>   <span class="o">(</span><span class="n">a1</span><span class="o">)</span>
-</code></pre></div>
-
-<p>This code creates the memory chunk in the free memory area. The size of the chunk is stored in the <code>MC_BYTES</code> field (<code>0x4(a1)</code>), and the <code>MC_NEXT</code> field is cleared.</p>
-<div class="highlight"><pre><span></span><code><span class="mi">00001</span><span class="n">a6e</span><span class="o">:</span> <span class="mi">2248</span>                      <span class="n">movea</span><span class="o">.</span><span class="na">l</span> <span class="n">a0</span><span class="o">,</span><span class="n">a1</span>
-<span class="mi">00001</span><span class="n">a70</span><span class="o">:</span> <span class="mi">41</span><span class="n">ee</span> <span class="mi">0142</span>                 <span class="n">lea</span>     <span class="mh">0x142</span><span class="o">(</span><span class="n">a6</span><span class="o">),</span><span class="n">a0</span>
-<span class="mi">00001</span><span class="n">a74</span><span class="o">:</span> <span class="mi">6100</span> <span class="n">fc48</span>                 <span class="n">bsr</span><span class="o">.</span><span class="na">w</span>   <span class="mh">0x16be</span>
-<span class="mi">00001</span><span class="n">a78</span><span class="o">:</span> <span class="mi">4</span><span class="n">e75</span>                      <span class="n">rts</span>     
-</code></pre></div>
-
-<p>The rest of the code prepares the call to the protected version of <code>Enqueue</code>, copying the address of the node in <code>a1</code> , the absolute address of <code>MemList</code> in <code>a0</code>, and branching to the subroutine. When <code>Enqueue</code> returns, <code>AddMemList</code> terminates and returns as well.</p>
-<h1 id="resources">Resources<a class="headerlink" href="#resources" title="Permanent link">&para;</a></h1>
-<ul>
-<li>Motorola M68000 Family Programmer's Reference Manual <a href="https://www.nxp.com/docs/en/reference-manual/M68000PRM.pdf">PDF here</a></li>
-<li>Amiga System Programmers Guide, Abacus (<a href="https://archive.org/details/Amiga_System_Programmers_Guide_1988_Abacus">pdf here</a>)</li>
-</ul>
-<h1 id="feedback">Feedback<a class="headerlink" href="#feedback" title="Permanent link">&para;</a></h1>
-<p>Feel free to reach me on <a href="https://twitter.com/thedigicat">Twitter</a> if you have questions. The <a href="https://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues">GitHub issues</a> page is the best place to submit corrections.</p>
+    <p><button onclick="hideStyle()">Toggle retro style</button></p><h1 id="h1-the%20complete%20exe-13983793">The complete Exec vector table</h1><p>In <a href="https://www.thedigitalcatonline.com/blog/2018/06/08/exploring-the-amiga-3/">the 3rd post</a> of this series I showed the Exec vectors table and the way <code>MakeFunctions</code> creates the jump table when Exec is installed in memory. In that post I focused on the first 4 reserved vectors, but it is useful to have the full table while reading the Kickstart code. This is the full vectors table for Exec 34.2 (28 Oct 1987).</p><p>The <strong></strong>Relative offset<strong></strong> column contains the offset of the function in the jump table once the library has been installed, which allows any Amiga program to call Exec functions through the <code>offset(a6)</code> syntax (e.g. <code>OpenLibrary</code> can be called by <code>jsr -0x228(a6)</code>). <strong></strong>Vector position<strong></strong> is the offset of the vector in the Kickstart 1.3 ROM (i.e. <code>0x0001a7c</code> is the position of the vector table itself), <strong></strong>Relative address<strong></strong> is the hexadecimal value stored in the table before the relocation, <strong></strong>Absolute address<strong></strong> is the function position after relocation (i.e. the wrapped sum between the table address and the relative address), and <strong></strong>Function<strong></strong> is the function name according to the include files and the Amiga documentation.</p><div class="code"><div class="content"><div class="highlight"><pre><span></span>| Relative offset | Vector position | Relative address | Absolute address | Function                 |
+|-----------------|-----------------|------------------|------------------|--------------------------|
+| -0x00           | 00001a7c        | 08a0             | 0000231c         | Open()                   |
+| -0x06           | 00001a7e        | 08a8             | 00002324         | Close()                  |
+| -0x12           | 00001a80        | 08ac             | 00002328         | Expunge()                |
+| -0x18           | 00001a82        | 08ac             | 00002328         | Reserved for future use  |
+| -0x1e           | 00001a84        | ee6a             | 000008e6         | Supervisor()             |
+| -0x24           | 00001a86        | f420             | 00000e9c         | ExitIntr()               |
+| -0x2a           | 00001a88        | f446             | 00000ec2         | Schedule()               |
+| -0x30           | 00001a8a        | 04f8             | 00001f74         | Reschedule()             |
+| -0x36           | 00001a8c        | f4a0             | 00000f1c         | Switch()                 |
+| -0x3c           | 00001a8e        | f4ea             | 00000f66         | Dispatch()               |
+| -0x42           | 00001a90        | f58e             | 0000100a         | Exception()              |
+| -0x48           | 00001a92        | f0b0             | 00000b2c         | InitCode()               |
+| -0x4e           | 00001a94        | f188             | 00000c04         | InitStruct()             |
+| -0x54           | 00001a96        | faac             | 00001528         | MakeLibrary()            |
+| -0x5a           | 00001a98        | fb36             | 000015b2         | MakeFunctions()          |
+| -0x60           | 00001a9a        | f080             | 00000afc         | FindResident()           |
+| -0x66           | 00001a9c        | f0e8             | 00000b64         | InitResident()           |
+| -0x6c           | 00001a9e        | 1596             | 00003012         | Alert()                  |
+| -0x72           | 00001aa0        | 08ee             | 0000236a         | Debug()                  |
+| -0x78           | 00001aa2        | f9ac             | 00001428         | Disable()                |
+| -0x7e           | 00001aa4        | f9ba             | 00001436         | Enable()                 |
+| -0x84           | 00001aa6        | 051a             | 00001f96         | Forbid()                 |
+| -0x8a           | 00001aa8        | 0520             | 00001f9c         | Permit()                 |
+| -0x90           | 00001aaa        | f6e2             | 0000115e         | SetSR()                  |
+| -0x96           | 00001aac        | f708             | 00001184         | SuperState()             |
+| -0x9c           | 00001aae        | f734             | 000011b0         | UserState()              |
+| -0xa2           | 00001ab0        | f74e             | 000011ca         | SetIntVector()           |
+| -0xa8           | 00001ab2        | f794             | 00001210         | AddIntServer()           |
+| -0xae           | 00001ab4        | f7d4             | 00001250         | RemIntServer()           |
+| -0xb4           | 00001ab6        | f8e0             | 0000135c         | Cause()                  |
+| -0xba           | 00001ab8        | fc5c             | 000016d8         | Allocate()               |
+| -0xc0           | 00001ac0        | fcc4             | 00001740         | Deallocate()             |
+| -0xc6           | 00001abc        | fd54             | 000017d0         | AllocMem()               |
+| -0xcc           | 00001abe        | fe00             | 0000187c         | AllocAbs()               |
+| -0xd2           | 00001ac0        | fdb0             | 0000182c         | FreeMem()                |
+| -0xd8           | 00001ac2        | fe90             | 0000190c         | AvailMem()               |
+| -0xde           | 00001ac4        | fede             | 0000195a         | AllocEntry()             |
+| -0xe4           | 00001ac6        | ff6c             | 000019e8         | FreeEntry()              |
+| -0xea           | 00001ac8        | fb6c             | 000015e8         | Insert()                 |
+| -0xf0           | 00001aca        | fb98             | 00001614         | AddHead()                |
+| -0xf6           | 00001acc        | fba8             | 00001624         | AddTail()                |
+| -0xfc           | 00001ace        | fbc0             | 0000163c         | Remove()                 |
+| -0x102          | 00001ad0        | fbce             | 0000164a         | RemHead()                |
+| -0x108          | 00001ad2        | fbde             | 0000165a         | RemTail()                |
+| -0x10e          | 00001ad4        | fbf4             | 00001670         | Enqueue()                |
+| -0x114          | 00001ad6        | fc1a             | 00001696         | FindName()               |
+| -0x11a          | 00001ad8        | 0208             | 00001c84         | AddTask()                |
+| -0x120          | 00001ada        | 02b4             | 00001d30         | RemTask()                |
+| -0x126          | 00001adc        | 0334             | 00001db0         | FindTask()               |
+| -0x12c          | 00001ade        | 0388             | 00001e04         | SetTaskPri()             |
+| -0x132          | 00001ae0        | 03e2             | 00001e5e         | SetSignal()              |
+| -0x138          | 00001ae2        | 03d8             | 00001e54         | SetExcept()              |
+| -0x13e          | 00001ae4        | 0490             | 00001f0c         | Wait()                   |
+| -0x144          | 00001ae6        | 0408             | 00001e84         | Signal()                 |
+| -0x14a          | 00001ae8        | 0584             | 00002000         | AllocSignal()            |
+| -0x150          | 00001aea        | 05bc             | 00002038         | FreeSignal()             |
+| -0x156          | 00001aec        | 054e             | 00001fca         | AllocTrap()              |
+| -0x15c          | 00001aee        | 0574             | 00001ff0         | FreeTrap()               |
+| -0x162          | 00001af0        | 00d8             | 00001b54         | AddPort()                |
+| -0x168          | 00001af2        | 00f0             | 00001b6c         | RemPort()                |
+| -0x16e          | 00001af4        | 00f4             | 00001b70         | PutMsg()                 |
+| -0x174          | 00001af6        | 016e             | 00001bea         | GetMsg()                 |
+| -0x17a          | 00001af8        | 019c             | 00001c18         | ReplyMsg()               |
+| -0x180          | 00001afa        | 01b6             | 00001c32         | WaitPort()               |
+| -0x186          | 00001afc        | 01de             | 00001c5a         | FindPort()               |
+| -0x18c          | 00001afe        | f9cc             | 00001448         | AddLibrary()             |
+| -0x192          | 00001b00        | f9da             | 00001456         | RemLibrary()             |
+| -0x198          | 00001b02        | f9f0             | 0000146c         | OldOpenLibrary()         |
+| -0x19e          | 00001b04        | fa26             | 000014a2         | CloseLibrary()           |
+| -0x1a4          | 00001b06        | fa3a             | 000014b6         | SetFunction()            |
+| -0x1aa          | 00001b08        | fa58             | 000014d4         | SumLibrary()             |
+| -0x1b0          | 00001b0a        | ec14             | 00000690         | AddDevice()              |
+| -0x1b6          | 00001b0c        | ec22             | 0000069e         | RemDevice()              |
+| -0x1bc          | 00001b0e        | ec26             | 000006a2         | OpenDevice()             |
+| -0x1c2          | 00001b10        | ec74             | 000006f0         | CloseDevice()            |
+| -0x1c8          | 00001b12        | ec9c             | 00000718         | DoIO()                   |
+| -0x1ce          | 00001b14        | ec8a             | 00000706         | SendIO()                 |
+| -0x1d4          | 00001b16        | ed0e             | 0000078a         | CheckIO()                |
+| -0x1da          | 00001b18        | ecb2             | 0000072e         | WaitIO()                 |
+| -0x1e0          | 00001b1a        | ed2a             | 000007a6         | AbortIO()                |
+| -0x1e6          | 00001b1c        | 01e8             | 00001c64         | AddResource()            |
+| -0x1ec          | 00001b1e        | 01f0             | 00001c6c         | RemResource()            |
+| -0x1f2          | 00001b20        | 01f4             | 00001c70         | OpenResource()           |
+| -0x1f8          | 00001b22        | 07b8             | 00002234         | execPrivate7()           |
+| -0x1fe          | 00001b24        | 07c2             | 0000223e         | execPrivate8()           |
+| -0x204          | 00001b26        | 07ee             | 0000226a         | execPrivate9()           |
+| -0x20a          | 00001b28        | 06a8             | 00002124         | RawDoFmt()               |
+| -0x210          | 00001b2a        | f700             | 0000117c         | GetCC()                  |
+| -0x216          | 00001b2c        | fdda             | 00001856         | TypeOfMem()              |
+| -0x21c          | 00001b2e        | 131c             | 00002d98         | Procure()                |
+| -0x222          | 00001b30        | 1332             | 00002dae         | Vacate()                 |
+| -0x228          | 00001b32        | f9f8             | 00001474         | OpenLibrary()            |
+| -0x22e          | 00001b34        | 1354             | 00002dd0         | InitSemaphore()          |
+| -0x234          | 00001b36        | 1374             | 00002df0         | ObtainSemaphore()        |
+| -0x23a          | 00001b38        | 13c4             | 00002e40         | ReleaseSemaphore()       |
+| -0x240          | 00001b3a        | 1428             | 00002ea4         | AttemptSemaphore()       |
+| -0x246          | 00001b3c        | 1458             | 00002ed4         | ObtainSemaphoreList()    |
+| -0x24c          | 00001b3e        | 14ce             | 00002f4a         | ReleaseSemaphoreList()   |
+| -0x252          | 00001b40        | 14f4             | 00002f70         | FindSemaphore()          |
+| -0x258          | 00001b42        | 14e4             | 00002f60         | AddSemaphore()           |
+| -0x25e          | 00001b44        | 14f0             | 00002f6c         | RemSemaphore()           |
+| -0x264          | 00001b46        | effc             | 00000a78         | SumKickData()            |
+| -0x26a          | 00001b48        | ffaa             | 00001a26         | AddMemList()             |
+| -0x270          | 00001b4a        | 1504             | 00002f80         | CopyMem()                |
+| -0x276          | 00001b4c        | 1500             | 00002f7c         | CopyMemQuick()           |
+|-----------------|-----------------|------------------|------------------|--------------------------|
+</pre></div>
+</div></div><h1 id="h1-the%20memory%20list%-13983793">The memory list header</h1><p>Before we dig into the code of the <code>AddMemList</code> function to see how the memory space is added to the free memory list, let's have a look at the status of the memory list itself, as we need to be familiar with its structure to understand the rest of the process.</p><p>You might recall from the <a href="https://www.thedigitalcatonline.com/blog/2018/06/25/exploring-the-amiga-5/">fifth article</a> that the <code>MemList</code> structure is created <code>0x142</code> bytes after ExecBase, and that the structure is the following</p><div class="code"><div class="content"><div class="highlight"><pre><span></span>    0xe +-------+ 0x150
+        |       |
+    0xd +-------+ 0x14f (LH_pad)
+        | 0xa   |
+    0xc +-------+ 0x14e (LH_TYPE)
+        | 0x142 |
+    0x8 +-------+ 0x14a (LH_TAILPRED)
+        | 0x0   |
+    0x4 +-------+ 0x146 (LH_TAIL)
+        | 0x146 |
+    0x0 +-------+ 0x142 (LH_HEAD)
+</pre></div>
+</div></div><p>This means that we can access the memory list with <code>lea 0x142(a6),a0</code>, as <code>0x142</code> is the relative address, i.e. assuming ExecBase is 0. Once the absolute address is in one of the address registers we can access the first node through <code>(a0)</code>, which is the Motorola Assembly version of the C pointer dereference operation (Address Register Indirect Mode). With <code>(a0)</code> we do not use the content of <code>a0</code>, but the content of the memory location which address is contained in <code>a0</code>.</p><p>So if <code>a0</code> is <code>0x142</code> in the previous figure, <code>(a0)</code> is <code>0x0</code> (<code>0x142</code> contains <code>0x146</code>, <code>0x146</code> contains <code>0x0</code>). It's thus convenient to think of <code>a0</code> as the pointer, and of <code>(a0)</code> as the value.</p><p>It is also interesting to note that the structure at <code>0x146</code> is very similar to the <code>LN</code> structure. Recall that the latter is defined in <code>include_i/exec/nodes.i</code> as</p><div class="code"><div class="content"><div class="highlight"><pre><span></span> STRUCTURE    LN,0    ; List Node
+    APTR    LN_SUCC ; Pointer to next (successor)
+    APTR    LN_PRED ; Pointer to previous (predecessor)
+    UBYTE   LN_TYPE
+    BYTE    LN_PRI  ; Priority, for sorting
+    APTR    LN_NAME ; ID string, null terminated
+    LABEL   LN_SIZE ; Note: word aligned
+</pre></div>
+</div></div><p>and as you can see <code>LH_TAIL</code>, <code>LH_TAILPRED</code>, and <code>LH_TYPE</code> can act as a proper node of a linked list. This is done on purpose (obviously), as the tail of the list has to be processed by the code that manages linked lists.</p><h1 id="h1-adding%20free%20memo-13983793">Adding free memory to the system list</h1><p>At the end of the <a href="https://www.thedigitalcatonline.com/blog/2018/06/25/exploring-the-amiga-6/">previous post</a> we left Exec just after its code prepared the parameters of the free memory that was available on the system. As we saw in that post, this operation is always executed for the chip memory, and optionally for the fast memory if the hardware expansion is installed.</p><p>The <code>AddMemList</code> function at <code>0x1a26</code> is called with the following prototype</p><div class="code"><div class="content"><div class="highlight"><pre><span></span>size = AddMemList(size, attributes, pri, base, name)
+D0                D0    D1          D2   A0    A1
+</pre></div>
+</div></div><p>with the purpose of adding the given memory <code>size</code>, starting from the <code>base</code> address, to the system pool. The memory <code>attributes</code> will be store in the memory block and the priority (<code>pri</code>) will be used to find the insertion point. The name is also added to the memory node to identify it.</p><p>We can split the memory addition in two different parts. <code>AddMemList</code> will create a node that contain the parameters of the memory region, then will call <code>Enqueue</code> to add it to the <code>MemList</code> linked list. When Exec bootstraps the system the memory list is empty, but these functions must work in a generic case. Actually when the system has a memory expansion (fast memory), this is the first that is added to the list, but it's immediately followed by the chip memory.</p><p>To help you to follow what happens in the function, this is a depiction of the memory area that we want to add to the system pool at the end of <code>AddMemList</code>, just before the call to <code>Enqueue</code>. The area contains a header made of three structures, <code>LN</code> (linked list node), <code>MH</code> (memory header), and <code>MC</code> (memory chunk)</p><div class="code"><div class="content"><div class="highlight"><pre><span></span>   SIZE +---------------+
+        | Free memory   |
+        +---------------+
+        | ...           |
+        +---------------+
+        | Free memory   |
+   0x2c +---------------+ &lt;-+
+        | MC_SIZE       |   |
+   0x28 +---------------+   |
+        | MC_BYTES      |   | MC
+   0x24 +---------------+   |
+        | MC_NEXT       |   |
+   0x20 +---------------+ &lt;-+
+        | MH_FREE       |   |
+   0x1c +---------------+   |
+        | MH_UPPER      |   |
+   0x18 +---------------+   |
+        | MH_LOWER      |   | MH
+   0x14 +---------------+   |
+        | MH_FIRST      |   |
+   0x10 +---------------+   |
+        | MH_ATTRIBUTES |   |
+    0xe +---------------+ &lt;-+
+        | LN_NAME       |   |
+    0xa +---------------+   |
+        | LN_PRI        |   |
+    0x9 +---------------+   |
+        | LN_TYPE       |   | LN
+    0x8 +---------------+   |
+        | LN_PRED       |   |
+    0x4 +---------------+   |
+        | LN_SUCC       |   |
+    0x0 +---------------+ &lt;-+
+</pre></div>
+</div></div><p>It is interesting to note that, since we are managing the system memory, we cannot store information about it other than in the memory itself. The presence of management structures, then, is reducing the amount of free memory. This has to taken into account when designing a memory management system, but will not be considered in this article.</p><p>When we create the structure shown in figure, we need to ensure that the actual free memory is a multiple of a long word (8 bytes), as this is generally desirable. The memory space we are dealing with starts from 0 in the picture, but can actually be anywhere in the system memory, so it is not guaranteed that either the beginning or the end of the free memory space are aligned with long words.</p><p>The code of <code>AddMemList</code> performs the alignment in two steps. First it aligns the address of <code>MC</code> to the upper nearest long word (multiple of 8), then aligns the total size to the lower nearest long word. For example, if the starting point was 0 and the total size 64 bytes, we would leave all the values untouched:<code>LN_SUCC</code> at <code>0x0</code>, <code>MC_NEXT</code> at <code>0x20</code>, and the total size of the chunk (structure 'MC' + free memory) would be 32 bytes.</p><div class="code"><div class="content"><div class="highlight"><pre><span></span>   0x40 +---------------+ &lt;-+
+        | Free memory   |   |
+        +---------------+   | 32 bytes
+        | MC            |   |
+   0x20 +---------------+ &lt;-+
+        | MH            |   |
+        +---------------+   | 32 bytes
+        | LN            |   |
+    0x0 +---------------+ &lt;-+
+</pre></div>
+</div></div><p>If the starting point was 1 and the total size 65 bytes, however, the result would be: <code>LN_SUCC</code> at <code>0x1</code>, <code>MC_NEXT</code> at <code>0x28</code> (upper long word), and the total size of the memory would be 56 bytes (65-7 gives 58, rounded down to a multiple of 8), which means a chunk of 24 bytes</p><div class="code"><div class="content"><div class="highlight"><pre><span></span>   0x42 +---------------+ &lt;-+
+        | Ignored       |   | 2 bytes
+   0x40 +---------------+ &lt;-+
+        | Free memory   |   |
+        +---------------+   | 24 bytes
+        | MC            |   |
+   0x28 +---------------+ &lt;-+
+        | EMPTY         |   | 7 bytes
+   0x21 +---------------+ &lt;-+
+        | MH            |   |
+        +---------------+   | 32 bytes
+        | LN            |   |
+    0x1 +---------------+ &lt;-+
+</pre></div>
+</div></div><h1 id="h1-addmemlist%20interna-13983793">AddMemList internals</h1><p>According to the Exec vectors table, <code>AddMemList</code> can be found at <code>00001a26</code>, and ends at <code>00001a78</code>. It is immediately followed by a padding word <code>0000</code> and the vectors table itself</p><div class="code"><div class="content"><div class="highlight"><pre><span></span>00001a26: 2149 000a                 move.l  a1,0xa(a0)
+00001a2a: 43e8 0020                 lea     0x20(a0),a1
+00001a2e: 117c 000a 0008            move.b  #0xa,0x8(a0)
+00001a34: 1142 0009                 move.b  d2,0x9(a0)
+00001a38: 3141 000e                 move.w  d1,0xe(a0)
+00001a3c: 2209                      move.l  a1,d1
+00001a3e: 5e81                      addq.l  #0x7,d1
+00001a40: 0201 00f8                 andi.b  #-0x8,d1
+00001a44: c389                      exg     d1,a1
+00001a46: 9289                      sub.l   a1,d1
+00001a48: d081                      add.l   d1,d0
+00001a4a: 0200 00f8                 andi.b  #-0x8,d0
+00001a4e: 0480 0000 0020            subi.l  #0x20,d0
+00001a54: 2149 0010                 move.l  a1,0x10(a0)
+00001a58: 2149 0014                 move.l  a1,0x14(a0)
+00001a5c: 2209                      move.l  a1,d1
+00001a5e: d280                      add.l   d0,d1
+00001a60: 2141 0018                 move.l  d1,0x18(a0)
+00001a64: 2140 001c                 move.l  d0,0x1c(a0)
+00001a68: 2340 0004                 move.l  d0,0x4(a1)
+00001a6c: 4291                      clr.l   (a1)
+00001a6e: 2248                      movea.l a0,a1
+00001a70: 41ee 0142                 lea     0x142(a6),a0
+00001a74: 6100 fc48                 bsr.w   0x16be
+00001a78: 4e75                      rts     
+</pre></div>
+</div></div><p>Let's comment the function line by line. I will refer to the fields shown in the picture above by name, mentioning the offsets for clarity.</p><div class="code"><div class="content"><div class="highlight"><pre><span></span>00001a26: 2149 000a                 move.l  a1,0xa(a0)
+</pre></div>
+</div></div><p>This code stores the address of the memory area name in <code>LN_NAME</code> (<code>0xa(a0)</code>).</p><div class="code"><div class="content"><div class="highlight"><pre><span></span>00001a2a: 43e8 0020                 lea     0x20(a0),a1
+</pre></div>
+</div></div><p>This loads the absolute address of the memory chunk (structure <code>MC</code>). The purpose of this is to align the memory chunk to a long word later in the code.</p><div class="code"><div class="content"><div class="highlight"><pre><span></span>00001a2e: 117c 000a 0008            move.b  #0xa,0x8(a0)
+00001a34: 1142 0009                 move.b  d2,0x9(a0)
+00001a38: 3141 000e                 move.w  d1,0xe(a0)
+</pre></div>
+</div></div><p>This stores <code>0xa</code> in the <code>LN_TYPE</code> field (<code>0x8(a0)</code>). This corresponds to <code>NT_MEMORY</code> (see <code>include_i/exec/nodes.i</code>). It then copies the list priority into the <code>LN_PRI</code> field (<code>0x9(a0)</code>), and the memory attributes in the <code>MH_ATTRIBUTES</code> field (<code>0xe(a0)</code>).</p><div class="code"><div class="content"><div class="highlight"><pre><span></span>00001a3c: 2209                      move.l  a1,d1
+00001a3e: 5e81                      addq.l  #0x7,d1
+00001a40: 0201 00f8                 andi.b  #-0x8,d1
+00001a4e: 0480 0000 0020            subi.l  #0x20,d0
+</pre></div>
+</div></div><p>These three lines of code align the address of <code>MC</code> (<code>a1</code>) to a long word, adding 7 and removing the least significant 3 bits. Then the size of the headers (<code>0x20</code>) is removed from the total size of the memory region that was passed as an argument.</p><div class="code"><div class="content"><div class="highlight"><pre><span></span>00001a54: 2149 0010                 move.l  a1,0x10(a0)
+00001a58: 2149 0014                 move.l  a1,0x14(a0)
+</pre></div>
+</div></div><p>Store the first free memory location (<code>a1</code>) in <code>MH_FIRST</code> (<code>0x10(a0)</code>) and in <code>MH_LOWER</code> (<code>0x14(a0)</code>).</p><div class="code"><div class="content"><div class="highlight"><pre><span></span>00001a5c: 2209                      move.l  a1,d1
+00001a5e: d280                      add.l   d0,d1
+00001a60: 2141 0018                 move.l  d1,0x18(a0)
+00001a64: 2140 001c                 move.l  d0,0x1c(a0)
+</pre></div>
+</div></div><p>The size of the free memory is then added to the first free address and stored in <code>MH_UPPER</code> (<code>0x18(a0)</code>). The size of the free memory is stored in <code>MH_FREE</code> (<code>0x1c(a0)</code>).</p><div class="code"><div class="content"><div class="highlight"><pre><span></span>00001a68: 2340 0004                 move.l  d0,0x4(a1)
+00001a6c: 4291                      clr.l   (a1)
+</pre></div>
+</div></div><p>This code creates the memory chunk in the free memory area. The size of the chunk is stored in the <code>MC_BYTES</code> field (<code>0x4(a1)</code>), and the <code>MC_NEXT</code> field is cleared.</p><div class="code"><div class="content"><div class="highlight"><pre><span></span>00001a6e: 2248                      movea.l a0,a1
+00001a70: 41ee 0142                 lea     0x142(a6),a0
+00001a74: 6100 fc48                 bsr.w   0x16be
+00001a78: 4e75                      rts     
+</pre></div>
+</div></div><p>The rest of the code prepares the call to the protected version of <code>Enqueue</code>, copying the address of the node in <code>a1</code> , the absolute address of <code>MemList</code> in <code>a0</code>, and branching to the subroutine. When <code>Enqueue</code> returns, <code>AddMemList</code> terminates and returns as well.</p><h1 id="h1-resources-13983793">Resources</h1><ul><li>Motorola M68000 Family Programmer's Reference Manual - <a href="https://www.nxp.com/docs/en/reference-manual/M68000PRM.pdf">https://www.nxp.com/docs/en/reference-manual/M68000PRM.pdf</a></li><li>Amiga System Programmers Guide, Abacus - <a href="https://archive.org/details/Amiga">https://archive.org/details/Amiga</a><em>System</em>Programmers<em>Guide</em>1988_Abacus</li></ul><h1 id="h1-feedback-13983793">Feedback</h1><p>Feel free to reach me on <a href="https://twitter.com/thedigicat">Twitter</a> if you have questions. The <a href="https://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues">GitHub issues</a> page is the best place to submit corrections.</p>
   </section>
 
   <section class="footer">
@@ -1446,6 +756,8 @@
 			<script src="/theme/js/browser.min.js"></script>
 			<script src="/theme/js/breakpoints.min.js"></script>
             <script src="/theme/js/packed.js?fa89ff81"></script>
+
+<script src="/theme/js/retro.min.js?eb49ee0b"></script>
 
 	</body>
 </html>
