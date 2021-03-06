@@ -8,6 +8,7 @@
 	<head>
         <title>Exploring the Amiga - Part 2 - The Digital Cat</title>
 		<meta charset="utf-8" />
+		<meta http-equiv='content-language' content='en-gb'>
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 <meta name="description" content="The jump table of libraries in the Amiga system, types and structures of Kickstart 1.3">
 <meta name="twitter:card" content="summary" />
@@ -115,7 +116,7 @@
   </section>
 
   <section id="content">
-    <p><button onclick="hideStyle()">Toggle retro style</button></p><h1 id="h1-the%20library%20jump-13983793">The library jump table</h1><p>As already mentioned when a library is loaded in memory a jump table is created just before the library base address. This table contains the addresses of the functions exposed by the library, and Exec itself has one.</p><p>The jump table functions order for the Exec library is specified in one of the include files provided by the NDK, namely <code>include_i/exec/exec_lib.i</code>.</p><div class="code"><div class="content"><div class="highlight"><pre><span></span>    FUNCDEF Supervisor
+    <p><button onclick="hideStyle()">Toggle retro style</button></p><h1 id="h1-the%20library%20jump-14012000">The library jump table</h1><p>As already mentioned when a library is loaded in memory a jump table is created just before the library base address. This table contains the addresses of the functions exposed by the library, and Exec itself has one.</p><p>The jump table functions order for the Exec library is specified in one of the include files provided by the NDK, namely <code>include_i/exec/exec_lib.i</code>.</p><div class="code"><div class="content"><div class="highlight"><pre><span></span>    FUNCDEF Supervisor
     FUNCDEF execPrivate1
     FUNCDEF execPrivate2
     FUNCDEF execPrivate3
@@ -211,7 +212,7 @@ libname:
 libname:
     dc.b &quot;somename.library&quot;,0
 </pre></div>
-</div></div><h1 id="h1-the%20four%20reserve-13983793">The four reserved vectors</h1><p>As we saw, the Amiga system reserves 4 vectors at the beginning of the jump table of a library. These 4 spaces host 3 standard functions that shall be provided by any library, <code>Open()</code>, <code>Close()</code>, and <code>Expunge()</code>. The fourth slot is kept for possible future expansions and must contain a function that returns 0.</p><p>The offsets of these functions are contained in the <code>include_i/exec/libraries.i</code> file</p><div class="code"><div class="content"><div class="highlight"><pre><span></span>*----------------------------------------------------------------
+</div></div><h1 id="h1-the%20four%20reserve-14012000">The four reserved vectors</h1><p>As we saw, the Amiga system reserves 4 vectors at the beginning of the jump table of a library. These 4 spaces host 3 standard functions that shall be provided by any library, <code>Open()</code>, <code>Close()</code>, and <code>Expunge()</code>. The fourth slot is kept for possible future expansions and must contain a function that returns 0.</p><p>The offsets of these functions are contained in the <code>include_i/exec/libraries.i</code> file</p><div class="code"><div class="content"><div class="highlight"><pre><span></span>*----------------------------------------------------------------
 *
 *   Standard Library Functions
 *
@@ -229,7 +230,7 @@ LIB_CLOSE       EQU     -12
 LIB_EXPUNGE     EQU     -18
 LIB_EXTFUNC     EQU     -24
 </pre></div>
-</div></div><p>You can try to follow the definitions of the <code>LIBINIT</code> and <code>LIBDEF</code> macros to obtain the same result.</p><h1 id="h1-types%20and%20struct-13983793">Types and structures</h1><p>Let's see how the Exec library defines its types, which are the base components of the Amiga system. The main entry point for this investigation is the <code>include_i/exec/types.i</code> file.</p><p>When working with data structures in Assembly, everything is expressed in terms of offsets. The main idea behind structures is to create something like this</p><div class="code"><div class="content"><div class="highlight"><pre><span></span>STRUCT1         EQU     0
+</div></div><p>You can try to follow the definitions of the <code>LIBINIT</code> and <code>LIBDEF</code> macros to obtain the same result.</p><h1 id="h1-types%20and%20struct-14012000">Types and structures</h1><p>Let's see how the Exec library defines its types, which are the base components of the Amiga system. The main entry point for this investigation is the <code>include_i/exec/types.i</code> file.</p><p>When working with data structures in Assembly, everything is expressed in terms of offsets. The main idea behind structures is to create something like this</p><div class="code"><div class="content"><div class="highlight"><pre><span></span>STRUCT1         EQU     0
 OFFS            SET     0
 FIELD1          EQU     OFFS
 OFFS            EQU     OFFS+SIZE_OF_FIELD1
@@ -276,7 +277,7 @@ LN_PRI      EQU     9
 LN_NAME     EQU     10
 LN_SIZE     EQU     14
 </pre></div>
-</div></div><p>As you can see the field names are just offsets inside the structure, and there is no specific padding at the end to align the structure. In this case there is no need, as the structure size is already a multiple of a word (14 bytes).</p><h2 id="h2-how%20to%20align%20s-13983793">How to align structures</h2><p>If we need to align the bytes however we can use a little binary trick. If you ignore the least significant bit of a binary number you convert it to the nearest even number (downwards). An example in Python is</p><div class="code"><div class="content"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="nb">bin</span><span class="p">(</span><span class="mi">13</span><span class="p">)</span>
+</div></div><p>As you can see the field names are just offsets inside the structure, and there is no specific padding at the end to align the structure. In this case there is no need, as the structure size is already a multiple of a word (14 bytes).</p><h2 id="h2-how%20to%20align%20s-14012000">How to align structures</h2><p>If we need to align the bytes however we can use a little binary trick. If you ignore the least significant bit of a binary number you convert it to the nearest even number (downwards). An example in Python is</p><div class="code"><div class="content"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="nb">bin</span><span class="p">(</span><span class="mi">13</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="s1">&#39;0b1101&#39;</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="nb">bin</span><span class="p">(</span><span class="mi">12</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="s1">&#39;0b1100&#39;</span>
@@ -290,7 +291,7 @@ LN_SIZE     EQU     14
 SOFFSET     SET     (SOFFSET+1)&amp;$fffffffe
             ENDM
 </pre></div>
-</div></div><p>This can be seen in action in the <code>CardHandle</code> structure defined in <code>include_i/resources/card.i</code>. The same algorithm is implemented in other parts of the Kickstart code, for example in the <code>AddMemList</code> function that adds memory space to the free memory pool.</p><h1 id="h1-what%27s%20next-13983793">What's next</h1><p>The next article will describe in depth how the jump table of the Exec library is created through the <code>MakeFunctions</code> routine. This will be shown step by step discussing the reverse engineering method followed to discover the mechanism and the relevant code.</p><h1 id="h1-resources-13983793">Resources</h1><ul><li>Amiga System Programmers Guide, Abacus - <a href="https://archive.org/details/Amiga">https://archive.org/details/Amiga</a><em>System</em>Programmers<em>Guide</em>1988_Abacus</li><li><a href="http://amigadev.elowar.com">AmigaOS Developer Docs</a></li></ul><h1 id="h1-feedback-13983793">Feedback</h1><p>Feel free to reach me on <a href="https://twitter.com/thedigicat">Twitter</a> if you have questions. The <a href="https://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues">GitHub issues</a> page is the best place to submit corrections.</p>
+</div></div><p>This can be seen in action in the <code>CardHandle</code> structure defined in <code>include_i/resources/card.i</code>. The same algorithm is implemented in other parts of the Kickstart code, for example in the <code>AddMemList</code> function that adds memory space to the free memory pool.</p><h1 id="h1-what%27s%20next-14011999">What's next</h1><p>The next article will describe in depth how the jump table of the Exec library is created through the <code>MakeFunctions</code> routine. This will be shown step by step discussing the reverse engineering method followed to discover the mechanism and the relevant code.</p><h1 id="h1-resources-14011999">Resources</h1><ul><li>Amiga System Programmers Guide, Abacus - <a href="https://archive.org/details/Amiga">https://archive.org/details/Amiga</a><em>System</em>Programmers<em>Guide</em>1988_Abacus</li><li><a href="http://amigadev.elowar.com">AmigaOS Developer Docs</a></li></ul><h1 id="h1-feedback-14011999">Feedback</h1><p>Feel free to reach me on <a href="https://twitter.com/thedigicat">Twitter</a> if you have questions. The <a href="https://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues">GitHub issues</a> page is the best place to submit corrections.</p>
   </section>
 
   <section class="footer">
