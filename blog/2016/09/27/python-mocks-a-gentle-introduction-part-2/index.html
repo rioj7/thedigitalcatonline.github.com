@@ -189,7 +189,7 @@
 </code></pre></div>
 
 <p>Obviously to write the test you have to know that you are going to use the <code>os.path.abspath</code> function, so patching is somehow a "less pure" practice in TDD. In pure OOP/TDD you are only concerned with the external behaviour of the object, and not with its internal structure. This example, however, shows that you have to cope with some real world issues, and patching is a clean way to do it.</p>
-<h1 id="the-patching-decorator">The patching decorator<a class="headerlink" href="#the-patching-decorator" title="Permanent link">&para;</a></h1>
+<h2 id="the-patching-decorator">The patching decorator<a class="headerlink" href="#the-patching-decorator" title="Permanent link">&para;</a></h2>
 <p>The <code>patch</code> function we imported from the <code>unittest.mock</code> module is very powerful, and can be used as a function decorator as well. When used in this fashion you need to change the decorated function to accept a mock as last argument.</p>
 <div class="highlight"><pre><span></span><code><span class="nd">@patch</span><span class="p">(</span><span class="s1">&#39;os.path.abspath&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">test_get_info</span><span class="p">(</span><span class="n">abspath_mock</span><span class="p">):</span>
@@ -203,7 +203,7 @@
 </code></pre></div>
 
 <p>As you can see the <code>patch</code> decorator works like a big <code>with</code> statement for the whole function. Obviously in this way you replace the target function <code>os.path.abspath</code> in the scope of the whole function. It is then up to you to decide if you need to use <code>patch</code> as a decorator or in a <code>with</code> block.</p>
-<h1 id="multiple-patches">Multiple patches<a class="headerlink" href="#multiple-patches" title="Permanent link">&para;</a></h1>
+<h2 id="multiple-patches">Multiple patches<a class="headerlink" href="#multiple-patches" title="Permanent link">&para;</a></h2>
 <p>We can also patch more that one object. Say for example that we want to change the above test to check that the outcome of the <code>FileInfo.get_info()</code> method also contains the size of the file. To get the size of a file in Python we may use the <code>os.path.getsize()</code> function, which returns the size of the file in bytes.</p>
 <p>So now we have to patch <code>os.path.getsize</code> as well, and this can be done with another <code>patch</code> decorator.</p>
 <div class="highlight"><pre><span></span><code><span class="nd">@patch</span><span class="p">(</span><span class="s1">&#39;os.path.getsize&#39;</span><span class="p">)</span>
@@ -262,7 +262,7 @@
 </code></pre></div>
 
 <p>Using more than one <code>with</code> statement, however, makes the code difficult to read, in my opinion, so in general I prefer to avoid complex <code>with</code> trees if I do not need a limited scope of the patching.</p>
-<h1 id="patching-immutable-objects">Patching immutable objects<a class="headerlink" href="#patching-immutable-objects" title="Permanent link">&para;</a></h1>
+<h2 id="patching-immutable-objects">Patching immutable objects<a class="headerlink" href="#patching-immutable-objects" title="Permanent link">&para;</a></h2>
 <p>The most widespread version of Python is CPython, which is written, as the name suggests, in C. Part of the standard library is also written in C, while the rest is written in Python itself.</p>
 <p>The objects (classes, modules, functions, etc) that are implemented in C are shared between interpreters, which is something that you can do embedding the Python interpreter in a C program, for example. This requires those objects to be immutable, so that you cannot alter them at runtime from a single interpreter.</p>
 <p>For an example of this immutability just check the following code</p>

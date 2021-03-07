@@ -110,7 +110,7 @@
     <p>This post contains a step-by-step example of a refactoring session guided by tests. When dealing with untested or legacy code refactoring is dangerous and tests can help us do it the right way, minimizing the amount of bugs we introduce, and possibly completely avoiding them.</p>
 <p>Refactoring is not easy. It requires a double effort to understand code that others wrote, or that we wrote in the past, and moving around parts of it, simplifying it, in one word <strong>improving</strong> it, is by no means something for the faint-hearted. Like programming, refactoring has its rules and best practices, but it can be described as a mixture of technique, intuition, experience, risk.</p>
 <p>Programming, after all, is craftsmanship.</p>
-<h1 id="the-starting-point">The starting point<a class="headerlink" href="#the-starting-point" title="Permanent link">&para;</a></h1>
+<h2 id="the-starting-point">The starting point<a class="headerlink" href="#the-starting-point" title="Permanent link">&para;</a></h2>
 <p>The simple use case I will use for this post is that of a service API that we can access, and that produces data in JSON format, namely a <strong>list</strong> of elements like the one shown here</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
     <span class="nt">&quot;age&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
@@ -163,7 +163,7 @@
         <span class="p">})</span>
 </code></pre></div>
 
-<h1 id="the-goal">The goal<a class="headerlink" href="#the-goal" title="Permanent link">&para;</a></h1>
+<h2 id="the-goal">The goal<a class="headerlink" href="#the-goal" title="Permanent link">&para;</a></h2>
 <p>It is fairly easy, even for the untrained eye, to spot some issues in the previous class. A list of the most striking ones is</p>
 <ul>
 <li>The class exposes a single method and has no <code>__init__()</code>, thus the same functionality could be provided by a single function.</li>
@@ -172,16 +172,16 @@
 </ul>
 <p>So, since we are going to use this code in some part of our Amazing New Project™, we want to possibly fix these issues.</p>
 <p>The class, however, is working perfectly. It has been used in production for many years and there are no known bugs, so our operation has to be a <strong>refactoring</strong>, which means that we want to write something better, preserving the behaviour of the previous object.</p>
-<h1 id="the-path">The path<a class="headerlink" href="#the-path" title="Permanent link">&para;</a></h1>
+<h2 id="the-path">The path<a class="headerlink" href="#the-path" title="Permanent link">&para;</a></h2>
 <p>In this post I want to show you how you can safely refactor such a class using tests. This is different from TDD, but the two are closely related. The class we have has not been created using TDD, as there are no tests, but we can use tests to ensure its behaviour is preserved. This should therefore be called Test Driven Refactoring (TDR).</p>
 <p>The idea behind TDR is pretty simple. First, we have to write a test that checks the behaviour of some code, possibly a small part with a clearly defined scope and output. This is a posthumous (or late) unit test, and it simulates what the author of the code should have provided (cough cough, it was you some months ago...).</p>
 <p>Once you have you unit test you can go and modify the code, knowing that the behaviour of the resulting object will be the same of the previous one. As you can easily understand, the effectiveness of this methodology depends strongly on the quality of the tests themselves, possibly more than when developing with TDD, and this is why refactoring is hard.</p>
-<h1 id="caveats">Caveats<a class="headerlink" href="#caveats" title="Permanent link">&para;</a></h1>
+<h2 id="caveats">Caveats<a class="headerlink" href="#caveats" title="Permanent link">&para;</a></h2>
 <p>Two remarks before we start our refactoring. The first is that such a class could easily be refactored to some functional code. As you will be able to infer from the final result there is no real reason to keep an object-oriented approach for this code. I decided to go that way, however, as it gave me the possibility to show a design pattern called wrapper, and the refactoring technique that leverages it.</p>
 <p>The second remark is that in pure TDD it is strongly advised not to test internal methods, that is those methods that do not form the public API of the object. In general, we identify such methods in Python by prefixing their name with an underscore, and the reason not to test them is that TDD wants you to shape objects according to the object-oriented programming methodology, which considers objects as <strong>behaviours</strong> and not as <strong>structures</strong>. Thus, we are only interested in testing public methods.</p>
 <p>It is also true, however, that sometimes even tough we do not want to make a method public, that method contains some complex logic that we want to test. So, in my opinion the TDD advice should sound like "Test internal methods only when they contain some non-trivial logic".</p>
 <p>When it comes to refactoring, however, we are somehow deconstructing a previously existing structure, and usually we end up creating a lot of private methods to help extracting and generalising parts of the code. My advice in this case is to test those methods, as this gives you a higher degree of confidence in what you are doing. With experience you will then learn which tests are required and which are not.</p>
-<h1 id="setup-of-the-testing-environment">Setup of the testing environment<a class="headerlink" href="#setup-of-the-testing-environment" title="Permanent link">&para;</a></h1>
+<h2 id="setup-of-the-testing-environment">Setup of the testing environment<a class="headerlink" href="#setup-of-the-testing-environment" title="Permanent link">&para;</a></h2>
 <p>Clone <a href="https://github.com/lgiordani/datastats">this repository</a> and create a virtual environment. Activate it and install the required packages with </p>
 <div class="highlight"><pre><span></span><code>pip install -r requirements.txt
 </code></pre></div>
@@ -199,7 +199,7 @@ collected <span class="m">0</span> <span class="nv">items</span>
 </code></pre></div>
 
 <p>The given repository contains two branches. <code>master</code> is the one that you are into, and contains the initial setup, while <code>develop</code> points to the last step of the whole refactoring process. Every step of this post contains a reference to the commit that contains the changes introduced in that section.</p>
-<h1 id="step-1-testing-the-endpoints">Step 1 - Testing the endpoints<a class="headerlink" href="#step-1-testing-the-endpoints" title="Permanent link">&para;</a></h1>
+<h2 id="step-1-testing-the-endpoints">Step 1 - Testing the endpoints<a class="headerlink" href="#step-1-testing-the-endpoints" title="Permanent link">&para;</a></h2>
 <p>Commit: <a href="https://github.com/lgiordani/datastats/commit/27a1d8ccd5b0a57fa6d9d5f3bd80874538f14ed2">27a1d8c</a></p>
 <p>When you start refactoring a system, regardless of the size, you have to test the endpoints. This means that you consider the system as a black box (i.e. you do not know what is inside) and just check the external behaviour. In this case we can write a test that initialises the class and runs the <code>stats()</code> method with some test data, possibly <strong>real</strong> data, and checks the output. Obviously we will write the test with the actual output returned by the method, so this test is automatically passing.</p>
 <p>Querying the server we get the following data</p>
@@ -309,7 +309,7 @@ collected <span class="m">0</span> <span class="nv">items</span>
 
 <p>As said before, this test is obviously passing, having been artificially constructed from a real execution of the code.</p>
 <p>Well, this test is very important! Now we know that if we change something inside the code, altering the behaviour of the class, at least one test will fail.</p>
-<h1 id="step-2-getting-rid-of-the-json-format">Step 2 - Getting rid of the JSON format<a class="headerlink" href="#step-2-getting-rid-of-the-json-format" title="Permanent link">&para;</a></h1>
+<h2 id="step-2-getting-rid-of-the-json-format">Step 2 - Getting rid of the JSON format<a class="headerlink" href="#step-2-getting-rid-of-the-json-format" title="Permanent link">&para;</a></h2>
 <p>Commit: <a href="https://github.com/lgiordani/datastats/commit/65e2997d71ade752633229186c6669803a46f185">65e2997</a></p>
 <p>The method returns its output in JSON format, and looking at the class it is pretty evident that the conversion is done by <code>json.dumps()</code>.</p>
 <p>The structure of the code is the following</p>
@@ -399,7 +399,7 @@ collected <span class="m">0</span> <span class="nv">items</span>
 </code></pre></div>
 
 <p>and we have two tests that check the correctness of it.</p>
-<h1 id="step-3-refactoring-the-tests">Step 3 - Refactoring the tests<a class="headerlink" href="#step-3-refactoring-the-tests" title="Permanent link">&para;</a></h1>
+<h2 id="step-3-refactoring-the-tests">Step 3 - Refactoring the tests<a class="headerlink" href="#step-3-refactoring-the-tests" title="Permanent link">&para;</a></h2>
 <p>Commit: <a href="https://github.com/lgiordani/datastats/commit/d61901754b83ccc36fa25bcebf88da7cace28ff2">d619017</a></p>
 <p>It is pretty clear that the <code>test_data</code> list of dictionaries is bound to be used in every test we will perform, so it is high time we moved that to a global variable. There is no point now in using a fixture, as the test data is just static data.</p>
 <p>We could also move the output data to a global variable, but the upcoming tests are not using the whole output dictionary any more, so we can postpone the decision.</p>
@@ -486,7 +486,7 @@ collected <span class="m">0</span> <span class="nv">items</span>
     <span class="p">}</span>
 </code></pre></div>
 
-<h1 id="step-4-isolate-the-average-age-algorithm">Step 4 - Isolate the average age algorithm<a class="headerlink" href="#step-4-isolate-the-average-age-algorithm" title="Permanent link">&para;</a></h1>
+<h2 id="step-4-isolate-the-average-age-algorithm">Step 4 - Isolate the average age algorithm<a class="headerlink" href="#step-4-isolate-the-average-age-algorithm" title="Permanent link">&para;</a></h2>
 <p>Commit: <a href="https://github.com/lgiordani/datastats/commit/9db18036eee2f6712384195fcd970303387291f6">9db1803</a></p>
 <p>Isolating independent features is a key target of software design. Thus, our refactoring shall aim to disentangle the code dividing it into small separated functions.</p>
 <p>The output dictionary contains five keys, and each of them corresponds to a value computed either on the fly (for <code>avg_age</code> and <code>avg_salary</code>) or by the method's code (for <code>avg_yearly_increase</code>, <code>max_salary</code>, and <code>min_salary</code>). We can start replacing the code that computes the value of each key with dedicated methods, trying to isolate the algorithms.</p>
@@ -516,7 +516,7 @@ collected <span class="m">0</span> <span class="nv">items</span>
 </code></pre></div>
 
 <p>Checking after that that no test is failing. Well done! We isolated the first feature, and our refactoring produced already three tests.</p>
-<h1 id="step-5-isolate-the-average-salary-algorithm">Step 5 - Isolate the average salary algorithm<a class="headerlink" href="#step-5-isolate-the-average-salary-algorithm" title="Permanent link">&para;</a></h1>
+<h2 id="step-5-isolate-the-average-salary-algorithm">Step 5 - Isolate the average salary algorithm<a class="headerlink" href="#step-5-isolate-the-average-salary-algorithm" title="Permanent link">&para;</a></h2>
 <p>Commit: <a href="https://github.com/lgiordani/datastats/commit/412220145ea4d7ef846b1d1f289b4ddefc4fb24b">4122201</a></p>
 <p>The <code>avg_salary</code> key works exactly like the <code>avg_age</code>, with different code. Thus, the refactoring process is the same as before, and the result should be a new <code>test__avg_salary()</code> test</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test__avg_salary</span><span class="p">():</span>
@@ -541,7 +541,7 @@ collected <span class="m">0</span> <span class="nv">items</span>
         <span class="p">}</span>
 </code></pre></div>
 
-<h1 id="step-6-isolate-the-average-yearly-increase-algorithm">Step 6 - Isolate the average yearly increase algorithm<a class="headerlink" href="#step-6-isolate-the-average-yearly-increase-algorithm" title="Permanent link">&para;</a></h1>
+<h2 id="step-6-isolate-the-average-yearly-increase-algorithm">Step 6 - Isolate the average yearly increase algorithm<a class="headerlink" href="#step-6-isolate-the-average-yearly-increase-algorithm" title="Permanent link">&para;</a></h2>
 <p>Commit: <a href="https://github.com/lgiordani/datastats/commit/4005145f39d36fda0519127d57e1b4099d24e72b">4005145</a></p>
 <p>The remaining three keys are computed with algorithms that, being longer than one line, couldn't be squeezed directly in the definition of the dictionary. The refactoring process, however, does not really change; as before, we first test a helper method, then we define it duplicating the code, and last we call the helper removing the code duplication.</p>
 <p>For the average yearly increase of the salary we have a new test</p>
@@ -590,7 +590,7 @@ collected <span class="m">0</span> <span class="nv">items</span>
 </code></pre></div>
 
 <p>Please note that we are not solving any code duplication but the ones that we introduce to refactor. The first achievement we should aim to is to completely isolate independent features.</p>
-<h1 id="step-7-isolate-max-and-min-salary-algorithms">Step 7 - Isolate max and min salary algorithms<a class="headerlink" href="#step-7-isolate-max-and-min-salary-algorithms" title="Permanent link">&para;</a></h1>
+<h2 id="step-7-isolate-max-and-min-salary-algorithms">Step 7 - Isolate max and min salary algorithms<a class="headerlink" href="#step-7-isolate-max-and-min-salary-algorithms" title="Permanent link">&para;</a></h2>
 <p>Commit: <a href="https://github.com/lgiordani/datastats/commit/17b24138e712f9174b072a579a2dfc9e2800e6ac">17b2413</a></p>
 <p>When refactoring we shall always do one thing at a time, but for the sake of conciseness, I'll show here the result of two refactoring steps at once. I'll recommend the reader to perform them as independent steps, as I did when I wrote the code that I am posting below.</p>
 <p>The new tests are</p>
@@ -647,7 +647,7 @@ collected <span class="m">0</span> <span class="nv">items</span>
         <span class="p">}</span>
 </code></pre></div>
 
-<h1 id="step-8-reducing-code-duplication">Step 8 - Reducing code duplication<a class="headerlink" href="#step-8-reducing-code-duplication" title="Permanent link">&para;</a></h1>
+<h2 id="step-8-reducing-code-duplication">Step 8 - Reducing code duplication<a class="headerlink" href="#step-8-reducing-code-duplication" title="Permanent link">&para;</a></h2>
 <p>Commit: <a href="https://github.com/lgiordani/datastats/commit/b559a5c91ef58e1e734ac97b676468d09a460a45">b559a5c</a></p>
 <p>Now that we have the main tests in place we can start changing the code of the various helper methods. These are now small enough to allow us to change the code without further tests. While this can be true in this case, however, in general there is no definition of what "small enough" means, as there is no real definition of what "unit test" is. Generally speaking you should be confident that the change that you are doing is covered by the tests that you have. Weren't this the case, you'd better add one or more tests until you feel confident enough.</p>
 <p>The two methods <code>_max_salary()</code> and <code>_min_salary()</code> share a great deal of code, even though the second one is more concise</p>
@@ -773,7 +773,7 @@ collected <span class="m">0</span> <span class="nv">items</span>
         <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">average_salary_increase</span><span class="o">/</span><span class="n">average_age_increase</span><span class="p">)</span>
 </code></pre></div>
 
-<h1 id="step-9-advanced-refactoring">Step 9 - Advanced refactoring<a class="headerlink" href="#step-9-advanced-refactoring" title="Permanent link">&para;</a></h1>
+<h2 id="step-9-advanced-refactoring">Step 9 - Advanced refactoring<a class="headerlink" href="#step-9-advanced-refactoring" title="Permanent link">&para;</a></h2>
 <p>Commit: <a href="https://github.com/lgiordani/datastats/commit/cc0b0a105ebc882cb73831b177e881bb65f4b491">cc0b0a1</a></p>
 <p>The initial class didn't have any <code>__init__()</code> method, and was thus missing the encapsulation part of the object-oriented paradigm. There was no reason to keep the class, as the <code>stats()</code> method could have easily been extracted and provided as a plain function.</p>
 <p>This is much more evident now that we refactored the method, because we have 10 methods that accept <code>data</code> as a parameter. I would be nice to load the input data into the class at instantiation time, and then access it as <code>self.data</code>. This would greatly improve the readability of the class, and also justify its existence.</p>
@@ -858,7 +858,7 @@ collected <span class="m">0</span> <span class="nv">items</span>
 </code></pre></div>
 
 <p>And since all the other methods are not used any more we can safely delete them, checking that the tests do not fail. Speaking of tests, removing methods will make many tests of <code>DataStats</code> fail, so we need to remove them.</p>
-<h1 id="step-10-still-room-for-improvement">Step 10 - Still room for improvement<a class="headerlink" href="#step-10-still-room-for-improvement" title="Permanent link">&para;</a></h1>
+<h2 id="step-10-still-room-for-improvement">Step 10 - Still room for improvement<a class="headerlink" href="#step-10-still-room-for-improvement" title="Permanent link">&para;</a></h2>
 <p>As refactoring is an iterative process it will often happen that you think you did everything was possible, just to spot later that you missed something. In this case the missing step was spotted by Harun Yasar, who noticed another small code duplication.</p>
 <p>The two functions</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">_avg_salary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -881,12 +881,12 @@ collected <span class="m">0</span> <span class="nv">items</span>
 
 <p>which passes all the tests and is thus correct.</p>
 <p>Whenever I get corrected by someone who read one of my posts and just learned something new I feel so happy, because it means that the message is clear!</p>
-<h1 id="final-words">Final words<a class="headerlink" href="#final-words" title="Permanent link">&para;</a></h1>
+<h2 id="final-words">Final words<a class="headerlink" href="#final-words" title="Permanent link">&para;</a></h2>
 <p>I hope this little tour of a refactoring session didn't result too trivial, and helped you to grasp the basic concepts of this technique. If you are interested in the subject I'd strongly recommend the classic book by Martin Fowler "Refactoring: Improving the Design of Existing Code", which is a collection of refactoring patterns. The reference language is Java, but the concepts are easily adapted to Python.</p>
-<h1 id="updates">Updates<a class="headerlink" href="#updates" title="Permanent link">&para;</a></h1>
+<h2 id="updates">Updates<a class="headerlink" href="#updates" title="Permanent link">&para;</a></h2>
 <p>2017-07-28: <a href="https://github.com/delirious-lettuce">delirious-lettuce</a> and <a href="https://github.com/superbeckgit">Matt Beck</a> did a very serious proofread and spotted many typos. Thank you both for reading the post and for taking the time to submit the issues!</p>
 <p>2020-02-15: <a href="https://github.com/harunyasar">Harun Yasar</a> spotted a missing refactoring in two functions. Thanks!</p>
-<h1 id="feedback">Feedback<a class="headerlink" href="#feedback" title="Permanent link">&para;</a></h1>
+<h2 id="feedback">Feedback<a class="headerlink" href="#feedback" title="Permanent link">&para;</a></h2>
 <p>Feel free to reach me on <a href="https://twitter.com/thedigicat">Twitter</a> if you have questions. The <a href="https://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues">GitHub issues</a> page is the best place to submit corrections.</p>
   </section>
 

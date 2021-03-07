@@ -115,21 +115,21 @@
   </section>
 
   <section id="content">
-    <h1 id="the-problem">The problem<a class="headerlink" href="#the-problem" title="Permanent link">&para;</a></h1>
+    <h2 id="the-problem">The problem<a class="headerlink" href="#the-problem" title="Permanent link">&para;</a></h2>
 <p><strong>P02</strong> (*) Find the last but one element of a list.</p>
 <p>Example:</p>
 <div class="highlight"><pre><span></span><code><span class="n">scala</span><span class="o">&gt;</span> <span class="n">penultimate</span><span class="o">(</span><span class="nc">List</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">3</span><span class="o">,</span> <span class="mi">5</span><span class="o">,</span> <span class="mi">8</span><span class="o">))</span>
 <span class="n">res0</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">5</span>
 </code></pre></div>
 
-<h1 id="initial-thoughts">Initial thoughts<a class="headerlink" href="#initial-thoughts" title="Permanent link">&para;</a></h1>
+<h2 id="initial-thoughts">Initial thoughts<a class="headerlink" href="#initial-thoughts" title="Permanent link">&para;</a></h2>
 <p>This problem come in the same form as the first one, so most of the syntax issues have already been solved. The challenge here is to find a good algorithm to extract the penultimate element and, as done for the first problem, it can probably be solved both in a procedural and in a recursive way.</p>
 <p>Theoretically, the issue is very simple: we have to cycle (or recursively call the function) as long as we find the last element. Then, the penultimate is the last element read.</p>
 <p>As happened for the first problem, however, both the procedural and the functional solution provide some smart way to implement that algorithm.</p>
 <p>An additional interesting issue is to try and generalize the problem, writing a function that extracts the last-nth element, where the last-1st is the last element, the last-2nd is the penultimate, and so on.</p>
 <p>There are two edge cases this time, but both give the same result. When the list is empty or the list contains only one element, the penultimate element cannot be retrieved. In general, if we talk about the last-nth algorithm, the list shall contain at least n elements.</p>
 <p>The general function to extract the last-nth element shall also check that no negative indexes are provided.</p>
-<h1 id="the-procedural-solution">The procedural solution<a class="headerlink" href="#the-procedural-solution" title="Permanent link">&para;</a></h1>
+<h2 id="the-procedural-solution">The procedural solution<a class="headerlink" href="#the-procedural-solution" title="Permanent link">&para;</a></h2>
 <p>A smart way to solve the problem is to consider that the penultimate element of a list of n elements is the last element of the first (n - 1) elements. Scala provides a method called <a href="http://www.scala-lang.org/api/2.11.4/index.html#scala.collection.immutable.List"><code>init()</code></a> which returns all elements except the last. Documentation says that if the given list is empty the method throws the <code>UnsupportedOperationException</code>, so if we want to imitate the previous <code>last()</code> function we shall cover the empty list case.</p>
 <p>If the list contains a single element, <code>init()</code> returns an empty list, and in that case the <code>last()</code> method throws the right exception.</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="n">penultimate</span><span class="o">[</span><span class="kt">A</span><span class="o">](</span><span class="n">l</span><span class="k">:</span><span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">])</span><span class="k">:</span><span class="kt">A</span> <span class="o">=</span> <span class="o">{</span>
@@ -146,7 +146,7 @@
 <span class="o">}</span>
 </code></pre></div>
 
-<h1 id="the-recursive-solution">The recursive solution<a class="headerlink" href="#the-recursive-solution" title="Permanent link">&para;</a></h1>
+<h2 id="the-recursive-solution">The recursive solution<a class="headerlink" href="#the-recursive-solution" title="Permanent link">&para;</a></h2>
 <p>The recursive solution takes advantage of the power of pattern matching. The exit case is when the list is composed by a head element and a tail made by a list of one single element. The pattern matching syntax can express this situation with the <code>h :: List(t)</code> syntax. The standard case is when the tail is still a generic list and the last case covers all edge cases.</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="n">penultimate</span><span class="o">[</span><span class="kt">A</span><span class="o">](</span><span class="n">l</span><span class="k">:</span><span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">])</span><span class="k">:</span><span class="kt">A</span> <span class="o">=</span> <span class="n">l</span> <span class="k">match</span> <span class="o">{</span>
     <span class="k">case</span> <span class="n">h</span> <span class="o">::</span> <span class="nc">List</span><span class="o">(</span><span class="n">t</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="n">h</span>
@@ -167,10 +167,10 @@
 </code></pre></div>
 
 <p>The function is very simple. If the length of the list is <code>n</code> the element we are looking for is the first (here the pattern guard does the job). Otherwise if the list has still some tail just call the function recursively on it and last, that is if the list is empty, throw the exception.</p>
-<h1 id="final-considerations">Final considerations<a class="headerlink" href="#final-considerations" title="Permanent link">&para;</a></h1>
+<h2 id="final-considerations">Final considerations<a class="headerlink" href="#final-considerations" title="Permanent link">&para;</a></h2>
 <p>This time I learned digging into the <strong>Scala documentation</strong> and paying attention to <strong>exceptions</strong> which are an important matter in a robust API.</p>
 <p>Working on the recursive solution I learned that <strong>patterns</strong> can be very expressive and how to use <strong>pattern guards</strong>.</p>
-<h1 id="feedback">Feedback<a class="headerlink" href="#feedback" title="Permanent link">&para;</a></h1>
+<h2 id="feedback">Feedback<a class="headerlink" href="#feedback" title="Permanent link">&para;</a></h2>
 <p>The <a href="https://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues">GitHub issues</a> page is the best place to submit corrections.</p>
   </section>
 

@@ -114,14 +114,14 @@
   </section>
 
   <section id="content">
-    <h1 id="the-problem">The problem<a class="headerlink" href="#the-problem" title="Permanent link">&para;</a></h1>
+    <h2 id="the-problem">The problem<a class="headerlink" href="#the-problem" title="Permanent link">&para;</a></h2>
 <p><strong>P01</strong> (*) Find the last element of a list.</p>
 <p>Example:</p>
 <div class="highlight"><pre><span></span><code><span class="n">scala</span><span class="o">&gt;</span> <span class="n">last</span><span class="o">(</span><span class="nc">List</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">3</span><span class="o">,</span> <span class="mi">5</span><span class="o">,</span> <span class="mi">8</span><span class="o">))</span>
 <span class="n">res0</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">8</span>
 </code></pre></div>
 
-<h1 id="initial-thoughts">Initial thoughts<a class="headerlink" href="#initial-thoughts" title="Permanent link">&para;</a></h1>
+<h2 id="initial-thoughts">Initial thoughts<a class="headerlink" href="#initial-thoughts" title="Permanent link">&para;</a></h2>
 <p>This is the very first Scala problem, but a lot of topics are covered even by such a small task.</p>
 <p>First I have to learn how to define functions. Then the problem shows two data types, namely <code>List</code> and <code>Int</code>, but it does not state that the list has to contain integers. So another point is to understand if and how Scala can deal with generic containers (that is, a list, regardless of the type of the content).</p>
 <p>Scala has a strong functional component, so it seems a good thing to try and solve the problem both with some procedural code (object-oriented or not) and with a functional approach.</p>
@@ -131,7 +131,7 @@
 <li>Learn generic containers</li>
 <li>Find a procedural and a functional solution to the problem</li>
 </ol>
-<h1 id="functions">Functions<a class="headerlink" href="#functions" title="Permanent link">&para;</a></h1>
+<h2 id="functions">Functions<a class="headerlink" href="#functions" title="Permanent link">&para;</a></h2>
 <p>A function in Scala is defined through the <code>def</code> keyword, both inside and outside an object. The language syntax seems to have a lot of possibilities and some dark corners, but it is clear that input parameters have to be specified between round brackets, and the type of the output comes after them (outside the brackets). Then an equal sign and the body of the function between braces.</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="n">name_of_the_function</span><span class="o">(</span><span class="n">paramA</span><span class="k">:</span><span class="kt">typeA</span><span class="o">,</span> <span class="n">paramB</span><span class="k">:</span><span class="kt">typeB</span><span class="o">,</span> <span class="o">...)</span><span class="k">:type</span> <span class="o">=</span> <span class="o">{</span>
     <span class="n">body</span>
@@ -139,7 +139,7 @@
 </code></pre></div>
 
 <p>The equal sign has an important meaning, if I remember correctly. Omitting the equal sign makes the function automatically return a <code>Unit</code> type (that is, no output), so the point seems to be: ask yourself if your function shall return something or not. The <code>Unit</code> return type may be also explicitly stated, in which case you have to add the equal sign. And interesting clarification (with two different points of view) may be found <a href="https://stackoverflow.com/questions/944111/when-to-use-the-equals-sign-in-a-scala-method-declaration">here</a>. As a beginner, I prefer to be explicit.</p>
-<h1 id="type-variables">Type variables<a class="headerlink" href="#type-variables" title="Permanent link">&para;</a></h1>
+<h2 id="type-variables">Type variables<a class="headerlink" href="#type-variables" title="Permanent link">&para;</a></h2>
 <p>I need to declare a function that accepts a list of any kind of things. This problem falls under the term <em>polymorphism</em>, and in Scala can be achieved with <em>type variables</em>. A very quick introduction to the matter may be found <a href="https://twitter.github.io/scala_school/type-basics.html">here</a>. Basically for my problem I simply have to use the following syntax</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="n">func</span><span class="o">[</span><span class="kt">A</span><span class="o">](</span><span class="n">l</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">])</span><span class="k">:</span><span class="kt">A</span> <span class="o">=</span> <span class="o">{</span>
     <span class="o">...</span>
@@ -147,12 +147,12 @@
 </code></pre></div>
 
 <p>where the starting <code>[A]</code> signals that the function is a sort of template with a free type <code>A</code>, unknown at the moment. The same type is used later to say that the parameter <code>l</code> is a <code>List</code> of things, and <code>A</code> is the type of each of them. Last, this function returns one value of the <code>A</code> type, since the problems requires to find one specific element of the list.</p>
-<h1 id="find-the-last-element-of-a-list">Find the last element of a list<a class="headerlink" href="#find-the-last-element-of-a-list" title="Permanent link">&para;</a></h1>
+<h2 id="find-the-last-element-of-a-list">Find the last element of a list<a class="headerlink" href="#find-the-last-element-of-a-list" title="Permanent link">&para;</a></h2>
 <p>The procedural approach to this problem is to simply iterate through the list storing the last visited element, until the end of the function is reached. At that point the last visited element is also the last element of the list.</p>
 <p>A good list type, however, should also have methods to easily retrieve special elements, such as the first or the last element. According to the <a href="http://www.scala-lang.org/api/2.11.4/index.html#scala.collection.immutable.List">Scala documentation</a> the <code>List</code> type provides a <code>last()</code> method which returns ("selects") the last element.</p>
 <p>The functional approach is easy in this case. Usually functional solutions are built starting with the exit case, which for this problem is: the list contains only one element, which is the last one. This excludes the possibility for the list to be empty, so we should manage that event too. If the list has more that one element, we simply remove the first one and call the function recursively. Just like Erlang, Scala has a very powerful pattern matching mechanism, that may be leveraged to simplify expressing the algorithm.</p>
 <p>The only edge case of this algorithm is when the list is empty. In that situation no element can be found, and an exception shall be thrown (Scala nomenclature).</p>
-<h1 id="the-procedural-solution">The procedural solution<a class="headerlink" href="#the-procedural-solution" title="Permanent link">&para;</a></h1>
+<h2 id="the-procedural-solution">The procedural solution<a class="headerlink" href="#the-procedural-solution" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="n">last</span><span class="o">[</span><span class="kt">A</span><span class="o">](</span><span class="n">l</span><span class="k">:</span><span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">])</span><span class="k">:</span><span class="kt">A</span> <span class="o">=</span> <span class="o">{</span>
     <span class="n">l</span><span class="o">.</span><span class="n">last</span>
 <span class="o">}</span>
@@ -164,7 +164,7 @@
 
 <p>There is no check for an empty list because the <code>last()</code> method already throws the <code>NoSuchElementException</code> when no element is present.</p>
 <p>There is no need to use an explicit <code>return</code> statement, as functions always return the last expression.</p>
-<h1 id="the-recursive-solution">The recursive solution<a class="headerlink" href="#the-recursive-solution" title="Permanent link">&para;</a></h1>
+<h2 id="the-recursive-solution">The recursive solution<a class="headerlink" href="#the-recursive-solution" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="n">last</span><span class="o">[</span><span class="kt">A</span><span class="o">](</span><span class="n">l</span><span class="k">:</span><span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">])</span><span class="k">:</span><span class="kt">A</span> <span class="o">=</span> <span class="n">l</span> <span class="k">match</span> <span class="o">{</span>
     <span class="k">case</span> <span class="n">h</span> <span class="o">::</span> <span class="nc">Nil</span> <span class="k">=&gt;</span> <span class="n">h</span>
     <span class="k">case</span> <span class="k">_</span> <span class="o">::</span> <span class="n">tail</span> <span class="k">=&gt;</span> <span class="n">last</span><span class="o">(</span><span class="n">tail</span><span class="o">)</span>
@@ -177,10 +177,10 @@
 <p>The second matching takes the tail of the list (the first element is not even stored, it is ignored using the <code>_</code> wildcard) and calls itself on the remaining values.</p>
 <p>The last matching is selected when the first two fail, that is when the list is empty. In that case an exception shall be thrown to match the behaviour of the <code>last()</code> method. This is not mandatory, but is probably something that the programmer is accustomed to, so provided that we document it, it is a good convention to adhere to.</p>
 <p>In Scala the exception shall be created at the moment, just like a standard object, so the <code>new</code> keyword is needed before the name of the exception itself.</p>
-<h1 id="final-considerations">Final considerations<a class="headerlink" href="#final-considerations" title="Permanent link">&para;</a></h1>
+<h2 id="final-considerations">Final considerations<a class="headerlink" href="#final-considerations" title="Permanent link">&para;</a></h2>
 <p>My first experience with functional languages was Erlang, so I quickly learned to love <strong>pattern matching</strong> and the beauty of <strong>recursive solutions</strong>. The Scala pattern matching syntax was for me really simple to grasp. The procedural solution using the dedicated method was straightforward.</p>
 <p>The <strong>type variables</strong> syntax is very useful. I come from Python, where the polymorphic approach is pushed to its limit, and all variables are references, thus implementing type variables from the very beginning. In Scala, types are explicitly declared, so the type variables syntax allows me to use collections without binding the code to a specific type.</p>
-<h1 id="feedback">Feedback<a class="headerlink" href="#feedback" title="Permanent link">&para;</a></h1>
+<h2 id="feedback">Feedback<a class="headerlink" href="#feedback" title="Permanent link">&para;</a></h2>
 <p>The <a href="https://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues">GitHub issues</a> page is the best place to submit corrections.</p>
   </section>
 

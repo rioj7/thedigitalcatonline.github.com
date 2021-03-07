@@ -4,25 +4,25 @@
 &lt;p&gt;In other words, the messages cannot be read or modified by malicious third-parties, but what if we established communication with a malicious actor in the first place? Such a situation can arise during a man-in-the-middle attack, where the low-level network communication is hijacked by a malicious actor who pretends to be the desired recipient of the communication.&lt;/p&gt;
 &lt;p&gt;In the context of the Internet, and in particular of the World Wide Web, the main concern is that the server that provides services we log into (think of every service that has your personal or financial data like you bank, Google, Facebook, Netflix, etc.) is run by the company that we trust and not by an attacker who wants to steal our data.&lt;/p&gt;
 &lt;p&gt;In this post I will try to clarify the main components of the certificates system and to explain the meaning of the major acronyms and names that you might hear when you deal with this part of web development.&lt;/p&gt;
-&lt;h1 id="clarification-ssl-vs-tls"&gt;Clarification: SSL vs TLS&lt;a class="headerlink" href="#clarification-ssl-vs-tls" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
+&lt;h2 id="clarification-ssl-vs-tls"&gt;Clarification: SSL vs TLS&lt;a class="headerlink" href="#clarification-ssl-vs-tls" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;In the world of web development and infrastructure management, we normally speak of SSL protocol and of SSL certificates, but it has to be noted that SSL (Secure Sockets Layer) is the name of a deprecated protocol. The current implementation of the protocol used to secure web applications is &lt;strong&gt;TLS&lt;/strong&gt; (Transport Layer Security).&lt;/p&gt;
 &lt;p&gt;The story of SSL and TLS is rich of events and spans 25 years since its inception by Taher Elgamal at Netscape. In short, SSL had 3 major versions (the first of which was never publicly used), and was replaced by TLS in 1999. TLS itself has gone through 3 revisions at the time of writing, TLS 1.3 being the latest version available.&lt;/p&gt;
 &lt;p&gt;The TLS/SSL nomenclature is one of many sources of confusion in the complicated world of security and applied cryptography. In this article I will use only the acronym TLS, but I went for SSL in the title because I wanted the subject matter to be recognisable also by developers that are not much into security and cryptography.&lt;/p&gt;
-&lt;h1 id="x509-certificates"&gt;X.509 certificates&lt;a class="headerlink" href="#x509-certificates" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
+&lt;h2 id="x509-certificates"&gt;X.509 certificates&lt;a class="headerlink" href="#x509-certificates" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;While the problem of the identity in an insecure network can be solved in several ways, the solution embraced to secure the World Wide Web is based on a standard called &lt;strong&gt;X.509&lt;/strong&gt;. When we mention SSL certificates, we usually mean X.509 certificates used in a TLS connection, such as that created by HTTPS.&lt;/p&gt;
 &lt;p&gt;X.509 is the ITU-T standard used to represent certificates, and has been chosen to be the standard used in the TLS protocol. The standard doesn't only define the binary structure of the certificate itself, but it also defines procedures to revoke the certificates, and establishes a hierarchical system of certification known as &lt;strong&gt;certificate path&lt;/strong&gt;, or &lt;strong&gt;certificate chain&lt;/strong&gt;.&lt;/p&gt;
 &lt;p&gt;The structure of an X.509 certificate is expressed using &lt;a href="https://en.wikipedia.org/wiki/Abstract_Syntax_Notation_One"&gt;ASN.1&lt;/a&gt;, a notation used natively by the PEM format (discussed &lt;a href="https://www.thedigitalcatonline.com/blog/2018/04/25/rsa-keys/"&gt;here&lt;/a&gt;). You can read the full specification in &lt;a href="https://tools.ietf.org/html/rfc2459"&gt;RFC 2459&lt;/a&gt;, in particular &lt;a href="https://tools.ietf.org/html/rfc2459#section-4"&gt;Section 4&lt;/a&gt; "Certificate and Certificate Extensions Profile". I will refer to this later when I will have a look at a real certificate.&lt;/p&gt;
-&lt;h1 id="how-are-certificates-related-to-https"&gt;How are certificates related to HTTPS?&lt;a class="headerlink" href="#how-are-certificates-related-to-https" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
+&lt;h2 id="how-are-certificates-related-to-https"&gt;How are certificates related to HTTPS?&lt;a class="headerlink" href="#how-are-certificates-related-to-https" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;Before I discuss how certificates solve the problem of identity (or ownership of a public key), let's clarify the relationship between them and HTTPS.&lt;/p&gt;
 &lt;p&gt;HTTPS stands for HTTP Secure, and the core of the protocol consists of running HTTP over TLS. When we access a web site with HTTPS the browser first establishes a TLS connection with the server and then communicates with it using pure HTTP. This means that the whole HTTP protocol is encrypted, as the secure channel is established outside it, and also means that, aside from the different URI scheme &lt;code&gt;https://&lt;/code&gt; instead of &lt;code&gt;http://&lt;/code&gt;, there are no differences between the two protocols.&lt;/p&gt;
 &lt;p&gt;Certificates come into play when the browser establishes the TLS connection, which is why you need to set-up HTTPS as part of your infrastructure and not in your web application. By the time the HTTP requests reach your application they are already decrypted and accessible in plain text, as the HTTP protocol mandates. We usually say that we "terminate TLS" when a component of our infrastructure manages certificates and decrypts HTTPS into HTTP.&lt;/p&gt;
-&lt;h1 id="how-do-certificates-work"&gt;How do certificates work?&lt;a class="headerlink" href="#how-do-certificates-work" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
+&lt;h2 id="how-do-certificates-work"&gt;How do certificates work?&lt;a class="headerlink" href="#how-do-certificates-work" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;The X.509 standard establishes entities called &lt;strong&gt;Certificate Authorities&lt;/strong&gt; (CAs), and creates a hierarchy of trust called &lt;strong&gt;chain&lt;/strong&gt; between them. The idea is that there is a set of entities that are trusted worldwide by operating systems, browsers, and other network-related software, and that these entities can trust other entities, thus creating a trust network.&lt;/p&gt;
 &lt;p&gt;While the market of Certificate Authorities is dominated by three major commercial players (see the &lt;a href="https://w3techs.com/technologies/overview/ssl_certificate"&gt;usage statistics&lt;/a&gt;)there are approximately 100 organisations operating worldwide, among which some non-profit ones. Not all of these are trusted by all operating systems or browsers, though.&lt;/p&gt;
 &lt;p&gt;The set of CAs trusted by an organisation is called &lt;strong&gt;root program&lt;/strong&gt;. The Mozilla community runs a program that is independent from the hardware/software platform, aptly called &lt;a href="https://wiki.mozilla.org/CA"&gt;Mozilla's CA Certificate Program&lt;/a&gt; and uses data contained in the &lt;a href="https://www.ccadb.org/"&gt;Common CA Database&lt;/a&gt; (CCADB). Private companies such as Microsoft, Apple, and Oracle run their own root programs and software running on the respective platforms (Windows, macOS/iOS, Java) can decide to trust the CAs provided by those programs.&lt;/p&gt;
 &lt;p&gt;In the open-source world, the Mozilla root program is by far the most influential and important source of information, being used by other software packages and Linux distributions.&lt;/p&gt;
 &lt;p&gt;It is possible to create certificates that are not signed by any CA, and these are called &lt;strong&gt;self-signed certificates&lt;/strong&gt;. Such certificates can be used with any software that relies on certificates, but it requires such a software to disable certificate checking with the Certificate Authorities. Self-signed certificates are obviously useful for testing purposes, but there are scenarios in which it might be desirable not to rely on the CAs and establish a private network of trust.&lt;/p&gt;
-&lt;h1 id="example-ca-root-certificate"&gt;Example: CA root certificate&lt;a class="headerlink" href="#example-ca-root-certificate" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
+&lt;h2 id="example-ca-root-certificate"&gt;Example: CA root certificate&lt;a class="headerlink" href="#example-ca-root-certificate" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;The certificates for root CAs that are part of the Mozilla root program can be retrieved from the &lt;a href="https://www.ccadb.org/resources"&gt;Common CA Database&lt;/a&gt; web page, or can be seen in the Firefox &lt;a href="https://hg.mozilla.org/mozilla-central/file/tip/security/nss/lib/ckfw/builtins/certdata.txt"&gt;source code&lt;/a&gt; directly. On a running Firefox browser you can open the &lt;a href="about:preferences#privacy"&gt;Privacy &amp;amp; Security&lt;/a&gt; menu and click on "View Certificates" at the bottom of the page. The CAs are listed under the tab "Authorities".&lt;/p&gt;
 &lt;p&gt;The interesting thing you can do here is to export a CA certificate. If you do it Firefox will save it in a file with extension &lt;code&gt;.crt&lt;/code&gt;, that contains data in PEM format. I exported the certificate for &lt;code&gt;Amazon Root CA 1&lt;/code&gt; and I ended up with the file &lt;code&gt;AmazonRootCA1.crt&lt;/code&gt;. If, instead of exporting, you view the certificate, you will end up in a page that allows you to download the certificate and the chain, both in PEM format, in files with the extension &lt;code&gt;.pem&lt;/code&gt;. As you see, you are not the only one who is confused.&lt;/p&gt;
 &lt;p&gt;I described the PEM format &lt;a href="https://www.thedigitalcatonline.com/blog/2018/04/25/rsa-keys/"&gt;in a post on RSA keys&lt;/a&gt; so I won't repeat here the whole discussion about it. The &lt;a href="https://tools.ietf.org/html/rfc7468"&gt;RFC 7468&lt;/a&gt; ("Textual Encodings of PKIX, PKCS, and CMS Structures") describes certificates in section 5. Section 4 mentions the module &lt;code&gt;id-pkix1-e&lt;/code&gt; for &lt;code&gt;Certificate&lt;/code&gt;, &lt;code&gt;CertificateList&lt;/code&gt;, and &lt;code&gt;SubjectPublicKeyInfo&lt;/code&gt; &lt;a href="https://tools.ietf.org/html/rfc5280"&gt;RFC 5280&lt;/a&gt; ("Internet X.509 Public Key Infrastructure Certificate and Certificate Revocation List (CRL) Profile").&lt;/p&gt;
@@ -241,7 +241,7 @@ Certificate:
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Moreover, one of the version 3 extensions of the self-signed certificate is a basic constraint with the boolean &lt;code&gt;CA&lt;/code&gt; set to true. It also has the extension &lt;code&gt;Key Usage&lt;/code&gt; set to &lt;code&gt;Digital Signature, Certificate Sign, CRL Sign&lt;/code&gt;, which means that the certificate can be used to sign other certificates.&lt;/p&gt;
-&lt;h1 id="example-self-signed-certificate"&gt;Example: self-signed certificate&lt;a class="headerlink" href="#example-self-signed-certificate" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
+&lt;h2 id="example-self-signed-certificate"&gt;Example: self-signed certificate&lt;a class="headerlink" href="#example-self-signed-certificate" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;You can use OpenSSL to create a self-signed certificate using the module &lt;code&gt;req&lt;/code&gt; that you would normally use to create certificate requests. As a self-signed certificate doesn't need approval, the module can directly output the certificate.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ openssl req -x509 -newkey rsa:2048 -keyout self-signed-key.pem -out self-signed.pem -days &lt;span class="m"&gt;365&lt;/span&gt; -nodes -subj &lt;span class="s1"&gt;&amp;#39;/CN=localhost&amp;#39;&lt;/span&gt;
 Generating a RSA private key
@@ -315,7 +315,7 @@ Certificate:
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;As you can see this certificate has the same value in &lt;code&gt;Issuer&lt;/code&gt; and &lt;code&gt;Subject&lt;/code&gt;, as happened before for the Amazon Root one. It also has the flag &lt;code&gt;CA&lt;/code&gt; set to true but it doesn't have the extension &lt;code&gt;Key Usage&lt;/code&gt; meaning that this certificate can't be used to sign other certificates.&lt;/p&gt;
-&lt;h1 id="example-this-sites-certificate"&gt;Example: this site's certificate&lt;a class="headerlink" href="#example-this-sites-certificate" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
+&lt;h2 id="example-this-sites-certificate"&gt;Example: this site's certificate&lt;a class="headerlink" href="#example-this-sites-certificate" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;You can see TLS certificates and the chain of trust in action in this very website. Following the documentation of you browser (instructions for Firefox are &lt;a href="https://support.mozilla.org/en-US/kb/secure-website-certificate"&gt;here&lt;/a&gt;), you can see the certificate used by The Digital Cat. At the time of writing the blog is hosted on GitHub Pages, even tough I'm using a custom domain, and GitHub partnered with &lt;a href="https://letsencrypt.org/"&gt;Let's Encrypt&lt;/a&gt; to provide certificates for such a configuration (details &lt;a href="https://github.blog/2018-05-01-github-pages-custom-domains-https/"&gt;here&lt;/a&gt;).&lt;/p&gt;
 &lt;p&gt;Indeed, the certificate for &lt;a href="https://www.thedigitalcatonline.com"&gt;thedigitalcatonline.com&lt;/a&gt; is provided by "Let's Encrypt Authority X3", which in turn is trusted by Digital Signature Trust Co. with its root CA "DST Root CA X3".&lt;/p&gt;
 &lt;p&gt;Let's have a look at the three certificates. The one for The Digital Cat is&lt;/p&gt;
@@ -416,7 +416,7 @@ Certificate:
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;As happened for the certificate &lt;code&gt;Amazon Root CA 1&lt;/code&gt; that we discussed before, this one is self-signed, having the same value for &lt;code&gt;Subject&lt;/code&gt; and &lt;code&gt;Issuer&lt;/code&gt;.&lt;/p&gt;
-&lt;h1 id="how-to-verify-certificates-with-openssl"&gt;How to verify certificates with OpenSSL&lt;a class="headerlink" href="#how-to-verify-certificates-with-openssl" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
+&lt;h2 id="how-to-verify-certificates-with-openssl"&gt;How to verify certificates with OpenSSL&lt;a class="headerlink" href="#how-to-verify-certificates-with-openssl" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;To verify if a certificate is valid we can use the module &lt;code&gt;verify&lt;/code&gt; of OpenSSL. By default, OpenSSL doesn't trust anything, and &lt;code&gt;verify&lt;/code&gt; relies on a default path in the system to find root certificates. You can see the path running&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ openssl version -d
 OPENSSLDIR: &lt;span class="s2"&gt;&amp;quot;/usr/lib/ssl&amp;quot;&lt;/span&gt;
@@ -455,7 +455,7 @@ error &lt;span class="m"&gt;2&lt;/span&gt; at &lt;span class="m"&gt;1&lt;/span&g
 error www-thedigitalcatonline-com.pem: verification failed
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;h1 id="low-level-certificate-validation-process"&gt;Low-level certificate validation process&lt;a class="headerlink" href="#low-level-certificate-validation-process" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
+&lt;h2 id="low-level-certificate-validation-process"&gt;Low-level certificate validation process&lt;a class="headerlink" href="#low-level-certificate-validation-process" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;Let's have a look at the signature process for x.509 certificates. The process depends on the specific algorithm used to sign the certificate, so I will use the certificate &lt;code&gt;Amazon Root CA 1&lt;/code&gt; as an example, leaving to the reader the investigation about other algorithms.&lt;/p&gt;
 &lt;p&gt;A signed certificate is made of two parts, the certificate itself and the signature. The signature contains an encrypted hash of the certificate. Being encrypted we can verify the signed using their public key, and once we decrypted it we can compare the hash with one that we create on the fly using the same algorithm.&lt;/p&gt;
 &lt;p&gt;For the Amazon root certificate, we know the signature algorithm and value from the output of &lt;code&gt;openssl x509&lt;/code&gt;&lt;/p&gt;
@@ -618,7 +618,7 @@ fffffffffffffffffffff003031300d0609608648016503040201050004206fc
 
 &lt;p&gt;This is arguably not the best Python code ever, but it's a simple way to demonstrate the process. As I said, this is far from being general, as it assumes the signature is &lt;code&gt;sha256WithRSAEncryption&lt;/code&gt;, which might not be the case.&lt;/p&gt;
 &lt;p&gt;What I showed you here is what happens when we validate a root certificate. When we validate a non-root certificate the process is exactly the same (taking into account that the algorithms involved might be different), only the public key used to sign the certificate doesn't come from the certificate itself, but from the signer one. So, in the case of this blog, the certificate for www.thedigitalcat.com has a signature encrypted with the public key of Let's Encrypt. And the certificate for Let's Encrypt will be signed using the public key of Digital Signature Trust Co. This is what creates the chain of trust.&lt;/p&gt;
-&lt;h1 id="algorithms-used-by-root-certificates"&gt;Algorithms used by root certificates&lt;a class="headerlink" href="#algorithms-used-by-root-certificates" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
+&lt;h2 id="algorithms-used-by-root-certificates"&gt;Algorithms used by root certificates&lt;a class="headerlink" href="#algorithms-used-by-root-certificates" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;A quick scan of the certificates that are part of the Mozilla program reveals that the vast majority of them is using RSA to self-sign them&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ &lt;span class="k"&gt;for&lt;/span&gt; i in /etc/ssl/certs/*.pem&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt; openssl x509 -inform pem -in &lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;i&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; -noout -text &lt;span class="p"&gt;|&lt;/span&gt; grep -E &lt;span class="s2"&gt;&amp;quot;Public Key Algorithm&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="k"&gt;done&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt; sort &lt;span class="p"&gt;|&lt;/span&gt; uniq -c
      &lt;span class="m"&gt;25&lt;/span&gt;             Public Key Algorithm: id-ecPublicKey
@@ -637,15 +637,15 @@ fffffffffffffffffffff003031300d0609608648016503040201050004206fc
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Even here, elliptic curves are slowly being adopted.&lt;/p&gt;
-&lt;h1 id="aws-components-related-to-certificates"&gt;AWS components related to certificates&lt;a class="headerlink" href="#aws-components-related-to-certificates" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
+&lt;h2 id="aws-components-related-to-certificates"&gt;AWS components related to certificates&lt;a class="headerlink" href="#aws-components-related-to-certificates" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;If you are using AWS, you can create certificates with ACM, the &lt;a href="https://aws.amazon.com/certificate-manager/"&gt;AWS Certificate Manager&lt;/a&gt;. Such certificates cannot be downloaded, they can only be attached to other AWS components. For this reason, the generation process requires you to create any request, as you might have to do with other authorities. Certificates created in the ACM are free.&lt;/p&gt;
 &lt;p&gt;Certificates created in the ACM can be attached to several AWS components, most notably &lt;a href="https://aws.amazon.com/documentation/elastic-load-balancing/"&gt;Load Balancers&lt;/a&gt;, &lt;a href="https://aws.amazon.com/documentation/cloudfront/"&gt;CloudFront&lt;/a&gt;, and &lt;a href="https://aws.amazon.com/documentation/apigateway/"&gt;API Gateway&lt;/a&gt;.&lt;/p&gt;
 &lt;p&gt;Traditionally, load balancers are the place where TLS is terminated for HTTPS, requiring a connection to port 443. While &lt;a href="https://docs.aws.amazon.com/elasticloadbalancing/latest/application/index.html"&gt;Application Load Balancers&lt;/a&gt; can do that, in 2019 AWS &lt;a href="https://aws.amazon.com/blogs/aws/new-tls-termination-for-network-load-balancers/"&gt;announced&lt;/a&gt; support for certificates in &lt;a href="https://docs.aws.amazon.com/elasticloadbalancing/latest/network/index.html"&gt;Network Load Balancers&lt;/a&gt; as well.&lt;/p&gt;
-&lt;h2 id="lets-encrypt"&gt;Let's encrypt&lt;a class="headerlink" href="#lets-encrypt" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;h3 id="lets-encrypt"&gt;Let's encrypt&lt;a class="headerlink" href="#lets-encrypt" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h3&gt;
 &lt;p&gt;In an effort to push for HTTP encryption of any public server, the Internet Security Research Group founded in 2016 a non-profit CA named &lt;a href="https://letsencrypt.org/"&gt;Let's Encrypt&lt;/a&gt;, which provides at no charge TLS certificates valid for 90 days. Such certificates can be renewed automatically as part of the setup (&lt;a href="https://certbot.org/"&gt;certbot&lt;/a&gt;) and represent a viable alternative to certificates issued by other CA, in particular for open source projects. This blog uses a certificate issued by Let's Encrypt (provided by GitHub Pages) and will thus expire in less than 3 months (but also automatically renewed).&lt;/p&gt;
-&lt;h1 id="final-words"&gt;Final words&lt;a class="headerlink" href="#final-words" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
+&lt;h2 id="final-words"&gt;Final words&lt;a class="headerlink" href="#final-words" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;I hope this post helped to clarify some of the most obscure points of certificates, that definitely bugged be when I first approached them. As always when standards are involved, the risk is to get lost in the myriad of documents where information is scattered, and not to realise that some (if not many) parts of the systems we run every day have a long history and thus a big burden of legacy code or nomenclature.&lt;/p&gt;
-&lt;h1 id="resources"&gt;Resources&lt;a class="headerlink" href="#resources" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
+&lt;h2 id="resources"&gt;Resources&lt;a class="headerlink" href="#resources" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;ul&gt;
 &lt;li&gt;The Wikipedia article on &lt;a href="https://en.wikipedia.org/wiki/Transport_Layer_Security#SSL_1.0,_2.0,_and_3.0"&gt;TLS&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;The Wikipedia article on &lt;a href="https://en.wikipedia.org/wiki/Certificate_authority"&gt;Certificate authority&lt;/a&gt;&lt;/li&gt;
@@ -663,17 +663,19 @@ fffffffffffffffffffff003031300d0609608648016503040201050004206fc
 &lt;li&gt;&lt;a href="https://tools.ietf.org/html/rfc8017"&gt;RFC 8017&lt;/a&gt; - "PKCS #1: RSA Cryptography Specifications Version 2.2"&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://tools.ietf.org/html/rfc8446"&gt;RFC 8446&lt;/a&gt; - "The Transport Layer Security (TLS) Protocol Version 1.3"&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://cryptography.io/en/latest/"&gt;pyca/cryptography&lt;/a&gt; - The Python pyca/cryptography package&lt;/li&gt;
-&lt;/ul&gt;</content><category term="Programming"></category><category term="algorithms"></category><category term="cryptography"></category><category term="SSL"></category><category term="SSH"></category><category term="RSA"></category><category term="Python"></category><category term="WWW"></category></entry><entry><title>Public key cryptography: RSA keys</title><link href="https://www.thedigitalcatonline.com/blog/2018/04/25/rsa-keys/" rel="alternate"></link><published>2018-04-25T13:00:00+01:00</published><updated>2020-03-14T11:00:00+00:00</updated><author><name>Leonardo Giordani</name></author><id>tag:www.thedigitalcatonline.com,2018-04-25:/blog/2018/04/25/rsa-keys/</id><summary type="html">&lt;p&gt;An in-depth discussion of the format of RSA keys, the PEM format, ASN, and PKCS&lt;/p&gt;</summary><content type="html">&lt;p&gt;I bet you created at least once an RSA key pair, usually because you needed to connect to GitHub and you wanted to avoid typing your password every time. You diligently followed the documentation on how to create SSH keys and after a couple of minutes your setup was complete.&lt;/p&gt;
+&lt;/ul&gt;
+&lt;h2 id="feedback"&gt;Feedback&lt;a class="headerlink" href="#feedback" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Feel free to reach me on &lt;a href="https://twitter.com/thedigicat"&gt;Twitter&lt;/a&gt; if you have questions. The &lt;a href="https://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues"&gt;GitHub issues&lt;/a&gt; page is the best place to submit corrections.&lt;/p&gt;</content><category term="Programming"></category><category term="algorithms"></category><category term="cryptography"></category><category term="SSL"></category><category term="SSH"></category><category term="RSA"></category><category term="Python"></category><category term="WWW"></category></entry><entry><title>Public key cryptography: RSA keys</title><link href="https://www.thedigitalcatonline.com/blog/2018/04/25/rsa-keys/" rel="alternate"></link><published>2018-04-25T13:00:00+01:00</published><updated>2020-03-14T11:00:00+00:00</updated><author><name>Leonardo Giordani</name></author><id>tag:www.thedigitalcatonline.com,2018-04-25:/blog/2018/04/25/rsa-keys/</id><summary type="html">&lt;p&gt;An in-depth discussion of the format of RSA keys, the PEM format, ASN, and PKCS&lt;/p&gt;</summary><content type="html">&lt;p&gt;I bet you created at least once an RSA key pair, usually because you needed to connect to GitHub and you wanted to avoid typing your password every time. You diligently followed the documentation on how to create SSH keys and after a couple of minutes your setup was complete.&lt;/p&gt;
 &lt;p&gt;But do you know what you actually did?&lt;/p&gt;
 &lt;p&gt;Do you know what the file &lt;code&gt;~/.ssh/id_rsa&lt;/code&gt; really contains? Why did ssh create two files with such a different format? Did you notice that one file begins with &lt;code&gt;ssh-rsa&lt;/code&gt;, while the other begins with &lt;code&gt;-----BEGIN RSA PRIVATE KEY-----&lt;/code&gt;? Have you noticed that sometimes the header of the second file misses the &lt;code&gt;RSA&lt;/code&gt; part and just says &lt;code&gt;BEGIN PRIVATE KEY&lt;/code&gt;?&lt;/p&gt;
 &lt;p&gt;I believe that a minimum level of knowledge regarding the various formats of RSA keys is mandatory for every developer nowadays, not to mention the importance of understanding them deeply if you want to pursue a career in the infrastructure management world.&lt;/p&gt;
-&lt;h1 id="rsa-algorithm-and-key-pairs"&gt;RSA algorithm and key pairs&lt;a class="headerlink" href="#rsa-algorithm-and-key-pairs" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
+&lt;h2 id="rsa-algorithm-and-key-pairs"&gt;RSA algorithm and key pairs&lt;a class="headerlink" href="#rsa-algorithm-and-key-pairs" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;Since the invention of public-key cryptography, various systems have been devised to create the key pair. One of the first ones is RSA, the creation of three brilliant cryptographers, that dates back to 1977. The story of RSA is quite interesting, as it was first invented by an English mathematician, Clifford Cocks, who was however forced to keep it secret by the British intelligence office he was working for.&lt;/p&gt;
 &lt;p&gt;Keeping in mind that RSA is not a synonym for public-key cryptography but only one of the possible implementations, I wanted to write a post on it because it is still, more than 40 years after its publication, one of the most widespread algorithms. In particular it is the standard algorithm used to generate SSH key pairs, and since nowadays every developer has their public key on GitHub, BitBucket, or similar systems, we may arguably say that RSA is pretty ubiquitous.&lt;/p&gt;
 &lt;p&gt;I will not cover the internals of the RSA algorithm in this article, however. If you are interested in the gory details of the mathematical framework you may find plenty of resources both on Internet and in the textbooks. The theory behind it is not trivial, but it is definitely worth the time if you want to be serious about the mathematical part of cryptography.&lt;/p&gt;
 &lt;p&gt;In this article I will instead explore two ways to create RSA key pairs and the formats used to store them. Applied cryptography is, like many other topics in computer science, a moving target, and the tools change often. Sometimes it is pretty easy to find out &lt;em&gt;how&lt;/em&gt; to do something (StackOverflow helps), but less easy to get a clear picture of what is going on.&lt;/p&gt;
 &lt;p&gt;All the examples shown in this post use a 2048-bits RSA key created for this purpose, so all the numbers you see come from a real example. The key has been obviously trashed after I wrote the article.&lt;/p&gt;
-&lt;h1 id="the-pem-format"&gt;The PEM format&lt;a class="headerlink" href="#the-pem-format" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
+&lt;h2 id="the-pem-format"&gt;The PEM format&lt;a class="headerlink" href="#the-pem-format" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;Let's start the discussion about key pairs with the format used to store them. Nowadays the most widely accepted storage format is called PEM (Privacy-enhanced Electronic Mail). As the name suggests, this format was initially created for e-mail encryption but later became a general format to store cryptographic data like keys and certificates. It is described in &lt;a href="https://tools.ietf.org/html/rfc7468"&gt;RFC 7468&lt;/a&gt; ("Textual Encodings of PKIX, PKCS, and CMS Structures").&lt;/p&gt;
 &lt;p&gt;An example private key in PEM format is the following&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;-----BEGIN PRIVATE KEY-----
@@ -755,7 +757,7 @@ wBLKVfMiwcWAbl121M2DCLj9/g==
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Please note that, due to the structure of the underlying ASN.1 structure, every PEM body starts with the characters &lt;code&gt;MII&lt;/code&gt;.&lt;/p&gt;
-&lt;h2 id="openssl-and-asn1"&gt;OpenSSL and ASN.1&lt;a class="headerlink" href="#openssl-and-asn1" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;h3 id="openssl-and-asn1"&gt;OpenSSL and ASN.1&lt;a class="headerlink" href="#openssl-and-asn1" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h3&gt;
 &lt;p&gt;OpenSSL can directly decode a key in PEM format and show the underlying ASN.1 structure with the module &lt;code&gt;asn1parse&lt;/code&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ openssl asn1parse -inform pem -in private.pem
     &lt;span class="m"&gt;0&lt;/span&gt;:d&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;  &lt;span class="nv"&gt;hl&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;4&lt;/span&gt; &lt;span class="nv"&gt;l&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;1214&lt;/span&gt; cons: SEQUENCE          
@@ -875,7 +877,7 @@ wBLKVfMiwcWAbl121M2DCLj9/g==
    5806E5D76D4CD8308B8FDFE
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;h2 id="openssl-and-rsa-keys"&gt;OpenSSL and RSA keys&lt;a class="headerlink" href="#openssl-and-rsa-keys" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;h3 id="openssl-and-rsa-keys"&gt;OpenSSL and RSA keys&lt;a class="headerlink" href="#openssl-and-rsa-keys" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h3&gt;
 &lt;p&gt;Another way to look into a private key with OpenSSL is to use the module &lt;code&gt;rsa&lt;/code&gt;. While the module &lt;code&gt;asn1parse&lt;/code&gt; is a generic ASN.1 parser, the module &lt;code&gt;rsa&lt;/code&gt; knows the structure of an RSA key and can properly output the field names&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ openssl rsa -in private.pem -noout -text
 Private-Key: &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="m"&gt;2048&lt;/span&gt; bit&lt;span class="o"&gt;)&lt;/span&gt;
@@ -972,7 +974,7 @@ coefficient:
 
 &lt;p&gt;The fields are the same we found in the ASN.1 structure, but in this representation we have a better view of the specific values of the RSA key. You can compare the two and see that the value of the fields are the same.&lt;/p&gt;
 &lt;p&gt;If you want to learn something about RSA try to investigate the historical reasons behind the choice of 65537 as a common public exponent (as you can see here in the section &lt;code&gt;publicExponent&lt;/code&gt;).&lt;/p&gt;
-&lt;h2 id="pkcs-8-vs-pkcs-1"&gt;PKCS #8 vs PKCS #1&lt;a class="headerlink" href="#pkcs-8-vs-pkcs-1" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;h3 id="pkcs-8-vs-pkcs-1"&gt;PKCS #8 vs PKCS #1&lt;a class="headerlink" href="#pkcs-8-vs-pkcs-1" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h3&gt;
 &lt;p&gt;The first version of the PKCS standard (PKCS #1) was specifically tailored to contain an RSA key. Its ASN.1 definition can be found in &lt;a href="https://tools.ietf.org/html/rfc8017"&gt;RFC 8017&lt;/a&gt; ("PKCS #1: RSA Cryptography Specifications Version 2.2")&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;RSAPublicKey ::= SEQUENCE {
     modulus           INTEGER,  -- n
@@ -1024,7 +1026,7 @@ PrivateKey ::= OCTET STRING
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;The structure of PKCS #8 is the reason why we had to parse the field at offset 22 to access the RSA parameters when using the module &lt;code&gt;asn1parse&lt;/code&gt; of OpenSSL. If you are parsing a PKCS #1 key in PEM format you don't need this second step.&lt;/p&gt;
-&lt;h1 id="private-and-public-key"&gt;Private and public key&lt;a class="headerlink" href="#private-and-public-key" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
+&lt;h2 id="private-and-public-key"&gt;Private and public key&lt;a class="headerlink" href="#private-and-public-key" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;In the RSA algorithm the public key is built using the modulus and the public exponent, which means that we can always derive the public key from the private key. OpenSSL can easily do this with the module &lt;code&gt;rsa&lt;/code&gt;, producing the public key in PEM format&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ openssl rsa -in private.pem -pubout
 writing RSA key
@@ -1064,7 +1066,7 @@ Modulus:
 Exponent: &lt;span class="m"&gt;65537&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;0x10001&lt;span class="o"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;h1 id="generating-key-pairs-with-openssl"&gt;Generating key pairs with OpenSSL&lt;a class="headerlink" href="#generating-key-pairs-with-openssl" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
+&lt;h2 id="generating-key-pairs-with-openssl"&gt;Generating key pairs with OpenSSL&lt;a class="headerlink" href="#generating-key-pairs-with-openssl" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;If you want to generate an RSA private key you can do it with OpenSSL&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ openssl genpkey -algorithm RSA -out private.pem -pkeyopt rsa_keygen_bits:2048
 ......................................................................+++
@@ -1092,7 +1094,7 @@ Verifying - Enter PEM pass phrase:
 -----END ENCRYPTED PRIVATE KEY-----
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;h1 id="generating-key-pairs-with-openssh"&gt;Generating key pairs with OpenSSH&lt;a class="headerlink" href="#generating-key-pairs-with-openssh" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
+&lt;h2 id="generating-key-pairs-with-openssh"&gt;Generating key pairs with OpenSSH&lt;a class="headerlink" href="#generating-key-pairs-with-openssh" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;Another tool that you can use to generate key pairs is ssh-keygen, which is a tool included in the SSH suite that is specifically used to create and manage SSH keys. As SSH keys are standard asymmetrical keys we can use the tool to create keys for other purposes.&lt;/p&gt;
 &lt;p&gt;To create a key pair just run&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;ssh-keygen -m PEM -t rsa -b &lt;span class="m"&gt;2048&lt;/span&gt; -f key
@@ -1114,7 +1116,7 @@ Verifying - Enter PEM pass phrase:
 -----END PRIVATE KEY-----
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;h2 id="the-openssh-public-key-format"&gt;The OpenSSH public key format&lt;a class="headerlink" href="#the-openssh-public-key-format" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;h3 id="the-openssh-public-key-format"&gt;The OpenSSH public key format&lt;a class="headerlink" href="#the-openssh-public-key-format" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h3&gt;
 &lt;p&gt;The public key saved by ssh-keygen is written in the so-called SSH-format, which is not a standard in the cryptography world. It's structure is &lt;code&gt;&amp;lt;algorithm&amp;gt; &amp;lt;key&amp;gt; &amp;lt;comment&amp;gt;&lt;/code&gt;, where the &lt;code&gt;&amp;lt;key&amp;gt;&lt;/code&gt; part of the format is encoded with Base64.&lt;/p&gt;
 &lt;p&gt;For example&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCy9f0/nwkXESzkL4v4ftZ24VJYvkQ/Nt6vsLab3iSWtJXqrRsBythCcbAU6W9
@@ -1181,26 +1183,26 @@ ef 93 8c 61 ca a6 0d
 
 &lt;p&gt;Please note that since we created a key of 2048 bits we should have a modulus of 256 bytes. Instead this key uses 257 bytes prefixing the number with a byte &lt;code&gt;00&lt;/code&gt; to avoid it being interpreted as negative (two's complement format).&lt;/p&gt;
 &lt;p&gt;The structure shown above is the reason why all the RSA public SSH keys start with the same 12 characters &lt;code&gt;AAAAB3NzaC1y&lt;/code&gt;. This string, converted in Base64 gives the initial 9 bytes &lt;code&gt;00 00 00 07 73 73 68 2d 72&lt;/code&gt; (Base64 characters are not a one-to-one mapping of the source bytes). If the exponent is the standard 65537 the key starts with &lt;code&gt;AAAAB3NzaC1yc2EAAAADAQAB&lt;/code&gt;, which encoded gives the fist 18 bytes &lt;code&gt;00 00 00 07 73 73 68 2d 72 73 61 00 00 00 03 01 00 01&lt;/code&gt;. &lt;/p&gt;
-&lt;h1 id="converting-between-pem-and-openssh-format"&gt;Converting between PEM and OpenSSH format&lt;a class="headerlink" href="#converting-between-pem-and-openssh-format" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
+&lt;h2 id="converting-between-pem-and-openssh-format"&gt;Converting between PEM and OpenSSH format&lt;a class="headerlink" href="#converting-between-pem-and-openssh-format" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;We often need to convert files created with one tool to a different format, so this is a list of the most common conversions you might need. I prefer to consider the key format instead of the source tool, but I give a short description of the reason why you should want to perform the conversion.&lt;/p&gt;
-&lt;h2 id="pempkcs1-to-pempkcs8"&gt;PEM/PKCS#1 to PEM/PKCS#8&lt;a class="headerlink" href="#pempkcs1-to-pempkcs8" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;h3 id="pempkcs1-to-pempkcs8"&gt;PEM/PKCS#1 to PEM/PKCS#8&lt;a class="headerlink" href="#pempkcs1-to-pempkcs8" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h3&gt;
 &lt;p&gt;This is useful to convert OpenSSH private keys to a newer format.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;openssl pkcs8 -topk8 -inform PEM -outform PEM -in pkcs1.pem -out pkcs8.pem
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;h2 id="openssh-public-to-pempkcs8"&gt;OpenSSH public to PEM/PKCS#8&lt;a class="headerlink" href="#openssh-public-to-pempkcs8" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;h3 id="openssh-public-to-pempkcs8"&gt;OpenSSH public to PEM/PKCS#8&lt;a class="headerlink" href="#openssh-public-to-pempkcs8" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h3&gt;
 &lt;p&gt;To convert public OpenSSH keys in a PEM format using PKCS #8 (prints to stdout)&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;ssh-keygen -e -f public.pub -m PKCS8
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;This is easy to remember because &lt;code&gt;-e&lt;/code&gt; stands for export. Note that you can also use &lt;code&gt;-m PEM&lt;/code&gt; to convert the key into a PEM format that uses PKCS #1.&lt;/p&gt;
-&lt;h2 id="pempkcs8-to-openssh-public"&gt;PEM/PKCS#8 to OpenSSH public&lt;a class="headerlink" href="#pempkcs8-to-openssh-public" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
+&lt;h3 id="pempkcs8-to-openssh-public"&gt;PEM/PKCS#8 to OpenSSH public&lt;a class="headerlink" href="#pempkcs8-to-openssh-public" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h3&gt;
 &lt;p&gt;If you need to use in SSH a key pair created with another system &lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;ssh-keygen -i -f public.pem -m PKCS8
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;This is easy to remember because &lt;code&gt;-i&lt;/code&gt; stands for import. As happened when exporting the key, you can import a PEM/PKCS #1 key using &lt;code&gt;-m PEM&lt;/code&gt;.&lt;/p&gt;
-&lt;h1 id="reading-rsa-keys-in-python"&gt;Reading RSA keys in Python&lt;a class="headerlink" href="#reading-rsa-keys-in-python" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
+&lt;h2 id="reading-rsa-keys-in-python"&gt;Reading RSA keys in Python&lt;a class="headerlink" href="#reading-rsa-keys-in-python" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;In Python you can use the package &lt;code&gt;pycrypto&lt;/code&gt; to access a PEM file containing an RSA key with the function &lt;code&gt;RSA.importKey&lt;/code&gt;. Now you can hopefully understand the &lt;a href="https://www.dlitz.net/software/pycrypto/api/current/Crypto.PublicKey.RSA-module.html"&gt;documentation&lt;/a&gt; that says&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;externKey (string) - The RSA key to import, encoded as a string.
 
@@ -1237,9 +1239,9 @@ supported.
 &lt;span class="n"&gt;q_inv_crt&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;key&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;u&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;h1 id="final-words"&gt;Final words&lt;a class="headerlink" href="#final-words" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
+&lt;h2 id="final-words"&gt;Final words&lt;a class="headerlink" href="#final-words" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;I keep finding on StackOverflow (and on other boards) messages of users that are confused by RSA keys, the output of the various tools, and by the subtle but important differences between the formats, so I hope this post helped you to get a better understanding of the matter.&lt;/p&gt;
-&lt;h1 id="resources"&gt;Resources&lt;a class="headerlink" href="#resources" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
+&lt;h2 id="resources"&gt;Resources&lt;a class="headerlink" href="#resources" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;ul&gt;
 &lt;li&gt;The Wikipedia article on &lt;a href="https://en.wikipedia.org/wiki/RSA_(cryptosystem)"&gt;RSA&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;OpenSSL documentation: &lt;a href="https://www.openssl.org/docs/man1.1.0/apps/asn1parse.html"&gt;asn1parse&lt;/a&gt;, &lt;a href="https://www.openssl.org/docs/man1.1.0/apps/rsa.html"&gt;rsa&lt;/a&gt;, &lt;a href="https://www.openssl.org/docs/man1.1.0/apps/genpkey.html"&gt;genpkey&lt;/a&gt;&lt;/li&gt;
@@ -1254,5 +1256,5 @@ supported.
 &lt;li&gt;&lt;a href="https://tools.ietf.org/html/rfc8017"&gt;RFC 8017 - PKCS #1: RSA Cryptography Specifications Version 2.2&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://www.dlitz.net/software/pycrypto/"&gt;PyCrypto&lt;/a&gt; - The Python Cryptography Toolkit&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h1 id="feedback"&gt;Feedback&lt;a class="headerlink" href="#feedback" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h1&gt;
+&lt;h2 id="feedback"&gt;Feedback&lt;a class="headerlink" href="#feedback" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;Feel free to reach me on &lt;a href="https://twitter.com/thedigicat"&gt;Twitter&lt;/a&gt; if you have questions. The &lt;a href="https://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues"&gt;GitHub issues&lt;/a&gt; page is the best place to submit corrections.&lt;/p&gt;</content><category term="Programming"></category><category term="algorithms"></category><category term="cryptography"></category><category term="SSL"></category><category term="SSH"></category><category term="RSA"></category><category term="Python"></category></entry></feed>
