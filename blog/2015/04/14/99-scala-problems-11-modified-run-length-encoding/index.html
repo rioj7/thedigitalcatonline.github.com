@@ -119,8 +119,8 @@
 <p><strong>P11</strong> (*) Modified run-length encoding.
 Modify the result of problem P10 in such a way that if an element has no duplicates it is simply copied into the result list. Only elements with duplicates are transferred as (N, E) terms.</p>
 <p>Example:</p>
-<div class="highlight"><pre><span></span><code><span class="n">scala</span><span class="o">&gt;</span> <span class="n">encodeModified</span><span class="o">(</span><span class="nc">List</span><span class="o">(</span><span class=" -Symbol">&#39;a</span><span class="o">,</span> <span class=" -Symbol">&#39;a</span><span class="o">,</span> <span class=" -Symbol">&#39;a</span><span class="o">,</span> <span class=" -Symbol">&#39;a</span><span class="o">,</span> <span class=" -Symbol">&#39;b</span><span class="o">,</span> <span class=" -Symbol">&#39;c</span><span class="o">,</span> <span class=" -Symbol">&#39;c</span><span class="o">,</span> <span class=" -Symbol">&#39;a</span><span class="o">,</span> <span class=" -Symbol">&#39;a</span><span class="o">,</span> <span class=" -Symbol">&#39;d</span><span class="o">,</span> <span class=" -Symbol">&#39;e</span><span class="o">,</span> <span class=" -Symbol">&#39;e</span><span class="o">,</span> <span class=" -Symbol">&#39;e</span><span class="o">,</span> <span class=" -Symbol">&#39;e</span><span class="o">))</span>
-<span class="n">res0</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">Any</span><span class="o">]</span> <span class="k">=</span> <span class="nc">List</span><span class="o">((</span><span class="mi">4</span><span class="o">,</span><span class=" -Symbol">&#39;a</span><span class="o">),</span> <span class=" -Symbol">&#39;b</span><span class="o">,</span> <span class="o">(</span><span class="mi">2</span><span class="o">,</span><span class=" -Symbol">&#39;c</span><span class="o">),</span> <span class="o">(</span><span class="mi">2</span><span class="o">,</span><span class=" -Symbol">&#39;a</span><span class="o">),</span> <span class=" -Symbol">&#39;d</span><span class="o">,</span> <span class="o">(</span><span class="mi">4</span><span class="o">,</span><span class=" -Symbol">&#39;e</span><span class="o">))</span>
+<div class="highlight"><pre><span></span><code><span class="n">scala</span><span class="o">&gt;</span> <span class="n">encodeModified</span><span class="p">(</span><span class="nc">List</span><span class="p">(</span><span class="ss">&#39;a</span><span class="p">,</span> <span class="ss">&#39;a</span><span class="p">,</span> <span class="ss">&#39;a</span><span class="p">,</span> <span class="ss">&#39;a</span><span class="p">,</span> <span class="ss">&#39;b</span><span class="p">,</span> <span class="ss">&#39;c</span><span class="p">,</span> <span class="ss">&#39;c</span><span class="p">,</span> <span class="ss">&#39;a</span><span class="p">,</span> <span class="ss">&#39;a</span><span class="p">,</span> <span class="ss">&#39;d</span><span class="p">,</span> <span class="ss">&#39;e</span><span class="p">,</span> <span class="ss">&#39;e</span><span class="p">,</span> <span class="ss">&#39;e</span><span class="p">,</span> <span class="ss">&#39;e</span><span class="p">))</span>
+<span class="n">res0</span><span class="p">:</span> <span class="nc">List</span><span class="p">[</span><span class="nc">Any</span><span class="p">]</span> <span class="o">=</span> <span class="nc">List</span><span class="p">((</span><span class="mi">4</span><span class="p">,</span><span class="ss">&#39;a</span><span class="p">),</span> <span class="ss">&#39;b</span><span class="p">,</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="ss">&#39;c</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="ss">&#39;a</span><span class="p">),</span> <span class="ss">&#39;d</span><span class="p">,</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="ss">&#39;e</span><span class="p">))</span>
 </code></pre></div>
 
 <h2 id="initial-thoughts">Initial thoughts<a class="headerlink" href="#initial-thoughts" title="Permanent link">&para;</a></h2>
@@ -129,14 +129,14 @@ Modify the result of problem P10 in such a way that if an element has no duplica
 <p>If the source element is a list with more than an element, we produce a tuple <code>(Int, A)</code>, where <code>A</code> is the actual type of elements in the list. If the source element is a list with a single element, we just produce that element, so the type is <code>A</code>.</p>
 <p>In Scala this situation may be represented by means of <code>Either</code>, <code>Left</code> and <code>Right</code>. Good explanations of this matter may be found <a href="http://alvinalexander.com/scala/scala-either-left-right-example-option-some-none-null">here</a> and <a href="http://danielwestheide.com/blog/2013/01/02/the-neophytes-guide-to-scala-part-7-the-either-type.html">here</a>.</p>
 <p>Given that, the solution is straightforward</p>
-<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="n">encode</span><span class="o">[</span><span class="kt">A</span><span class="o">](</span><span class="n">l</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">])</span><span class="k">:</span><span class="kt">List</span><span class="o">[</span><span class="kt">Either</span><span class="o">[</span><span class="kt">A</span><span class="p">,</span> <span class="o">(</span><span class="kt">Int</span><span class="p">,</span> <span class="kt">A</span><span class="o">)]]</span> <span class="k">=</span> <span class="o">{</span>
-    <span class="n">utils</span><span class="o">.</span><span class="n">packer</span><span class="o">.</span><span class="n">pack</span><span class="o">(</span><span class="n">l</span><span class="o">)</span> <span class="n">map</span> <span class="o">{</span>
-        <span class="n">e</span> <span class="k">=&gt;</span> <span class="n">e</span> <span class="k">match</span> <span class="o">{</span>
-            <span class="k">case</span> <span class="n">e</span> <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">length</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">=&gt;</span> <span class="nc">Left</span><span class="o">(</span><span class="n">e</span><span class="o">.</span><span class="n">head</span><span class="o">)</span>
-            <span class="k">case</span> <span class="n">e</span> <span class="k">=&gt;</span> <span class="nc">Right</span><span class="o">((</span><span class="n">e</span><span class="o">.</span><span class="n">length</span><span class="o">,</span> <span class="n">e</span><span class="o">.</span><span class="n">head</span><span class="o">))</span>
-        <span class="o">}</span>
-    <span class="o">}</span>
-<span class="o">}</span>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">encode</span><span class="p">[</span><span class="nc">A</span><span class="p">](</span><span class="n">l</span><span class="p">:</span> <span class="nc">List</span><span class="p">[</span><span class="nc">A</span><span class="p">]):</span><span class="nc">List</span><span class="p">[</span><span class="nc">Either</span><span class="p">[</span><span class="nc">A</span><span class="p">,</span> <span class="p">(</span><span class="nc">Int</span><span class="p">,</span> <span class="nc">A</span><span class="p">)]]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">utils</span><span class="p">.</span><span class="n">packer</span><span class="p">.</span><span class="n">pack</span><span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="n">map</span> <span class="p">{</span>
+        <span class="n">e</span> <span class="o">=&gt;</span> <span class="n">e</span> <span class="k">match</span> <span class="p">{</span>
+            <span class="k">case</span> <span class="n">e</span> <span class="k">if</span> <span class="n">e</span><span class="p">.</span><span class="n">length</span> <span class="o">==</span> <span class="mi">1</span> <span class="o">=&gt;</span> <span class="nc">Left</span><span class="p">(</span><span class="n">e</span><span class="p">.</span><span class="n">head</span><span class="p">)</span>
+            <span class="k">case</span> <span class="n">e</span> <span class="o">=&gt;</span> <span class="nc">Right</span><span class="p">((</span><span class="n">e</span><span class="p">.</span><span class="n">length</span><span class="p">,</span> <span class="n">e</span><span class="p">.</span><span class="n">head</span><span class="p">))</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
 </code></pre></div>
 
 <p>I prefer to express conditions through pattern matching, but the same code may be expressed with an <code>if/else</code> statement.</p>
@@ -328,16 +328,16 @@ Modify the result of problem P10 in such a way that if an element has no duplica
             </header>
 <div class="mini-posts">
     <article>
+        <a href="/blog/2021/03/25/how-to-write-a-pelican-theme-for-your-website/" class="image"><img src="/images/how-to-write-a-pelican-theme-for-your-website.jpg" alt="how-to-write-a-pelican-theme-for-your-website" /></a>
+        <p><strong>How to write a Pelican theme for your static website</strong> <a href="/blog/2021/03/25/how-to-write-a-pelican-theme-for-your-website/">Read</a></p> 
+    </article>
+    <article>
         <a href="/blog/2021/03/22/aws-log-insights-as-cloudwatch-metrics-with-python-and-terraform/" class="image"><img src="/images/aws-log-insights-as-cloudwatch-metrics-with-python-and-terraform.jpg" alt="aws-log-insights-as-cloudwatch-metrics-with-python-and-terraform" /></a>
         <p><strong>AWS Log Insights as CloudWatch metrics with Python and Terraform</strong> <a href="/blog/2021/03/22/aws-log-insights-as-cloudwatch-metrics-with-python-and-terraform/">Read</a></p> 
     </article>
     <article>
         <a href="/blog/2021/03/09/first-class-objects-in-python-generic-code-wrappers-and-factories/" class="image"><img src="/images/first-class-objects-in-python-generic-code-wrappers-and-factories.jpg" alt="first-class-objects-in-python-generic-code-wrappers-and-factories" /></a>
         <p><strong>First-class objects in Python: generic code, wrappers, and factories</strong> <a href="/blog/2021/03/09/first-class-objects-in-python-generic-code-wrappers-and-factories/">Read</a></p> 
-    </article>
-    <article>
-        <a href="/blog/2021/02/22/mau-a-lightweight-markup-language/" class="image"><img src="/images/mau-a-lightweight-markup-language.jpg" alt="mau-a-lightweight-markup-language" /></a>
-        <p><strong>Mau: a lightweight markup language</strong> <a href="/blog/2021/02/22/mau-a-lightweight-markup-language/">Read</a></p> 
     </article>
 </div>        </section>
 
@@ -371,7 +371,7 @@ Modify the result of problem P10 in such a way that if an element has no duplica
                 <h2>Tags</h2>
             </header>
 <ul class="list-inline list-clean" id="tags-side">
-    <li class="tag font-size-2">
+    <li class="tag font-size-3">
         <a title="Posts about algorithms" href="/categories/algorithms/">algorithms</a>
     </li>
     <li class="tag font-size-2">
@@ -425,7 +425,7 @@ Modify the result of problem P10 in such a way that if an element has no duplica
     <li class="tag font-size-3">
         <a title="Posts about Erlang" href="/categories/erlang/">Erlang</a>
     </li>
-    <li class="tag font-size-2">
+    <li class="tag font-size-3">
         <a title="Posts about Flask" href="/categories/flask/">Flask</a>
     </li>
     <li class="tag font-size-1">
@@ -437,7 +437,10 @@ Modify the result of problem P10 in such a way that if an element has no duplica
     <li class="tag font-size-3">
         <a title="Posts about Git" href="/categories/git/">Git</a>
     </li>
-    <li class="tag font-size-2">
+    <li class="tag font-size-4">
+        <a title="Posts about HTML" href="/categories/html/">HTML</a>
+    </li>
+    <li class="tag font-size-3">
         <a title="Posts about HTTP" href="/categories/http/">HTTP</a>
     </li>
     <li class="tag font-size-3">
@@ -452,7 +455,7 @@ Modify the result of problem P10 in such a way that if an element has no duplica
     <li class="tag font-size-4">
         <a title="Posts about M68000" href="/categories/m68000/">M68000</a>
     </li>
-    <li class="tag font-size-4">
+    <li class="tag font-size-3">
         <a title="Posts about Markdown" href="/categories/markdown/">Markdown</a>
     </li>
     <li class="tag font-size-4">
@@ -473,7 +476,7 @@ Modify the result of problem P10 in such a way that if an element has no duplica
     <li class="tag font-size-2">
         <a title="Posts about operating systems" href="/categories/operating-systems/">operating systems</a>
     </li>
-    <li class="tag font-size-4">
+    <li class="tag font-size-3">
         <a title="Posts about pelican" href="/categories/pelican/">pelican</a>
     </li>
     <li class="tag font-size-4">

@@ -118,8 +118,8 @@
     <h2 id="the-problem">The problem<a class="headerlink" href="#the-problem" title="Permanent link">&para;</a></h2>
 <p><strong>P02</strong> (*) Find the last but one element of a list.</p>
 <p>Example:</p>
-<div class="highlight"><pre><span></span><code><span class="n">scala</span><span class="o">&gt;</span> <span class="n">penultimate</span><span class="o">(</span><span class="nc">List</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">3</span><span class="o">,</span> <span class="mi">5</span><span class="o">,</span> <span class="mi">8</span><span class="o">))</span>
-<span class="n">res0</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">5</span>
+<div class="highlight"><pre><span></span><code><span class="n">scala</span><span class="o">&gt;</span> <span class="n">penultimate</span><span class="p">(</span><span class="nc">List</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+<span class="n">res0</span><span class="p">:</span> <span class="nc">Int</span> <span class="o">=</span> <span class="mi">5</span>
 </code></pre></div>
 
 <h2 id="initial-thoughts">Initial thoughts<a class="headerlink" href="#initial-thoughts" title="Permanent link">&para;</a></h2>
@@ -132,38 +132,38 @@
 <h2 id="the-procedural-solution">The procedural solution<a class="headerlink" href="#the-procedural-solution" title="Permanent link">&para;</a></h2>
 <p>A smart way to solve the problem is to consider that the penultimate element of a list of n elements is the last element of the first (n - 1) elements. Scala provides a method called <a href="http://www.scala-lang.org/api/2.11.4/index.html#scala.collection.immutable.List"><code>init()</code></a> which returns all elements except the last. Documentation says that if the given list is empty the method throws the <code>UnsupportedOperationException</code>, so if we want to imitate the previous <code>last()</code> function we shall cover the empty list case.</p>
 <p>If the list contains a single element, <code>init()</code> returns an empty list, and in that case the <code>last()</code> method throws the right exception.</p>
-<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="n">penultimate</span><span class="o">[</span><span class="kt">A</span><span class="o">](</span><span class="n">l</span><span class="k">:</span><span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">])</span><span class="k">:</span><span class="kt">A</span> <span class="o">=</span> <span class="o">{</span>
-    <span class="k">if</span> <span class="o">(</span><span class="n">l</span><span class="o">.</span><span class="n">isEmpty</span><span class="o">)</span> <span class="k">throw</span> <span class="k">new</span> <span class="nc">NoSuchElementException</span>  
-    <span class="n">l</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">last</span>
-<span class="o">}</span>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">penultimate</span><span class="p">[</span><span class="nc">A</span><span class="p">](</span><span class="n">l</span><span class="p">:</span><span class="nc">List</span><span class="p">[</span><span class="nc">A</span><span class="p">]):</span><span class="nc">A</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">l</span><span class="p">.</span><span class="n">isEmpty</span><span class="p">)</span> <span class="k">throw</span> <span class="k">new</span> <span class="nc">NoSuchElementException</span>  
+    <span class="n">l</span><span class="p">.</span><span class="n">init</span><span class="p">.</span><span class="n">last</span>
+<span class="p">}</span>
 </code></pre></div>
 
 <p>The generic case may be handled using the <code>takeRight()</code> method, which selects the last n elements from the list. The last-nth element is then the head of the resulting list. This method deals with a list with less than n elements returning the whole list, which is not what we want. So we have to deal with the case of a list which contains less than n elements. The length of a list in Scala may be retrieved with the <code>length()</code> method.</p>
-<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="n">lastNth</span><span class="o">[</span><span class="kt">A</span><span class="o">](</span><span class="n">n</span><span class="k">:</span> <span class="kt">Int</span><span class="o">,</span> <span class="n">l</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">])</span><span class="k">:</span> <span class="kt">A</span> <span class="o">=</span> <span class="o">{</span>
-    <span class="k">if</span> <span class="o">(</span><span class="n">n</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="o">)</span> <span class="k">throw</span> <span class="k">new</span> <span class="nc">IllegalArgumentException</span>
-    <span class="k">if</span> <span class="o">(</span><span class="n">n</span> <span class="o">&gt;</span> <span class="n">l</span><span class="o">.</span><span class="n">length</span><span class="o">)</span> <span class="k">throw</span> <span class="k">new</span> <span class="nc">NoSuchElementException</span>
-    <span class="n">l</span><span class="o">.</span><span class="n">takeRight</span><span class="o">(</span><span class="n">n</span><span class="o">).</span><span class="n">head</span>
-<span class="o">}</span>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">lastNth</span><span class="p">[</span><span class="nc">A</span><span class="p">](</span><span class="n">n</span><span class="p">:</span> <span class="nc">Int</span><span class="p">,</span> <span class="n">l</span><span class="p">:</span> <span class="nc">List</span><span class="p">[</span><span class="nc">A</span><span class="p">]):</span> <span class="nc">A</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">n</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="k">throw</span> <span class="k">new</span> <span class="nc">IllegalArgumentException</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">n</span> <span class="o">&gt;</span> <span class="n">l</span><span class="p">.</span><span class="n">length</span><span class="p">)</span> <span class="k">throw</span> <span class="k">new</span> <span class="nc">NoSuchElementException</span>
+    <span class="n">l</span><span class="p">.</span><span class="n">takeRight</span><span class="p">(</span><span class="n">n</span><span class="p">).</span><span class="n">head</span>
+<span class="p">}</span>
 </code></pre></div>
 
 <h2 id="the-recursive-solution">The recursive solution<a class="headerlink" href="#the-recursive-solution" title="Permanent link">&para;</a></h2>
 <p>The recursive solution takes advantage of the power of pattern matching. The exit case is when the list is composed by a head element and a tail made by a list of one single element. The pattern matching syntax can express this situation with the <code>h :: List(t)</code> syntax. The standard case is when the tail is still a generic list and the last case covers all edge cases.</p>
-<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="n">penultimate</span><span class="o">[</span><span class="kt">A</span><span class="o">](</span><span class="n">l</span><span class="k">:</span><span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">])</span><span class="k">:</span><span class="kt">A</span> <span class="o">=</span> <span class="n">l</span> <span class="k">match</span> <span class="o">{</span>
-    <span class="k">case</span> <span class="n">h</span> <span class="o">::</span> <span class="nc">List</span><span class="o">(</span><span class="n">t</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="n">h</span>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">penultimate</span><span class="p">[</span><span class="nc">A</span><span class="p">](</span><span class="n">l</span><span class="p">:</span><span class="nc">List</span><span class="p">[</span><span class="nc">A</span><span class="p">]):</span><span class="nc">A</span> <span class="o">=</span> <span class="n">l</span> <span class="k">match</span> <span class="p">{</span>
+    <span class="k">case</span> <span class="n">h</span> <span class="o">::</span> <span class="nc">List</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="n">h</span>
 
-    <span class="k">case</span> <span class="k">_</span> <span class="o">::</span> <span class="n">tail</span> <span class="k">=&gt;</span> <span class="n">penultimate</span><span class="o">(</span><span class="n">tail</span><span class="o">)</span>
+    <span class="k">case</span> <span class="n">_</span> <span class="o">::</span> <span class="n">tail</span> <span class="o">=&gt;</span> <span class="n">penultimate</span><span class="p">(</span><span class="n">tail</span><span class="p">)</span>
 
-    <span class="k">case</span> <span class="k">_</span> <span class="k">=&gt;</span> <span class="k">throw</span> <span class="k">new</span> <span class="nc">NoSuchElementException</span>
-<span class="o">}</span>
+    <span class="k">case</span> <span class="n">_</span> <span class="o">=&gt;</span> <span class="k">throw</span> <span class="k">new</span> <span class="nc">NoSuchElementException</span>
+<span class="p">}</span>
 </code></pre></div>
 
 <p>The generic case may be written at least in two different ways. The first one involves the use of an helper function that reverses the list. Once the list has been reversed we may recursively find the nth element. Another way to express the same procedure is to have an helper function that counts the number N of elements in the list, then finds the (N-n)-th element (zero-indexed). Since however the reverse function, the count function, and the function to extract the nth element are discussed in the next three problems (problem 03, 04 and 05) this solution will be shown there.</p>
 <p>The second solution makes use of some methods of the <code>List</code> type and pattern guards. Pattern guards are simply conditional expressions that rule the application of a pattern.</p>
-<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="n">lastNth</span><span class="o">[</span><span class="kt">A</span><span class="o">](</span><span class="n">n</span><span class="k">:</span> <span class="kt">Int</span><span class="o">,</span> <span class="n">l</span><span class="k">:</span><span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">])</span><span class="k">:</span> <span class="kt">A</span> <span class="o">=</span> <span class="n">l</span> <span class="k">match</span> <span class="o">{</span>
-    <span class="k">case</span> <span class="n">tail</span> <span class="k">if</span> <span class="o">(</span><span class="n">tail</span><span class="o">.</span><span class="n">length</span> <span class="o">==</span> <span class="n">n</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="n">tail</span><span class="o">.</span><span class="n">head</span>
-    <span class="k">case</span> <span class="k">_</span> <span class="o">::</span> <span class="n">tail</span> <span class="k">=&gt;</span> <span class="n">lastNth</span><span class="o">(</span><span class="n">n</span><span class="o">,</span> <span class="n">tail</span><span class="o">)</span>
-    <span class="k">case</span> <span class="k">_</span> <span class="k">=&gt;</span> <span class="k">throw</span> <span class="k">new</span> <span class="nc">NoSuchElementException</span>
-<span class="o">}</span>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">lastNth</span><span class="p">[</span><span class="nc">A</span><span class="p">](</span><span class="n">n</span><span class="p">:</span> <span class="nc">Int</span><span class="p">,</span> <span class="n">l</span><span class="p">:</span><span class="nc">List</span><span class="p">[</span><span class="nc">A</span><span class="p">]):</span> <span class="nc">A</span> <span class="o">=</span> <span class="n">l</span> <span class="k">match</span> <span class="p">{</span>
+    <span class="k">case</span> <span class="n">tail</span> <span class="k">if</span> <span class="p">(</span><span class="n">tail</span><span class="p">.</span><span class="n">length</span> <span class="o">==</span> <span class="n">n</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="n">tail</span><span class="p">.</span><span class="n">head</span>
+    <span class="k">case</span> <span class="n">_</span> <span class="o">::</span> <span class="n">tail</span> <span class="o">=&gt;</span> <span class="n">lastNth</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">tail</span><span class="p">)</span>
+    <span class="k">case</span> <span class="n">_</span> <span class="o">=&gt;</span> <span class="k">throw</span> <span class="k">new</span> <span class="nc">NoSuchElementException</span>
+<span class="p">}</span>
 </code></pre></div>
 
 <p>The function is very simple. If the length of the list is <code>n</code> the element we are looking for is the first (here the pattern guard does the job). Otherwise if the list has still some tail just call the function recursively on it and last, that is if the list is empty, throw the exception.</p>
@@ -356,16 +356,16 @@
             </header>
 <div class="mini-posts">
     <article>
+        <a href="/blog/2021/03/25/how-to-write-a-pelican-theme-for-your-website/" class="image"><img src="/images/how-to-write-a-pelican-theme-for-your-website.jpg" alt="how-to-write-a-pelican-theme-for-your-website" /></a>
+        <p><strong>How to write a Pelican theme for your static website</strong> <a href="/blog/2021/03/25/how-to-write-a-pelican-theme-for-your-website/">Read</a></p> 
+    </article>
+    <article>
         <a href="/blog/2021/03/22/aws-log-insights-as-cloudwatch-metrics-with-python-and-terraform/" class="image"><img src="/images/aws-log-insights-as-cloudwatch-metrics-with-python-and-terraform.jpg" alt="aws-log-insights-as-cloudwatch-metrics-with-python-and-terraform" /></a>
         <p><strong>AWS Log Insights as CloudWatch metrics with Python and Terraform</strong> <a href="/blog/2021/03/22/aws-log-insights-as-cloudwatch-metrics-with-python-and-terraform/">Read</a></p> 
     </article>
     <article>
         <a href="/blog/2021/03/09/first-class-objects-in-python-generic-code-wrappers-and-factories/" class="image"><img src="/images/first-class-objects-in-python-generic-code-wrappers-and-factories.jpg" alt="first-class-objects-in-python-generic-code-wrappers-and-factories" /></a>
         <p><strong>First-class objects in Python: generic code, wrappers, and factories</strong> <a href="/blog/2021/03/09/first-class-objects-in-python-generic-code-wrappers-and-factories/">Read</a></p> 
-    </article>
-    <article>
-        <a href="/blog/2021/02/22/mau-a-lightweight-markup-language/" class="image"><img src="/images/mau-a-lightweight-markup-language.jpg" alt="mau-a-lightweight-markup-language" /></a>
-        <p><strong>Mau: a lightweight markup language</strong> <a href="/blog/2021/02/22/mau-a-lightweight-markup-language/">Read</a></p> 
     </article>
 </div>        </section>
 
@@ -399,7 +399,7 @@
                 <h2>Tags</h2>
             </header>
 <ul class="list-inline list-clean" id="tags-side">
-    <li class="tag font-size-2">
+    <li class="tag font-size-3">
         <a title="Posts about algorithms" href="/categories/algorithms/">algorithms</a>
     </li>
     <li class="tag font-size-2">
@@ -453,7 +453,7 @@
     <li class="tag font-size-3">
         <a title="Posts about Erlang" href="/categories/erlang/">Erlang</a>
     </li>
-    <li class="tag font-size-2">
+    <li class="tag font-size-3">
         <a title="Posts about Flask" href="/categories/flask/">Flask</a>
     </li>
     <li class="tag font-size-1">
@@ -465,7 +465,10 @@
     <li class="tag font-size-3">
         <a title="Posts about Git" href="/categories/git/">Git</a>
     </li>
-    <li class="tag font-size-2">
+    <li class="tag font-size-4">
+        <a title="Posts about HTML" href="/categories/html/">HTML</a>
+    </li>
+    <li class="tag font-size-3">
         <a title="Posts about HTTP" href="/categories/http/">HTTP</a>
     </li>
     <li class="tag font-size-3">
@@ -480,7 +483,7 @@
     <li class="tag font-size-4">
         <a title="Posts about M68000" href="/categories/m68000/">M68000</a>
     </li>
-    <li class="tag font-size-4">
+    <li class="tag font-size-3">
         <a title="Posts about Markdown" href="/categories/markdown/">Markdown</a>
     </li>
     <li class="tag font-size-4">
@@ -501,7 +504,7 @@
     <li class="tag font-size-2">
         <a title="Posts about operating systems" href="/categories/operating-systems/">operating systems</a>
     </li>
-    <li class="tag font-size-4">
+    <li class="tag font-size-3">
         <a title="Posts about pelican" href="/categories/pelican/">pelican</a>
     </li>
     <li class="tag font-size-4">

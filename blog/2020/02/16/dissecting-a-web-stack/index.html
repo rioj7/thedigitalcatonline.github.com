@@ -217,9 +217,9 @@ Accept: */*
 
 <p>The server keeps running the code in the <code>while</code> loop, so if you want to terminate it you have to do it with Ctrl+C. So far so good, but this is not an HTTP server yet, as it sends no response; you should actually receive an error message from curl that says <code>curl: (52) Empty reply from server</code>.</p>
 <p>Sending back a standard response is very simple, we just need to call <code>conn.sendall</code> passing the raw bytes. A minimal HTTP response contains the protocol and the status, an empty line, and the actual content, for example</p>
-<div class="highlight"><pre><span></span><code><span class="n">HTTP</span><span class="o">/</span><span class="mi">1</span><span class="p">.</span><span class="mi">1</span> <span class="mi">200</span> <span class="n">OK</span>
+<div class="highlight"><pre><span></span><code>HTTP/1.1 200 OK
 
-<span class="n">Hi</span> <span class="n">there</span><span class="o">!</span>
+Hi there!
 </code></pre></div>
 
 <p>Our server becomes then</p>
@@ -409,7 +409,7 @@ Resource favicon.ico cannot be loaded
 <div class="highlight"><pre><span></span><code>$ <span class="nv">FLASK_APP</span><span class="o">=</span>service.py flask run
  * Serving Flask app <span class="s2">&quot;service.py&quot;</span>
  * Environment: production
-   WARNING: This is a development server. Do not use it in a production deployment.
+   WARNING: This is a development server. Do not use it <span class="k">in</span> a production deployment.
    Use a production WSGI server instead.
  * Debug mode: off
  * Running on http://127.0.0.1:5000/ <span class="o">(</span>Press CTRL+C to quit<span class="o">)</span>
@@ -430,7 +430,7 @@ Resource favicon.ico cannot be loaded
 </ul>
 <h3 id="24-issues">2.4 Issues<a class="headerlink" href="#24-issues" title="Permanent link">&para;</a></h3>
 <p>Apparently, we solved all our problems, and many programmers just stop here. They learn how to use the framework (which is a big achievement!), but as we will shortly discover, this is not enough for a production system. Let's have a closer look at the output of the Flask server. It clearly says, among other things</p>
-<div class="highlight"><pre><span></span><code>   WARNING: This is a development server. Do not use it in a production deployment.
+<div class="highlight"><pre><span></span><code>   WARNING: This is a development server. Do not use it <span class="k">in</span> a production deployment.
    Use a production WSGI server instead.
 </code></pre></div>
 
@@ -671,33 +671,33 @@ application.            <span class="m">600</span>     IN      A       <span cla
 
 <p>We defined here an <code>upstream</code> structure that lists two different services, <code>application1</code> and <code>application2</code>, giving to the first one a weight of 3. This mean that each 4 requests, 3 will be routed to the first service, and one to the second service. Now nginx is not just relying on the DNS, but consciously choosing between two different services.</p>
 <p>Let's define the services accordingly in the Docker Compose configuration file</p>
-<div class="highlight"><pre><span></span><code><span class="k">version</span><span class="p">:</span> <span class="ss">&quot;3&quot;</span>
-<span class="n">services</span><span class="p">:</span>
-  <span class="n">application1</span><span class="p">:</span>
-    <span class="n">build</span><span class="p">:</span>
-      <span class="n">context</span><span class="p">:</span> <span class="p">.</span>
-      <span class="n">dockerfile</span><span class="p">:</span> <span class="n">Dockerfile</span>
-    <span class="n">command</span><span class="p">:</span> <span class="n">gunicorn</span> <span class="c1">--workers 6 --bind 0.0.0.0:8000 wsgi</span>
-    <span class="n">expose</span><span class="p">:</span>
-        <span class="o">-</span> <span class="mi">8000</span>
+<div class="highlight"><pre><span></span><code>version: &quot;3&quot;
+services:
+  application1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: gunicorn --workers 6 --bind 0.0.0.0:8000 wsgi
+    expose:
+        - 8000
 
-  <span class="n">application2</span><span class="p">:</span>
-    <span class="n">build</span><span class="p">:</span>
-      <span class="n">context</span><span class="p">:</span> <span class="p">.</span>
-      <span class="n">dockerfile</span><span class="p">:</span> <span class="n">Dockerfile</span>
-    <span class="n">command</span><span class="p">:</span> <span class="n">gunicorn</span> <span class="c1">--workers 3 --bind 0.0.0.0:8000 wsgi</span>
-    <span class="n">expose</span><span class="p">:</span>
-        <span class="o">-</span> <span class="mi">8000</span>
+  application2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: gunicorn --workers 3 --bind 0.0.0.0:8000 wsgi
+    expose:
+        - 8000
 
-  <span class="n">nginx</span><span class="p">:</span>
-    <span class="n">image</span><span class="p">:</span> <span class="n">nginx</span>
-    <span class="n">volumes</span><span class="p">:</span>
-     <span class="o">-</span> <span class="p">.</span><span class="o">/</span><span class="n">nginx</span><span class="p">.</span><span class="n">conf</span><span class="p">:</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">conf</span><span class="p">.</span><span class="n">d</span><span class="o">/</span><span class="k">default</span><span class="p">.</span><span class="n">conf</span>
-    <span class="n">ports</span><span class="p">:</span>
-      <span class="o">-</span> <span class="mi">80</span><span class="p">:</span><span class="mi">80</span>
-    <span class="n">depends_on</span><span class="p">:</span>
-      <span class="o">-</span> <span class="n">application1</span>
-      <span class="o">-</span> <span class="n">application2</span>
+  nginx:
+    image: nginx
+    volumes:
+     - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - 80:80
+    depends_on:
+      - application1
+      - application2
 </code></pre></div>
 
 <p>I basically duplicated the definition of <code>application</code>, but the first service is running now 6 workers, just for the sake of showing a possible difference between the two. Now run <code>docker-compose up -d</code> and <code>docker-compose logs -f nginx</code>. If you refresh the page on the browser multiple times you will see something like</p>
@@ -911,16 +911,16 @@ nginx_1         <span class="p">|</span> <span class="o">[</span><span class="m"
             </header>
 <div class="mini-posts">
     <article>
+        <a href="/blog/2021/03/25/how-to-write-a-pelican-theme-for-your-website/" class="image"><img src="/images/how-to-write-a-pelican-theme-for-your-website.jpg" alt="how-to-write-a-pelican-theme-for-your-website" /></a>
+        <p><strong>How to write a Pelican theme for your static website</strong> <a href="/blog/2021/03/25/how-to-write-a-pelican-theme-for-your-website/">Read</a></p> 
+    </article>
+    <article>
         <a href="/blog/2021/03/22/aws-log-insights-as-cloudwatch-metrics-with-python-and-terraform/" class="image"><img src="/images/aws-log-insights-as-cloudwatch-metrics-with-python-and-terraform.jpg" alt="aws-log-insights-as-cloudwatch-metrics-with-python-and-terraform" /></a>
         <p><strong>AWS Log Insights as CloudWatch metrics with Python and Terraform</strong> <a href="/blog/2021/03/22/aws-log-insights-as-cloudwatch-metrics-with-python-and-terraform/">Read</a></p> 
     </article>
     <article>
         <a href="/blog/2021/03/09/first-class-objects-in-python-generic-code-wrappers-and-factories/" class="image"><img src="/images/first-class-objects-in-python-generic-code-wrappers-and-factories.jpg" alt="first-class-objects-in-python-generic-code-wrappers-and-factories" /></a>
         <p><strong>First-class objects in Python: generic code, wrappers, and factories</strong> <a href="/blog/2021/03/09/first-class-objects-in-python-generic-code-wrappers-and-factories/">Read</a></p> 
-    </article>
-    <article>
-        <a href="/blog/2021/02/22/mau-a-lightweight-markup-language/" class="image"><img src="/images/mau-a-lightweight-markup-language.jpg" alt="mau-a-lightweight-markup-language" /></a>
-        <p><strong>Mau: a lightweight markup language</strong> <a href="/blog/2021/02/22/mau-a-lightweight-markup-language/">Read</a></p> 
     </article>
 </div>        </section>
 
@@ -954,7 +954,7 @@ nginx_1         <span class="p">|</span> <span class="o">[</span><span class="m"
                 <h2>Tags</h2>
             </header>
 <ul class="list-inline list-clean" id="tags-side">
-    <li class="tag font-size-2">
+    <li class="tag font-size-3">
         <a title="Posts about algorithms" href="/categories/algorithms/">algorithms</a>
     </li>
     <li class="tag font-size-2">
@@ -1008,7 +1008,7 @@ nginx_1         <span class="p">|</span> <span class="o">[</span><span class="m"
     <li class="tag font-size-3">
         <a title="Posts about Erlang" href="/categories/erlang/">Erlang</a>
     </li>
-    <li class="tag font-size-2">
+    <li class="tag font-size-3">
         <a title="Posts about Flask" href="/categories/flask/">Flask</a>
     </li>
     <li class="tag font-size-1">
@@ -1020,7 +1020,10 @@ nginx_1         <span class="p">|</span> <span class="o">[</span><span class="m"
     <li class="tag font-size-3">
         <a title="Posts about Git" href="/categories/git/">Git</a>
     </li>
-    <li class="tag font-size-2">
+    <li class="tag font-size-4">
+        <a title="Posts about HTML" href="/categories/html/">HTML</a>
+    </li>
+    <li class="tag font-size-3">
         <a title="Posts about HTTP" href="/categories/http/">HTTP</a>
     </li>
     <li class="tag font-size-3">
@@ -1035,7 +1038,7 @@ nginx_1         <span class="p">|</span> <span class="o">[</span><span class="m"
     <li class="tag font-size-4">
         <a title="Posts about M68000" href="/categories/m68000/">M68000</a>
     </li>
-    <li class="tag font-size-4">
+    <li class="tag font-size-3">
         <a title="Posts about Markdown" href="/categories/markdown/">Markdown</a>
     </li>
     <li class="tag font-size-4">
@@ -1056,7 +1059,7 @@ nginx_1         <span class="p">|</span> <span class="o">[</span><span class="m"
     <li class="tag font-size-2">
         <a title="Posts about operating systems" href="/categories/operating-systems/">operating systems</a>
     </li>
-    <li class="tag font-size-4">
+    <li class="tag font-size-3">
         <a title="Posts about pelican" href="/categories/pelican/">pelican</a>
     </li>
     <li class="tag font-size-4">

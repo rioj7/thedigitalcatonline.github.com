@@ -620,14 +620,14 @@ fffffffffffffffffffff003031300d0609608648016503040201050004206fc
 &lt;p&gt;What I showed you here is what happens when we validate a root certificate. When we validate a non-root certificate the process is exactly the same (taking into account that the algorithms involved might be different), only the public key used to sign the certificate doesn't come from the certificate itself, but from the signer one. So, in the case of this blog, the certificate for www.thedigitalcat.com has a signature encrypted with the public key of Let's Encrypt. And the certificate for Let's Encrypt will be signed using the public key of Digital Signature Trust Co. This is what creates the chain of trust.&lt;/p&gt;
 &lt;h2 id="algorithms-used-by-root-certificates"&gt;Algorithms used by root certificates&lt;a class="headerlink" href="#algorithms-used-by-root-certificates" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;A quick scan of the certificates that are part of the Mozilla program reveals that the vast majority of them is using RSA to self-sign them&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ &lt;span class="k"&gt;for&lt;/span&gt; i in /etc/ssl/certs/*.pem&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt; openssl x509 -inform pem -in &lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;i&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; -noout -text &lt;span class="p"&gt;|&lt;/span&gt; grep -E &lt;span class="s2"&gt;&amp;quot;Public Key Algorithm&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="k"&gt;done&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt; sort &lt;span class="p"&gt;|&lt;/span&gt; uniq -c
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ &lt;span class="k"&gt;for&lt;/span&gt; i &lt;span class="k"&gt;in&lt;/span&gt; /etc/ssl/certs/*.pem&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt; openssl x509 -inform pem -in &lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;i&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; -noout -text &lt;span class="p"&gt;|&lt;/span&gt; grep -E &lt;span class="s2"&gt;&amp;quot;Public Key Algorithm&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="k"&gt;done&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt; sort &lt;span class="p"&gt;|&lt;/span&gt; uniq -c
      &lt;span class="m"&gt;25&lt;/span&gt;             Public Key Algorithm: id-ecPublicKey
     &lt;span class="m"&gt;114&lt;/span&gt;             Public Key Algorithm: rsaEncryption
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;while part of them are using &lt;code&gt;id-ecPublicKey&lt;/code&gt; which is the identifier of elliptic curves algorithms.&lt;/p&gt;
 &lt;p&gt;When it comes to signature algorithms, instead, there is more variety&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ &lt;span class="k"&gt;for&lt;/span&gt; i in /etc/ssl/certs/*.pem&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt; openssl x509 -inform pem -in &lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;i&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; -noout -text &lt;span class="p"&gt;|&lt;/span&gt; grep -E &lt;span class="s2"&gt;&amp;quot;^    Signature Algorithm&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="k"&gt;done&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt; sort &lt;span class="p"&gt;|&lt;/span&gt; uniq -c
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ &lt;span class="k"&gt;for&lt;/span&gt; i &lt;span class="k"&gt;in&lt;/span&gt; /etc/ssl/certs/*.pem&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt; openssl x509 -inform pem -in &lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;i&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; -noout -text &lt;span class="p"&gt;|&lt;/span&gt; grep -E &lt;span class="s2"&gt;&amp;quot;^    Signature Algorithm&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="k"&gt;done&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt; sort &lt;span class="p"&gt;|&lt;/span&gt; uniq -c
       &lt;span class="m"&gt;7&lt;/span&gt;     Signature Algorithm: ecdsa-with-SHA256
      &lt;span class="m"&gt;18&lt;/span&gt;     Signature Algorithm: ecdsa-with-SHA384
      &lt;span class="m"&gt;47&lt;/span&gt;     Signature Algorithm: sha1WithRSAEncryption
@@ -1159,17 +1159,17 @@ ef 93 8c 61 ca a6 0d
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;while the definition of the types &lt;code&gt;string&lt;/code&gt; and &lt;code&gt;mpint&lt;/code&gt; can be found in &lt;a href="https://tools.ietf.org/html/rfc4251"&gt;RFC 4251&lt;/a&gt; ("SSH Protocol Architecture"), section 5&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;string&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;string
 
-    &lt;span class="p"&gt;[...]&lt;/span&gt; &lt;span class="n"&gt;They&lt;/span&gt; &lt;span class="k"&gt;are&lt;/span&gt; &lt;span class="n"&gt;stored&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="n"&gt;uint32&lt;/span&gt; &lt;span class="n"&gt;containing&lt;/span&gt; &lt;span class="n"&gt;its&lt;/span&gt; &lt;span class="k"&gt;length&lt;/span&gt;
-    &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;number&lt;/span&gt; &lt;span class="k"&gt;of&lt;/span&gt; &lt;span class="n"&gt;bytes&lt;/span&gt; &lt;span class="n"&gt;that&lt;/span&gt; &lt;span class="n"&gt;follow&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;and&lt;/span&gt; &lt;span class="n"&gt;zero&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;empty&lt;/span&gt; &lt;span class="n"&gt;string&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;or&lt;/span&gt; &lt;span class="k"&gt;more&lt;/span&gt;
-    &lt;span class="n"&gt;bytes&lt;/span&gt; &lt;span class="n"&gt;that&lt;/span&gt; &lt;span class="k"&gt;are&lt;/span&gt; &lt;span class="n"&gt;the&lt;/span&gt; &lt;span class="n"&gt;value&lt;/span&gt; &lt;span class="k"&gt;of&lt;/span&gt; &lt;span class="n"&gt;the&lt;/span&gt; &lt;span class="n"&gt;string&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;  &lt;span class="n"&gt;Terminating&lt;/span&gt; &lt;span class="k"&gt;null&lt;/span&gt;
-    &lt;span class="n"&gt;characters&lt;/span&gt; &lt;span class="k"&gt;are&lt;/span&gt; &lt;span class="k"&gt;not&lt;/span&gt; &lt;span class="n"&gt;used&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt; &lt;span class="p"&gt;[...]&lt;/span&gt;
+    [...] They are stored as a uint32 containing its length
+    (number of bytes that follow) and zero (= empty string) or more
+    bytes that are the value of the string.  Terminating null
+    characters are not used. [...]
 
-&lt;span class="n"&gt;mpint&lt;/span&gt;
+mpint
 
-    &lt;span class="n"&gt;Represents&lt;/span&gt; &lt;span class="n"&gt;multiple&lt;/span&gt; &lt;span class="k"&gt;precision&lt;/span&gt; &lt;span class="n"&gt;integers&lt;/span&gt; &lt;span class="k"&gt;in&lt;/span&gt; &lt;span class="n"&gt;two&lt;/span&gt;&lt;span class="err"&gt;&amp;#39;&lt;/span&gt;&lt;span class="n"&gt;s&lt;/span&gt; &lt;span class="n"&gt;complement&lt;/span&gt; &lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
-    &lt;span class="n"&gt;stored&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="n"&gt;string&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;8&lt;/span&gt; &lt;span class="n"&gt;bits&lt;/span&gt; &lt;span class="n"&gt;per&lt;/span&gt; &lt;span class="n"&gt;byte&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;MSB&lt;/span&gt; &lt;span class="k"&gt;first&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt; &lt;span class="p"&gt;[...]&lt;/span&gt;
+    Represents multiple precision integers in two&amp;#39;s complement format,
+    stored as a string, 8 bits per byte, MSB first. [...]
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;This means that the above sequence of bytes is interpreted as 4 bytes of length (32 bits of the type &lt;code&gt;uint32&lt;/code&gt;) followed by that number of bytes of content.&lt;/p&gt;

@@ -108,9 +108,9 @@ Accept: */*
 
 &lt;p&gt;The server keeps running the code in the &lt;code&gt;while&lt;/code&gt; loop, so if you want to terminate it you have to do it with Ctrl+C. So far so good, but this is not an HTTP server yet, as it sends no response; you should actually receive an error message from curl that says &lt;code&gt;curl: (52) Empty reply from server&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;Sending back a standard response is very simple, we just need to call &lt;code&gt;conn.sendall&lt;/code&gt; passing the raw bytes. A minimal HTTP response contains the protocol and the status, an empty line, and the actual content, for example&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;HTTP&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="mi"&gt;200&lt;/span&gt; &lt;span class="n"&gt;OK&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;HTTP/1.1 200 OK
 
-&lt;span class="n"&gt;Hi&lt;/span&gt; &lt;span class="n"&gt;there&lt;/span&gt;&lt;span class="o"&gt;!&lt;/span&gt;
+Hi there!
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Our server becomes then&lt;/p&gt;
@@ -300,7 +300,7 @@ Resource favicon.ico cannot be loaded
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ &lt;span class="nv"&gt;FLASK_APP&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;service.py flask run
  * Serving Flask app &lt;span class="s2"&gt;&amp;quot;service.py&amp;quot;&lt;/span&gt;
  * Environment: production
-   WARNING: This is a development server. Do not use it in a production deployment.
+   WARNING: This is a development server. Do not use it &lt;span class="k"&gt;in&lt;/span&gt; a production deployment.
    Use a production WSGI server instead.
  * Debug mode: off
  * Running on http://127.0.0.1:5000/ &lt;span class="o"&gt;(&lt;/span&gt;Press CTRL+C to quit&lt;span class="o"&gt;)&lt;/span&gt;
@@ -321,7 +321,7 @@ Resource favicon.ico cannot be loaded
 &lt;/ul&gt;
 &lt;h3 id="24-issues"&gt;2.4 Issues&lt;a class="headerlink" href="#24-issues" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h3&gt;
 &lt;p&gt;Apparently, we solved all our problems, and many programmers just stop here. They learn how to use the framework (which is a big achievement!), but as we will shortly discover, this is not enough for a production system. Let's have a closer look at the output of the Flask server. It clearly says, among other things&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;   WARNING: This is a development server. Do not use it in a production deployment.
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;   WARNING: This is a development server. Do not use it &lt;span class="k"&gt;in&lt;/span&gt; a production deployment.
    Use a production WSGI server instead.
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
@@ -562,33 +562,33 @@ application.            &lt;span class="m"&gt;600&lt;/span&gt;     IN      A    
 
 &lt;p&gt;We defined here an &lt;code&gt;upstream&lt;/code&gt; structure that lists two different services, &lt;code&gt;application1&lt;/code&gt; and &lt;code&gt;application2&lt;/code&gt;, giving to the first one a weight of 3. This mean that each 4 requests, 3 will be routed to the first service, and one to the second service. Now nginx is not just relying on the DNS, but consciously choosing between two different services.&lt;/p&gt;
 &lt;p&gt;Let's define the services accordingly in the Docker Compose configuration file&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;version&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="ss"&gt;&amp;quot;3&amp;quot;&lt;/span&gt;
-&lt;span class="n"&gt;services&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-  &lt;span class="n"&gt;application1&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-    &lt;span class="n"&gt;build&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-      &lt;span class="n"&gt;context&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;.&lt;/span&gt;
-      &lt;span class="n"&gt;dockerfile&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;Dockerfile&lt;/span&gt;
-    &lt;span class="n"&gt;command&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;gunicorn&lt;/span&gt; &lt;span class="c1"&gt;--workers 6 --bind 0.0.0.0:8000 wsgi&lt;/span&gt;
-    &lt;span class="n"&gt;expose&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-        &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="mi"&gt;8000&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;version: &amp;quot;3&amp;quot;
+services:
+  application1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: gunicorn --workers 6 --bind 0.0.0.0:8000 wsgi
+    expose:
+        - 8000
 
-  &lt;span class="n"&gt;application2&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-    &lt;span class="n"&gt;build&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-      &lt;span class="n"&gt;context&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;.&lt;/span&gt;
-      &lt;span class="n"&gt;dockerfile&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;Dockerfile&lt;/span&gt;
-    &lt;span class="n"&gt;command&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;gunicorn&lt;/span&gt; &lt;span class="c1"&gt;--workers 3 --bind 0.0.0.0:8000 wsgi&lt;/span&gt;
-    &lt;span class="n"&gt;expose&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-        &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="mi"&gt;8000&lt;/span&gt;
+  application2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: gunicorn --workers 3 --bind 0.0.0.0:8000 wsgi
+    expose:
+        - 8000
 
-  &lt;span class="n"&gt;nginx&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-    &lt;span class="n"&gt;image&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;nginx&lt;/span&gt;
-    &lt;span class="n"&gt;volumes&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-     &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;nginx&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;conf&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;etc&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;nginx&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;conf&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;d&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="k"&gt;default&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;conf&lt;/span&gt;
-    &lt;span class="n"&gt;ports&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-      &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="mi"&gt;80&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;80&lt;/span&gt;
-    &lt;span class="n"&gt;depends_on&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-      &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;application1&lt;/span&gt;
-      &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;application2&lt;/span&gt;
+  nginx:
+    image: nginx
+    volumes:
+     - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - 80:80
+    depends_on:
+      - application1
+      - application2
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;I basically duplicated the definition of &lt;code&gt;application&lt;/code&gt;, but the first service is running now 6 workers, just for the sake of showing a possible difference between the two. Now run &lt;code&gt;docker-compose up -d&lt;/code&gt; and &lt;code&gt;docker-compose logs -f nginx&lt;/code&gt;. If you refresh the page on the browser multiple times you will see something like&lt;/p&gt;
@@ -1457,7 +1457,7 @@ nginx_1         &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="o"&gt;[&lt;
   &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;result&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;length&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
   &lt;span class="n"&gt;length&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="k"&gt;sizeof&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;messagebuf_t&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="k"&gt;sizeof&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;long&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
 
-  &lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="p"&gt;((&lt;/span&gt;&lt;span class="n"&gt;result&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;msgrcv&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;qid&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="n"&gt;msgbuf&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;qbuf&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;length&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;type&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;IPC_NOWAIT&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;){&lt;/span&gt;
+  &lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="p"&gt;((&lt;/span&gt;&lt;span class="n"&gt;result&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;msgrcv&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;qid&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="nc"&gt;msgbuf&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;qbuf&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;length&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;type&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;IPC_NOWAIT&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;-1&lt;/span&gt;&lt;span class="p"&gt;){&lt;/span&gt;
     &lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;errno&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;ENOMSG&lt;/span&gt;&lt;span class="p"&gt;){&lt;/span&gt;
       &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
     &lt;span class="p"&gt;}&lt;/span&gt;
@@ -1909,7 +1909,7 @@ nginx_1         &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="o"&gt;[&lt;
 &lt;p&gt;Now it is the time to speak about implementing these concepts in a Linux operating system environment. As already said we have a set of primitives that allow us to manage the structures related to message queues, and they are very similar to those dedicated to semaphore management, already described in &lt;a href="https://www.thedigitalcatonline.com/blog/2013/02/13/concurrent-programming-4/"&gt;the past article&lt;/a&gt;.&lt;/p&gt;
 &lt;p&gt;The structure used to describe a message is &lt;code&gt;msgbuf&lt;/code&gt; and is declared in &lt;code&gt;linux/msg.h&lt;/code&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="cm"&gt;/* message buffer for msgsnd and msgrcv calls */&lt;/span&gt;
-&lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="n"&gt;msgbuf&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="nc"&gt;msgbuf&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
    &lt;span class="kt"&gt;long&lt;/span&gt; &lt;span class="n"&gt;mtype&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;         &lt;span class="cm"&gt;/* type of message */&lt;/span&gt;
    &lt;span class="kt"&gt;char&lt;/span&gt; &lt;span class="n"&gt;mtext&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;      &lt;span class="cm"&gt;/* message text */&lt;/span&gt;
 &lt;span class="p"&gt;};&lt;/span&gt;
@@ -1917,11 +1917,11 @@ nginx_1         &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="o"&gt;[&lt;
 
 &lt;p&gt;The field &lt;code&gt;mtype&lt;/code&gt; represents the type of the message and is a strictly positive number: the correspondence between numbers and message types has to be set in advance and is part of the protocol definition.&lt;/p&gt;
 &lt;p&gt;The second field represents the content of the message. With the standard definition, no real message can be held inside it because the space is too little (just one byte). This is just a placeholder since the real structure used to describe messages can be redefined in order to contain complex data. An example of redefinition is the following&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="n"&gt;message&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="nc"&gt;message&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
    &lt;span class="kt"&gt;long&lt;/span&gt; &lt;span class="n"&gt;mtype&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;         &lt;span class="cm"&gt;/* message type */&lt;/span&gt;
    &lt;span class="kt"&gt;long&lt;/span&gt; &lt;span class="n"&gt;sender&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;        &lt;span class="cm"&gt;/* sender id */&lt;/span&gt;
    &lt;span class="kt"&gt;long&lt;/span&gt; &lt;span class="n"&gt;receiver&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;        &lt;span class="cm"&gt;/* receiver id */&lt;/span&gt;        
-   &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="n"&gt;info&lt;/span&gt; &lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;   &lt;span class="cm"&gt;/* message content */&lt;/span&gt;
+   &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="nc"&gt;info&lt;/span&gt; &lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;   &lt;span class="cm"&gt;/* message content */&lt;/span&gt;
 &lt;span class="p"&gt;};&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
@@ -1941,26 +1941,26 @@ nginx_1         &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="o"&gt;[&lt;
 and grant access to the owner and group users). The returned integer is called queue identifier and is unique in the system.&lt;/p&gt;
 &lt;h4 id="send-messages"&gt;Send messages&lt;a class="headerlink" href="#send-messages" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
 &lt;p&gt;To send a message to a queue we call the &lt;code&gt;msgsnd()&lt;/code&gt; primitive&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;msgsnd&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;msqid&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="n"&gt;msgbuf&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;msgp&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;msgsz&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;msgflg&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;msgsnd&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;msqid&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="nc"&gt;msgbuf&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;msgp&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;msgsz&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;msgflg&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;where &lt;code&gt;msqid&lt;/code&gt; is the identifier of the queue, &lt;code&gt;msgp&lt;/code&gt; is a pointer to the message we have to send, &lt;code&gt;msgz&lt;/code&gt; the size of the message in bytes (excluding the length of the &lt;code&gt;mtype&lt;/code&gt; field, which is 4 bytes) and &lt;code&gt;msgflg&lt;/code&gt; a flag related to the waiting policy.&lt;/p&gt;
 &lt;p&gt;Here, &lt;code&gt;msgp&lt;/code&gt; is a pointer to a &lt;code&gt;struct msgbuf&lt;/code&gt;. However, since that structure has been redefined, our actual call will contain a pointer to a variable of the redefined type.&lt;/p&gt;
 &lt;p&gt;The length of the message in bytes can be easily be found as&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;length&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="k"&gt;sizeof&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="n"&gt;message&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="k"&gt;sizeof&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;long&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;length&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="k"&gt;sizeof&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="nc"&gt;message&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="k"&gt;sizeof&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;long&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;where &lt;code&gt;struct message&lt;/code&gt; is our redefinition of &lt;code&gt;struct msgbuf&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;Waiting policies are similar to those introduced for semaphores. This time the policy is used when the queue is full. If &lt;code&gt;msgflg&lt;/code&gt; is set to &lt;code&gt;IPC_NOWAIT&lt;/code&gt;, the sender process will not wait for some available space and will exit with an error code.&lt;/p&gt;
 &lt;h4 id="read-messages"&gt;Read messages&lt;a class="headerlink" href="#read-messages" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
 &lt;p&gt;To read messages contained in a queue we use the &lt;code&gt;msgrcv()&lt;/code&gt; system call&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;msgrcv&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;msqid&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="n"&gt;msgbuf&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;msgp&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;msgsz&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;long&lt;/span&gt; &lt;span class="n"&gt;mtype&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;msgflg&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;msgrcv&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;msqid&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="nc"&gt;msgbuf&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;msgp&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;msgsz&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;long&lt;/span&gt; &lt;span class="n"&gt;mtype&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;msgflg&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;where the &lt;code&gt;msgp&lt;/code&gt; pointer identifies the variable where we will copy the message read from the queue and mtype identifies the subset of messages we want to consider. As before, &lt;code&gt;msgp&lt;/code&gt; should be a pointer to a variable of our redefined type and both &lt;code&gt;msgz&lt;/code&gt; and &lt;code&gt;msgflg&lt;/code&gt; have the same meaning of their counterparts in &lt;code&gt;msgsnd()&lt;/code&gt;.&lt;/p&gt;
 &lt;h4 id="delete-a-queue"&gt;Delete a queue&lt;a class="headerlink" href="#delete-a-queue" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h4&gt;
 &lt;p&gt;Last, a queue can be removed calling the &lt;code&gt;msgctl()&lt;/code&gt; primitive&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="nf"&gt;msgctl&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;msqid&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;cmd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="n"&gt;msqid_ds&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;buf&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="nf"&gt;msgctl&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;msqid&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;cmd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="nc"&gt;msqid_ds&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;buf&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;where the command &lt;code&gt;cmd&lt;/code&gt; to remove the queue is &lt;code&gt;IPC_RMID&lt;/code&gt;. Other two commands, &lt;code&gt;IPC_STAT&lt;/code&gt; and &lt;code&gt;IPC_SET&lt;/code&gt;, are available through &lt;code&gt;msgctl()&lt;/code&gt;, but they are not interesting now.&lt;/p&gt;
@@ -1972,7 +1972,7 @@ and grant access to the owner and group users). The returned integer is called q
 &lt;span class="cp"&gt;#include&lt;/span&gt; &lt;span class="cpf"&gt;&amp;lt;linux/msg.h&amp;gt;&lt;/span&gt;&lt;span class="cp"&gt;&lt;/span&gt;
 
 &lt;span class="cm"&gt;/* Redefines the struct msgbuf */&lt;/span&gt;
-&lt;span class="k"&gt;typedef&lt;/span&gt; &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="n"&gt;mymsgbuf&lt;/span&gt;
+&lt;span class="k"&gt;typedef&lt;/span&gt; &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="nc"&gt;mymsgbuf&lt;/span&gt;
 &lt;span class="p"&gt;{&lt;/span&gt;
   &lt;span class="kt"&gt;long&lt;/span&gt; &lt;span class="n"&gt;mtype&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
   &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;int_num&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
@@ -2057,7 +2057,7 @@ and grant access to the owner and group users). The returned integer is called q
 &lt;span class="cp"&gt;#include&lt;/span&gt; &lt;span class="cpf"&gt;&amp;lt;sys/types.h&amp;gt;&lt;/span&gt;&lt;span class="cp"&gt;&lt;/span&gt;
 
 &lt;span class="cm"&gt;/* Redefines the message structure */&lt;/span&gt;
-&lt;span class="k"&gt;typedef&lt;/span&gt; &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="n"&gt;mymsgbuf&lt;/span&gt;
+&lt;span class="k"&gt;typedef&lt;/span&gt; &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="nc"&gt;mymsgbuf&lt;/span&gt;
 &lt;span class="p"&gt;{&lt;/span&gt;
   &lt;span class="kt"&gt;long&lt;/span&gt; &lt;span class="n"&gt;mtype&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
   &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;num&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
@@ -2126,19 +2126,19 @@ and grant access to the owner and group users). The returned integer is called q
 &lt;p&gt;As briefly shown in the last article synchronization problems are not only among the most complex issues to solve in computer science, but can also lead to severe malfunctions of our software.&lt;/p&gt;
 &lt;p&gt;Let's reconsider and formalize the example given in the last post. Say we create two different processes working on the same data. If the two processes just read the same data from memory (or disk) no problems can arise: data are static, and accessing does not change them. So the execution of the two processes is called &lt;strong&gt;consistent&lt;/strong&gt;, which highlights that repeated executions or executions spanning a long time will always result in the same system behaviour.&lt;/p&gt;
 &lt;p&gt;If now one of the processes wants to modify data different situations can come up, depending on the actual timing of the operations. Say we have two processes &lt;code&gt;A&lt;/code&gt; and &lt;code&gt;B&lt;/code&gt; and an element &lt;code&gt;d&lt;/code&gt;; process &lt;code&gt;A&lt;/code&gt; increases element &lt;code&gt;d&lt;/code&gt; by 1 while process &lt;code&gt;B&lt;/code&gt; prints the element value on the screen. In a sort of metalanguage, we could express this situation with the following syntax&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;A { d-&amp;gt;d+1 } &amp;amp; B { d-&amp;gt;output }&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;A&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="n"&gt;d&lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;&lt;span class="n"&gt;d&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt; &lt;span class="n"&gt;B&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="n"&gt;d&lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;&lt;span class="kr"&gt;output&lt;/span&gt; &lt;span class="p"&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;where &lt;code&gt;&amp;amp;&lt;/code&gt; stands for a concurrent execution; in other words the two processes are not synchronized. One of the possible resulting executions is&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;(-) d = 5&lt;/span&gt;
-&lt;span class="err"&gt;(A) d = 6&lt;/span&gt;
-&lt;span class="err"&gt;(B) output = 6&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;(-) d = 5
+(A) d = 6
+(B) output = 6
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;while the other is&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;(-) d = 5&lt;/span&gt;
-&lt;span class="err"&gt;(B) output = 5&lt;/span&gt;
-&lt;span class="err"&gt;(A) d = 6&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;(-) d = 5
+(B) output = 5
+(A) d = 6
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;As you can see, different timings can lead to different results; let's pretend that element &lt;code&gt;d&lt;/code&gt; is the amount of money in your bank account, and you will suddenly realize the importance of the matter. Such a reliance of data on timing or system conditions is known as &lt;strong&gt;data inconsistency&lt;/strong&gt;.&lt;/p&gt;
@@ -2192,12 +2192,12 @@ and grant access to the owner and group users). The returned integer is called q
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;where &lt;code&gt;semid&lt;/code&gt; is the semaphore set identifier returned from &lt;code&gt;semget()&lt;/code&gt;, &lt;code&gt;semnum&lt;/code&gt; the index of the semaphore inside the set and &lt;code&gt;cmd&lt;/code&gt; the command you want to run. The value &lt;code&gt;semnum&lt;/code&gt; is optional for some commands. Some commands need also an additional argument which type is &lt;code&gt;union semun&lt;/code&gt;, defined as&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;union&lt;/span&gt; &lt;span class="n"&gt;semun&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;union&lt;/span&gt; &lt;span class="nc"&gt;semun&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
  &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;                  &lt;span class="cm"&gt;/* value for SETVAL */&lt;/span&gt;
- &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="n"&gt;semid_ds&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;buf&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;     &lt;span class="cm"&gt;/* buffer for IPC_STAT, IPC_SET */&lt;/span&gt;
+ &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="nc"&gt;semid_ds&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;buf&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;     &lt;span class="cm"&gt;/* buffer for IPC_STAT, IPC_SET */&lt;/span&gt;
  &lt;span class="kt"&gt;unsigned&lt;/span&gt; &lt;span class="kt"&gt;short&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;array&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;    &lt;span class="cm"&gt;/* array for GETALL, SETALL */&lt;/span&gt;
                            &lt;span class="cm"&gt;/* Linux specific part: */&lt;/span&gt;
- &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="n"&gt;seminfo&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;__buf&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;    &lt;span class="cm"&gt;/* buffer for IPC_INFO */&lt;/span&gt;
+ &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="nc"&gt;seminfo&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;__buf&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;    &lt;span class="cm"&gt;/* buffer for IPC_INFO */&lt;/span&gt;
 &lt;span class="p"&gt;};&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
@@ -2212,7 +2212,7 @@ and grant access to the owner and group users). The returned integer is called q
 &lt;span class="p"&gt;{&lt;/span&gt;
   &lt;span class="kt"&gt;key_t&lt;/span&gt; &lt;span class="n"&gt;key&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
   &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;semid&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-  &lt;span class="k"&gt;union&lt;/span&gt; &lt;span class="n"&gt;semun&lt;/span&gt; &lt;span class="n"&gt;arg&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="k"&gt;union&lt;/span&gt; &lt;span class="nc"&gt;semun&lt;/span&gt; &lt;span class="n"&gt;arg&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 
   &lt;span class="n"&gt;key&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;ftok&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;/etc/fstab&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;getpid&lt;/span&gt;&lt;span class="p"&gt;());&lt;/span&gt;
 
@@ -2237,7 +2237,7 @@ and grant access to the owner and group users). The returned integer is called q
 &lt;span class="p"&gt;{&lt;/span&gt;
   &lt;span class="kt"&gt;key_t&lt;/span&gt; &lt;span class="n"&gt;key&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
   &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;semid&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-  &lt;span class="k"&gt;union&lt;/span&gt; &lt;span class="n"&gt;semun&lt;/span&gt; &lt;span class="n"&gt;arg&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="k"&gt;union&lt;/span&gt; &lt;span class="nc"&gt;semun&lt;/span&gt; &lt;span class="n"&gt;arg&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 
   &lt;span class="n"&gt;key&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;ftok&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;/etc/fstab&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;getpid&lt;/span&gt;&lt;span class="p"&gt;());&lt;/span&gt;
 
@@ -2257,11 +2257,11 @@ and grant access to the owner and group users). The returned integer is called q
 &lt;p&gt;Now you can compile and run it. As you can imagine the program seems to do nothing: it just silently creates a semaphore, sets its value and removes it.&lt;/p&gt;
 &lt;h2 id="semaphores-part-2"&gt;Semaphores - part 2&lt;a class="headerlink" href="#semaphores-part-2" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;Time to use effectively the semaphore: the function that allows to performs operations on a semaphore is &lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="nf"&gt;semop&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;semid&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="n"&gt;sembuf&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;sops&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;unsigned&lt;/span&gt; &lt;span class="n"&gt;nsops&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="nf"&gt;semop&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;semid&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="nc"&gt;sembuf&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;sops&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;unsigned&lt;/span&gt; &lt;span class="n"&gt;nsops&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;where &lt;code&gt;semid&lt;/code&gt; is the set identifier, &lt;code&gt;sops&lt;/code&gt; an array of operations and &lt;code&gt;nsops&lt;/code&gt; the length of the latter. Each operation is declared through a &lt;code&gt;struct sembuf&lt;/code&gt;&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="n"&gt;sembuf&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="nc"&gt;sembuf&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
     &lt;span class="n"&gt;ushort&lt;/span&gt;  &lt;span class="n"&gt;sem_num&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;        &lt;span class="cm"&gt;/* semaphore index in array */&lt;/span&gt;
              &lt;span class="kt"&gt;short&lt;/span&gt;   &lt;span class="n"&gt;sem_op&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;         &lt;span class="cm"&gt;/* semaphore operation */&lt;/span&gt;
              &lt;span class="kt"&gt;short&lt;/span&gt;   &lt;span class="n"&gt;sem_flg&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;        &lt;span class="cm"&gt;/* operation flags */&lt;/span&gt;
@@ -2297,11 +2297,11 @@ and grant access to the owner and group users). The returned integer is called q
   &lt;span class="kt"&gt;pid_t&lt;/span&gt; &lt;span class="n"&gt;pid&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
   &lt;span class="kt"&gt;key_t&lt;/span&gt; &lt;span class="n"&gt;key&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
   &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;semid&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-  &lt;span class="k"&gt;union&lt;/span&gt; &lt;span class="n"&gt;semun&lt;/span&gt; &lt;span class="n"&gt;arg&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-  &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="n"&gt;sembuf&lt;/span&gt; &lt;span class="n"&gt;lock_res&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;};&lt;/span&gt;
-  &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="n"&gt;sembuf&lt;/span&gt; &lt;span class="n"&gt;rel_res&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;};&lt;/span&gt;
-  &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="n"&gt;sembuf&lt;/span&gt; &lt;span class="n"&gt;push&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;IPC_NOWAIT&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;IPC_NOWAIT&lt;/span&gt;&lt;span class="p"&gt;};&lt;/span&gt;
-  &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="n"&gt;sembuf&lt;/span&gt; &lt;span class="n"&gt;pop&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;IPC_NOWAIT&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;IPC_NOWAIT&lt;/span&gt;&lt;span class="p"&gt;};&lt;/span&gt;
+  &lt;span class="k"&gt;union&lt;/span&gt; &lt;span class="nc"&gt;semun&lt;/span&gt; &lt;span class="n"&gt;arg&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="nc"&gt;sembuf&lt;/span&gt; &lt;span class="n"&gt;lock_res&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;-1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;};&lt;/span&gt;
+  &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="nc"&gt;sembuf&lt;/span&gt; &lt;span class="n"&gt;rel_res&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;};&lt;/span&gt;
+  &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="nc"&gt;sembuf&lt;/span&gt; &lt;span class="n"&gt;push&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;-1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;IPC_NOWAIT&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;IPC_NOWAIT&lt;/span&gt;&lt;span class="p"&gt;};&lt;/span&gt;
+  &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="nc"&gt;sembuf&lt;/span&gt; &lt;span class="n"&gt;pop&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;IPC_NOWAIT&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;-1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;IPC_NOWAIT&lt;/span&gt;&lt;span class="p"&gt;};&lt;/span&gt;
 
   &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;j&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
   &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;len&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
@@ -2344,13 +2344,13 @@ and grant access to the owner and group users). The returned integer is called q
     &lt;span class="n"&gt;sleep&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;rand&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;%&lt;/span&gt;&lt;span class="mi"&gt;6&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
 
     &lt;span class="cm"&gt;/* Try to lock the buffer - sem #0 */&lt;/span&gt;
-    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;semop&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;semid&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;lock_res&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;){&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;semop&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;semid&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;lock_res&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;-1&lt;/span&gt;&lt;span class="p"&gt;){&lt;/span&gt;
       &lt;span class="n"&gt;perror&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;semop:lock_res (write)&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
     &lt;span class="p"&gt;}&lt;/span&gt;
 
     &lt;span class="cm"&gt;/* Lock a free cell - sem #1 */&lt;/span&gt;
     &lt;span class="cm"&gt;/* Push an element - sem #2 */&lt;/span&gt;
-    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;semop&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;semid&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;push&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;!=&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;){&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;semop&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;semid&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;push&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;!=&lt;/span&gt; &lt;span class="mi"&gt;-1&lt;/span&gt;&lt;span class="p"&gt;){&lt;/span&gt;
       &lt;span class="n"&gt;printf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;---&amp;gt; Child process %d: Element written&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;getpid&lt;/span&gt;&lt;span class="p"&gt;());&lt;/span&gt;
     &lt;span class="p"&gt;}&lt;/span&gt;
     &lt;span class="k"&gt;else&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
@@ -2369,13 +2369,13 @@ and grant access to the owner and group users). The returned integer is called q
     &lt;span class="n"&gt;sleep&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;rand&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;%&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
 
     &lt;span class="cm"&gt;/* Try to lock the buffer - sem #0 */&lt;/span&gt;
-    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;semop&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;semid&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;lock_res&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;){&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;semop&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;semid&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;lock_res&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;-1&lt;/span&gt;&lt;span class="p"&gt;){&lt;/span&gt;
       &lt;span class="n"&gt;perror&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;semop:lock_res (read)&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
     &lt;span class="p"&gt;}&lt;/span&gt;
 
     &lt;span class="cm"&gt;/* Unlock a free cell - sem #1 */&lt;/span&gt;
     &lt;span class="cm"&gt;/* Pop an element - sem #2 */&lt;/span&gt;
-    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;semop&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;semid&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;pop&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;!=&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;){&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;semop&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;semid&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;pop&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;!=&lt;/span&gt; &lt;span class="mi"&gt;-1&lt;/span&gt;&lt;span class="p"&gt;){&lt;/span&gt;
       &lt;span class="n"&gt;printf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;&amp;lt;--- Parent process %d: Element read&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;getpid&lt;/span&gt;&lt;span class="p"&gt;());&lt;/span&gt;
     &lt;span class="p"&gt;}&lt;/span&gt;
     &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
@@ -2394,10 +2394,10 @@ and grant access to the owner and group users). The returned integer is called q
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Let us review the most interesting parts of the code.&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;  &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="n"&gt;sembuf&lt;/span&gt; &lt;span class="n"&gt;lock_res&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;};&lt;/span&gt;
-  &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="n"&gt;sembuf&lt;/span&gt; &lt;span class="n"&gt;rel_res&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;};&lt;/span&gt;
-  &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="n"&gt;sembuf&lt;/span&gt; &lt;span class="n"&gt;push&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;IPC_NOWAIT&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;IPC_NOWAIT&lt;/span&gt;&lt;span class="p"&gt;};&lt;/span&gt;
-  &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="n"&gt;sembuf&lt;/span&gt; &lt;span class="n"&gt;pop&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;IPC_NOWAIT&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;IPC_NOWAIT&lt;/span&gt;&lt;span class="p"&gt;};&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;  &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="nc"&gt;sembuf&lt;/span&gt; &lt;span class="n"&gt;lock_res&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;-1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;};&lt;/span&gt;
+  &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="nc"&gt;sembuf&lt;/span&gt; &lt;span class="n"&gt;rel_res&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;};&lt;/span&gt;
+  &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="nc"&gt;sembuf&lt;/span&gt; &lt;span class="n"&gt;push&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;-1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;IPC_NOWAIT&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;IPC_NOWAIT&lt;/span&gt;&lt;span class="p"&gt;};&lt;/span&gt;
+  &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="nc"&gt;sembuf&lt;/span&gt; &lt;span class="n"&gt;pop&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;IPC_NOWAIT&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;-1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;IPC_NOWAIT&lt;/span&gt;&lt;span class="p"&gt;};&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;These four lines of code declare the actions we will use later on the semaphore set. The first two are single actions while the second two are double ones. The first action, &lt;code&gt;lock_res&lt;/code&gt;, is used to lock the buffer: as you can see the semaphore number 0 is decremented by 1 and in case of busy resource the strategy is waiting (the last 0 in the action). The second action releases the buffer and is the mirror image of the first one.&lt;/p&gt;
@@ -2419,13 +2419,13 @@ and grant access to the owner and group users). The returned integer is called q
 
 &lt;p&gt;Next, semaphores must be initialized: as already stated the first one is set to 1, being a binary access controller, the second to the length of the buffer as overflow controller and the third to 0 as underflow controller.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="cm"&gt;/* Try to lock the buffer - sem #0 */&lt;/span&gt;
-    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;semop&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;semid&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;lock_res&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;){&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;semop&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;semid&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;lock_res&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;-1&lt;/span&gt;&lt;span class="p"&gt;){&lt;/span&gt;
       &lt;span class="n"&gt;perror&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;semop:lock_res (write)&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
     &lt;span class="p"&gt;}&lt;/span&gt;
 
     &lt;span class="cm"&gt;/* Lock a free cell - sem #1 */&lt;/span&gt;
     &lt;span class="cm"&gt;/* Push an element - sem #2 */&lt;/span&gt;
-    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;semop&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;semid&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;push&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;!=&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;){&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;semop&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;semid&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;push&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;!=&lt;/span&gt; &lt;span class="mi"&gt;-1&lt;/span&gt;&lt;span class="p"&gt;){&lt;/span&gt;
       &lt;span class="n"&gt;printf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;---&amp;gt; Child process %d: Element written&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;getpid&lt;/span&gt;&lt;span class="p"&gt;());&lt;/span&gt;
     &lt;span class="p"&gt;}&lt;/span&gt;
     &lt;span class="k"&gt;else&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
@@ -2438,13 +2438,13 @@ and grant access to the owner and group users). The returned integer is called q
 
 &lt;p&gt;Child process code (a writer) tries first of all to lock the buffer using &lt;code&gt;lock_res&lt;/code&gt;; once the control over the resource has been acquired it performs the &lt;code&gt;push&lt;/code&gt; action and writes on the standard output a meaningful message. Otherwise, it signals that the buffer is full. The last action it performs is to release the resource through &lt;code&gt;rel_res&lt;/code&gt;.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="cm"&gt;/* Try to lock the buffer - sem #0 */&lt;/span&gt;
-    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;semop&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;semid&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;lock_res&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;){&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;semop&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;semid&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;lock_res&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;-1&lt;/span&gt;&lt;span class="p"&gt;){&lt;/span&gt;
       &lt;span class="n"&gt;perror&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;semop:lock_res (read)&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
     &lt;span class="p"&gt;}&lt;/span&gt;
 
     &lt;span class="cm"&gt;/* Unlock a free cell - sem #1 */&lt;/span&gt;
     &lt;span class="cm"&gt;/* Pop an element - sem #2 */&lt;/span&gt;
-    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;semop&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;semid&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;pop&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;!=&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;){&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;semop&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;semid&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;pop&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;!=&lt;/span&gt; &lt;span class="mi"&gt;-1&lt;/span&gt;&lt;span class="p"&gt;){&lt;/span&gt;
       &lt;span class="n"&gt;printf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;&amp;lt;--- Parent process %d: Element read&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;getpid&lt;/span&gt;&lt;span class="p"&gt;());&lt;/span&gt;
     &lt;span class="p"&gt;}&lt;/span&gt;
     &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;

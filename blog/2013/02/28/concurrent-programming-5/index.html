@@ -152,7 +152,7 @@
 <p>Now it is the time to speak about implementing these concepts in a Linux operating system environment. As already said we have a set of primitives that allow us to manage the structures related to message queues, and they are very similar to those dedicated to semaphore management, already described in <a href="https://www.thedigitalcatonline.com/blog/2013/02/13/concurrent-programming-4/">the past article</a>.</p>
 <p>The structure used to describe a message is <code>msgbuf</code> and is declared in <code>linux/msg.h</code></p>
 <div class="highlight"><pre><span></span><code><span class="cm">/* message buffer for msgsnd and msgrcv calls */</span>
-<span class="k">struct</span> <span class="n">msgbuf</span> <span class="p">{</span>
+<span class="k">struct</span> <span class="nc">msgbuf</span> <span class="p">{</span>
    <span class="kt">long</span> <span class="n">mtype</span><span class="p">;</span>         <span class="cm">/* type of message */</span>
    <span class="kt">char</span> <span class="n">mtext</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>      <span class="cm">/* message text */</span>
 <span class="p">};</span>
@@ -160,11 +160,11 @@
 
 <p>The field <code>mtype</code> represents the type of the message and is a strictly positive number: the correspondence between numbers and message types has to be set in advance and is part of the protocol definition.</p>
 <p>The second field represents the content of the message. With the standard definition, no real message can be held inside it because the space is too little (just one byte). This is just a placeholder since the real structure used to describe messages can be redefined in order to contain complex data. An example of redefinition is the following</p>
-<div class="highlight"><pre><span></span><code><span class="k">struct</span> <span class="n">message</span> <span class="p">{</span>
+<div class="highlight"><pre><span></span><code><span class="k">struct</span> <span class="nc">message</span> <span class="p">{</span>
    <span class="kt">long</span> <span class="n">mtype</span><span class="p">;</span>         <span class="cm">/* message type */</span>
    <span class="kt">long</span> <span class="n">sender</span><span class="p">;</span>        <span class="cm">/* sender id */</span>
    <span class="kt">long</span> <span class="n">receiver</span><span class="p">;</span>        <span class="cm">/* receiver id */</span>        
-   <span class="k">struct</span> <span class="n">info</span> <span class="n">data</span><span class="p">;</span>   <span class="cm">/* message content */</span>
+   <span class="k">struct</span> <span class="nc">info</span> <span class="n">data</span><span class="p">;</span>   <span class="cm">/* message content */</span>
 <span class="p">};</span>
 </code></pre></div>
 
@@ -184,26 +184,26 @@
 and grant access to the owner and group users). The returned integer is called queue identifier and is unique in the system.</p>
 <h4 id="send-messages">Send messages<a class="headerlink" href="#send-messages" title="Permanent link">&para;</a></h4>
 <p>To send a message to a queue we call the <code>msgsnd()</code> primitive</p>
-<div class="highlight"><pre><span></span><code><span class="kt">int</span> <span class="n">msgsnd</span><span class="p">(</span><span class="kt">int</span> <span class="n">msqid</span><span class="p">,</span> <span class="k">struct</span> <span class="n">msgbuf</span> <span class="o">*</span><span class="n">msgp</span><span class="p">,</span> <span class="kt">int</span> <span class="n">msgsz</span><span class="p">,</span> <span class="kt">int</span> <span class="n">msgflg</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="kt">int</span> <span class="n">msgsnd</span><span class="p">(</span><span class="kt">int</span> <span class="n">msqid</span><span class="p">,</span> <span class="k">struct</span> <span class="nc">msgbuf</span> <span class="o">*</span><span class="n">msgp</span><span class="p">,</span> <span class="kt">int</span> <span class="n">msgsz</span><span class="p">,</span> <span class="kt">int</span> <span class="n">msgflg</span><span class="p">)</span>
 </code></pre></div>
 
 <p>where <code>msqid</code> is the identifier of the queue, <code>msgp</code> is a pointer to the message we have to send, <code>msgz</code> the size of the message in bytes (excluding the length of the <code>mtype</code> field, which is 4 bytes) and <code>msgflg</code> a flag related to the waiting policy.</p>
 <p>Here, <code>msgp</code> is a pointer to a <code>struct msgbuf</code>. However, since that structure has been redefined, our actual call will contain a pointer to a variable of the redefined type.</p>
 <p>The length of the message in bytes can be easily be found as</p>
-<div class="highlight"><pre><span></span><code><span class="n">length</span> <span class="o">=</span> <span class="k">sizeof</span><span class="p">(</span><span class="k">struct</span> <span class="n">message</span><span class="p">)</span> <span class="o">-</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">long</span><span class="p">);</span>
+<div class="highlight"><pre><span></span><code><span class="n">length</span> <span class="o">=</span> <span class="k">sizeof</span><span class="p">(</span><span class="k">struct</span> <span class="nc">message</span><span class="p">)</span> <span class="o">-</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">long</span><span class="p">);</span>
 </code></pre></div>
 
 <p>where <code>struct message</code> is our redefinition of <code>struct msgbuf</code>.</p>
 <p>Waiting policies are similar to those introduced for semaphores. This time the policy is used when the queue is full. If <code>msgflg</code> is set to <code>IPC_NOWAIT</code>, the sender process will not wait for some available space and will exit with an error code.</p>
 <h4 id="read-messages">Read messages<a class="headerlink" href="#read-messages" title="Permanent link">&para;</a></h4>
 <p>To read messages contained in a queue we use the <code>msgrcv()</code> system call</p>
-<div class="highlight"><pre><span></span><code><span class="kt">int</span> <span class="n">msgrcv</span><span class="p">(</span><span class="kt">int</span> <span class="n">msqid</span><span class="p">,</span> <span class="k">struct</span> <span class="n">msgbuf</span> <span class="o">*</span><span class="n">msgp</span><span class="p">,</span> <span class="kt">int</span> <span class="n">msgsz</span><span class="p">,</span> <span class="kt">long</span> <span class="n">mtype</span><span class="p">,</span> <span class="kt">int</span> <span class="n">msgflg</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="kt">int</span> <span class="n">msgrcv</span><span class="p">(</span><span class="kt">int</span> <span class="n">msqid</span><span class="p">,</span> <span class="k">struct</span> <span class="nc">msgbuf</span> <span class="o">*</span><span class="n">msgp</span><span class="p">,</span> <span class="kt">int</span> <span class="n">msgsz</span><span class="p">,</span> <span class="kt">long</span> <span class="n">mtype</span><span class="p">,</span> <span class="kt">int</span> <span class="n">msgflg</span><span class="p">)</span>
 </code></pre></div>
 
 <p>where the <code>msgp</code> pointer identifies the variable where we will copy the message read from the queue and mtype identifies the subset of messages we want to consider. As before, <code>msgp</code> should be a pointer to a variable of our redefined type and both <code>msgz</code> and <code>msgflg</code> have the same meaning of their counterparts in <code>msgsnd()</code>.</p>
 <h4 id="delete-a-queue">Delete a queue<a class="headerlink" href="#delete-a-queue" title="Permanent link">&para;</a></h4>
 <p>Last, a queue can be removed calling the <code>msgctl()</code> primitive</p>
-<div class="highlight"><pre><span></span><code><span class="kt">int</span> <span class="nf">msgctl</span><span class="p">(</span><span class="kt">int</span> <span class="n">msqid</span><span class="p">,</span> <span class="kt">int</span> <span class="n">cmd</span><span class="p">,</span> <span class="k">struct</span> <span class="n">msqid_ds</span> <span class="o">*</span><span class="n">buf</span><span class="p">);</span>
+<div class="highlight"><pre><span></span><code><span class="kt">int</span> <span class="nf">msgctl</span><span class="p">(</span><span class="kt">int</span> <span class="n">msqid</span><span class="p">,</span> <span class="kt">int</span> <span class="n">cmd</span><span class="p">,</span> <span class="k">struct</span> <span class="nc">msqid_ds</span> <span class="o">*</span><span class="n">buf</span><span class="p">);</span>
 </code></pre></div>
 
 <p>where the command <code>cmd</code> to remove the queue is <code>IPC_RMID</code>. Other two commands, <code>IPC_STAT</code> and <code>IPC_SET</code>, are available through <code>msgctl()</code>, but they are not interesting now.</p>
@@ -215,7 +215,7 @@ and grant access to the owner and group users). The returned integer is called q
 <span class="cp">#include</span> <span class="cpf">&lt;linux/msg.h&gt;</span><span class="cp"></span>
 
 <span class="cm">/* Redefines the struct msgbuf */</span>
-<span class="k">typedef</span> <span class="k">struct</span> <span class="n">mymsgbuf</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="nc">mymsgbuf</span>
 <span class="p">{</span>
   <span class="kt">long</span> <span class="n">mtype</span><span class="p">;</span>
   <span class="kt">int</span> <span class="n">int_num</span><span class="p">;</span>
@@ -300,7 +300,7 @@ and grant access to the owner and group users). The returned integer is called q
 <span class="cp">#include</span> <span class="cpf">&lt;sys/types.h&gt;</span><span class="cp"></span>
 
 <span class="cm">/* Redefines the message structure */</span>
-<span class="k">typedef</span> <span class="k">struct</span> <span class="n">mymsgbuf</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="nc">mymsgbuf</span>
 <span class="p">{</span>
   <span class="kt">long</span> <span class="n">mtype</span><span class="p">;</span>
   <span class="kt">int</span> <span class="n">num</span><span class="p">;</span>
@@ -511,16 +511,16 @@ and grant access to the owner and group users). The returned integer is called q
             </header>
 <div class="mini-posts">
     <article>
+        <a href="/blog/2021/03/25/how-to-write-a-pelican-theme-for-your-website/" class="image"><img src="/images/how-to-write-a-pelican-theme-for-your-website.jpg" alt="how-to-write-a-pelican-theme-for-your-website" /></a>
+        <p><strong>How to write a Pelican theme for your static website</strong> <a href="/blog/2021/03/25/how-to-write-a-pelican-theme-for-your-website/">Read</a></p> 
+    </article>
+    <article>
         <a href="/blog/2021/03/22/aws-log-insights-as-cloudwatch-metrics-with-python-and-terraform/" class="image"><img src="/images/aws-log-insights-as-cloudwatch-metrics-with-python-and-terraform.jpg" alt="aws-log-insights-as-cloudwatch-metrics-with-python-and-terraform" /></a>
         <p><strong>AWS Log Insights as CloudWatch metrics with Python and Terraform</strong> <a href="/blog/2021/03/22/aws-log-insights-as-cloudwatch-metrics-with-python-and-terraform/">Read</a></p> 
     </article>
     <article>
         <a href="/blog/2021/03/09/first-class-objects-in-python-generic-code-wrappers-and-factories/" class="image"><img src="/images/first-class-objects-in-python-generic-code-wrappers-and-factories.jpg" alt="first-class-objects-in-python-generic-code-wrappers-and-factories" /></a>
         <p><strong>First-class objects in Python: generic code, wrappers, and factories</strong> <a href="/blog/2021/03/09/first-class-objects-in-python-generic-code-wrappers-and-factories/">Read</a></p> 
-    </article>
-    <article>
-        <a href="/blog/2021/02/22/mau-a-lightweight-markup-language/" class="image"><img src="/images/mau-a-lightweight-markup-language.jpg" alt="mau-a-lightweight-markup-language" /></a>
-        <p><strong>Mau: a lightweight markup language</strong> <a href="/blog/2021/02/22/mau-a-lightweight-markup-language/">Read</a></p> 
     </article>
 </div>        </section>
 
@@ -554,7 +554,7 @@ and grant access to the owner and group users). The returned integer is called q
                 <h2>Tags</h2>
             </header>
 <ul class="list-inline list-clean" id="tags-side">
-    <li class="tag font-size-2">
+    <li class="tag font-size-3">
         <a title="Posts about algorithms" href="/categories/algorithms/">algorithms</a>
     </li>
     <li class="tag font-size-2">
@@ -608,7 +608,7 @@ and grant access to the owner and group users). The returned integer is called q
     <li class="tag font-size-3">
         <a title="Posts about Erlang" href="/categories/erlang/">Erlang</a>
     </li>
-    <li class="tag font-size-2">
+    <li class="tag font-size-3">
         <a title="Posts about Flask" href="/categories/flask/">Flask</a>
     </li>
     <li class="tag font-size-1">
@@ -620,7 +620,10 @@ and grant access to the owner and group users). The returned integer is called q
     <li class="tag font-size-3">
         <a title="Posts about Git" href="/categories/git/">Git</a>
     </li>
-    <li class="tag font-size-2">
+    <li class="tag font-size-4">
+        <a title="Posts about HTML" href="/categories/html/">HTML</a>
+    </li>
+    <li class="tag font-size-3">
         <a title="Posts about HTTP" href="/categories/http/">HTTP</a>
     </li>
     <li class="tag font-size-3">
@@ -635,7 +638,7 @@ and grant access to the owner and group users). The returned integer is called q
     <li class="tag font-size-4">
         <a title="Posts about M68000" href="/categories/m68000/">M68000</a>
     </li>
-    <li class="tag font-size-4">
+    <li class="tag font-size-3">
         <a title="Posts about Markdown" href="/categories/markdown/">Markdown</a>
     </li>
     <li class="tag font-size-4">
@@ -656,7 +659,7 @@ and grant access to the owner and group users). The returned integer is called q
     <li class="tag font-size-2">
         <a title="Posts about operating systems" href="/categories/operating-systems/">operating systems</a>
     </li>
-    <li class="tag font-size-4">
+    <li class="tag font-size-3">
         <a title="Posts about pelican" href="/categories/pelican/">pelican</a>
     </li>
     <li class="tag font-size-4">

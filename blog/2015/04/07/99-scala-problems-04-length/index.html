@@ -118,51 +118,51 @@
     <h2 id="the-problem">The problem<a class="headerlink" href="#the-problem" title="Permanent link">&para;</a></h2>
 <p><strong>P04</strong> (*) Find the number of elements of a list.</p>
 <p>Example:</p>
-<div class="highlight"><pre><span></span><code><span class="n">scala</span><span class="o">&gt;</span> <span class="n">length</span><span class="o">(</span><span class="nc">List</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">3</span><span class="o">,</span> <span class="mi">5</span><span class="o">,</span> <span class="mi">8</span><span class="o">))</span>
-<span class="n">res0</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">6</span>
+<div class="highlight"><pre><span></span><code><span class="n">scala</span><span class="o">&gt;</span> <span class="n">length</span><span class="p">(</span><span class="nc">List</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+<span class="n">res0</span><span class="p">:</span> <span class="nc">Int</span> <span class="o">=</span> <span class="mi">6</span>
 </code></pre></div>
 
 <h2 id="initial-thoughts">Initial thoughts<a class="headerlink" href="#initial-thoughts" title="Permanent link">&para;</a></h2>
 <p>This should be straightforward both with object-oriented and functional techniques. There are no special cases except that of an empty list. There is an interesting solution that mixes functional and object-oriented techniques, which is known as folding, and I'll discuss it in detail.</p>
 <p>As already said for <a href="https://www.thedigitalcatonline.com/blog/2015/04/07/99-scala-problems-02-find-last-nth/">problem 02</a>, this function may help solving that problem in a pure recursive way, so we'll talk about this too.</p>
 <h2 id="the-procedural-solution">The procedural solution<a class="headerlink" href="#the-procedural-solution" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="n">length</span><span class="o">[</span><span class="kt">A</span><span class="o">](</span><span class="n">l</span><span class="k">:</span><span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">])</span><span class="k">:</span><span class="kt">Int</span> <span class="o">=</span> <span class="o">{</span>
-    <span class="n">l</span><span class="o">.</span><span class="n">length</span>
-<span class="o">}</span>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">length</span><span class="p">[</span><span class="nc">A</span><span class="p">](</span><span class="n">l</span><span class="p">:</span><span class="nc">List</span><span class="p">[</span><span class="nc">A</span><span class="p">]):</span><span class="nc">Int</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">l</span><span class="p">.</span><span class="n">length</span>
+<span class="p">}</span>
 </code></pre></div>
 
 <p>No special things to highlight here. The <code>length()</code> method works with empty lists too, returning 0, so everything should be fine. As already shown in <a href="https://www.thedigitalcatonline.com/blog/2015/04/07/99-scala-problems-01-find-last-element/">problem 01</a> the function may be also reduced to one single line</p>
-<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="n">length</span><span class="o">[</span><span class="kt">A</span><span class="o">](</span><span class="n">l</span><span class="k">:</span><span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">])</span><span class="k">:</span><span class="kt">Int</span> <span class="o">=</span> <span class="n">l</span><span class="o">.</span><span class="n">length</span>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">length</span><span class="p">[</span><span class="nc">A</span><span class="p">](</span><span class="n">l</span><span class="p">:</span><span class="nc">List</span><span class="p">[</span><span class="nc">A</span><span class="p">]):</span><span class="nc">Int</span> <span class="o">=</span> <span class="n">l</span><span class="p">.</span><span class="n">length</span>
 </code></pre></div>
 
 <h2 id="the-recursive-solution">The recursive solution<a class="headerlink" href="#the-recursive-solution" title="Permanent link">&para;</a></h2>
 <p>Coming from procedural languages my first solution was</p>
-<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="n">length</span><span class="o">[</span><span class="kt">A</span><span class="o">](</span><span class="n">l</span><span class="k">:</span><span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">])</span><span class="k">:</span><span class="kt">Int</span> <span class="o">=</span> <span class="o">{</span>
-    <span class="k">def</span> <span class="n">lengthN</span><span class="o">[</span><span class="kt">A</span><span class="o">](</span><span class="n">n</span><span class="k">:</span><span class="kt">Int</span><span class="o">,</span> <span class="n">l</span><span class="k">:</span><span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">])</span><span class="k">:</span><span class="kt">Int</span> <span class="o">=</span> <span class="n">l</span> <span class="k">match</span> <span class="o">{</span>
-        <span class="k">case</span> <span class="nc">Nil</span> <span class="k">=&gt;</span> <span class="n">n</span>
-        <span class="k">case</span> <span class="k">_</span><span class="o">::</span><span class="n">tail</span> <span class="k">=&gt;</span> <span class="n">lengthN</span><span class="o">(</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="o">,</span> <span class="n">tail</span><span class="o">)</span>
-    <span class="o">}</span>
-    <span class="n">lengthN</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span><span class="n">l</span><span class="o">)</span>
-<span class="o">}</span>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">length</span><span class="p">[</span><span class="nc">A</span><span class="p">](</span><span class="n">l</span><span class="p">:</span><span class="nc">List</span><span class="p">[</span><span class="nc">A</span><span class="p">]):</span><span class="nc">Int</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="k">def</span> <span class="nf">lengthN</span><span class="p">[</span><span class="nc">A</span><span class="p">](</span><span class="n">n</span><span class="p">:</span><span class="nc">Int</span><span class="p">,</span> <span class="n">l</span><span class="p">:</span><span class="nc">List</span><span class="p">[</span><span class="nc">A</span><span class="p">]):</span><span class="nc">Int</span> <span class="o">=</span> <span class="n">l</span> <span class="k">match</span> <span class="p">{</span>
+        <span class="k">case</span> <span class="nc">Nil</span> <span class="o">=&gt;</span> <span class="n">n</span>
+        <span class="k">case</span> <span class="n">_::tail</span> <span class="o">=&gt;</span> <span class="n">lengthN</span><span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">tail</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="n">lengthN</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">l</span><span class="p">)</span>
+<span class="p">}</span>
 </code></pre></div>
 
 <p>which works fine. I create an helper function that calls itself on each element in the list passing an incremented accumulator and the remaining elements of the list. Then I call it passing an empty accumulator and the whole list.</p>
 <p>There is a simpler way to express the same algorithm, which is</p>
-<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="n">lengthRecursive</span><span class="o">[</span><span class="kt">A</span><span class="o">](</span><span class="n">l</span><span class="k">:</span><span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">])</span><span class="k">:</span><span class="kt">Int</span> <span class="o">=</span> <span class="n">l</span> <span class="k">match</span> <span class="o">{</span>
-    <span class="k">case</span> <span class="nc">Nil</span> <span class="k">=&gt;</span> <span class="mi">0</span>
-    <span class="k">case</span> <span class="n">h</span><span class="o">::</span><span class="n">tail</span> <span class="k">=&gt;</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">lengthRecursive</span><span class="o">(</span><span class="n">tail</span><span class="o">)</span>
-<span class="o">}</span>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">lengthRecursive</span><span class="p">[</span><span class="nc">A</span><span class="p">](</span><span class="n">l</span><span class="p">:</span><span class="nc">List</span><span class="p">[</span><span class="nc">A</span><span class="p">]):</span><span class="nc">Int</span> <span class="o">=</span> <span class="n">l</span> <span class="k">match</span> <span class="p">{</span>
+    <span class="k">case</span> <span class="nc">Nil</span> <span class="o">=&gt;</span> <span class="mi">0</span>
+    <span class="k">case</span> <span class="n">h::tail</span> <span class="o">=&gt;</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">lengthRecursive</span><span class="p">(</span><span class="n">tail</span><span class="p">)</span>
+<span class="p">}</span>
 </code></pre></div>
 
 <p>The first solution is better, anyhow, because that function is tail recursive. You can find a good explanation of tail recursion <a href="http://oldfashionedsoftware.com/2008/09/27/tail-recursion-basics-in-scala/">here</a>. The explanation given by "learn you some Erlang!" (<a href="http://learnyousomeerlang.com/recursion">here</a>) is perhaps clearer, even if discussed for a different language.</p>
 <p>Basically the first solution may be optimized since all local variables are useless once the recursive call is performed, thus the stack may be freed.</p>
 <h2 id="folding">Folding<a class="headerlink" href="#folding" title="Permanent link">&para;</a></h2>
 <p>There is a third way to solve the problem, mixing object-oriented and functional approaches, through the use of folding. This is something new for me, and it took me a little to grasp the concept.</p>
-<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="n">length</span><span class="o">[</span><span class="kt">A</span><span class="o">](</span><span class="n">l</span><span class="k">:</span><span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">])</span><span class="k">:</span><span class="kt">Int</span> <span class="o">=</span> <span class="n">l</span><span class="o">.</span><span class="n">foldLeft</span><span class="o">(</span><span class="mi">0</span><span class="o">)</span> <span class="o">{</span> <span class="o">(</span><span class="n">c</span><span class="o">,</span><span class="k">_</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="n">c</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">}</span>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">length</span><span class="p">[</span><span class="nc">A</span><span class="p">](</span><span class="n">l</span><span class="p">:</span><span class="nc">List</span><span class="p">[</span><span class="nc">A</span><span class="p">]):</span><span class="nc">Int</span> <span class="o">=</span> <span class="n">l</span><span class="p">.</span><span class="n">foldLeft</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="p">{</span> <span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">_</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="n">c</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">}</span>
 </code></pre></div>
 
 <p>The <code>foldLeft()</code> definition is the following</p>
-<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="n">foldLeft</span><span class="o">[</span><span class="kt">B</span><span class="o">](</span><span class="n">z</span><span class="k">:</span> <span class="kt">B</span><span class="o">)(</span><span class="n">f</span><span class="k">:</span> <span class="o">(</span><span class="kt">B</span><span class="o">,</span> <span class="kt">A</span><span class="o">)</span> <span class="k">⇒</span> <span class="n">B</span><span class="o">)</span><span class="k">:</span> <span class="kt">B</span> 
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">foldLeft</span><span class="p">[</span><span class="nc">B</span><span class="p">](</span><span class="n">z</span><span class="p">:</span> <span class="nc">B</span><span class="p">)(</span><span class="n">f</span><span class="p">:</span> <span class="p">(</span><span class="nc">B</span><span class="p">,</span> <span class="nc">A</span><span class="p">)</span> <span class="o">⇒</span> <span class="nc">B</span><span class="p">):</span> <span class="nc">B</span> 
 </code></pre></div>
 
 <p>and the documentation states: "Applies a binary operator to a start value and all elements of this sequence, going left to right".</p>
@@ -171,34 +171,34 @@
 <p>This has to do with the concepts of partially applied functions (NOT <em>partial functions</em>) and currying. I recommend two readings from Stackoverflow: <a href="https://stackoverflow.com/questions/8650549/using-partial-functions-in-scala-how-does-it-work/8650639#8650639">this answer</a> about the meaning of partial function, partially applied function and currying, and <a href="https://stackoverflow.com/questions/14309501/scala-currying-vs-partially-applied-functions">this answer</a> (which also links the first one) that explores the difference between partially applied and currying. I consider that two answers to be exhaustive so I will not add any explanation about this topic.</p>
 <p>There is another thing to note in the folding solution, however, which is the way Scala defines anonymous functions. The Scala tour has a <a href="https://www.scala-lang.org/old/node/133">good explanation</a> of anonymous functions, which are pretty simple.</p>
 <p>In the given solution for the problem, the anonymous function can be written more explicitly like</p>
-<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="n">count</span><span class="o">[</span><span class="kt">A</span><span class="o">](</span><span class="n">c</span><span class="k">:</span><span class="kt">Int</span><span class="o">,</span> <span class="n">d</span><span class="k">:</span><span class="kt">A</span><span class="o">)</span><span class="k">:</span><span class="kt">Int</span> <span class="o">=</span> <span class="o">{</span>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">count</span><span class="p">[</span><span class="nc">A</span><span class="p">](</span><span class="n">c</span><span class="p">:</span><span class="nc">Int</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span><span class="nc">A</span><span class="p">):</span><span class="nc">Int</span> <span class="o">=</span> <span class="p">{</span>
     <span class="n">c</span> <span class="o">+</span> <span class="mi">1</span>
-<span class="o">}</span>
+<span class="p">}</span>
 
-<span class="k">def</span> <span class="n">length</span><span class="o">[</span><span class="kt">A</span><span class="o">](</span><span class="n">l</span><span class="k">:</span><span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">])</span><span class="k">:</span><span class="kt">Int</span> <span class="o">=</span> <span class="n">l</span><span class="o">.</span><span class="n">foldLeft</span><span class="o">(</span><span class="mi">0</span><span class="o">)</span> <span class="o">{</span> <span class="n">count</span> <span class="o">}</span>
+<span class="k">def</span> <span class="nf">length</span><span class="p">[</span><span class="nc">A</span><span class="p">](</span><span class="n">l</span><span class="p">:</span><span class="nc">List</span><span class="p">[</span><span class="nc">A</span><span class="p">]):</span><span class="nc">Int</span> <span class="o">=</span> <span class="n">l</span><span class="p">.</span><span class="n">foldLeft</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="p">{</span> <span class="n">count</span> <span class="p">}</span>
 </code></pre></div>
 
 <p>which should be clear. The count function accepts an <code>Int</code> and a value of the generic type <code>A</code> and returns <code>c + 1</code>. This function is applied on each element of the list by the <code>foldLeft()</code> method, passing the result of the previous application as the first parameter <code>c</code>.</p>
 <p>The <code>count()</code> function may however be simplified to an anonymous function due to its simplicity. Making use of <a href="https://stackoverflow.com/questions/4899320/when-does-scala-need-parameter-types-for-anonymous-and-expanded-functions">type inference</a> and <a href="http://www.codecommit.com/blog/scala/quick-explanation-of-scalas-syntax">placeholder syntax</a> we may reduce it to the given form.</p>
 <h2 id="last-nth-element">Last nth element<a class="headerlink" href="#last-nth-element" title="Permanent link">&para;</a></h2>
 <p>Now that we have a pure recursive solution for counting elements in a list we may go back to <a href="https://www.thedigitalcatonline.com/blog/2015/04/07/99-scala-problems-02-find-last-nth/">problem 02</a> and give another solution.</p>
-<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="n">lastNth</span><span class="o">[</span><span class="kt">A</span><span class="o">](</span><span class="n">n</span><span class="k">:</span> <span class="kt">Int</span><span class="o">,</span> <span class="n">l</span><span class="k">:</span><span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">])</span><span class="k">:</span> <span class="kt">A</span> <span class="o">=</span> <span class="o">{</span>
-    <span class="k">def</span> <span class="n">length</span><span class="o">[</span><span class="kt">A</span><span class="o">](</span><span class="n">l</span><span class="k">:</span><span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">])</span><span class="k">:</span><span class="kt">Int</span> <span class="o">=</span> <span class="o">{</span>
-        <span class="k">def</span> <span class="n">lengthN</span><span class="o">[</span><span class="kt">A</span><span class="o">](</span><span class="n">n</span><span class="k">:</span><span class="kt">Int</span><span class="o">,</span> <span class="n">l</span><span class="k">:</span><span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">])</span><span class="k">:</span><span class="kt">Int</span> <span class="o">=</span> <span class="n">l</span> <span class="k">match</span> <span class="o">{</span>
-            <span class="k">case</span> <span class="nc">Nil</span> <span class="k">=&gt;</span> <span class="n">n</span>
-            <span class="k">case</span> <span class="k">_</span><span class="o">::</span><span class="n">tail</span> <span class="k">=&gt;</span> <span class="n">lengthN</span><span class="o">(</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="o">,</span> <span class="n">tail</span><span class="o">)</span>
-        <span class="o">}</span>
-        <span class="n">lengthN</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span><span class="n">l</span><span class="o">)</span>
-    <span class="o">}</span>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">lastNth</span><span class="p">[</span><span class="nc">A</span><span class="p">](</span><span class="n">n</span><span class="p">:</span> <span class="nc">Int</span><span class="p">,</span> <span class="n">l</span><span class="p">:</span><span class="nc">List</span><span class="p">[</span><span class="nc">A</span><span class="p">]):</span> <span class="nc">A</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="k">def</span> <span class="nf">length</span><span class="p">[</span><span class="nc">A</span><span class="p">](</span><span class="n">l</span><span class="p">:</span><span class="nc">List</span><span class="p">[</span><span class="nc">A</span><span class="p">]):</span><span class="nc">Int</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="k">def</span> <span class="nf">lengthN</span><span class="p">[</span><span class="nc">A</span><span class="p">](</span><span class="n">n</span><span class="p">:</span><span class="nc">Int</span><span class="p">,</span> <span class="n">l</span><span class="p">:</span><span class="nc">List</span><span class="p">[</span><span class="nc">A</span><span class="p">]):</span><span class="nc">Int</span> <span class="o">=</span> <span class="n">l</span> <span class="k">match</span> <span class="p">{</span>
+            <span class="k">case</span> <span class="nc">Nil</span> <span class="o">=&gt;</span> <span class="n">n</span>
+            <span class="k">case</span> <span class="n">_::tail</span> <span class="o">=&gt;</span> <span class="n">lengthN</span><span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">tail</span><span class="p">)</span>
+        <span class="p">}</span>
+        <span class="n">lengthN</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">l</span><span class="p">)</span>
+    <span class="p">}</span>
 
-    <span class="k">def</span> <span class="n">findKth</span><span class="o">[</span><span class="kt">A</span><span class="o">](</span><span class="n">k</span><span class="k">:</span><span class="kt">Int</span><span class="o">,</span> <span class="n">l</span><span class="k">:</span><span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">])</span><span class="k">:</span><span class="kt">A</span> <span class="o">=</span> <span class="o">(</span><span class="n">k</span><span class="o">,</span><span class="n">l</span><span class="o">)</span> <span class="k">match</span> <span class="o">{</span>
-        <span class="k">case</span> <span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="n">h</span><span class="o">::</span><span class="k">_</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="n">h</span>
-        <span class="k">case</span> <span class="o">(</span><span class="n">k</span><span class="o">,</span> <span class="k">_</span><span class="o">::</span><span class="n">tail</span><span class="o">)</span> <span class="k">if</span> <span class="n">k</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">=&gt;</span> <span class="n">findKth</span><span class="o">(</span><span class="n">k</span> <span class="o">-</span> <span class="mi">1</span><span class="o">,</span> <span class="n">tail</span><span class="o">)</span>
-        <span class="k">case</span> <span class="k">_</span> <span class="k">=&gt;</span> <span class="k">throw</span> <span class="k">new</span> <span class="nc">NoSuchElementException</span>
-    <span class="o">}</span>
-    <span class="k">val</span> <span class="n">k</span> <span class="k">=</span> <span class="n">length</span><span class="o">(</span><span class="n">l</span><span class="o">)</span> <span class="o">-</span> <span class="n">n</span>
-    <span class="n">findKth</span><span class="o">(</span><span class="n">k</span><span class="o">,</span> <span class="n">l</span><span class="o">)</span>
-<span class="o">}</span>
+    <span class="k">def</span> <span class="nf">findKth</span><span class="p">[</span><span class="nc">A</span><span class="p">](</span><span class="n">k</span><span class="p">:</span><span class="nc">Int</span><span class="p">,</span> <span class="n">l</span><span class="p">:</span><span class="nc">List</span><span class="p">[</span><span class="nc">A</span><span class="p">]):</span><span class="nc">A</span> <span class="o">=</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">l</span><span class="p">)</span> <span class="k">match</span> <span class="p">{</span>
+        <span class="k">case</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">h::_</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="n">h</span>
+        <span class="k">case</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">_::tail</span><span class="p">)</span> <span class="k">if</span> <span class="n">k</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">=&gt;</span> <span class="n">findKth</span><span class="p">(</span><span class="n">k</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">tail</span><span class="p">)</span>
+        <span class="k">case</span> <span class="n">_</span> <span class="o">=&gt;</span> <span class="k">throw</span> <span class="k">new</span> <span class="nc">NoSuchElementException</span>
+    <span class="p">}</span>
+    <span class="kd">val</span> <span class="n">k</span> <span class="o">=</span> <span class="n">length</span><span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span>
+    <span class="n">findKth</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">l</span><span class="p">)</span>
+<span class="p">}</span>
 </code></pre></div>
 
 <p>This simply takes advantage of the function <code>length()</code> developed in this post and of the function <code>findKth()</code> from <a href="https://www.thedigitalcatonline.com/blog/2015/04/07/99-scala-problems-03-find-kth/">problem 03</a>.</p>
@@ -390,16 +390,16 @@
             </header>
 <div class="mini-posts">
     <article>
+        <a href="/blog/2021/03/25/how-to-write-a-pelican-theme-for-your-website/" class="image"><img src="/images/how-to-write-a-pelican-theme-for-your-website.jpg" alt="how-to-write-a-pelican-theme-for-your-website" /></a>
+        <p><strong>How to write a Pelican theme for your static website</strong> <a href="/blog/2021/03/25/how-to-write-a-pelican-theme-for-your-website/">Read</a></p> 
+    </article>
+    <article>
         <a href="/blog/2021/03/22/aws-log-insights-as-cloudwatch-metrics-with-python-and-terraform/" class="image"><img src="/images/aws-log-insights-as-cloudwatch-metrics-with-python-and-terraform.jpg" alt="aws-log-insights-as-cloudwatch-metrics-with-python-and-terraform" /></a>
         <p><strong>AWS Log Insights as CloudWatch metrics with Python and Terraform</strong> <a href="/blog/2021/03/22/aws-log-insights-as-cloudwatch-metrics-with-python-and-terraform/">Read</a></p> 
     </article>
     <article>
         <a href="/blog/2021/03/09/first-class-objects-in-python-generic-code-wrappers-and-factories/" class="image"><img src="/images/first-class-objects-in-python-generic-code-wrappers-and-factories.jpg" alt="first-class-objects-in-python-generic-code-wrappers-and-factories" /></a>
         <p><strong>First-class objects in Python: generic code, wrappers, and factories</strong> <a href="/blog/2021/03/09/first-class-objects-in-python-generic-code-wrappers-and-factories/">Read</a></p> 
-    </article>
-    <article>
-        <a href="/blog/2021/02/22/mau-a-lightweight-markup-language/" class="image"><img src="/images/mau-a-lightweight-markup-language.jpg" alt="mau-a-lightweight-markup-language" /></a>
-        <p><strong>Mau: a lightweight markup language</strong> <a href="/blog/2021/02/22/mau-a-lightweight-markup-language/">Read</a></p> 
     </article>
 </div>        </section>
 
@@ -433,7 +433,7 @@
                 <h2>Tags</h2>
             </header>
 <ul class="list-inline list-clean" id="tags-side">
-    <li class="tag font-size-2">
+    <li class="tag font-size-3">
         <a title="Posts about algorithms" href="/categories/algorithms/">algorithms</a>
     </li>
     <li class="tag font-size-2">
@@ -487,7 +487,7 @@
     <li class="tag font-size-3">
         <a title="Posts about Erlang" href="/categories/erlang/">Erlang</a>
     </li>
-    <li class="tag font-size-2">
+    <li class="tag font-size-3">
         <a title="Posts about Flask" href="/categories/flask/">Flask</a>
     </li>
     <li class="tag font-size-1">
@@ -499,7 +499,10 @@
     <li class="tag font-size-3">
         <a title="Posts about Git" href="/categories/git/">Git</a>
     </li>
-    <li class="tag font-size-2">
+    <li class="tag font-size-4">
+        <a title="Posts about HTML" href="/categories/html/">HTML</a>
+    </li>
+    <li class="tag font-size-3">
         <a title="Posts about HTTP" href="/categories/http/">HTTP</a>
     </li>
     <li class="tag font-size-3">
@@ -514,7 +517,7 @@
     <li class="tag font-size-4">
         <a title="Posts about M68000" href="/categories/m68000/">M68000</a>
     </li>
-    <li class="tag font-size-4">
+    <li class="tag font-size-3">
         <a title="Posts about Markdown" href="/categories/markdown/">Markdown</a>
     </li>
     <li class="tag font-size-4">
@@ -535,7 +538,7 @@
     <li class="tag font-size-2">
         <a title="Posts about operating systems" href="/categories/operating-systems/">operating systems</a>
     </li>
-    <li class="tag font-size-4">
+    <li class="tag font-size-3">
         <a title="Posts about pelican" href="/categories/pelican/">pelican</a>
     </li>
     <li class="tag font-size-4">

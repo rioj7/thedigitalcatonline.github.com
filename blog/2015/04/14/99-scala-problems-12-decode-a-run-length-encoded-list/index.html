@@ -119,8 +119,8 @@
 <p><strong>P12</strong> (**) Decode a run-length encoded list.
 Given a run-length code list generated as specified in problem P10, construct its uncompressed version.</p>
 <p>Example:</p>
-<div class="highlight"><pre><span></span><code><span class="n">scala</span><span class="o">&gt;</span> <span class="n">decode</span><span class="o">(</span><span class="nc">List</span><span class="o">((</span><span class="mi">4</span><span class="o">,</span> <span class=" -Symbol">&#39;a</span><span class="o">),</span> <span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class=" -Symbol">&#39;b</span><span class="o">),</span> <span class="o">(</span><span class="mi">2</span><span class="o">,</span> <span class=" -Symbol">&#39;c</span><span class="o">),</span> <span class="o">(</span><span class="mi">2</span><span class="o">,</span> <span class=" -Symbol">&#39;a</span><span class="o">),</span> <span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class=" -Symbol">&#39;d</span><span class="o">),</span> <span class="o">(</span><span class="mi">4</span><span class="o">,</span> <span class=" -Symbol">&#39;e</span><span class="o">)))</span>
-<span class="n">res0</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">Symbol</span><span class="o">]</span> <span class="k">=</span> <span class="nc">List</span><span class="o">(</span><span class=" -Symbol">&#39;a</span><span class="o">,</span> <span class=" -Symbol">&#39;a</span><span class="o">,</span> <span class=" -Symbol">&#39;a</span><span class="o">,</span> <span class=" -Symbol">&#39;a</span><span class="o">,</span> <span class=" -Symbol">&#39;b</span><span class="o">,</span> <span class=" -Symbol">&#39;c</span><span class="o">,</span> <span class=" -Symbol">&#39;c</span><span class="o">,</span> <span class=" -Symbol">&#39;a</span><span class="o">,</span> <span class=" -Symbol">&#39;a</span><span class="o">,</span> <span class=" -Symbol">&#39;d</span><span class="o">,</span> <span class=" -Symbol">&#39;e</span><span class="o">,</span> <span class=" -Symbol">&#39;e</span><span class="o">,</span> <span class=" -Symbol">&#39;e</span><span class="o">,</span> <span class=" -Symbol">&#39;e</span><span class="o">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">scala</span><span class="o">&gt;</span> <span class="n">decode</span><span class="p">(</span><span class="nc">List</span><span class="p">((</span><span class="mi">4</span><span class="p">,</span> <span class="ss">&#39;a</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="ss">&#39;b</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="ss">&#39;c</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="ss">&#39;a</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="ss">&#39;d</span><span class="p">),</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="ss">&#39;e</span><span class="p">)))</span>
+<span class="n">res0</span><span class="p">:</span> <span class="nc">List</span><span class="p">[</span><span class="nc">Symbol</span><span class="p">]</span> <span class="o">=</span> <span class="nc">List</span><span class="p">(</span><span class="ss">&#39;a</span><span class="p">,</span> <span class="ss">&#39;a</span><span class="p">,</span> <span class="ss">&#39;a</span><span class="p">,</span> <span class="ss">&#39;a</span><span class="p">,</span> <span class="ss">&#39;b</span><span class="p">,</span> <span class="ss">&#39;c</span><span class="p">,</span> <span class="ss">&#39;c</span><span class="p">,</span> <span class="ss">&#39;a</span><span class="p">,</span> <span class="ss">&#39;a</span><span class="p">,</span> <span class="ss">&#39;d</span><span class="p">,</span> <span class="ss">&#39;e</span><span class="p">,</span> <span class="ss">&#39;e</span><span class="p">,</span> <span class="ss">&#39;e</span><span class="p">,</span> <span class="ss">&#39;e</span><span class="p">)</span>
 </code></pre></div>
 
 <h2 id="initial-thoughts">Initial thoughts<a class="headerlink" href="#initial-thoughts" title="Permanent link">&para;</a></h2>
@@ -128,14 +128,14 @@ Given a run-length code list generated as specified in problem P10, construct it
 <h2 id="the-recursive-solution">The recursive solution<a class="headerlink" href="#the-recursive-solution" title="Permanent link">&para;</a></h2>
 <p>Since I decided to use <code>flatMap()</code>, which basically acts like <code>map()</code> but then inserts the resulting list into the target list (indeed flattening it), I have to write a function that converts a <code>(Int, A)</code> tuple into a <code>List[A]</code>, where <code>A</code> is a type of choice.</p>
 <p>The only issue in building lists in Scala is that the <code>:::</code> operator works with two lists, so we have to build a list with the current head to be able to append it.</p>
-<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="n">decode</span><span class="o">[</span><span class="kt">A</span><span class="o">](</span><span class="n">l</span><span class="k">:</span> <span class="kt">List</span><span class="o">[(</span><span class="kt">Int</span><span class="p">,</span> <span class="kt">A</span><span class="o">)])</span><span class="k">:</span><span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
-    <span class="k">def</span> <span class="nc">_expand</span><span class="o">(</span><span class="n">res</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">],</span> <span class="n">rem</span><span class="k">:</span><span class="o">(</span><span class="kt">Int</span><span class="o">,</span> <span class="kt">A</span><span class="o">))</span><span class="k">:</span><span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">]</span> <span class="k">=</span> <span class="n">rem</span> <span class="k">match</span> <span class="o">{</span>
-        <span class="k">case</span> <span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="k">_</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="n">res</span>
-        <span class="k">case</span> <span class="o">(</span><span class="n">n</span><span class="o">,</span> <span class="n">h</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="nc">_expand</span><span class="o">(</span><span class="n">res</span><span class="o">:::</span><span class="nc">List</span><span class="o">(</span><span class="n">h</span><span class="o">),</span> <span class="o">(</span><span class="n">n</span> <span class="o">-</span><span class="mi">1</span><span class="o">,</span> <span class="n">h</span><span class="o">))</span>
-    <span class="o">}</span>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">decode</span><span class="p">[</span><span class="nc">A</span><span class="p">](</span><span class="n">l</span><span class="p">:</span> <span class="nc">List</span><span class="p">[(</span><span class="nc">Int</span><span class="p">,</span> <span class="nc">A</span><span class="p">)]):</span><span class="nc">List</span><span class="p">[</span><span class="nc">A</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="k">def</span> <span class="nf">_expand</span><span class="p">(</span><span class="n">res</span><span class="p">:</span> <span class="nc">List</span><span class="p">[</span><span class="nc">A</span><span class="p">],</span> <span class="n">rem</span><span class="p">:(</span><span class="nc">Int</span><span class="p">,</span> <span class="nc">A</span><span class="p">)):</span><span class="nc">List</span><span class="p">[</span><span class="nc">A</span><span class="p">]</span> <span class="o">=</span> <span class="n">rem</span> <span class="k">match</span> <span class="p">{</span>
+        <span class="k">case</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="n">res</span>
+        <span class="k">case</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="n">_expand</span><span class="p">(</span><span class="n">res:::</span><span class="nc">List</span><span class="p">(</span><span class="n">h</span><span class="p">),</span> <span class="p">(</span><span class="n">n</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">h</span><span class="p">))</span>
+    <span class="p">}</span>
 
-    <span class="n">l</span> <span class="n">flatMap</span> <span class="o">{</span> <span class="n">e</span> <span class="k">=&gt;</span> <span class="nc">_expand</span><span class="o">(</span><span class="nc">List</span><span class="o">(),</span><span class="n">e</span><span class="o">)</span> <span class="o">}</span>
-<span class="o">}</span>
+    <span class="n">l</span> <span class="n">flatMap</span> <span class="p">{</span> <span class="n">e</span> <span class="o">=&gt;</span> <span class="n">_expand</span><span class="p">(</span><span class="nc">List</span><span class="p">(),</span><span class="n">e</span><span class="p">)</span> <span class="p">}</span>
+<span class="p">}</span>
 </code></pre></div>
 
 <p>The last call is a mapping. Each element is mapped into a list by the <code>_expand()</code> function, while <code>flatMap()</code> does the flattening job.</p>
@@ -143,9 +143,9 @@ Given a run-length code list generated as specified in problem P10, construct it
 <p>There is a simpler way that makes use of a function of the <code>List</code> object. Object and classes are two different entities in Scala, and objects are singletons that encapsulate constructor (and de-constructor) methods.</p>
 <p>The <code>fill()</code> method is documented <a href="http://www.scala-lang.org/api/2.11.4/index.html#scala.collection.immutable.List$">here</a>, and we are interested now in the one-dimensional version. As you can see from the documentation, this function is curried (see <a href="https://www.thedigitalcatonline.com/blog/2015/04/07/99-scala-problems-04-length/">problem 04</a>) and accepts as first parameter the length of the list and as second parameter the element to put into the list itself.</p>
 <p>We are just interested in repeating an element this time, so the function invocation is very simple</p>
-<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="n">decode2</span><span class="o">[</span><span class="kt">A</span><span class="o">](</span><span class="n">l</span><span class="k">:</span> <span class="kt">List</span><span class="o">[(</span><span class="kt">Int</span><span class="p">,</span> <span class="kt">A</span><span class="o">)])</span><span class="k">:</span><span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
-    <span class="n">l</span> <span class="n">flatMap</span> <span class="o">{</span> <span class="n">e</span> <span class="k">=&gt;</span> <span class="nc">List</span><span class="o">.</span><span class="n">fill</span><span class="o">(</span><span class="n">e</span><span class="o">.</span><span class="n">_1</span><span class="o">)(</span><span class="n">e</span><span class="o">.</span><span class="n">_2</span><span class="o">)</span> <span class="o">}</span>
-<span class="o">}</span>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">decode2</span><span class="p">[</span><span class="nc">A</span><span class="p">](</span><span class="n">l</span><span class="p">:</span> <span class="nc">List</span><span class="p">[(</span><span class="nc">Int</span><span class="p">,</span> <span class="nc">A</span><span class="p">)]):</span><span class="nc">List</span><span class="p">[</span><span class="nc">A</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">l</span> <span class="n">flatMap</span> <span class="p">{</span> <span class="n">e</span> <span class="o">=&gt;</span> <span class="nc">List</span><span class="p">.</span><span class="n">fill</span><span class="p">(</span><span class="n">e</span><span class="p">.</span><span class="n">_1</span><span class="p">)(</span><span class="n">e</span><span class="p">.</span><span class="n">_2</span><span class="p">)</span> <span class="p">}</span>
+<span class="p">}</span>
 </code></pre></div>
 
 <p>Scala tuples may be indexed using the <code>_index</code> notation, starting from 1 (while lists are indexed from 0). Here, just like in the recursive solution, we have to use <code>flatMap()</code> to flatten the resulting list.</p>
@@ -337,16 +337,16 @@ Given a run-length code list generated as specified in problem P10, construct it
             </header>
 <div class="mini-posts">
     <article>
+        <a href="/blog/2021/03/25/how-to-write-a-pelican-theme-for-your-website/" class="image"><img src="/images/how-to-write-a-pelican-theme-for-your-website.jpg" alt="how-to-write-a-pelican-theme-for-your-website" /></a>
+        <p><strong>How to write a Pelican theme for your static website</strong> <a href="/blog/2021/03/25/how-to-write-a-pelican-theme-for-your-website/">Read</a></p> 
+    </article>
+    <article>
         <a href="/blog/2021/03/22/aws-log-insights-as-cloudwatch-metrics-with-python-and-terraform/" class="image"><img src="/images/aws-log-insights-as-cloudwatch-metrics-with-python-and-terraform.jpg" alt="aws-log-insights-as-cloudwatch-metrics-with-python-and-terraform" /></a>
         <p><strong>AWS Log Insights as CloudWatch metrics with Python and Terraform</strong> <a href="/blog/2021/03/22/aws-log-insights-as-cloudwatch-metrics-with-python-and-terraform/">Read</a></p> 
     </article>
     <article>
         <a href="/blog/2021/03/09/first-class-objects-in-python-generic-code-wrappers-and-factories/" class="image"><img src="/images/first-class-objects-in-python-generic-code-wrappers-and-factories.jpg" alt="first-class-objects-in-python-generic-code-wrappers-and-factories" /></a>
         <p><strong>First-class objects in Python: generic code, wrappers, and factories</strong> <a href="/blog/2021/03/09/first-class-objects-in-python-generic-code-wrappers-and-factories/">Read</a></p> 
-    </article>
-    <article>
-        <a href="/blog/2021/02/22/mau-a-lightweight-markup-language/" class="image"><img src="/images/mau-a-lightweight-markup-language.jpg" alt="mau-a-lightweight-markup-language" /></a>
-        <p><strong>Mau: a lightweight markup language</strong> <a href="/blog/2021/02/22/mau-a-lightweight-markup-language/">Read</a></p> 
     </article>
 </div>        </section>
 
@@ -380,7 +380,7 @@ Given a run-length code list generated as specified in problem P10, construct it
                 <h2>Tags</h2>
             </header>
 <ul class="list-inline list-clean" id="tags-side">
-    <li class="tag font-size-2">
+    <li class="tag font-size-3">
         <a title="Posts about algorithms" href="/categories/algorithms/">algorithms</a>
     </li>
     <li class="tag font-size-2">
@@ -434,7 +434,7 @@ Given a run-length code list generated as specified in problem P10, construct it
     <li class="tag font-size-3">
         <a title="Posts about Erlang" href="/categories/erlang/">Erlang</a>
     </li>
-    <li class="tag font-size-2">
+    <li class="tag font-size-3">
         <a title="Posts about Flask" href="/categories/flask/">Flask</a>
     </li>
     <li class="tag font-size-1">
@@ -446,7 +446,10 @@ Given a run-length code list generated as specified in problem P10, construct it
     <li class="tag font-size-3">
         <a title="Posts about Git" href="/categories/git/">Git</a>
     </li>
-    <li class="tag font-size-2">
+    <li class="tag font-size-4">
+        <a title="Posts about HTML" href="/categories/html/">HTML</a>
+    </li>
+    <li class="tag font-size-3">
         <a title="Posts about HTTP" href="/categories/http/">HTTP</a>
     </li>
     <li class="tag font-size-3">
@@ -461,7 +464,7 @@ Given a run-length code list generated as specified in problem P10, construct it
     <li class="tag font-size-4">
         <a title="Posts about M68000" href="/categories/m68000/">M68000</a>
     </li>
-    <li class="tag font-size-4">
+    <li class="tag font-size-3">
         <a title="Posts about Markdown" href="/categories/markdown/">Markdown</a>
     </li>
     <li class="tag font-size-4">
@@ -482,7 +485,7 @@ Given a run-length code list generated as specified in problem P10, construct it
     <li class="tag font-size-2">
         <a title="Posts about operating systems" href="/categories/operating-systems/">operating systems</a>
     </li>
-    <li class="tag font-size-4">
+    <li class="tag font-size-3">
         <a title="Posts about pelican" href="/categories/pelican/">pelican</a>
     </li>
     <li class="tag font-size-4">

@@ -119,45 +119,45 @@
 <p><strong>P03</strong> (*) Find the Kth element of a list.
 By convention, the first element in the list is element 0.</p>
 <p>Example:</p>
-<div class="highlight"><pre><span></span><code><span class="n">scala</span><span class="o">&gt;</span> <span class="n">nth</span><span class="o">(</span><span class="mi">2</span><span class="o">,</span> <span class="nc">List</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">3</span><span class="o">,</span> <span class="mi">5</span><span class="o">,</span> <span class="mi">8</span><span class="o">))</span>
-<span class="n">res0</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">2</span>
+<div class="highlight"><pre><span></span><code><span class="n">scala</span><span class="o">&gt;</span> <span class="n">nth</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nc">List</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+<span class="n">res0</span><span class="p">:</span> <span class="nc">Int</span> <span class="o">=</span> <span class="mi">2</span>
 </code></pre></div>
 
 <h2 id="initial-thoughts">Initial thoughts<a class="headerlink" href="#initial-thoughts" title="Permanent link">&para;</a></h2>
 <p>I expect the solution to be trivial using the indexing capabilities of <code>List</code> types, such as in any language that supports indexed lists. The functional solution cannot use indexing and shall reduce the list element by element.</p>
 <h2 id="the-procedural-solution">The procedural solution<a class="headerlink" href="#the-procedural-solution" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="n">findKth</span><span class="o">[</span><span class="kt">A</span><span class="o">](</span><span class="n">k</span><span class="k">:</span><span class="kt">Int</span><span class="o">,</span> <span class="n">l</span><span class="k">:</span><span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">])</span><span class="k">:</span><span class="kt">A</span> <span class="o">=</span> <span class="o">{</span>
-    <span class="k">if</span> <span class="o">(</span><span class="n">k</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="n">l</span><span class="o">.</span><span class="n">length</span><span class="o">)</span> <span class="n">l</span><span class="o">(</span><span class="n">k</span><span class="o">)</span>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">findKth</span><span class="p">[</span><span class="nc">A</span><span class="p">](</span><span class="n">k</span><span class="p">:</span><span class="nc">Int</span><span class="p">,</span> <span class="n">l</span><span class="p">:</span><span class="nc">List</span><span class="p">[</span><span class="nc">A</span><span class="p">]):</span><span class="nc">A</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">k</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="n">l</span><span class="p">.</span><span class="n">length</span><span class="p">)</span> <span class="n">l</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
     <span class="k">else</span> <span class="k">throw</span> <span class="k">new</span> <span class="nc">NoSuchElementException</span>
-<span class="o">}</span>
+<span class="p">}</span>
 </code></pre></div>
 
 <p>Since indexing out of bounds (in both directions) throws <code>IndexOutOfBoundsException</code> we first check if the index is safe. The logical AND operation is expressed in Scala by <code>&amp;&amp;</code>.</p>
 <p>Knowing that a wrong indexing throws an exception we could also catch it and throw the 'right' one. This results in </p>
-<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="n">findKth</span><span class="o">[</span><span class="kt">A</span><span class="o">](</span><span class="n">k</span><span class="k">:</span><span class="kt">Int</span><span class="o">,</span> <span class="n">l</span><span class="k">:</span><span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">])</span><span class="k">:</span><span class="kt">A</span> <span class="o">=</span> <span class="o">{</span>
-    <span class="k">try</span> <span class="n">l</span><span class="o">(</span><span class="n">k</span><span class="o">)</span>
-    <span class="k">catch</span> <span class="o">{</span>
-        <span class="k">case</span> <span class="n">e</span><span class="k">:</span><span class="kt">IndexOutOfBoundsException</span> <span class="o">=&gt;</span> <span class="k">throw</span> <span class="k">new</span> <span class="nc">NoSuchElementException</span>
-    <span class="o">}</span>
-<span class="o">}</span>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">findKth</span><span class="p">[</span><span class="nc">A</span><span class="p">](</span><span class="n">k</span><span class="p">:</span><span class="nc">Int</span><span class="p">,</span> <span class="n">l</span><span class="p">:</span><span class="nc">List</span><span class="p">[</span><span class="nc">A</span><span class="p">]):</span><span class="nc">A</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="k">try</span> <span class="n">l</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+    <span class="k">catch</span> <span class="p">{</span>
+        <span class="k">case</span> <span class="n">e</span><span class="p">:</span><span class="nc">IndexOutOfBoundsException</span> <span class="o">=&gt;</span> <span class="k">throw</span> <span class="k">new</span> <span class="nc">NoSuchElementException</span>
+    <span class="p">}</span>
+<span class="p">}</span>
 </code></pre></div>
 
 <p>which probably states more clearly that the main job of the function is to replace one exception with another one.</p>
 <h2 id="the-recursive-solution">The recursive solution<a class="headerlink" href="#the-recursive-solution" title="Permanent link">&para;</a></h2>
 <p>A recursive solution is pretty straightforward. We just repeatedly remove the first element and decrease the given index until it reaches 0. Using a couple of methods from the <code>List</code> type the solution is</p>
-<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="n">findKth</span><span class="o">[</span><span class="kt">A</span><span class="o">](</span><span class="n">k</span><span class="k">:</span><span class="kt">Int</span><span class="o">,</span> <span class="n">l</span><span class="k">:</span><span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">])</span><span class="k">:</span><span class="kt">A</span> <span class="o">=</span> <span class="n">k</span> <span class="k">match</span> <span class="o">{</span>
-    <span class="k">case</span> <span class="mi">0</span> <span class="k">=&gt;</span> <span class="n">l</span><span class="o">.</span><span class="n">head</span>
-    <span class="k">case</span> <span class="n">k</span> <span class="k">if</span> <span class="n">k</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">=&gt;</span> <span class="n">findKth</span><span class="o">(</span><span class="n">k</span> <span class="o">-</span> <span class="mi">1</span><span class="o">,</span> <span class="n">l</span><span class="o">.</span><span class="n">tail</span><span class="o">)</span>
-    <span class="k">case</span> <span class="k">_</span> <span class="k">=&gt;</span> <span class="k">throw</span> <span class="k">new</span> <span class="nc">NoSuchElementException</span>  
-<span class="o">}</span>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">findKth</span><span class="p">[</span><span class="nc">A</span><span class="p">](</span><span class="n">k</span><span class="p">:</span><span class="nc">Int</span><span class="p">,</span> <span class="n">l</span><span class="p">:</span><span class="nc">List</span><span class="p">[</span><span class="nc">A</span><span class="p">]):</span><span class="nc">A</span> <span class="o">=</span> <span class="n">k</span> <span class="k">match</span> <span class="p">{</span>
+    <span class="k">case</span> <span class="mi">0</span> <span class="o">=&gt;</span> <span class="n">l</span><span class="p">.</span><span class="n">head</span>
+    <span class="k">case</span> <span class="n">k</span> <span class="k">if</span> <span class="n">k</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">=&gt;</span> <span class="n">findKth</span><span class="p">(</span><span class="n">k</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">l</span><span class="p">.</span><span class="n">tail</span><span class="p">)</span>
+    <span class="k">case</span> <span class="n">_</span> <span class="o">=&gt;</span> <span class="k">throw</span> <span class="k">new</span> <span class="nc">NoSuchElementException</span>  
+<span class="p">}</span>
 </code></pre></div>
 
 <p>If however we try to avoid the use of methods, just to see if we may solve it with a pure recursive approach, we need to match two things together, which leads to</p>
-<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="n">findKth</span><span class="o">[</span><span class="kt">A</span><span class="o">](</span><span class="n">k</span><span class="k">:</span><span class="kt">Int</span><span class="o">,</span> <span class="n">l</span><span class="k">:</span><span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">])</span><span class="k">:</span><span class="kt">A</span> <span class="o">=</span> <span class="o">(</span><span class="n">k</span><span class="o">,</span><span class="n">l</span><span class="o">)</span> <span class="k">match</span> <span class="o">{</span>
-    <span class="k">case</span> <span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="n">h</span><span class="o">::</span><span class="k">_</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="n">h</span>
-    <span class="k">case</span> <span class="o">(</span><span class="n">k</span><span class="o">,</span> <span class="k">_</span><span class="o">::</span><span class="n">tail</span><span class="o">)</span> <span class="k">if</span> <span class="n">k</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">=&gt;</span> <span class="n">findKth</span><span class="o">(</span><span class="n">k</span> <span class="o">-</span> <span class="mi">1</span><span class="o">,</span> <span class="n">tail</span><span class="o">)</span>
-    <span class="k">case</span> <span class="k">_</span> <span class="k">=&gt;</span> <span class="k">throw</span> <span class="k">new</span> <span class="nc">NoSuchElementException</span>
-<span class="o">}</span>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">findKth</span><span class="p">[</span><span class="nc">A</span><span class="p">](</span><span class="n">k</span><span class="p">:</span><span class="nc">Int</span><span class="p">,</span> <span class="n">l</span><span class="p">:</span><span class="nc">List</span><span class="p">[</span><span class="nc">A</span><span class="p">]):</span><span class="nc">A</span> <span class="o">=</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">l</span><span class="p">)</span> <span class="k">match</span> <span class="p">{</span>
+    <span class="k">case</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">h::_</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="n">h</span>
+    <span class="k">case</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">_::tail</span><span class="p">)</span> <span class="k">if</span> <span class="n">k</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">=&gt;</span> <span class="n">findKth</span><span class="p">(</span><span class="n">k</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">tail</span><span class="p">)</span>
+    <span class="k">case</span> <span class="n">_</span> <span class="o">=&gt;</span> <span class="k">throw</span> <span class="k">new</span> <span class="nc">NoSuchElementException</span>
+<span class="p">}</span>
 </code></pre></div>
 
 <p>The "new" thing here is that we are pattern matching a tuple of values (which is, after all, one value of a given type). Moreover, Scala pattern matching shows us another strength point in that it can match a case and simultaneously operate on the variables (in this case splitting the list).</p>
@@ -350,16 +350,16 @@ By convention, the first element in the list is element 0.</p>
             </header>
 <div class="mini-posts">
     <article>
+        <a href="/blog/2021/03/25/how-to-write-a-pelican-theme-for-your-website/" class="image"><img src="/images/how-to-write-a-pelican-theme-for-your-website.jpg" alt="how-to-write-a-pelican-theme-for-your-website" /></a>
+        <p><strong>How to write a Pelican theme for your static website</strong> <a href="/blog/2021/03/25/how-to-write-a-pelican-theme-for-your-website/">Read</a></p> 
+    </article>
+    <article>
         <a href="/blog/2021/03/22/aws-log-insights-as-cloudwatch-metrics-with-python-and-terraform/" class="image"><img src="/images/aws-log-insights-as-cloudwatch-metrics-with-python-and-terraform.jpg" alt="aws-log-insights-as-cloudwatch-metrics-with-python-and-terraform" /></a>
         <p><strong>AWS Log Insights as CloudWatch metrics with Python and Terraform</strong> <a href="/blog/2021/03/22/aws-log-insights-as-cloudwatch-metrics-with-python-and-terraform/">Read</a></p> 
     </article>
     <article>
         <a href="/blog/2021/03/09/first-class-objects-in-python-generic-code-wrappers-and-factories/" class="image"><img src="/images/first-class-objects-in-python-generic-code-wrappers-and-factories.jpg" alt="first-class-objects-in-python-generic-code-wrappers-and-factories" /></a>
         <p><strong>First-class objects in Python: generic code, wrappers, and factories</strong> <a href="/blog/2021/03/09/first-class-objects-in-python-generic-code-wrappers-and-factories/">Read</a></p> 
-    </article>
-    <article>
-        <a href="/blog/2021/02/22/mau-a-lightweight-markup-language/" class="image"><img src="/images/mau-a-lightweight-markup-language.jpg" alt="mau-a-lightweight-markup-language" /></a>
-        <p><strong>Mau: a lightweight markup language</strong> <a href="/blog/2021/02/22/mau-a-lightweight-markup-language/">Read</a></p> 
     </article>
 </div>        </section>
 
@@ -393,7 +393,7 @@ By convention, the first element in the list is element 0.</p>
                 <h2>Tags</h2>
             </header>
 <ul class="list-inline list-clean" id="tags-side">
-    <li class="tag font-size-2">
+    <li class="tag font-size-3">
         <a title="Posts about algorithms" href="/categories/algorithms/">algorithms</a>
     </li>
     <li class="tag font-size-2">
@@ -447,7 +447,7 @@ By convention, the first element in the list is element 0.</p>
     <li class="tag font-size-3">
         <a title="Posts about Erlang" href="/categories/erlang/">Erlang</a>
     </li>
-    <li class="tag font-size-2">
+    <li class="tag font-size-3">
         <a title="Posts about Flask" href="/categories/flask/">Flask</a>
     </li>
     <li class="tag font-size-1">
@@ -459,7 +459,10 @@ By convention, the first element in the list is element 0.</p>
     <li class="tag font-size-3">
         <a title="Posts about Git" href="/categories/git/">Git</a>
     </li>
-    <li class="tag font-size-2">
+    <li class="tag font-size-4">
+        <a title="Posts about HTML" href="/categories/html/">HTML</a>
+    </li>
+    <li class="tag font-size-3">
         <a title="Posts about HTTP" href="/categories/http/">HTTP</a>
     </li>
     <li class="tag font-size-3">
@@ -474,7 +477,7 @@ By convention, the first element in the list is element 0.</p>
     <li class="tag font-size-4">
         <a title="Posts about M68000" href="/categories/m68000/">M68000</a>
     </li>
-    <li class="tag font-size-4">
+    <li class="tag font-size-3">
         <a title="Posts about Markdown" href="/categories/markdown/">Markdown</a>
     </li>
     <li class="tag font-size-4">
@@ -495,7 +498,7 @@ By convention, the first element in the list is element 0.</p>
     <li class="tag font-size-2">
         <a title="Posts about operating systems" href="/categories/operating-systems/">operating systems</a>
     </li>
-    <li class="tag font-size-4">
+    <li class="tag font-size-3">
         <a title="Posts about pelican" href="/categories/pelican/">pelican</a>
     </li>
     <li class="tag font-size-4">

@@ -121,19 +121,19 @@
 <p>As briefly shown in the last article synchronization problems are not only among the most complex issues to solve in computer science, but can also lead to severe malfunctions of our software.</p>
 <p>Let's reconsider and formalize the example given in the last post. Say we create two different processes working on the same data. If the two processes just read the same data from memory (or disk) no problems can arise: data are static, and accessing does not change them. So the execution of the two processes is called <strong>consistent</strong>, which highlights that repeated executions or executions spanning a long time will always result in the same system behaviour.</p>
 <p>If now one of the processes wants to modify data different situations can come up, depending on the actual timing of the operations. Say we have two processes <code>A</code> and <code>B</code> and an element <code>d</code>; process <code>A</code> increases element <code>d</code> by 1 while process <code>B</code> prints the element value on the screen. In a sort of metalanguage, we could express this situation with the following syntax</p>
-<div class="highlight"><pre><span></span><code><span class="err">A { d-&gt;d+1 } &amp; B { d-&gt;output }</span>
+<div class="highlight"><pre><span></span><code><span class="n">A</span> <span class="p">{</span> <span class="n">d</span><span class="o">-&gt;</span><span class="n">d</span><span class="o">+</span><span class="mi">1</span> <span class="p">}</span> <span class="o">&amp;</span> <span class="n">B</span> <span class="p">{</span> <span class="n">d</span><span class="o">-&gt;</span><span class="kr">output</span> <span class="p">}</span>
 </code></pre></div>
 
 <p>where <code>&amp;</code> stands for a concurrent execution; in other words the two processes are not synchronized. One of the possible resulting executions is</p>
-<div class="highlight"><pre><span></span><code><span class="err">(-) d = 5</span>
-<span class="err">(A) d = 6</span>
-<span class="err">(B) output = 6</span>
+<div class="highlight"><pre><span></span><code>(-) d = 5
+(A) d = 6
+(B) output = 6
 </code></pre></div>
 
 <p>while the other is</p>
-<div class="highlight"><pre><span></span><code><span class="err">(-) d = 5</span>
-<span class="err">(B) output = 5</span>
-<span class="err">(A) d = 6</span>
+<div class="highlight"><pre><span></span><code>(-) d = 5
+(B) output = 5
+(A) d = 6
 </code></pre></div>
 
 <p>As you can see, different timings can lead to different results; let's pretend that element <code>d</code> is the amount of money in your bank account, and you will suddenly realize the importance of the matter. Such a reliance of data on timing or system conditions is known as <strong>data inconsistency</strong>.</p>
@@ -187,12 +187,12 @@
 </code></pre></div>
 
 <p>where <code>semid</code> is the semaphore set identifier returned from <code>semget()</code>, <code>semnum</code> the index of the semaphore inside the set and <code>cmd</code> the command you want to run. The value <code>semnum</code> is optional for some commands. Some commands need also an additional argument which type is <code>union semun</code>, defined as</p>
-<div class="highlight"><pre><span></span><code><span class="k">union</span> <span class="n">semun</span> <span class="p">{</span>
+<div class="highlight"><pre><span></span><code><span class="k">union</span> <span class="nc">semun</span> <span class="p">{</span>
  <span class="kt">int</span> <span class="n">val</span><span class="p">;</span>                  <span class="cm">/* value for SETVAL */</span>
- <span class="k">struct</span> <span class="n">semid_ds</span> <span class="o">*</span><span class="n">buf</span><span class="p">;</span>     <span class="cm">/* buffer for IPC_STAT, IPC_SET */</span>
+ <span class="k">struct</span> <span class="nc">semid_ds</span> <span class="o">*</span><span class="n">buf</span><span class="p">;</span>     <span class="cm">/* buffer for IPC_STAT, IPC_SET */</span>
  <span class="kt">unsigned</span> <span class="kt">short</span> <span class="o">*</span><span class="n">array</span><span class="p">;</span>    <span class="cm">/* array for GETALL, SETALL */</span>
                            <span class="cm">/* Linux specific part: */</span>
- <span class="k">struct</span> <span class="n">seminfo</span> <span class="o">*</span><span class="n">__buf</span><span class="p">;</span>    <span class="cm">/* buffer for IPC_INFO */</span>
+ <span class="k">struct</span> <span class="nc">seminfo</span> <span class="o">*</span><span class="n">__buf</span><span class="p">;</span>    <span class="cm">/* buffer for IPC_INFO */</span>
 <span class="p">};</span>
 </code></pre></div>
 
@@ -207,7 +207,7 @@
 <span class="p">{</span>
   <span class="kt">key_t</span> <span class="n">key</span><span class="p">;</span>
   <span class="kt">int</span> <span class="n">semid</span><span class="p">;</span>
-  <span class="k">union</span> <span class="n">semun</span> <span class="n">arg</span><span class="p">;</span>
+  <span class="k">union</span> <span class="nc">semun</span> <span class="n">arg</span><span class="p">;</span>
 
   <span class="n">key</span> <span class="o">=</span> <span class="n">ftok</span><span class="p">(</span><span class="s">&quot;/etc/fstab&quot;</span><span class="p">,</span> <span class="n">getpid</span><span class="p">());</span>
 
@@ -232,7 +232,7 @@
 <span class="p">{</span>
   <span class="kt">key_t</span> <span class="n">key</span><span class="p">;</span>
   <span class="kt">int</span> <span class="n">semid</span><span class="p">;</span>
-  <span class="k">union</span> <span class="n">semun</span> <span class="n">arg</span><span class="p">;</span>
+  <span class="k">union</span> <span class="nc">semun</span> <span class="n">arg</span><span class="p">;</span>
 
   <span class="n">key</span> <span class="o">=</span> <span class="n">ftok</span><span class="p">(</span><span class="s">&quot;/etc/fstab&quot;</span><span class="p">,</span> <span class="n">getpid</span><span class="p">());</span>
 
@@ -252,11 +252,11 @@
 <p>Now you can compile and run it. As you can imagine the program seems to do nothing: it just silently creates a semaphore, sets its value and removes it.</p>
 <h2 id="semaphores-part-2">Semaphores - part 2<a class="headerlink" href="#semaphores-part-2" title="Permanent link">&para;</a></h2>
 <p>Time to use effectively the semaphore: the function that allows to performs operations on a semaphore is </p>
-<div class="highlight"><pre><span></span><code><span class="kt">int</span> <span class="nf">semop</span><span class="p">(</span><span class="kt">int</span> <span class="n">semid</span><span class="p">,</span> <span class="k">struct</span> <span class="n">sembuf</span> <span class="o">*</span><span class="n">sops</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="n">nsops</span><span class="p">);</span>
+<div class="highlight"><pre><span></span><code><span class="kt">int</span> <span class="nf">semop</span><span class="p">(</span><span class="kt">int</span> <span class="n">semid</span><span class="p">,</span> <span class="k">struct</span> <span class="nc">sembuf</span> <span class="o">*</span><span class="n">sops</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="n">nsops</span><span class="p">);</span>
 </code></pre></div>
 
 <p>where <code>semid</code> is the set identifier, <code>sops</code> an array of operations and <code>nsops</code> the length of the latter. Each operation is declared through a <code>struct sembuf</code></p>
-<div class="highlight"><pre><span></span><code><span class="k">struct</span> <span class="n">sembuf</span> <span class="p">{</span>
+<div class="highlight"><pre><span></span><code><span class="k">struct</span> <span class="nc">sembuf</span> <span class="p">{</span>
     <span class="n">ushort</span>  <span class="n">sem_num</span><span class="p">;</span>        <span class="cm">/* semaphore index in array */</span>
              <span class="kt">short</span>   <span class="n">sem_op</span><span class="p">;</span>         <span class="cm">/* semaphore operation */</span>
              <span class="kt">short</span>   <span class="n">sem_flg</span><span class="p">;</span>        <span class="cm">/* operation flags */</span>
@@ -292,11 +292,11 @@
   <span class="kt">pid_t</span> <span class="n">pid</span><span class="p">;</span>
   <span class="kt">key_t</span> <span class="n">key</span><span class="p">;</span>
   <span class="kt">int</span> <span class="n">semid</span><span class="p">;</span>
-  <span class="k">union</span> <span class="n">semun</span> <span class="n">arg</span><span class="p">;</span>
-  <span class="k">struct</span> <span class="n">sembuf</span> <span class="n">lock_res</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">};</span>
-  <span class="k">struct</span> <span class="n">sembuf</span> <span class="n">rel_res</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">};</span>
-  <span class="k">struct</span> <span class="n">sembuf</span> <span class="n">push</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">IPC_NOWAIT</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">IPC_NOWAIT</span><span class="p">};</span>
-  <span class="k">struct</span> <span class="n">sembuf</span> <span class="n">pop</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">IPC_NOWAIT</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">IPC_NOWAIT</span><span class="p">};</span>
+  <span class="k">union</span> <span class="nc">semun</span> <span class="n">arg</span><span class="p">;</span>
+  <span class="k">struct</span> <span class="nc">sembuf</span> <span class="n">lock_res</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span> <span class="mi">-1</span><span class="p">,</span> <span class="mi">0</span><span class="p">};</span>
+  <span class="k">struct</span> <span class="nc">sembuf</span> <span class="n">rel_res</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">};</span>
+  <span class="k">struct</span> <span class="nc">sembuf</span> <span class="n">push</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">-1</span><span class="p">,</span> <span class="n">IPC_NOWAIT</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">IPC_NOWAIT</span><span class="p">};</span>
+  <span class="k">struct</span> <span class="nc">sembuf</span> <span class="n">pop</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">IPC_NOWAIT</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">-1</span><span class="p">,</span> <span class="n">IPC_NOWAIT</span><span class="p">};</span>
 
   <span class="kt">int</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">;</span>
   <span class="kt">int</span> <span class="n">len</span><span class="p">;</span>
@@ -339,13 +339,13 @@
     <span class="n">sleep</span><span class="p">(</span><span class="n">rand</span><span class="p">()</span><span class="o">%</span><span class="mi">6</span><span class="p">);</span>
 
     <span class="cm">/* Try to lock the buffer - sem #0 */</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">semop</span><span class="p">(</span><span class="n">semid</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">lock_res</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">){</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">semop</span><span class="p">(</span><span class="n">semid</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">lock_res</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">-1</span><span class="p">){</span>
       <span class="n">perror</span><span class="p">(</span><span class="s">&quot;semop:lock_res (write)&quot;</span><span class="p">);</span>
     <span class="p">}</span>
 
     <span class="cm">/* Lock a free cell - sem #1 */</span>
     <span class="cm">/* Push an element - sem #2 */</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">semop</span><span class="p">(</span><span class="n">semid</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">push</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">){</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">semop</span><span class="p">(</span><span class="n">semid</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">push</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">-1</span><span class="p">){</span>
       <span class="n">printf</span><span class="p">(</span><span class="s">&quot;---&gt; Child process %d: Element written</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">getpid</span><span class="p">());</span>
     <span class="p">}</span>
     <span class="k">else</span><span class="p">{</span>
@@ -364,13 +364,13 @@
     <span class="n">sleep</span><span class="p">(</span><span class="n">rand</span><span class="p">()</span><span class="o">%</span><span class="mi">3</span><span class="p">);</span>
 
     <span class="cm">/* Try to lock the buffer - sem #0 */</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">semop</span><span class="p">(</span><span class="n">semid</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">lock_res</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">){</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">semop</span><span class="p">(</span><span class="n">semid</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">lock_res</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">-1</span><span class="p">){</span>
       <span class="n">perror</span><span class="p">(</span><span class="s">&quot;semop:lock_res (read)&quot;</span><span class="p">);</span>
     <span class="p">}</span>
 
     <span class="cm">/* Unlock a free cell - sem #1 */</span>
     <span class="cm">/* Pop an element - sem #2 */</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">semop</span><span class="p">(</span><span class="n">semid</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">pop</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">){</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">semop</span><span class="p">(</span><span class="n">semid</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">pop</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">-1</span><span class="p">){</span>
       <span class="n">printf</span><span class="p">(</span><span class="s">&quot;&lt;--- Parent process %d: Element read</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">getpid</span><span class="p">());</span>
     <span class="p">}</span>
     <span class="k">else</span> <span class="p">{</span>
@@ -389,10 +389,10 @@
 </code></pre></div>
 
 <p>Let us review the most interesting parts of the code.</p>
-<div class="highlight"><pre><span></span><code>  <span class="k">struct</span> <span class="n">sembuf</span> <span class="n">lock_res</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">};</span>
-  <span class="k">struct</span> <span class="n">sembuf</span> <span class="n">rel_res</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">};</span>
-  <span class="k">struct</span> <span class="n">sembuf</span> <span class="n">push</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">IPC_NOWAIT</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">IPC_NOWAIT</span><span class="p">};</span>
-  <span class="k">struct</span> <span class="n">sembuf</span> <span class="n">pop</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">IPC_NOWAIT</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">IPC_NOWAIT</span><span class="p">};</span>
+<div class="highlight"><pre><span></span><code>  <span class="k">struct</span> <span class="nc">sembuf</span> <span class="n">lock_res</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span> <span class="mi">-1</span><span class="p">,</span> <span class="mi">0</span><span class="p">};</span>
+  <span class="k">struct</span> <span class="nc">sembuf</span> <span class="n">rel_res</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">};</span>
+  <span class="k">struct</span> <span class="nc">sembuf</span> <span class="n">push</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">-1</span><span class="p">,</span> <span class="n">IPC_NOWAIT</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">IPC_NOWAIT</span><span class="p">};</span>
+  <span class="k">struct</span> <span class="nc">sembuf</span> <span class="n">pop</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">IPC_NOWAIT</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">-1</span><span class="p">,</span> <span class="n">IPC_NOWAIT</span><span class="p">};</span>
 </code></pre></div>
 
 <p>These four lines of code declare the actions we will use later on the semaphore set. The first two are single actions while the second two are double ones. The first action, <code>lock_res</code>, is used to lock the buffer: as you can see the semaphore number 0 is decremented by 1 and in case of busy resource the strategy is waiting (the last 0 in the action). The second action releases the buffer and is the mirror image of the first one.</p>
@@ -414,13 +414,13 @@
 
 <p>Next, semaphores must be initialized: as already stated the first one is set to 1, being a binary access controller, the second to the length of the buffer as overflow controller and the third to 0 as underflow controller.</p>
 <div class="highlight"><pre><span></span><code>    <span class="cm">/* Try to lock the buffer - sem #0 */</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">semop</span><span class="p">(</span><span class="n">semid</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">lock_res</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">){</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">semop</span><span class="p">(</span><span class="n">semid</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">lock_res</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">-1</span><span class="p">){</span>
       <span class="n">perror</span><span class="p">(</span><span class="s">&quot;semop:lock_res (write)&quot;</span><span class="p">);</span>
     <span class="p">}</span>
 
     <span class="cm">/* Lock a free cell - sem #1 */</span>
     <span class="cm">/* Push an element - sem #2 */</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">semop</span><span class="p">(</span><span class="n">semid</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">push</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">){</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">semop</span><span class="p">(</span><span class="n">semid</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">push</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">-1</span><span class="p">){</span>
       <span class="n">printf</span><span class="p">(</span><span class="s">&quot;---&gt; Child process %d: Element written</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">getpid</span><span class="p">());</span>
     <span class="p">}</span>
     <span class="k">else</span><span class="p">{</span>
@@ -433,13 +433,13 @@
 
 <p>Child process code (a writer) tries first of all to lock the buffer using <code>lock_res</code>; once the control over the resource has been acquired it performs the <code>push</code> action and writes on the standard output a meaningful message. Otherwise, it signals that the buffer is full. The last action it performs is to release the resource through <code>rel_res</code>.</p>
 <div class="highlight"><pre><span></span><code>    <span class="cm">/* Try to lock the buffer - sem #0 */</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">semop</span><span class="p">(</span><span class="n">semid</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">lock_res</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">){</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">semop</span><span class="p">(</span><span class="n">semid</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">lock_res</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">-1</span><span class="p">){</span>
       <span class="n">perror</span><span class="p">(</span><span class="s">&quot;semop:lock_res (read)&quot;</span><span class="p">);</span>
     <span class="p">}</span>
 
     <span class="cm">/* Unlock a free cell - sem #1 */</span>
     <span class="cm">/* Pop an element - sem #2 */</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">semop</span><span class="p">(</span><span class="n">semid</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">pop</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">){</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">semop</span><span class="p">(</span><span class="n">semid</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">pop</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">-1</span><span class="p">){</span>
       <span class="n">printf</span><span class="p">(</span><span class="s">&quot;&lt;--- Parent process %d: Element read</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">getpid</span><span class="p">());</span>
     <span class="p">}</span>
     <span class="k">else</span> <span class="p">{</span>
@@ -604,16 +604,16 @@
             </header>
 <div class="mini-posts">
     <article>
+        <a href="/blog/2021/03/25/how-to-write-a-pelican-theme-for-your-website/" class="image"><img src="/images/how-to-write-a-pelican-theme-for-your-website.jpg" alt="how-to-write-a-pelican-theme-for-your-website" /></a>
+        <p><strong>How to write a Pelican theme for your static website</strong> <a href="/blog/2021/03/25/how-to-write-a-pelican-theme-for-your-website/">Read</a></p> 
+    </article>
+    <article>
         <a href="/blog/2021/03/22/aws-log-insights-as-cloudwatch-metrics-with-python-and-terraform/" class="image"><img src="/images/aws-log-insights-as-cloudwatch-metrics-with-python-and-terraform.jpg" alt="aws-log-insights-as-cloudwatch-metrics-with-python-and-terraform" /></a>
         <p><strong>AWS Log Insights as CloudWatch metrics with Python and Terraform</strong> <a href="/blog/2021/03/22/aws-log-insights-as-cloudwatch-metrics-with-python-and-terraform/">Read</a></p> 
     </article>
     <article>
         <a href="/blog/2021/03/09/first-class-objects-in-python-generic-code-wrappers-and-factories/" class="image"><img src="/images/first-class-objects-in-python-generic-code-wrappers-and-factories.jpg" alt="first-class-objects-in-python-generic-code-wrappers-and-factories" /></a>
         <p><strong>First-class objects in Python: generic code, wrappers, and factories</strong> <a href="/blog/2021/03/09/first-class-objects-in-python-generic-code-wrappers-and-factories/">Read</a></p> 
-    </article>
-    <article>
-        <a href="/blog/2021/02/22/mau-a-lightweight-markup-language/" class="image"><img src="/images/mau-a-lightweight-markup-language.jpg" alt="mau-a-lightweight-markup-language" /></a>
-        <p><strong>Mau: a lightweight markup language</strong> <a href="/blog/2021/02/22/mau-a-lightweight-markup-language/">Read</a></p> 
     </article>
 </div>        </section>
 
@@ -647,7 +647,7 @@
                 <h2>Tags</h2>
             </header>
 <ul class="list-inline list-clean" id="tags-side">
-    <li class="tag font-size-2">
+    <li class="tag font-size-3">
         <a title="Posts about algorithms" href="/categories/algorithms/">algorithms</a>
     </li>
     <li class="tag font-size-2">
@@ -701,7 +701,7 @@
     <li class="tag font-size-3">
         <a title="Posts about Erlang" href="/categories/erlang/">Erlang</a>
     </li>
-    <li class="tag font-size-2">
+    <li class="tag font-size-3">
         <a title="Posts about Flask" href="/categories/flask/">Flask</a>
     </li>
     <li class="tag font-size-1">
@@ -713,7 +713,10 @@
     <li class="tag font-size-3">
         <a title="Posts about Git" href="/categories/git/">Git</a>
     </li>
-    <li class="tag font-size-2">
+    <li class="tag font-size-4">
+        <a title="Posts about HTML" href="/categories/html/">HTML</a>
+    </li>
+    <li class="tag font-size-3">
         <a title="Posts about HTTP" href="/categories/http/">HTTP</a>
     </li>
     <li class="tag font-size-3">
@@ -728,7 +731,7 @@
     <li class="tag font-size-4">
         <a title="Posts about M68000" href="/categories/m68000/">M68000</a>
     </li>
-    <li class="tag font-size-4">
+    <li class="tag font-size-3">
         <a title="Posts about Markdown" href="/categories/markdown/">Markdown</a>
     </li>
     <li class="tag font-size-4">
@@ -749,7 +752,7 @@
     <li class="tag font-size-2">
         <a title="Posts about operating systems" href="/categories/operating-systems/">operating systems</a>
     </li>
-    <li class="tag font-size-4">
+    <li class="tag font-size-3">
         <a title="Posts about pelican" href="/categories/pelican/">pelican</a>
     </li>
     <li class="tag font-size-4">
