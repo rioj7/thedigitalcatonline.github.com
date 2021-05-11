@@ -53,27 +53,27 @@
   &lt;span class="na"&gt;default&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[]&lt;/span&gt;
 &lt;span class="p"&gt;}&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
-&lt;/div&gt;&lt;/div&gt;&lt;h4 id="resources"&gt;Resources&lt;/h4&gt;&lt;ul&gt;&lt;li&gt;&lt;a href="https://www.terraform.io/docs/configuration-0-11/variables.html"&gt;Terraform variables&lt;/a&gt;.&lt;/li&gt;&lt;/ul&gt;&lt;h3 id="dynamodb"&gt;DynamoDB&lt;/h3&gt;&lt;p&gt;Let's start with the corner stone, which is the DynamoDB table that contains data for the queries. As DynamoDB is not a SQL database we don't need to define columns in advance. This clearly might get us into trouble later, so we need to be careful and be consistent when we write items, adding everything is needed by the Lambda code.&lt;/p&gt;&lt;div class="code"&gt;&lt;div class="title"&gt;common/lambda-loginsights2metrics/dynamodb.tf&lt;/div&gt;&lt;div class="content"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;resource &amp;quot;aws_dynamodb_table&amp;quot; &amp;quot;loginsights2metrics&amp;quot; {
-  name = &amp;quot;${var.prefix}-items&amp;quot;
+&lt;/div&gt;&lt;/div&gt;&lt;h4 id="resources"&gt;Resources&lt;/h4&gt;&lt;ul&gt;&lt;li&gt;&lt;a href="https://www.terraform.io/docs/configuration-0-11/variables.html"&gt;Terraform variables&lt;/a&gt;.&lt;/li&gt;&lt;/ul&gt;&lt;h3 id="dynamodb"&gt;DynamoDB&lt;/h3&gt;&lt;p&gt;Let's start with the corner stone, which is the DynamoDB table that contains data for the queries. As DynamoDB is not a SQL database we don't need to define columns in advance. This clearly might get us into trouble later, so we need to be careful and be consistent when we write items, adding everything is needed by the Lambda code.&lt;/p&gt;&lt;div class="code"&gt;&lt;div class="title"&gt;common/lambda-loginsights2metrics/dynamodb.tf&lt;/div&gt;&lt;div class="content"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;resource&lt;/span&gt; &lt;span class="nc"&gt;&amp;quot;aws_dynamodb_table&amp;quot;&lt;/span&gt; &lt;span class="nv"&gt;&amp;quot;loginsights2metrics&amp;quot;&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="na"&gt;name&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;${var.prefix}-items&amp;quot;&lt;/span&gt;
 
-  billing_mode = &amp;quot;PAY_PER_REQUEST&amp;quot;
+  &lt;span class="na"&gt;billing_mode&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;PAY_PER_REQUEST&amp;quot;&lt;/span&gt;
 
-  hash_key = &amp;quot;SlotName&amp;quot;
+  &lt;span class="na"&gt;hash_key&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;SlotName&amp;quot;&lt;/span&gt;
 
-  attribute {
-    name = &amp;quot;SlotName&amp;quot;
-    type = &amp;quot;S&amp;quot;
-  }
-}
+  &lt;span class="nb"&gt;attribute&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="na"&gt;name&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;SlotName&amp;quot;&lt;/span&gt;
+    &lt;span class="na"&gt;type&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;S&amp;quot;&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
-&lt;/div&gt;&lt;/div&gt;&lt;p&gt;Speaking of items, I assume I will pass them when I call the module, so here I just need to loop on the input variable &lt;code&gt;items&lt;/code&gt;&lt;/p&gt;&lt;div class="code"&gt;&lt;div class="title"&gt;common/lambda-loginsights2metrics/dynamodb.tf&lt;/div&gt;&lt;div class="content"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;resource &amp;quot;aws_dynamodb_table_item&amp;quot; &amp;quot;item&amp;quot; {
-  count = length(var.items)
+&lt;/div&gt;&lt;/div&gt;&lt;p&gt;Speaking of items, I assume I will pass them when I call the module, so here I just need to loop on the input variable &lt;code&gt;items&lt;/code&gt;&lt;/p&gt;&lt;div class="code"&gt;&lt;div class="title"&gt;common/lambda-loginsights2metrics/dynamodb.tf&lt;/div&gt;&lt;div class="content"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;resource&lt;/span&gt; &lt;span class="nc"&gt;&amp;quot;aws_dynamodb_table_item&amp;quot;&lt;/span&gt; &lt;span class="nv"&gt;&amp;quot;item&amp;quot;&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="na"&gt;count&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nf"&gt;length&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;var.items&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 
-  table_name = aws_dynamodb_table.loginsights2metrics.name
-  hash_key   = aws_dynamodb_table.loginsights2metrics.hash_key
+  &lt;span class="na"&gt;table_name&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nv"&gt;aws_dynamodb_table.loginsights2metrics.name&lt;/span&gt;
+  &lt;span class="na"&gt;hash_key&lt;/span&gt;   &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nv"&gt;aws_dynamodb_table.loginsights2metrics.hash_key&lt;/span&gt;
 
-  item = jsonencode(element(var.items, count.index))
-}
+  &lt;span class="na"&gt;item&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nf"&gt;jsonencode&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nf"&gt;element&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;var.items&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nv"&gt;count.index&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 &lt;/div&gt;&lt;/div&gt;&lt;p&gt;Since the query is written as a Terraform string and will be read from Python there are two small caveats here. To be consistent with Terraform's syntax we need to escape double quotes in the query, and to avoid fights with Python we need to escape backslashes. So for example a valid query like&lt;/p&gt;&lt;div class="code"&gt;&lt;div class="content"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;parse @message /\[celery\.(?&amp;lt;source&amp;gt;[a-z.]+)\].*Received task: (?&amp;lt;task&amp;gt;[a-z._]+)\[/
  | filter not isblank(source)
@@ -81,24 +81,24 @@
 &lt;/pre&gt;&lt;/div&gt;
 &lt;/div&gt;&lt;/div&gt;&lt;p&gt;will be stored as&lt;/p&gt;&lt;div class="code"&gt;&lt;div class="content"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&amp;quot;parse @message /\\[celery\\.(?&amp;lt;source&amp;gt;[a-z.]+)\\].*Received task: (?&amp;lt;task&amp;gt;[a-z._]+)\\[/ | filter not isblank(source) | stats count(*) as Value by bin(1m)&amp;quot;
 &lt;/pre&gt;&lt;/div&gt;
-&lt;/div&gt;&lt;/div&gt;&lt;p&gt;Another remark is that the Lambda I will write in Python will read data plotted with the name &lt;code&gt;Value&lt;/code&gt; on bins of 1 minute, so the query should end with &lt;code&gt;stats X as Value by bin(1m)&lt;/code&gt; where &lt;code&gt;X&lt;/code&gt; is a specific stat, for example &lt;code&gt;stats count(*) as Value by bin(1m)&lt;/code&gt;.&lt;/p&gt;&lt;p&gt;The reason behind 1 minute is that the maximum standard resolution of CloudWatch metrics is 1 minute. Should you want more you need to have a look at &lt;a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/publishingMetrics.html#high-resolution-metrics"&gt;CloudWatch High-Resolution Metrics&lt;/a&gt;.&lt;/p&gt;&lt;h4 id="resources"&gt;Resources&lt;/h4&gt;&lt;ul&gt;&lt;li&gt;&lt;a href="https://aws.amazon.com/dynamodb/"&gt;Amazon DynamoDB&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/dynamodb_table"&gt;aws_dynamodb_table documentation&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/dynamodb_table_item"&gt;aws_dynamodb_table_item documentation&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;&lt;h3 id="iam-part-1"&gt;IAM part 1&lt;/h3&gt;&lt;p&gt;IAM roles are central in AWS. In this specific case we have the so-called &lt;a href="https://docs.aws.amazon.com/lambda/latest/dg/lambda-intro-execution-role.html"&gt;Lambda execution role&lt;/a&gt;, which is the IAM role that the Lambda assumes when you run it. In AWS users or services (that is humans or AWS components) &lt;em&gt;assume&lt;/em&gt; a role, receiving the permissions connected with it. To assume roles, however, they need to have a specific permission, a so-called &lt;em&gt;trust policy&lt;/em&gt;.&lt;/p&gt;&lt;p&gt;Let's define a trust policy that allows the Lambda service to assume the role that we will define&lt;/p&gt;&lt;div class="code"&gt;&lt;div class="title"&gt;common/lambda-loginsights2metrics/iam.tf&lt;/div&gt;&lt;div class="content"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;data &amp;quot;aws_iam_policy_document&amp;quot; &amp;quot;trust&amp;quot; {
-  statement {
+&lt;/div&gt;&lt;/div&gt;&lt;p&gt;Another remark is that the Lambda I will write in Python will read data plotted with the name &lt;code&gt;Value&lt;/code&gt; on bins of 1 minute, so the query should end with &lt;code&gt;stats X as Value by bin(1m)&lt;/code&gt; where &lt;code&gt;X&lt;/code&gt; is a specific stat, for example &lt;code&gt;stats count(*) as Value by bin(1m)&lt;/code&gt;.&lt;/p&gt;&lt;p&gt;The reason behind 1 minute is that the maximum standard resolution of CloudWatch metrics is 1 minute. Should you want more you need to have a look at &lt;a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/publishingMetrics.html#high-resolution-metrics"&gt;CloudWatch High-Resolution Metrics&lt;/a&gt;.&lt;/p&gt;&lt;h4 id="resources"&gt;Resources&lt;/h4&gt;&lt;ul&gt;&lt;li&gt;&lt;a href="https://aws.amazon.com/dynamodb/"&gt;Amazon DynamoDB&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/dynamodb_table"&gt;aws_dynamodb_table documentation&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/dynamodb_table_item"&gt;aws_dynamodb_table_item documentation&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;&lt;h3 id="iam-part-1"&gt;IAM part 1&lt;/h3&gt;&lt;p&gt;IAM roles are central in AWS. In this specific case we have the so-called &lt;a href="https://docs.aws.amazon.com/lambda/latest/dg/lambda-intro-execution-role.html"&gt;Lambda execution role&lt;/a&gt;, which is the IAM role that the Lambda assumes when you run it. In AWS users or services (that is humans or AWS components) &lt;em&gt;assume&lt;/em&gt; a role, receiving the permissions connected with it. To assume roles, however, they need to have a specific permission, a so-called &lt;em&gt;trust policy&lt;/em&gt;.&lt;/p&gt;&lt;p&gt;Let's define a trust policy that allows the Lambda service to assume the role that we will define&lt;/p&gt;&lt;div class="code"&gt;&lt;div class="title"&gt;common/lambda-loginsights2metrics/iam.tf&lt;/div&gt;&lt;div class="content"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="nc"&gt;&amp;quot;aws_iam_policy_document&amp;quot;&lt;/span&gt; &lt;span class="nv"&gt;&amp;quot;trust&amp;quot;&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nb"&gt;statement&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
 
-    actions = [&amp;quot;sts:AssumeRole&amp;quot;]
+    &lt;span class="na"&gt;actions&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;sts:AssumeRole&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
 
-    principals {
-      type = &amp;quot;Service&amp;quot;
-      identifiers = [
-        &amp;quot;lambda.amazonaws.com&amp;quot;
-      ]
-    }
-  }
-}
+    &lt;span class="nb"&gt;principals&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+      &lt;span class="na"&gt;type&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Service&amp;quot;&lt;/span&gt;
+      &lt;span class="na"&gt;identifiers&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+        &lt;span class="s2"&gt;&amp;quot;lambda.amazonaws.com&amp;quot;&lt;/span&gt;
+      &lt;span class="p"&gt;]&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
-&lt;/div&gt;&lt;/div&gt;&lt;p&gt;and after that the role in question&lt;/p&gt;&lt;div class="code"&gt;&lt;div class="title"&gt;common/lambda-loginsights2metrics/iam.tf&lt;/div&gt;&lt;div class="content"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;resource &amp;quot;aws_iam_role&amp;quot; &amp;quot;loginsights2metrics&amp;quot; {
-  name               = var.prefix
-  assume_role_policy = data.aws_iam_policy_document.trust.json
-}
+&lt;/div&gt;&lt;/div&gt;&lt;p&gt;and after that the role in question&lt;/p&gt;&lt;div class="code"&gt;&lt;div class="title"&gt;common/lambda-loginsights2metrics/iam.tf&lt;/div&gt;&lt;div class="content"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;resource&lt;/span&gt; &lt;span class="nc"&gt;&amp;quot;aws_iam_role&amp;quot;&lt;/span&gt; &lt;span class="nv"&gt;&amp;quot;loginsights2metrics&amp;quot;&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="na"&gt;name&lt;/span&gt;               &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nv"&gt;var.prefix&lt;/span&gt;
+  &lt;span class="na"&gt;assume_role_policy&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nv"&gt;data.aws_iam_policy_document.trust.json&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 &lt;/div&gt;&lt;/div&gt;&lt;p&gt;To run, Lambdas need an initial set of permissions which can be found in the canned policy &lt;code&gt;AWSLambdaVPCAccessExecutionRole&lt;/code&gt;. You can see the content of the policy in the IAM console or dumping it with &lt;code&gt;aws iam get-policy&lt;/code&gt; and &lt;code&gt;aws iam get-policy-version&lt;/code&gt;&lt;/p&gt;&lt;div class="code"&gt;&lt;div class="content"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ aws iam get-policy --policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
 {
@@ -144,191 +144,191 @@ $ aws iam get-policy-version --policy-arn arn:aws:iam::aws:policy/service-role/A
     }
 }
 &lt;/pre&gt;&lt;/div&gt;
-&lt;/div&gt;&lt;/div&gt;&lt;p&gt;Attaching a canned policy is just a matter of creating a specific &lt;code&gt;aws_iam_role_policy_attachment&lt;/code&gt; resource&lt;/p&gt;&lt;div class="code"&gt;&lt;div class="title"&gt;common/lambda-loginsights2metrics/iam.tf&lt;/div&gt;&lt;div class="content"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;resource &amp;quot;aws_iam_role_policy_attachment&amp;quot; &amp;quot;loginsights2metrics-&amp;quot; {
-  role       = aws_iam_role.loginsights2metrics.name
-  policy_arn = &amp;quot;arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole&amp;quot;
-}
+&lt;/div&gt;&lt;/div&gt;&lt;p&gt;Attaching a canned policy is just a matter of creating a specific &lt;code&gt;aws_iam_role_policy_attachment&lt;/code&gt; resource&lt;/p&gt;&lt;div class="code"&gt;&lt;div class="title"&gt;common/lambda-loginsights2metrics/iam.tf&lt;/div&gt;&lt;div class="content"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;resource&lt;/span&gt; &lt;span class="nc"&gt;&amp;quot;aws_iam_role_policy_attachment&amp;quot;&lt;/span&gt; &lt;span class="nv"&gt;&amp;quot;loginsights2metrics-&amp;quot;&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="na"&gt;role&lt;/span&gt;       &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nv"&gt;aws_iam_role.loginsights2metrics.name&lt;/span&gt;
+  &lt;span class="na"&gt;policy_arn&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole&amp;quot;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
-&lt;/div&gt;&lt;/div&gt;&lt;p&gt;Now that we have the IAM role and the basic policy we can assign custom permissions to it. We need to grant the Lambda permissions on other AWS components, namely CloudWatch to run Log Insights queries and to store metrics and DynamoDB to retrieve all the items from the queries table.&lt;/p&gt;&lt;div class="code"&gt;&lt;div class="title"&gt;common/lambda-loginsights2metrics/iam.tf&lt;/div&gt;&lt;div class="content"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;data &amp;quot;aws_iam_policy_document&amp;quot; &amp;quot;loginsights2metrics&amp;quot; {
-  statement {
-    actions = [
-      &amp;quot;cloudwatch:PutMetricData&amp;quot;,
-      &amp;quot;cloudwatch:PutMetricAlarm&amp;quot;,
-      &amp;quot;logs:StartQuery&amp;quot;,
-      &amp;quot;logs:GetQueryResults&amp;quot;,
-      &amp;quot;logs:GetLogEvents&amp;quot;,
-    ]
+&lt;/div&gt;&lt;/div&gt;&lt;p&gt;Now that we have the IAM role and the basic policy we can assign custom permissions to it. We need to grant the Lambda permissions on other AWS components, namely CloudWatch to run Log Insights queries and to store metrics and DynamoDB to retrieve all the items from the queries table.&lt;/p&gt;&lt;div class="code"&gt;&lt;div class="title"&gt;common/lambda-loginsights2metrics/iam.tf&lt;/div&gt;&lt;div class="content"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="nc"&gt;&amp;quot;aws_iam_policy_document&amp;quot;&lt;/span&gt; &lt;span class="nv"&gt;&amp;quot;loginsights2metrics&amp;quot;&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nb"&gt;statement&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="na"&gt;actions&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+      &lt;span class="s2"&gt;&amp;quot;cloudwatch:PutMetricData&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+      &lt;span class="s2"&gt;&amp;quot;cloudwatch:PutMetricAlarm&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+      &lt;span class="s2"&gt;&amp;quot;logs:StartQuery&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+      &lt;span class="s2"&gt;&amp;quot;logs:GetQueryResults&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+      &lt;span class="s2"&gt;&amp;quot;logs:GetLogEvents&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="p"&gt;]&lt;/span&gt;
 
-    resources = [&amp;quot;*&amp;quot;]
-  }
+    &lt;span class="na"&gt;resources&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;*&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
 
-  statement {
-    actions = [
-      &amp;quot;dynamodb:Scan&amp;quot;
-    ]
+  &lt;span class="nb"&gt;statement&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="na"&gt;actions&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+      &lt;span class="s2"&gt;&amp;quot;dynamodb:Scan&amp;quot;&lt;/span&gt;
+    &lt;span class="p"&gt;]&lt;/span&gt;
 
-    resources = [aws_dynamodb_table.loginsights2metrics.arn]
-  }
-}
+    &lt;span class="na"&gt;resources&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nv"&gt;aws_dynamodb_table.loginsights2metrics.arn&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
-&lt;/div&gt;&lt;/div&gt;&lt;p&gt;Through &lt;code&gt;aws_iam_role_policy&lt;/code&gt; we can create and assign the policy out of a &lt;code&gt;data&lt;/code&gt; structure&lt;/p&gt;&lt;div class="code"&gt;&lt;div class="title"&gt;common/lambda-loginsights2metrics/iam.tf&lt;/div&gt;&lt;div class="content"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;resource &amp;quot;aws_iam_role_policy&amp;quot; &amp;quot;loginsights2metrics&amp;quot; {
-  name   = var.prefix
-  role   = aws_iam_role.loginsights2metrics.name
-  policy = data.aws_iam_policy_document.loginsights2metrics.json
-}
+&lt;/div&gt;&lt;/div&gt;&lt;p&gt;Through &lt;code&gt;aws_iam_role_policy&lt;/code&gt; we can create and assign the policy out of a &lt;code&gt;data&lt;/code&gt; structure&lt;/p&gt;&lt;div class="code"&gt;&lt;div class="title"&gt;common/lambda-loginsights2metrics/iam.tf&lt;/div&gt;&lt;div class="content"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;resource&lt;/span&gt; &lt;span class="nc"&gt;&amp;quot;aws_iam_role_policy&amp;quot;&lt;/span&gt; &lt;span class="nv"&gt;&amp;quot;loginsights2metrics&amp;quot;&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="na"&gt;name&lt;/span&gt;   &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nv"&gt;var.prefix&lt;/span&gt;
+  &lt;span class="na"&gt;role&lt;/span&gt;   &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nv"&gt;aws_iam_role.loginsights2metrics.name&lt;/span&gt;
+  &lt;span class="na"&gt;policy&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nv"&gt;data.aws_iam_policy_document.loginsights2metrics.json&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
-&lt;/div&gt;&lt;/div&gt;&lt;h4 id="resources"&gt;Resources&lt;/h4&gt;&lt;ul&gt;&lt;li&gt;&lt;a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document"&gt;aws_iam_policy_document documentation&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role"&gt;aws_iam_role documentation&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment"&gt;aws_iam_role_policy_attachment documentation&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy"&gt;aws_iam_role_policy documentation&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href="https://docs.aws.amazon.com/cli/latest/reference/iam/get-policy.html"&gt;AWS CLI iam get-policy documentation&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href="https://docs.aws.amazon.com/cli/latest/reference/iam/get-policy-version.html"&gt;AWS CLI iam get-policy-version documentation&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;&lt;h3 id="lambda"&gt;Lambda&lt;/h3&gt;&lt;p&gt;We can now create the Lambda function container. I do not use Terraform as a deployer, as I think it should be used to define static infrastructure only, so I will use a dummy function here and later deploy the real code using the AWS CLI.&lt;/p&gt;&lt;p&gt;The dummy function can be easily created with&lt;/p&gt;&lt;div class="code"&gt;&lt;div class="title"&gt;common/lambda-loginsights2metrics/lambda.tf&lt;/div&gt;&lt;div class="content"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;data &amp;quot;archive_file&amp;quot; &amp;quot;dummy&amp;quot; {
-  type        = &amp;quot;zip&amp;quot;
-  output_path = &amp;quot;${path.module}/lambda.zip&amp;quot;
+&lt;/div&gt;&lt;/div&gt;&lt;h4 id="resources"&gt;Resources&lt;/h4&gt;&lt;ul&gt;&lt;li&gt;&lt;a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document"&gt;aws_iam_policy_document documentation&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role"&gt;aws_iam_role documentation&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment"&gt;aws_iam_role_policy_attachment documentation&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy"&gt;aws_iam_role_policy documentation&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href="https://docs.aws.amazon.com/cli/latest/reference/iam/get-policy.html"&gt;AWS CLI iam get-policy documentation&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href="https://docs.aws.amazon.com/cli/latest/reference/iam/get-policy-version.html"&gt;AWS CLI iam get-policy-version documentation&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;&lt;h3 id="lambda"&gt;Lambda&lt;/h3&gt;&lt;p&gt;We can now create the Lambda function container. I do not use Terraform as a deployer, as I think it should be used to define static infrastructure only, so I will use a dummy function here and later deploy the real code using the AWS CLI.&lt;/p&gt;&lt;p&gt;The dummy function can be easily created with&lt;/p&gt;&lt;div class="code"&gt;&lt;div class="title"&gt;common/lambda-loginsights2metrics/lambda.tf&lt;/div&gt;&lt;div class="content"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="nc"&gt;&amp;quot;archive_file&amp;quot;&lt;/span&gt; &lt;span class="nv"&gt;&amp;quot;dummy&amp;quot;&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="na"&gt;type&lt;/span&gt;        &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;zip&amp;quot;&lt;/span&gt;
+  &lt;span class="na"&gt;output_path&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;${path.module}/lambda.zip&amp;quot;&lt;/span&gt;
 
-  source {
-    content  = &amp;quot;dummy&amp;quot;
-    filename = &amp;quot;dummy.txt&amp;quot;
-  }
-}
+  &lt;span class="nb"&gt;source&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="na"&gt;content&lt;/span&gt;  &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;dummy&amp;quot;&lt;/span&gt;
+    &lt;span class="na"&gt;filename&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;dummy.txt&amp;quot;&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
-&lt;/div&gt;&lt;/div&gt;&lt;p&gt;The Lambda function is a bit more complicated. As I mentioned, I'll use Zappa to package the function, so the &lt;code&gt;handler&lt;/code&gt; has to be &lt;code&gt;"zappa.handler.lambda_handler"&lt;/code&gt;. The IAM role given to the function is the one we defined previously, while &lt;code&gt;memory_size&lt;/code&gt; and &lt;code&gt;timeout&lt;/code&gt; clearly depend on the specific function. Lambdas should run in private networks, and I won't cover here the steps to create them. The AWS docs contains a lot of details on this topic, e.g. &lt;a href="https://aws.amazon.com/premiumsupport/knowledge-center/internet-access-lambda-function/"&gt;https://aws.amazon.com/premiumsupport/knowledge-center/internet-access-lambda-function/&lt;/a&gt;.&lt;/p&gt;&lt;p&gt;The environment variables allow me to inject the name of the DynamoDB table so that I don't need to hardcode it. I also pass another variable, the &lt;a href="https://sentry.io/welcome/"&gt;Sentry DSN&lt;/a&gt; that I use in my configuration. This is not essential for the problem at hand, but I left it there to show how to pass such values.&lt;/p&gt;&lt;div class="code"&gt;&lt;div class="title"&gt;common/lambda-loginsights2metrics/lambda.tf&lt;/div&gt;&lt;div class="content"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;resource &amp;quot;aws_lambda_function&amp;quot; &amp;quot;loginsights2metrics&amp;quot; {
-  function_name = &amp;quot;loginsights2metrics&amp;quot;
-  handler       = &amp;quot;zappa.handler.lambda_handler&amp;quot;
-  runtime       = &amp;quot;python3.8&amp;quot;
-  filename      = data.archive_file.dummy.output_path
+&lt;/div&gt;&lt;/div&gt;&lt;p&gt;The Lambda function is a bit more complicated. As I mentioned, I'll use Zappa to package the function, so the &lt;code&gt;handler&lt;/code&gt; has to be &lt;code&gt;"zappa.handler.lambda_handler"&lt;/code&gt;. The IAM role given to the function is the one we defined previously, while &lt;code&gt;memory_size&lt;/code&gt; and &lt;code&gt;timeout&lt;/code&gt; clearly depend on the specific function. Lambdas should run in private networks, and I won't cover here the steps to create them. The AWS docs contains a lot of details on this topic, e.g. &lt;a href="https://aws.amazon.com/premiumsupport/knowledge-center/internet-access-lambda-function/"&gt;https://aws.amazon.com/premiumsupport/knowledge-center/internet-access-lambda-function/&lt;/a&gt;.&lt;/p&gt;&lt;p&gt;The environment variables allow me to inject the name of the DynamoDB table so that I don't need to hardcode it. I also pass another variable, the &lt;a href="https://sentry.io/welcome/"&gt;Sentry DSN&lt;/a&gt; that I use in my configuration. This is not essential for the problem at hand, but I left it there to show how to pass such values.&lt;/p&gt;&lt;div class="code"&gt;&lt;div class="title"&gt;common/lambda-loginsights2metrics/lambda.tf&lt;/div&gt;&lt;div class="content"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;resource&lt;/span&gt; &lt;span class="nc"&gt;&amp;quot;aws_lambda_function&amp;quot;&lt;/span&gt; &lt;span class="nv"&gt;&amp;quot;loginsights2metrics&amp;quot;&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="na"&gt;function_name&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;loginsights2metrics&amp;quot;&lt;/span&gt;
+  &lt;span class="na"&gt;handler&lt;/span&gt;       &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;zappa.handler.lambda_handler&amp;quot;&lt;/span&gt;
+  &lt;span class="na"&gt;runtime&lt;/span&gt;       &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;python3.8&amp;quot;&lt;/span&gt;
+  &lt;span class="na"&gt;filename&lt;/span&gt;      &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nv"&gt;data.archive_file.dummy.output_path&lt;/span&gt;
 
-  role        = aws_iam_role.loginsights2metrics.arn
-  memory_size = 128
-  timeout     = 300
+  &lt;span class="na"&gt;role&lt;/span&gt;        &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nv"&gt;aws_iam_role.loginsights2metrics.arn&lt;/span&gt;
+  &lt;span class="na"&gt;memory_size&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="m"&gt;128&lt;/span&gt;
+  &lt;span class="na"&gt;timeout&lt;/span&gt;     &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="m"&gt;300&lt;/span&gt;
 
-  vpc_config {
-    subnet_ids         = var.vpc_subnets
-    security_group_ids = var.security_groups
-  }
+  &lt;span class="nb"&gt;vpc_config&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="na"&gt;subnet_ids&lt;/span&gt;         &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nv"&gt;var.vpc_subnets&lt;/span&gt;
+    &lt;span class="na"&gt;security_group_ids&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nv"&gt;var.security_groups&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
 
-  environment {
-    variables = {
-      &amp;quot;SENTRY_DSN&amp;quot;     = &amp;quot;https://XXXXXX:@sentry.io/YYYYYY&amp;quot;,
-      &amp;quot;DYNAMODB_TABLE&amp;quot; = aws_dynamodb_table.loginsights2metrics.name
-    }
-  }
+  &lt;span class="nb"&gt;environment&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nb"&gt;variables&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+      &lt;span class="s2"&gt;&amp;quot;SENTRY_DSN&amp;quot;&lt;/span&gt;     &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;https://XXXXXX:@sentry.io/YYYYYY&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+      &lt;span class="s2"&gt;&amp;quot;DYNAMODB_TABLE&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nv"&gt;aws_dynamodb_table.loginsights2metrics.name&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
 
-  lifecycle {
-    ignore_changes = [last_modified, filename]
-  }
-}
+  &lt;span class="nb"&gt;lifecycle&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="na"&gt;ignore_changes&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nb"&gt;last_modified, filename&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
-&lt;/div&gt;&lt;/div&gt;&lt;p&gt;Please note that I instructed Terraform to ignore changes to the two attributes &lt;code&gt;last_modified&lt;/code&gt; and &lt;code&gt;filename&lt;/code&gt;, and that I haven't used any &lt;code&gt;source_code_hash&lt;/code&gt;. This way I can safely apply Terraform to change parameters like &lt;code&gt;memory_size&lt;/code&gt; or &lt;code&gt;timeout&lt;/code&gt; without affecting what I deployed with the CI.&lt;/p&gt;&lt;p&gt;Since I want to trigger the function from AWS CloudWatch Events I need to grant the service &lt;code&gt;events.amazonaws.com&lt;/code&gt; the &lt;code&gt;lambda:InvokeFunction&lt;/code&gt; permission.&lt;/p&gt;&lt;div class="code"&gt;&lt;div class="title"&gt;common/lambda-loginsights2metrics/lambda.tf&lt;/div&gt;&lt;div class="content"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;resource &amp;quot;aws_lambda_permission&amp;quot; &amp;quot;loginsights2metrics&amp;quot; {
-  statement_id  = &amp;quot;AllowExecutionFromCloudWatch&amp;quot;
-  action        = &amp;quot;lambda:InvokeFunction&amp;quot;
-  function_name = aws_lambda_function.loginsights2metrics.function_name
-  principal     = &amp;quot;events.amazonaws.com&amp;quot;
-  source_arn    = aws_cloudwatch_event_rule.rate.arn
-}
+&lt;/div&gt;&lt;/div&gt;&lt;p&gt;Please note that I instructed Terraform to ignore changes to the two attributes &lt;code&gt;last_modified&lt;/code&gt; and &lt;code&gt;filename&lt;/code&gt;, and that I haven't used any &lt;code&gt;source_code_hash&lt;/code&gt;. This way I can safely apply Terraform to change parameters like &lt;code&gt;memory_size&lt;/code&gt; or &lt;code&gt;timeout&lt;/code&gt; without affecting what I deployed with the CI.&lt;/p&gt;&lt;p&gt;Since I want to trigger the function from AWS CloudWatch Events I need to grant the service &lt;code&gt;events.amazonaws.com&lt;/code&gt; the &lt;code&gt;lambda:InvokeFunction&lt;/code&gt; permission.&lt;/p&gt;&lt;div class="code"&gt;&lt;div class="title"&gt;common/lambda-loginsights2metrics/lambda.tf&lt;/div&gt;&lt;div class="content"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;resource&lt;/span&gt; &lt;span class="nc"&gt;&amp;quot;aws_lambda_permission&amp;quot;&lt;/span&gt; &lt;span class="nv"&gt;&amp;quot;loginsights2metrics&amp;quot;&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="na"&gt;statement_id&lt;/span&gt;  &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;AllowExecutionFromCloudWatch&amp;quot;&lt;/span&gt;
+  &lt;span class="na"&gt;action&lt;/span&gt;        &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;lambda:InvokeFunction&amp;quot;&lt;/span&gt;
+  &lt;span class="na"&gt;function_name&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nv"&gt;aws_lambda_function.loginsights2metrics.function_name&lt;/span&gt;
+  &lt;span class="na"&gt;principal&lt;/span&gt;     &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;events.amazonaws.com&amp;quot;&lt;/span&gt;
+  &lt;span class="na"&gt;source_arn&lt;/span&gt;    &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nv"&gt;aws_cloudwatch_event_rule.rate.arn&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
-&lt;/div&gt;&lt;/div&gt;&lt;h4 id="resources"&gt;Resources&lt;/h4&gt;&lt;ul&gt;&lt;li&gt;&lt;a href="https://registry.terraform.io/providers/hashicorp/archive/latest/docs/data-sources/archive_file"&gt;archive_file documentation&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function"&gt;aws_lambda_function documentation&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_permission"&gt;aws_lambda_permission documentation&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;&lt;h3 id="iam-part-2"&gt;IAM part 2&lt;/h3&gt;&lt;p&gt;Since 2018 Lambdas have a maximum execution time of 15 minutes (900 seconds), which is more than enough for many services, but to be conservative I preferred to leverage Zappa's asynchronous calls and to make the main Lambda call itself for each query. The Lambda doesn't clearly call the same Python function (it's not recursive), but from AWS's point of view we have a Lambda that calls itself, so we need to give it a specific permission to do this.&lt;/p&gt;&lt;div class="code"&gt;&lt;div class="title"&gt;common/lambda-loginsights2metrics/iam.tf&lt;/div&gt;&lt;div class="content"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;data &amp;quot;aws_iam_policy_document&amp;quot; &amp;quot;loginsights2metrics_exec&amp;quot; {
-  statement {
-    actions = [
-      &amp;quot;lambda:InvokeAsync&amp;quot;,
-      &amp;quot;lambda:InvokeFunction&amp;quot;
-    ]
+&lt;/div&gt;&lt;/div&gt;&lt;h4 id="resources"&gt;Resources&lt;/h4&gt;&lt;ul&gt;&lt;li&gt;&lt;a href="https://registry.terraform.io/providers/hashicorp/archive/latest/docs/data-sources/archive_file"&gt;archive_file documentation&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function"&gt;aws_lambda_function documentation&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_permission"&gt;aws_lambda_permission documentation&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;&lt;h3 id="iam-part-2"&gt;IAM part 2&lt;/h3&gt;&lt;p&gt;Since 2018 Lambdas have a maximum execution time of 15 minutes (900 seconds), which is more than enough for many services, but to be conservative I preferred to leverage Zappa's asynchronous calls and to make the main Lambda call itself for each query. The Lambda doesn't clearly call the same Python function (it's not recursive), but from AWS's point of view we have a Lambda that calls itself, so we need to give it a specific permission to do this.&lt;/p&gt;&lt;div class="code"&gt;&lt;div class="title"&gt;common/lambda-loginsights2metrics/iam.tf&lt;/div&gt;&lt;div class="content"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="nc"&gt;&amp;quot;aws_iam_policy_document&amp;quot;&lt;/span&gt; &lt;span class="nv"&gt;&amp;quot;loginsights2metrics_exec&amp;quot;&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nb"&gt;statement&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="na"&gt;actions&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+      &lt;span class="s2"&gt;&amp;quot;lambda:InvokeAsync&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+      &lt;span class="s2"&gt;&amp;quot;lambda:InvokeFunction&amp;quot;&lt;/span&gt;
+    &lt;span class="p"&gt;]&lt;/span&gt;
 
-    resources = [aws_lambda_function.loginsights2metrics.arn]
-  }
-}
+    &lt;span class="na"&gt;resources&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nv"&gt;aws_lambda_function.loginsights2metrics.arn&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
-&lt;/div&gt;&lt;/div&gt;&lt;p&gt;I could not define this when I defined the rest of the IAM components because this needs the Lambda to be defined, but the resource is in the same file. Terraform doesn't care about which resource we defined first and where we define it as long as there are no loops in the definitions.&lt;/p&gt;&lt;p&gt;We can now assign the newly created policy document to the IAM role we created previously&lt;/p&gt;&lt;div class="code"&gt;&lt;div class="title"&gt;common/lambda-loginsights2metrics/iam.tf&lt;/div&gt;&lt;div class="content"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;resource &amp;quot;aws_iam_role_policy&amp;quot; &amp;quot;loginsights2metrics_exec&amp;quot; {
-  name   = &amp;quot;${var.prefix}-exec&amp;quot;
-  role   = aws_iam_role.loginsights2metrics.name
-  policy = data.aws_iam_policy_document.loginsights2metrics_exec.json
-}
+&lt;/div&gt;&lt;/div&gt;&lt;p&gt;I could not define this when I defined the rest of the IAM components because this needs the Lambda to be defined, but the resource is in the same file. Terraform doesn't care about which resource we defined first and where we define it as long as there are no loops in the definitions.&lt;/p&gt;&lt;p&gt;We can now assign the newly created policy document to the IAM role we created previously&lt;/p&gt;&lt;div class="code"&gt;&lt;div class="title"&gt;common/lambda-loginsights2metrics/iam.tf&lt;/div&gt;&lt;div class="content"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;resource&lt;/span&gt; &lt;span class="nc"&gt;&amp;quot;aws_iam_role_policy&amp;quot;&lt;/span&gt; &lt;span class="nv"&gt;&amp;quot;loginsights2metrics_exec&amp;quot;&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="na"&gt;name&lt;/span&gt;   &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;${var.prefix}-exec&amp;quot;&lt;/span&gt;
+  &lt;span class="na"&gt;role&lt;/span&gt;   &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nv"&gt;aws_iam_role.loginsights2metrics.name&lt;/span&gt;
+  &lt;span class="na"&gt;policy&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nv"&gt;data.aws_iam_policy_document.loginsights2metrics_exec.json&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
-&lt;/div&gt;&lt;/div&gt;&lt;h4 id="resources"&gt;Resources&lt;/h4&gt;&lt;ul&gt;&lt;li&gt;&lt;a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document"&gt;aws_iam_policy_document documentation&lt;/a&gt; documentation")&lt;/li&gt;&lt;li&gt;&lt;a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy"&gt;aws_iam_role_policy documentation&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;&lt;h3 id="cloudwatch"&gt;CloudWatch&lt;/h3&gt;&lt;p&gt;Whenever you need to run Lambdas (or other things) periodically, the standard AWS solution is to use CloudWatch Events, which work as the AWS cron system. CloudWatch Events are made of rules and targets, so first of all I defined a rule that gets triggered every 2 minutes&lt;/p&gt;&lt;div class="code"&gt;&lt;div class="title"&gt;common/lambda-loginsights2metrics/cloudwatch.tf&lt;/div&gt;&lt;div class="content"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;resource &amp;quot;aws_cloudwatch_event_rule&amp;quot; &amp;quot;rate&amp;quot; {
-  # Zappa requires the name to match the processing function
-  name                = &amp;quot;main.loginsights2metrics&amp;quot;
-  description         = &amp;quot;Trigger Lambda ${var.prefix}&amp;quot;
-  schedule_expression = &amp;quot;rate(2 minutes)&amp;quot;
-}
+&lt;/div&gt;&lt;/div&gt;&lt;h4 id="resources"&gt;Resources&lt;/h4&gt;&lt;ul&gt;&lt;li&gt;&lt;a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document"&gt;aws_iam_policy_document documentation&lt;/a&gt; documentation")&lt;/li&gt;&lt;li&gt;&lt;a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy"&gt;aws_iam_role_policy documentation&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;&lt;h3 id="cloudwatch"&gt;CloudWatch&lt;/h3&gt;&lt;p&gt;Whenever you need to run Lambdas (or other things) periodically, the standard AWS solution is to use CloudWatch Events, which work as the AWS cron system. CloudWatch Events are made of rules and targets, so first of all I defined a rule that gets triggered every 2 minutes&lt;/p&gt;&lt;div class="code"&gt;&lt;div class="title"&gt;common/lambda-loginsights2metrics/cloudwatch.tf&lt;/div&gt;&lt;div class="content"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;resource&lt;/span&gt; &lt;span class="nc"&gt;&amp;quot;aws_cloudwatch_event_rule&amp;quot;&lt;/span&gt; &lt;span class="nv"&gt;&amp;quot;rate&amp;quot;&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="c1"&gt;  # Zappa requires the name to match the processing function&lt;/span&gt;
+  &lt;span class="na"&gt;name&lt;/span&gt;                &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;main.loginsights2metrics&amp;quot;&lt;/span&gt;
+  &lt;span class="na"&gt;description&lt;/span&gt;         &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Trigger Lambda ${var.prefix}&amp;quot;&lt;/span&gt;
+  &lt;span class="na"&gt;schedule_expression&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;rate(2 minutes)&amp;quot;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
-&lt;/div&gt;&lt;/div&gt;&lt;p&gt;Please note that Zappa has a specific requirement for CloudWatch Events, so I left a comment to clarify this to my future self. The second part of the event is the target, which is the Lambda function that we defined in the previous section.&lt;/p&gt;&lt;div class="code"&gt;&lt;div class="title"&gt;common/lambda-loginsights2metrics/cloudwatch.tf&lt;/div&gt;&lt;div class="content"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;resource &amp;quot;aws_cloudwatch_event_target&amp;quot; &amp;quot;lambda&amp;quot; {
-  rule      = aws_cloudwatch_event_rule.rate.name
-  target_id = &amp;quot;${var.prefix}-target&amp;quot;
-  arn       = aws_lambda_function.loginsights2metrics.arn
-}
+&lt;/div&gt;&lt;/div&gt;&lt;p&gt;Please note that Zappa has a specific requirement for CloudWatch Events, so I left a comment to clarify this to my future self. The second part of the event is the target, which is the Lambda function that we defined in the previous section.&lt;/p&gt;&lt;div class="code"&gt;&lt;div class="title"&gt;common/lambda-loginsights2metrics/cloudwatch.tf&lt;/div&gt;&lt;div class="content"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;resource&lt;/span&gt; &lt;span class="nc"&gt;&amp;quot;aws_cloudwatch_event_target&amp;quot;&lt;/span&gt; &lt;span class="nv"&gt;&amp;quot;lambda&amp;quot;&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="na"&gt;rule&lt;/span&gt;      &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nv"&gt;aws_cloudwatch_event_rule.rate.name&lt;/span&gt;
+  &lt;span class="na"&gt;target_id&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;${var.prefix}-target&amp;quot;&lt;/span&gt;
+  &lt;span class="na"&gt;arn&lt;/span&gt;       &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nv"&gt;aws_lambda_function.loginsights2metrics.arn&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
-&lt;/div&gt;&lt;/div&gt;&lt;h4 id="resources"&gt;Resources&lt;/h4&gt;&lt;ul&gt;&lt;li&gt;&lt;a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_rule"&gt;aws_cloudwatch_event_rule documentation&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_target"&gt;aws_cloudwatch_event_target documentation&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;&lt;h3 id="using-the-module"&gt;Using the module&lt;/h3&gt;&lt;p&gt;Now the module is finished, so I just need to create some items for the DynamoDB table and to call the module itself&lt;/p&gt;&lt;div class="code"&gt;&lt;div class="title"&gt;account1/lambda-loginsights2metrics/main.tf&lt;/div&gt;&lt;div class="content"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;locals {
-  items = [
-    {
-      &amp;quot;SlotName&amp;quot; : {
-        &amp;quot;S&amp;quot; : &amp;quot;Celery Logs submitted tasks&amp;quot;
-      },
-      &amp;quot;LogGroup&amp;quot; : {
-        &amp;quot;S&amp;quot; : &amp;quot;mycluster/celery&amp;quot;,
-      },
-      &amp;quot;ClusterName&amp;quot; : {
-        &amp;quot;S&amp;quot; : &amp;quot;mycluster&amp;quot;
-      },
-      &amp;quot;Query&amp;quot; : {
-        &amp;quot;S&amp;quot; : &amp;quot;parse @message /\\[celery\\.(?&amp;lt;source&amp;gt;[a-z.]+)\\].*Received task: (?&amp;lt;task&amp;gt;[a-z._]+)\\[/ | filter not isblank(source) | stats count(*) as Value by bin(1m)&amp;quot;,
-      },
-      &amp;quot;Namespace&amp;quot; : {
-        &amp;quot;S&amp;quot; : &amp;quot;Custom&amp;quot;
-      },
-      &amp;quot;MetricName&amp;quot; : {
-        &amp;quot;S&amp;quot; : &amp;quot;Submitted tasks&amp;quot;
-      }
-    },
-    {
-      &amp;quot;SlotName&amp;quot; : {
-        &amp;quot;S&amp;quot; : &amp;quot;Celery Logs succeeded tasks&amp;quot;
-      },
-      &amp;quot;LogGroup&amp;quot; : {
-        &amp;quot;S&amp;quot; : &amp;quot;mycluster/celery&amp;quot;,
-      },
-      &amp;quot;ClusterName&amp;quot; : {
-        &amp;quot;S&amp;quot; : &amp;quot;mycluster&amp;quot;
-      },
-      &amp;quot;Query&amp;quot; : {
-        &amp;quot;S&amp;quot; : &amp;quot;parse @message /\\[celery.(?&amp;lt;source&amp;gt;[a-z\\._]+)].*Task (?&amp;lt;task&amp;gt;[a-z\\._]+)\\[.*\\] (?&amp;lt;event&amp;gt;[a-z]+)/ | filter source = \&amp;quot;app.trace\&amp;quot; | filter event = \&amp;quot;succeeded\&amp;quot; | stats count(*) as Value by bin(1m)&amp;quot;,
-      },
-      &amp;quot;Namespace&amp;quot; : {
-        &amp;quot;S&amp;quot; : &amp;quot;Custom&amp;quot;
-      },
-      &amp;quot;MetricName&amp;quot; : {
-        &amp;quot;S&amp;quot; : &amp;quot;Succeeded tasks&amp;quot;
-      }
-    },
-    {
-      &amp;quot;SlotName&amp;quot; : {
-        &amp;quot;S&amp;quot; : &amp;quot;Celery Logs retried tasks&amp;quot;
-      },
-      &amp;quot;LogGroup&amp;quot; : {
-        &amp;quot;S&amp;quot; : &amp;quot;mycluster/celery&amp;quot;,
-      },
-      &amp;quot;ClusterName&amp;quot; : {
-        &amp;quot;S&amp;quot; : &amp;quot;mycluster&amp;quot;
-      },
-      &amp;quot;Query&amp;quot; : {
-        &amp;quot;S&amp;quot; : &amp;quot;parse @message /\\[celery.(?&amp;lt;source&amp;gt;[a-z\\._]+)].*Task (?&amp;lt;task&amp;gt;[a-z\\._]+)\\[.*\\] (?&amp;lt;event&amp;gt;[a-z]+)/ | filter source = \&amp;quot;app.trace\&amp;quot; | filter event = \&amp;quot;retry\&amp;quot; | stats count(*) as Value by bin(1m)&amp;quot;,
-      },
-      &amp;quot;Namespace&amp;quot; : {
-        &amp;quot;S&amp;quot; : &amp;quot;Custom&amp;quot;
-      },
-      &amp;quot;MetricName&amp;quot; : {
-        &amp;quot;S&amp;quot; : &amp;quot;Retried tasks&amp;quot;
-      }
-    }
-  ]
-}
+&lt;/div&gt;&lt;/div&gt;&lt;h4 id="resources"&gt;Resources&lt;/h4&gt;&lt;ul&gt;&lt;li&gt;&lt;a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_rule"&gt;aws_cloudwatch_event_rule documentation&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_target"&gt;aws_cloudwatch_event_target documentation&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;&lt;h3 id="using-the-module"&gt;Using the module&lt;/h3&gt;&lt;p&gt;Now the module is finished, so I just need to create some items for the DynamoDB table and to call the module itself&lt;/p&gt;&lt;div class="code"&gt;&lt;div class="title"&gt;account1/lambda-loginsights2metrics/main.tf&lt;/div&gt;&lt;div class="content"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nb"&gt;locals&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="na"&gt;items&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+    &lt;span class="p"&gt;{&lt;/span&gt;
+      &lt;span class="s2"&gt;&amp;quot;SlotName&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="s2"&gt;&amp;quot;S&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Celery Logs submitted tasks&amp;quot;&lt;/span&gt;
+      &lt;span class="p"&gt;},&lt;/span&gt;
+      &lt;span class="s2"&gt;&amp;quot;LogGroup&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="s2"&gt;&amp;quot;S&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;mycluster/celery&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+      &lt;span class="p"&gt;},&lt;/span&gt;
+      &lt;span class="s2"&gt;&amp;quot;ClusterName&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="s2"&gt;&amp;quot;S&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;mycluster&amp;quot;&lt;/span&gt;
+      &lt;span class="p"&gt;},&lt;/span&gt;
+      &lt;span class="s2"&gt;&amp;quot;Query&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="s2"&gt;&amp;quot;S&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;parse @message /\\[celery\\.(?&amp;lt;source&amp;gt;[a-z.]+)\\].*Received task: (?&amp;lt;task&amp;gt;[a-z._]+)\\[/ | filter not isblank(source) | stats count(*) as Value by bin(1m)&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+      &lt;span class="p"&gt;},&lt;/span&gt;
+      &lt;span class="s2"&gt;&amp;quot;Namespace&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="s2"&gt;&amp;quot;S&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Custom&amp;quot;&lt;/span&gt;
+      &lt;span class="p"&gt;},&lt;/span&gt;
+      &lt;span class="s2"&gt;&amp;quot;MetricName&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="s2"&gt;&amp;quot;S&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Submitted tasks&amp;quot;&lt;/span&gt;
+      &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="p"&gt;},&lt;/span&gt;
+    &lt;span class="p"&gt;{&lt;/span&gt;
+      &lt;span class="s2"&gt;&amp;quot;SlotName&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="s2"&gt;&amp;quot;S&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Celery Logs succeeded tasks&amp;quot;&lt;/span&gt;
+      &lt;span class="p"&gt;},&lt;/span&gt;
+      &lt;span class="s2"&gt;&amp;quot;LogGroup&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="s2"&gt;&amp;quot;S&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;mycluster/celery&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+      &lt;span class="p"&gt;},&lt;/span&gt;
+      &lt;span class="s2"&gt;&amp;quot;ClusterName&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="s2"&gt;&amp;quot;S&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;mycluster&amp;quot;&lt;/span&gt;
+      &lt;span class="p"&gt;},&lt;/span&gt;
+      &lt;span class="s2"&gt;&amp;quot;Query&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="s2"&gt;&amp;quot;S&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;parse @message /\\[celery.(?&amp;lt;source&amp;gt;[a-z\\._]+)].*Task (?&amp;lt;task&amp;gt;[a-z\\._]+)\\[.*\\] (?&amp;lt;event&amp;gt;[a-z]+)/ | filter source = \&amp;quot;app.trace\&amp;quot; | filter event = \&amp;quot;succeeded\&amp;quot; | stats count(*) as Value by bin(1m)&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+      &lt;span class="p"&gt;},&lt;/span&gt;
+      &lt;span class="s2"&gt;&amp;quot;Namespace&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="s2"&gt;&amp;quot;S&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Custom&amp;quot;&lt;/span&gt;
+      &lt;span class="p"&gt;},&lt;/span&gt;
+      &lt;span class="s2"&gt;&amp;quot;MetricName&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="s2"&gt;&amp;quot;S&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Succeeded tasks&amp;quot;&lt;/span&gt;
+      &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="p"&gt;},&lt;/span&gt;
+    &lt;span class="p"&gt;{&lt;/span&gt;
+      &lt;span class="s2"&gt;&amp;quot;SlotName&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="s2"&gt;&amp;quot;S&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Celery Logs retried tasks&amp;quot;&lt;/span&gt;
+      &lt;span class="p"&gt;},&lt;/span&gt;
+      &lt;span class="s2"&gt;&amp;quot;LogGroup&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="s2"&gt;&amp;quot;S&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;mycluster/celery&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+      &lt;span class="p"&gt;},&lt;/span&gt;
+      &lt;span class="s2"&gt;&amp;quot;ClusterName&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="s2"&gt;&amp;quot;S&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;mycluster&amp;quot;&lt;/span&gt;
+      &lt;span class="p"&gt;},&lt;/span&gt;
+      &lt;span class="s2"&gt;&amp;quot;Query&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="s2"&gt;&amp;quot;S&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;parse @message /\\[celery.(?&amp;lt;source&amp;gt;[a-z\\._]+)].*Task (?&amp;lt;task&amp;gt;[a-z\\._]+)\\[.*\\] (?&amp;lt;event&amp;gt;[a-z]+)/ | filter source = \&amp;quot;app.trace\&amp;quot; | filter event = \&amp;quot;retry\&amp;quot; | stats count(*) as Value by bin(1m)&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+      &lt;span class="p"&gt;},&lt;/span&gt;
+      &lt;span class="s2"&gt;&amp;quot;Namespace&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="s2"&gt;&amp;quot;S&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Custom&amp;quot;&lt;/span&gt;
+      &lt;span class="p"&gt;},&lt;/span&gt;
+      &lt;span class="s2"&gt;&amp;quot;MetricName&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="s2"&gt;&amp;quot;S&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Retried tasks&amp;quot;&lt;/span&gt;
+      &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+  &lt;span class="p"&gt;]&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
-&lt;/div&gt;&lt;/div&gt;&lt;p&gt;I need to provide a security group for the Lambda, and in this case I can safely use the default one provided by the VPC&lt;/p&gt;&lt;div class="code"&gt;&lt;div class="title"&gt;account1/lambda-loginsights2metrics/main.tf&lt;/div&gt;&lt;div class="content"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;data &amp;quot;aws_security_group&amp;quot; &amp;quot;default&amp;quot; {
-  name   = &amp;quot;default&amp;quot;
-  vpc_id = var.vpc_id
-}
+&lt;/div&gt;&lt;/div&gt;&lt;p&gt;I need to provide a security group for the Lambda, and in this case I can safely use the default one provided by the VPC&lt;/p&gt;&lt;div class="code"&gt;&lt;div class="title"&gt;account1/lambda-loginsights2metrics/main.tf&lt;/div&gt;&lt;div class="content"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;data&lt;/span&gt; &lt;span class="nc"&gt;&amp;quot;aws_security_group&amp;quot;&lt;/span&gt; &lt;span class="nv"&gt;&amp;quot;default&amp;quot;&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="na"&gt;name&lt;/span&gt;   &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;default&amp;quot;&lt;/span&gt;
+  &lt;span class="na"&gt;vpc_id&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nv"&gt;var.vpc_id&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
-&lt;/div&gt;&lt;/div&gt;&lt;p&gt;And I can finally call the module&lt;/p&gt;&lt;div class="code"&gt;&lt;div class="title"&gt;account1/lambda-loginsights2metrics/main.tf&lt;/div&gt;&lt;div class="content"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;module &amp;quot;loginsights2metrics&amp;quot; {
-  source = &amp;quot;../../common/lambda-loginsights2metrics&amp;quot;
+&lt;/div&gt;&lt;/div&gt;&lt;p&gt;And I can finally call the module&lt;/p&gt;&lt;div class="code"&gt;&lt;div class="title"&gt;account1/lambda-loginsights2metrics/main.tf&lt;/div&gt;&lt;div class="content"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;module&lt;/span&gt; &lt;span class="nv"&gt;&amp;quot;loginsights2metrics&amp;quot;&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="na"&gt;source&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;../../common/lambda-loginsights2metrics&amp;quot;&lt;/span&gt;
 
-  items           = local.items
-  security_groups = [data.aws_security_group.default.id]
-  vpc_subnets     = var.vpc_private_subnets
-}
+  &lt;span class="na"&gt;items&lt;/span&gt;           &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nv"&gt;local.items&lt;/span&gt;
+  &lt;span class="na"&gt;security_groups&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nv"&gt;data.aws_security_group.default.id&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+  &lt;span class="na"&gt;vpc_subnets&lt;/span&gt;     &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nv"&gt;var.vpc_private_subnets&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 &lt;/div&gt;&lt;/div&gt;&lt;p&gt;Please note that the variable &lt;code&gt;vpc_private_subnets&lt;/code&gt; is a list of subnet names that I created in another module.&lt;/p&gt;&lt;h4 id="resources"&gt;Resources&lt;/h4&gt;&lt;ul&gt;&lt;li&gt;&lt;a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group"&gt;aws_security_group documentation&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href="https://www.terraform.io/docs/language/modules/develop/index.html"&gt;Creating Terraform modules&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;&lt;h2 id="python"&gt;Python&lt;a class="headerlink" href="#python" title="Permanent link"&gt;¶&lt;/a&gt;&lt;/h2&gt;&lt;p&gt;As I mentioned before, the Python code of the Lambda function is contained in a different repository and deployed with the CI using &lt;a href="https://github.com/zappa/Zappa"&gt;Zappa&lt;/a&gt;. Given we are interacting with AWS I am clearly using Boto3, the &lt;a href="https://boto3.amazonaws.com/v1/documentation/api/latest/index.html"&gt;AWS SDK for Python&lt;/a&gt;. The code was developed locally without Zappa's support, to test out the Boto3 functions I wanted to use, then quickly adjusted to be executed in a Lambda.&lt;/p&gt;&lt;p&gt;I think the code is pretty straightforward, but I left my original comments to be sure everything is clear. &lt;/p&gt;&lt;div class="code"&gt;&lt;div class="content"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;os&lt;/span&gt;
 &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;time&lt;/span&gt;
