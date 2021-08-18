@@ -1,128 +1,500 @@
 <!DOCTYPE HTML>
-<!--
-	Editorial by HTML5 UP
-	html5up.net | @ajlkn
-	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
--->
-<html>
-	<head>
-        <title>The Digital Cat - TDD in Python with pytest - Part 1</title>
-	<meta charset="utf-8" />
-	<meta http-equiv='content-language' content='en-gb'>
-	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+<html lang="en">
+  <head>
+    <title>The Digital Cat - TDD in Python with pytest - Part 1</title>
+    <meta charset="utf-8" />
+    <meta http-equiv='content-language' content='en-gb'>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <meta name="description" content="A blog featuring in-depth posts about Python, Scala, TDD, devops, security and all things development">
 <meta name="description" content="This series of posts comes directly from my book Clean Architectures in Python. As I am reviewing the book to prepare a second edition, I realised that Harry Percival was right when he said that the initial part on TDD shouldn't be in the book. That's a prerequisite to follow …">
 <meta name="twitter:card" content="summary" />
 <meta name="twitter:site" content="@thedigicat" />
 <meta name="twitter:title" content="TDD in Python with pytest - Part 1" />
 <meta name="twitter:description" content="This series of posts comes directly from my book Clean Architectures in Python. As I am reviewing the book to prepare a second edition, I realised that Harry Percival was right when he said that the initial part on TDD shouldn't be in the book. That's a prerequisite to follow …" />
 <meta name="twitter:image" content="https://www.thedigitalcatonline.com/images/tdd-in-python-with-pytest-part-1.jpg" />
-	<script src="https://kit.fontawesome.com/15214b60ba.js" crossorigin="anonymous"></script>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,400italic,600italic|Roboto+Slab:400,700">
-
-        <link rel="stylesheet" href="/theme/css/main.min.css?59b2d75a">
-
-        
-        <link href="/images/global/favicon.jpg" rel="icon">
-
-	<!-- Global site tag (gtag.js) - Google Analytics -->
-	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-74364524-1"></script>
-	<script>
-	  window.dataLayer = window.dataLayer || [];
-	  function gtag(){dataLayer.push(arguments);}
-	  gtag('js', new Date());
-	  
-	  gtag('config', 'UA-74364524-1');
-	</script>
-
-	<!-- Global site tag (gtag.js) - Google Analytics -->
-	<script async src="https://www.googletagmanager.com/gtag/js?id=G-FZ55XG1KGG"></script>
-	<script>
-	  window.dataLayer = window.dataLayer || [];
-	  function gtag(){dataLayer.push(arguments);}
-	  gtag('js', new Date());
-	  
-	  gtag('config', 'G-FZ55XG1KGG');
-	</script>
-
-<script type="application/ld+json">
-  {
-      "@context" : "https://schema.org",
-      "@type" : "Article",
-      "name" : "TDD in Python with pytest - Part 1",
-      "author" : {
-	  "@type" : "Person",
-	  "name" : "Leonardo Giordani"
-      },
-      "publisher" : {
-	  "@type" : "Organization",
-	  "name" : "The Digital Cat",
-	  "logo" : {
-	      "@type" : "ImageObject",
-	      "url" : "https://www.thedigitalcatonline.com/images/global/logo_200.jpg",
-	      "height" : 200,
-	      "width" : 200
-	  }
-      },
-      "mainEntityOfPage": {
-	  "@type": "WebPage",
-	  "@id": "https://www.thedigitalcatonline.com/blog/2020/09/10/tdd-in-python-with-pytest-part-1/"
-      },
-      "datePublished" : "10/09/2020",
-      "dateModified" : "26/02/2021",
-      "image" : "https://www.thedigitalcatonline.com/images/tdd-in-python-with-pytest-part-1.jpg",
-      "description" : "This series of posts comes directly from my book Clean Architectures in Python. As I am reviewing the book to prepare a second edition, I realised that Harry Percival was right when he said that the initial part on TDD shouldn't be in the book. That's a prerequisite to follow …",
-      "headline" : "This series of posts comes directly from my book Clean Architectures in Python. As I am reviewing the book to",
-      "url" : "https://www.thedigitalcatonline.com/blog/2020/09/10/tdd-in-python-with-pytest-part-1/"
-  }
-</script>
-	</head>
-	<body class="is-preload">
-
-		<!-- Wrapper -->
-			<div id="wrapper">
-
-				<!-- Main -->
-					<div id="main">
-						<div class="inner">
-
-<header id="header">
-  <a class="logo" href="/category/programming/" title="Programming">All posts in category Programming <i class="fas fa-link"></i></a>
-  <div class="align-right">
-
+    <script src="https://kit.fontawesome.com/15214b60ba.js" crossorigin="anonymous"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,600;1,400;1,600&family=Roboto+Slab:wght@400;700&display=swap" rel="stylesheet"> 
+    <link rel="stylesheet" href="/theme/css/main.min.css?a62a7002">
+    <link href="/images/global/favicon.jpg" rel="icon">
     
-    TDD in Python with pytest #1
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-74364524-1"></script>
+    <script>
+     window.dataLayer = window.dataLayer || [];
+     function gtag(){dataLayer.push(arguments);}
+     gtag('js', new Date());
+     
+     gtag('config', 'UA-74364524-1');
+    </script>
 
-    <a href="/blog/2020/09/11/tdd-in-python-with-pytest-part-2/"><i class="fas fa-caret-square-right"></i></a>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FZ55XG1KGG"></script>
+    <script>
+     window.dataLayer = window.dataLayer || [];
+     function gtag(){dataLayer.push(arguments);}
+     gtag('js', new Date());
+     
+     gtag('config', 'G-FZ55XG1KGG');
+    </script>
+  </head>
 
-  </div>
-</header>
+  <body class="preload">
+    <div class="container">
+      <div class="sidebar navigation">
+<nav>
+<div class="links">
+  <ul>
+    <li class="link"><a href="/index.html">Homepage</a></li>
+    <li class="link"><a href="/pages/about.html">About</a></li>
+    <li class="link"><a href="/archives/index.html">Archives</a></li>
+  </ul>
+</div></nav>
+<section>
+  <header>
+    <h2>Categories</h2>
+  </header>
+<ul>
+  <li><a href="/category/programming/">Programming</a></li>
+  <li><a href="/category/projects/">Projects</a></li>
+  <li><a href="/category/retro/">Retro</a></li>
+</ul></section>
+<section>
+  <header>
+    <h2>Feeds</h2>
+  </header>
+<ul>
+  <li><i class="fas fa-rss" aria-hidden="true"></i> <a href="/atom.xml">All posts</a></li>
 
-<!-- <article class="post"> -->
 
-  <section id="header">
-    <header class="main">
-      <h1>TDD in Python with pytest - Part 1</h1>
-    </header>
-  </section>
-
-  <section id="post-info">
-    <p class="article-info">
-    By Leonardo Giordani
-
-    <span class="fas fa-calendar-alt"></span> <time datetime="2020-09-10T10:30:00+02:00"> 10/09/2020</time>
-
-    <span class="fas fa-edit"></span> <time datetime="2021-02-26T19:00:00+02:00"> 26/02/2021</time>
-
-    <span class="fas fa-tags"></span>
-    <a class="tag" href="/categories/oop/">OOP</a>    <a class="tag" href="/categories/pytest/">pytest</a>    <a class="tag" href="/categories/python/">Python</a>    <a class="tag" href="/categories/python3/">Python3</a>    <a class="tag" href="/categories/refactoring/">refactoring</a>    <a class="tag" href="/categories/tdd/">TDD</a>    <a class="tag" href="/categories/testing/">testing</a>    <br>
-    Share on: <span><a class="" href="https://twitter.com/intent/tweet?text=TDD%20in%20Python%20with%20pytest%20-%20Part%201&url=https%3A//www.thedigitalcatonline.com/blog/2020/09/10/tdd-in-python-with-pytest-part-1/&via=thedigicat&hashtags=oop,pytest,python,python3,refactoring,tdd,testing" target="_blank" title="Share on Twitter"><i class="fab fa-twitter"></i> Twitter</a></span>
+  <li><i class="fas fa-rss" aria-hidden="true"></i> <a href="/category/programming/atom.xml">All posts in category: Programming</a></li>
+</ul></section>
+<section>
+  <header>
+    <h2>Tags</h2>
+  </header>
+<ul class="tags">
+    <li class="tag tag-size-2">
+      <a title="Posts about algorithms" href="/categories/algorithms/">algorithms</a>
+    </li>
+    <li class="tag tag-size-2">
+      <a title="Posts about amiga" href="/categories/amiga/">amiga</a>
+    </li>
+    <li class="tag tag-size-4">
+      <a title="Posts about AMQP" href="/categories/amqp/">AMQP</a>
+    </li>
+    <li class="tag tag-size-3">
+      <a title="Posts about architectures" href="/categories/architectures/">architectures</a>
+    </li>
+    <li class="tag tag-size-2">
+      <a title="Posts about assembly" href="/categories/assembly/">assembly</a>
+    </li>
+    <li class="tag tag-size-2">
+      <a title="Posts about AWS" href="/categories/aws/">AWS</a>
+    </li>
+    <li class="tag tag-size-3">
+      <a title="Posts about blogging" href="/categories/blogging/">blogging</a>
+    </li>
+    <li class="tag tag-size-2">
+      <a title="Posts about C" href="/categories/c/">C</a>
+    </li>
+    <li class="tag tag-size-4">
+      <a title="Posts about Clojure" href="/categories/clojure/">Clojure</a>
+    </li>
+    <li class="tag tag-size-2">
+      <a title="Posts about compilers" href="/categories/compilers/">compilers</a>
+    </li>
+    <li class="tag tag-size-2">
+      <a title="Posts about concurrent programming" href="/categories/concurrent-programming/">concurrent programming</a>
+    </li>
+    <li class="tag tag-size-3">
+      <a title="Posts about cryptography" href="/categories/cryptography/">cryptography</a>
+    </li>
+    <li class="tag tag-size-2">
+      <a title="Posts about decorators" href="/categories/decorators/">decorators</a>
+    </li>
+    <li class="tag tag-size-4">
+      <a title="Posts about design" href="/categories/design/">design</a>
+    </li>
+    <li class="tag tag-size-2">
+      <a title="Posts about Django" href="/categories/django/">Django</a>
+    </li>
+    <li class="tag tag-size-3">
+      <a title="Posts about Docker" href="/categories/docker/">Docker</a>
+    </li>
+    <li class="tag tag-size-4">
+      <a title="Posts about ed25519" href="/categories/ed25519/">ed25519</a>
+    </li>
+    <li class="tag tag-size-4">
+      <a title="Posts about editor" href="/categories/editor/">editor</a>
+    </li>
+    <li class="tag tag-size-4">
+      <a title="Posts about Emacs" href="/categories/emacs/">Emacs</a>
+    </li>
+    <li class="tag tag-size-3">
+      <a title="Posts about Erlang" href="/categories/erlang/">Erlang</a>
+    </li>
+    <li class="tag tag-size-3">
+      <a title="Posts about Flask" href="/categories/flask/">Flask</a>
+    </li>
+    <li class="tag tag-size-1">
+      <a title="Posts about functional programming" href="/categories/functional-programming/">functional programming</a>
+    </li>
+    <li class="tag tag-size-3">
+      <a title="Posts about generators" href="/categories/generators/">generators</a>
+    </li>
+    <li class="tag tag-size-3">
+      <a title="Posts about Git" href="/categories/git/">Git</a>
+    </li>
+    <li class="tag tag-size-4">
+      <a title="Posts about HTML" href="/categories/html/">HTML</a>
+    </li>
+    <li class="tag tag-size-3">
+      <a title="Posts about HTTP" href="/categories/http/">HTTP</a>
+    </li>
+    <li class="tag tag-size-3">
+      <a title="Posts about infrastructure" href="/categories/infrastructure/">infrastructure</a>
+    </li>
+    <li class="tag tag-size-4">
+      <a title="Posts about JavaScript" href="/categories/javascript/">JavaScript</a>
+    </li>
+    <li class="tag tag-size-4">
+      <a title="Posts about Lambda" href="/categories/lambda/">Lambda</a>
+    </li>
+    <li class="tag tag-size-4">
+      <a title="Posts about M68000" href="/categories/m68000/">M68000</a>
+    </li>
+    <li class="tag tag-size-3">
+      <a title="Posts about Markdown" href="/categories/markdown/">Markdown</a>
+    </li>
+    <li class="tag tag-size-4">
+      <a title="Posts about Mau" href="/categories/mau/">Mau</a>
+    </li>
+    <li class="tag tag-size-2">
+      <a title="Posts about metaclasses" href="/categories/metaclasses/">metaclasses</a>
+    </li>
+    <li class="tag tag-size-2">
+      <a title="Posts about metaprogramming" href="/categories/metaprogramming/">metaprogramming</a>
+    </li>
+    <li class="tag tag-size-3">
+      <a title="Posts about Notebook" href="/categories/notebook/">Notebook</a>
+    </li>
+    <li class="tag tag-size-1">
+      <a title="Posts about OOP" href="/categories/oop/">OOP</a>
+    </li>
+    <li class="tag tag-size-2">
+      <a title="Posts about operating systems" href="/categories/operating-systems/">operating systems</a>
+    </li>
+    <li class="tag tag-size-3">
+      <a title="Posts about pelican" href="/categories/pelican/">pelican</a>
+    </li>
+    <li class="tag tag-size-4">
+      <a title="Posts about Pika" href="/categories/pika/">Pika</a>
+    </li>
+    <li class="tag tag-size-4">
+      <a title="Posts about Postage" href="/categories/postage/">Postage</a>
+    </li>
+    <li class="tag tag-size-3">
+      <a title="Posts about Postgres" href="/categories/postgres/">Postgres</a>
+    </li>
+    <li class="tag tag-size-1">
+      <a title="Posts about pytest" href="/categories/pytest/">pytest</a>
+    </li>
+    <li class="tag tag-size-1">
+      <a title="Posts about Python" href="/categories/python/">Python</a>
+    </li>
+    <li class="tag tag-size-2">
+      <a title="Posts about Python2" href="/categories/python2/">Python2</a>
+    </li>
+    <li class="tag tag-size-1">
+      <a title="Posts about Python3" href="/categories/python3/">Python3</a>
+    </li>
+    <li class="tag tag-size-3">
+      <a title="Posts about RabbitMQ" href="/categories/rabbitmq/">RabbitMQ</a>
+    </li>
+    <li class="tag tag-size-2">
+      <a title="Posts about refactoring" href="/categories/refactoring/">refactoring</a>
+    </li>
+    <li class="tag tag-size-2">
+      <a title="Posts about retroprogramming" href="/categories/retroprogramming/">retroprogramming</a>
+    </li>
+    <li class="tag tag-size-3">
+      <a title="Posts about RSA" href="/categories/rsa/">RSA</a>
+    </li>
+    <li class="tag tag-size-1">
+      <a title="Posts about Scala" href="/categories/scala/">Scala</a>
+    </li>
+    <li class="tag tag-size-3">
+      <a title="Posts about SSH" href="/categories/ssh/">SSH</a>
+    </li>
+    <li class="tag tag-size-3">
+      <a title="Posts about SSL" href="/categories/ssl/">SSL</a>
+    </li>
+    <li class="tag tag-size-1">
+      <a title="Posts about TDD" href="/categories/tdd/">TDD</a>
+    </li>
+    <li class="tag tag-size-3">
+      <a title="Posts about Terraform" href="/categories/terraform/">Terraform</a>
+    </li>
+    <li class="tag tag-size-1">
+      <a title="Posts about testing" href="/categories/testing/">testing</a>
+    </li>
+    <li class="tag tag-size-3">
+      <a title="Posts about tools" href="/categories/tools/">tools</a>
+    </li>
+    <li class="tag tag-size-3">
+      <a title="Posts about versioning" href="/categories/versioning/">versioning</a>
+    </li>
+    <li class="tag tag-size-4">
+      <a title="Posts about video" href="/categories/video/">video</a>
+    </li>
+    <li class="tag tag-size-2">
+      <a title="Posts about WWW" href="/categories/www/">WWW</a>
+    </li>
+</ul></section>
+<section>
+  <header>
+    <h2>Get in touch</h2>
+  </header>
+  <ul class="contact">
+    <li><i class="fab fa-twitter" aria-hidden="true"></i> <a href="https://twitter.com/thedigicat">Twitter</a></li>
+    <li><i class="fab fa-github" aria-hidden="true"></i> <a href="https://github.com/TheDigitalCatOnline">GitHub</a></li>
+  </ul>
+</section>      </div>
+      <div class="page">
+	<header class="primary" >
+	  <button type="button">
+	    <i class="fas fa-bars"></i>
+	  </button>
+	  <p>The Digital Cat</p>
+	</header>
+	<div class="mobile-menu navigation">
+<nav>
+<div class="links">
+  <ul>
+    <li class="link"><a href="/index.html">Homepage</a></li>
+    <li class="link"><a href="/pages/about.html">About</a></li>
+    <li class="link"><a href="/archives/index.html">Archives</a></li>
+  </ul>
+</div></nav>
+<section>
+  <header>
+    <h2>Categories</h2>
+  </header>
+<ul>
+  <li><a href="/category/programming/">Programming</a></li>
+  <li><a href="/category/projects/">Projects</a></li>
+  <li><a href="/category/retro/">Retro</a></li>
+</ul></section>
+<section>
+  <header>
+    <h2>Tags</h2>
+  </header>
+<ul class="tags">
+    <li class="tag tag-size-2">
+      <a title="Posts about algorithms" href="/categories/algorithms/">algorithms</a>
+    </li>
+    <li class="tag tag-size-2">
+      <a title="Posts about amiga" href="/categories/amiga/">amiga</a>
+    </li>
+    <li class="tag tag-size-4">
+      <a title="Posts about AMQP" href="/categories/amqp/">AMQP</a>
+    </li>
+    <li class="tag tag-size-3">
+      <a title="Posts about architectures" href="/categories/architectures/">architectures</a>
+    </li>
+    <li class="tag tag-size-2">
+      <a title="Posts about assembly" href="/categories/assembly/">assembly</a>
+    </li>
+    <li class="tag tag-size-2">
+      <a title="Posts about AWS" href="/categories/aws/">AWS</a>
+    </li>
+    <li class="tag tag-size-3">
+      <a title="Posts about blogging" href="/categories/blogging/">blogging</a>
+    </li>
+    <li class="tag tag-size-2">
+      <a title="Posts about C" href="/categories/c/">C</a>
+    </li>
+    <li class="tag tag-size-4">
+      <a title="Posts about Clojure" href="/categories/clojure/">Clojure</a>
+    </li>
+    <li class="tag tag-size-2">
+      <a title="Posts about compilers" href="/categories/compilers/">compilers</a>
+    </li>
+    <li class="tag tag-size-2">
+      <a title="Posts about concurrent programming" href="/categories/concurrent-programming/">concurrent programming</a>
+    </li>
+    <li class="tag tag-size-3">
+      <a title="Posts about cryptography" href="/categories/cryptography/">cryptography</a>
+    </li>
+    <li class="tag tag-size-2">
+      <a title="Posts about decorators" href="/categories/decorators/">decorators</a>
+    </li>
+    <li class="tag tag-size-4">
+      <a title="Posts about design" href="/categories/design/">design</a>
+    </li>
+    <li class="tag tag-size-2">
+      <a title="Posts about Django" href="/categories/django/">Django</a>
+    </li>
+    <li class="tag tag-size-3">
+      <a title="Posts about Docker" href="/categories/docker/">Docker</a>
+    </li>
+    <li class="tag tag-size-4">
+      <a title="Posts about ed25519" href="/categories/ed25519/">ed25519</a>
+    </li>
+    <li class="tag tag-size-4">
+      <a title="Posts about editor" href="/categories/editor/">editor</a>
+    </li>
+    <li class="tag tag-size-4">
+      <a title="Posts about Emacs" href="/categories/emacs/">Emacs</a>
+    </li>
+    <li class="tag tag-size-3">
+      <a title="Posts about Erlang" href="/categories/erlang/">Erlang</a>
+    </li>
+    <li class="tag tag-size-3">
+      <a title="Posts about Flask" href="/categories/flask/">Flask</a>
+    </li>
+    <li class="tag tag-size-1">
+      <a title="Posts about functional programming" href="/categories/functional-programming/">functional programming</a>
+    </li>
+    <li class="tag tag-size-3">
+      <a title="Posts about generators" href="/categories/generators/">generators</a>
+    </li>
+    <li class="tag tag-size-3">
+      <a title="Posts about Git" href="/categories/git/">Git</a>
+    </li>
+    <li class="tag tag-size-4">
+      <a title="Posts about HTML" href="/categories/html/">HTML</a>
+    </li>
+    <li class="tag tag-size-3">
+      <a title="Posts about HTTP" href="/categories/http/">HTTP</a>
+    </li>
+    <li class="tag tag-size-3">
+      <a title="Posts about infrastructure" href="/categories/infrastructure/">infrastructure</a>
+    </li>
+    <li class="tag tag-size-4">
+      <a title="Posts about JavaScript" href="/categories/javascript/">JavaScript</a>
+    </li>
+    <li class="tag tag-size-4">
+      <a title="Posts about Lambda" href="/categories/lambda/">Lambda</a>
+    </li>
+    <li class="tag tag-size-4">
+      <a title="Posts about M68000" href="/categories/m68000/">M68000</a>
+    </li>
+    <li class="tag tag-size-3">
+      <a title="Posts about Markdown" href="/categories/markdown/">Markdown</a>
+    </li>
+    <li class="tag tag-size-4">
+      <a title="Posts about Mau" href="/categories/mau/">Mau</a>
+    </li>
+    <li class="tag tag-size-2">
+      <a title="Posts about metaclasses" href="/categories/metaclasses/">metaclasses</a>
+    </li>
+    <li class="tag tag-size-2">
+      <a title="Posts about metaprogramming" href="/categories/metaprogramming/">metaprogramming</a>
+    </li>
+    <li class="tag tag-size-3">
+      <a title="Posts about Notebook" href="/categories/notebook/">Notebook</a>
+    </li>
+    <li class="tag tag-size-1">
+      <a title="Posts about OOP" href="/categories/oop/">OOP</a>
+    </li>
+    <li class="tag tag-size-2">
+      <a title="Posts about operating systems" href="/categories/operating-systems/">operating systems</a>
+    </li>
+    <li class="tag tag-size-3">
+      <a title="Posts about pelican" href="/categories/pelican/">pelican</a>
+    </li>
+    <li class="tag tag-size-4">
+      <a title="Posts about Pika" href="/categories/pika/">Pika</a>
+    </li>
+    <li class="tag tag-size-4">
+      <a title="Posts about Postage" href="/categories/postage/">Postage</a>
+    </li>
+    <li class="tag tag-size-3">
+      <a title="Posts about Postgres" href="/categories/postgres/">Postgres</a>
+    </li>
+    <li class="tag tag-size-1">
+      <a title="Posts about pytest" href="/categories/pytest/">pytest</a>
+    </li>
+    <li class="tag tag-size-1">
+      <a title="Posts about Python" href="/categories/python/">Python</a>
+    </li>
+    <li class="tag tag-size-2">
+      <a title="Posts about Python2" href="/categories/python2/">Python2</a>
+    </li>
+    <li class="tag tag-size-1">
+      <a title="Posts about Python3" href="/categories/python3/">Python3</a>
+    </li>
+    <li class="tag tag-size-3">
+      <a title="Posts about RabbitMQ" href="/categories/rabbitmq/">RabbitMQ</a>
+    </li>
+    <li class="tag tag-size-2">
+      <a title="Posts about refactoring" href="/categories/refactoring/">refactoring</a>
+    </li>
+    <li class="tag tag-size-2">
+      <a title="Posts about retroprogramming" href="/categories/retroprogramming/">retroprogramming</a>
+    </li>
+    <li class="tag tag-size-3">
+      <a title="Posts about RSA" href="/categories/rsa/">RSA</a>
+    </li>
+    <li class="tag tag-size-1">
+      <a title="Posts about Scala" href="/categories/scala/">Scala</a>
+    </li>
+    <li class="tag tag-size-3">
+      <a title="Posts about SSH" href="/categories/ssh/">SSH</a>
+    </li>
+    <li class="tag tag-size-3">
+      <a title="Posts about SSL" href="/categories/ssl/">SSL</a>
+    </li>
+    <li class="tag tag-size-1">
+      <a title="Posts about TDD" href="/categories/tdd/">TDD</a>
+    </li>
+    <li class="tag tag-size-3">
+      <a title="Posts about Terraform" href="/categories/terraform/">Terraform</a>
+    </li>
+    <li class="tag tag-size-1">
+      <a title="Posts about testing" href="/categories/testing/">testing</a>
+    </li>
+    <li class="tag tag-size-3">
+      <a title="Posts about tools" href="/categories/tools/">tools</a>
+    </li>
+    <li class="tag tag-size-3">
+      <a title="Posts about versioning" href="/categories/versioning/">versioning</a>
+    </li>
+    <li class="tag tag-size-4">
+      <a title="Posts about video" href="/categories/video/">video</a>
+    </li>
+    <li class="tag tag-size-2">
+      <a title="Posts about WWW" href="/categories/www/">WWW</a>
+    </li>
+</ul></section>	</div>
+	
+<div class="page-content">
+  <header>
+    <h1>TDD in Python with pytest - Part 1</h1>
+    <div class="post-info">
+      <p>By Leonardo Giordani - <time datetime="2020-09-10T10:30:00+02:00"> 10/09/2020</time></p>
+      <p class="tags">
+	<a class="tag category" href="/category/programming/" title="All posts in category Programming">Programming</a>
+	<a class="tag" href="/categories/oop/">OOP</a>
+	<a class="tag" href="/categories/pytest/">pytest</a>
+	<a class="tag" href="/categories/python/">Python</a>
+	<a class="tag" href="/categories/python3/">Python3</a>
+	<a class="tag" href="/categories/refactoring/">refactoring</a>
+	<a class="tag" href="/categories/tdd/">TDD</a>
+	<a class="tag" href="/categories/testing/">testing</a>
+      </p>
+      <p class="share">Share on: <span><a class="" href="https://twitter.com/intent/tweet?text=TDD%20in%20Python%20with%20pytest%20-%20Part%201&url=https%3A//www.thedigitalcatonline.com/blog/2020/09/10/tdd-in-python-with-pytest-part-1/&via=thedigicat&hashtags=oop,pytest,python,python3,refactoring,tdd,testing" target="_blank" title="Share on Twitter"><i class="fab fa-twitter"></i> Twitter</a></span>
 <span><a class="" href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A//www.thedigitalcatonline.com/blog/2020/09/10/tdd-in-python-with-pytest-part-1/&title=TDD%20in%20Python%20with%20pytest%20-%20Part%201&summary=This%20series%20of%20posts%20comes%20directly%20from%20my%20book%20Clean%20Architectures%20in%20Python.%20As%20I%20am%20reviewing%20the%20book%20to%20prepare%20a%20second%20edition%2C%20I%20realised%20that%20Harry%20Percival%20was%20right%20when%20he%20said%20that%20the%20initial%20part%20on%20TDD%20shouldn%27t%20be%20in%20the%20book.%20That%27s%20a%20prerequisite%20to%20follow%20%E2%80%A6&source=https%3A//www.thedigitalcatonline.com/blog/2020/09/10/tdd-in-python-with-pytest-part-1/" target="_blank" title="Share on LinkedIn"><i class="fab fa-linkedin"></i> LinkedIn</a></span>
 <span><a class="" href="https://news.ycombinator.com/submitlink?t=TDD%20in%20Python%20with%20pytest%20-%20Part%201&u=https%3A//www.thedigitalcatonline.com/blog/2020/09/10/tdd-in-python-with-pytest-part-1/" target="_blank" title="Share on HackerNews"><i class="fab fa-hacker-news"></i> HackerNews</a></span>
 <span><a class="" href="mailto:?subject=TDD%20in%20Python%20with%20pytest%20-%20Part%201&amp;body=https%3A//www.thedigitalcatonline.com/blog/2020/09/10/tdd-in-python-with-pytest-part-1/" target="_blank" title="Share via Email"><i class="fas fa-envelope"></i> Email</a></span>
-<span><a class="" href="https://www.reddit.com/submit?url=https%3A//www.thedigitalcatonline.com/blog/2020/09/10/tdd-in-python-with-pytest-part-1/&title=TDD%20in%20Python%20with%20pytest%20-%20Part%201" target="_blank" title="Share via Reddit"><i class="fab fa-reddit"></i> Reddit</a></span>    </p>
-  </section>
-
-  <section id="content">
+<span><a class="" href="https://www.reddit.com/submit?url=https%3A//www.thedigitalcatonline.com/blog/2020/09/10/tdd-in-python-with-pytest-part-1/&title=TDD%20in%20Python%20with%20pytest%20-%20Part%201" target="_blank" title="Share via Reddit"><i class="fab fa-reddit"></i> Reddit</a></span></p>    
+    </div>
+  </header>
+  
+  <div class="post-content">
     <p>This series of posts comes directly from my book <a href="https://leanpub.com/clean-architectures-in-python">Clean Architectures in Python</a>. As I am reviewing the book to prepare a second edition, I realised that Harry Percival was right when he said that the initial part on TDD shouldn't be in the book. That's a prerequisite to follow the chapters on the clean architecture, but it is something many programmers already know and they might be surprised to find it in a book that discusses architectures.</p><p>So, I decided to move it here before I start working on a new version of the book. I also followed the advice of <a href="https://github.com/valorien">valorien</a>, who pointed out that the main example had some bad naming choices, and so I reworked the code.</p><h1 id="introduction">Introduction<a class="headerlink" href="#introduction" title="Permanent link">¶</a></h1><p>Test-Driven Development (TDD) is fortunately one of the names that I can spot most frequently when people talk about methodologies. Unfortunately, many programmers still do not follow it, fearing that it will impose a further burden on the already difficult life of a developer.</p><p>In this chapter I will try to outline the basic concept of TDD and to show you how your job as a programmer can greatly benefit from it. I will develop a very simple project to show how to practically write software following this methodology.</p><p>TDD is a <em>methodology</em>, something that can help you to create better code. But it is not going to solve all your problems. As with all methodologies you have to pay attention not to commit blindly to it. Try to understand the reasons why certain practices are suggested by the methodology and you will also understand when and why you can or have to be flexible.</p><p>Keep also in mind that testing is a broader concept that doesn't end with TDD, which focuses a lot on unit testing, a specific type of test that helps you to develop the API of your library/package. There are other types of tests, like integration or functional ones, that are not specifically part of the TDD methodology, strictly speaking, even though the TDD approach can be extended to any testing activity.</p><h1 id="a-real-life-example">A real-life example<a class="headerlink" href="#a-real-life-example" title="Permanent link">¶</a></h1><p>Let's start with a simple example taken from a programmer's everyday life.</p><p>The programmer is in the office with other colleagues, trying to nail down an issue in some part of the software. Suddenly the boss storms into the office, and addresses the programmer:</p><p><strong>Boss</strong>: I just met with the rest of the board. Our clients are not happy, we didn't fix enough bugs in the last two months.</p><p><strong>Programmer</strong>: I see. How many bugs did we fix?</p><p><strong>Boss</strong>: Well, not enough!</p><p><strong>Programmer</strong>: OK, so how many bugs do we have to fix every month?</p><p><strong>Boss</strong>: More!</p><p>I guess you feel very sorry for the poor programmer. Apart from the aggressive attitude of the boss, what is the real issue in this conversation? At the end of it there is no hint for the programmer and their colleagues about what to do next. They don't have any clue about what they have to change. They can definitely try to work harder, but the boss didn't refer to actual figures, so it will be definitely hard for the developers to understand if they improved "enough".</p><p>The classical <a href="https://en.wikipedia.org/wiki/Sorites_paradox">sorites paradox</a> may help to understand the issue. One of the standard formulations, taken from the Wikipedia page, is</p><div class="callout"><div class="content"><p>1,000,000 grains of sand is a heap of sand (Premise 1)</p><p>A heap of sand minus one grain is still a heap. (Premise 2)</p><p>So 999,999 grains is a heap of sand.</p><p>A heap of sand minus one grain is still a heap. (Premise 2)</p><p>So 999,998 grains is a heap of sand.</p><p>So one grain is a heap of sand.</p></div></div><p>Where is the issue? The concept expressed by the word "heap" is nebulous, it is not defined clearly enough to allow the process to find a stable point, or a solution.</p><p>When you write software you face that same challenge. You cannot conceive a function and just expect it "to work", because this is not clearly defined. How do you test if the function that you wrote "works"? What do you mean by "works"? TDD forces you to <strong>clearly state your goal</strong> before you write the code. Actually, the TDD mantra is "Test first, code later", which can be translated to "Goal first, solution later". Will shortly see a practical example of this.</p><p>For the time being, consider that this is a valid practice also outside the realm of software creation. Whoever runs a business knows that you need to be able to extract some numbers (KPIs) from the activity of your company, because it is by comparing those numbers with some predefined thresholds that you can easily tell if the business is healthy or not. KPIs are a form of test, and you have to define them in advance, according to the expectations or needs that you have. </p><p>Pay attention. Nothing prevents you from changing the thresholds as a reaction to external events. You may consider that, given the incredible heat wave that hit your country, the amount of coats that your company sold could not reach the goal. So, because of a specific event, you can justify a change in the test (KPI). If you didn't have the test you would have just generically recorded that you earned less money.</p><p>Going back to software and TDD, following this methodology you are forced to state clear goals like</p><div class="code"><div class="content"><div class="highlight"><pre><span></span><span class="nb">sum</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="o">==</span> <span class="mi">9</span>
 </pre></div>
 </div></div><p>Let me read this test for you: there will be a <code>sum</code> function available in the system that accepts two integers. If the two integers are 4 and 5 the function will return 9.</p><p>As you can see there are many things that are tested by this statement.</p><ul><li>The function exists and can be imported</li><li>The function accepts two integers</li><li>Passing 4 and 5 as inputs, the output of the function will be 9.</li></ul><p>Pay attention that at this stage there is no code that implements the function <code>sum</code>, the tests will fail for sure.</p><p>As we will see with a practical example in the next chapter, what I explained in this section will become a set of rules of the methodology.</p><h1 id="a-simple-tdd-project">A simple TDD project<a class="headerlink" href="#a-simple-tdd-project" title="Permanent link">¶</a></h1><p>The project we are going to develop is available at <a href="https://github.com/lgiordani/simple_calculator">https://github.com/lgiordani/simple_calculator</a>.</p><p>This project is purposefully extremely simple. You don't need to be an experienced Python programmer to follow this chapter, but you need to know the basics of the language. The goal of this series of posts is not that of making you write the best Python code, but that of allowing you learn the TDD work flow, so don't be too worried if your code is not perfect.</p><p>Methodologies are like sports or arts: you cannot learn them just by reading their description on a book. You have to practice them. Thus, you should avoid as much as possible to just follow this chapter reading the code passively. Instead, you should try to write the code and to try new solutions to the problems that I discuss. This is very important, as it actually makes you use TDD. This way, at the end of the chapter you will have a personal experience of what TDD is like.</p><p>The repository is tagged, and at the end of each section you will find a link to the relative tag that contains the working solution.</p><h1 id="setup-the-project">Setup the project<a class="headerlink" href="#setup-the-project" title="Permanent link">¶</a></h1><p>Clone the project repository and move to the branch <code>develop</code>. The branch <code>master</code> contains the full solution, and I use it to maintain the repository, but if you want to code along you need to start from scratch. If you prefer, you can clearly clone it on GitHub and make your own copy of the repository.</p><div class="code"><div class="content"><div class="highlight"><pre><span></span>git clone https://github.com/lgiordani/simple_calculator
@@ -425,13 +797,15 @@ tests/test_main.py:44: AttributeError
         <span class="k">return</span> <span class="n">reduce</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">x</span><span class="o">*</span><span class="n">y</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
 </pre></div>
 </div></div><p><strong>Git tag:</strong> <a href="https://github.com/lgiordani/simple_calculator/tree/step-6-refactoring">step-6-refactoring</a></p><p>where I define an anonymous function that accepts two inputs <code>x, y</code> and returns their multiplication <code>x*y</code>. Running the test suite I can see that all the test pass, so my refactoring is correct.</p><div class="callout"><div class="content"><p><strong>TDD rule number 6:</strong> Never refactor without tests.</p></div></div><h1 id="final-words">Final words<a class="headerlink" href="#final-words" title="Permanent link">¶</a></h1><p>Well, I think we learned a lot. We started with no knowledge of TDD and we managed to implement a fully tested class with 3 methods. We also briefly touched the topic of refactoring, which is of paramount importance in development. In the next post I will cover the remaining requirements: division, testing exceptions, and the average function.</p><h1 id="updates">Updates<a class="headerlink" href="#updates" title="Permanent link">¶</a></h1><p>2021-01-03: <a href="https://github.com/4myhw">George</a> fixed a typo, thanks!</p><p>2021-08-11: <a href="https://github.com/floatingpurr">Andrea Mignone</a> fixed a link. Thank you!</p><h1 id="feedback">Feedback<a class="headerlink" href="#feedback" title="Permanent link">¶</a></h1><p>Feel free to reach me on <a href="https://twitter.com/thedigicat">Twitter</a> if you have questions. The <a href="https://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues">GitHub issues</a> page is the best place to submit corrections.</p>
-  </section>
+  </div>
 
-  <section class="footer">
-    <h2>Part 1 of the TDD in Python with pytest series</h2>
-    <div class="box">
+  <section class="links">
+    <header>
+      <h2>Part 1 of the TDD in Python with pytest series</h2>
+    </header>
+    <div>
       
-      <h5>Next articles</h5>
+      <h3>Next articles</h3>
       <ul>
         <li><a href="/blog/2020/09/11/tdd-in-python-with-pytest-part-2/">TDD in Python with pytest - Part 2</a></li>
         <li><a href="/blog/2020/09/15/tdd-in-python-with-pytest-part-3/">TDD in Python with pytest - Part 3</a></li>
@@ -441,416 +815,222 @@ tests/test_main.py:44: AttributeError
     </div>
   </section>
 
-  <section class="footer">
-    <h2>Related Posts</h2>
-    <div class="posts mini">
-      <article class="card">
-        <a href="/blog/2020/09/21/tdd-in-python-with-pytest-part-5/" class="image">
-          <img src="/images/tdd-in-python-with-pytest-part-5.jpg" alt="tdd-in-python-with-pytest-part-5" />
-        </a>
-        <div class="card-body">
-          <a href="/blog/2020/09/21/tdd-in-python-with-pytest-part-5/"><h2 class="card-title">TDD in Python with pytest - Part 5</h2></a>
-	  <p class="article-info">
-            <time datetime="2020-09-21T10:30:00+02:00">Sep 21, 2020</time>
-            <span class="fas fa-tags"></span>
-            <a href="/categories/oop/" class="tag">OOP</a>            <a href="/categories/pytest/" class="tag">pytest</a>            <a href="/categories/python/" class="tag">Python</a>            <a href="/categories/python3/" class="tag">Python3</a>            <a href="/categories/refactoring/" class="tag">refactoring</a>            <a href="/categories/tdd/" class="tag">TDD</a>            <a href="/categories/testing/" class="tag">testing</a>          </p>
-        </div>
-      </article>
-      <article class="card">
-        <a href="/blog/2020/09/17/tdd-in-python-with-pytest-part-4/" class="image">
-          <img src="/images/tdd-in-python-with-pytest-part-4.jpg" alt="tdd-in-python-with-pytest-part-4" />
-        </a>
-        <div class="card-body">
-          <a href="/blog/2020/09/17/tdd-in-python-with-pytest-part-4/"><h2 class="card-title">TDD in Python with pytest - Part 4</h2></a>
-	  <p class="article-info">
-            <time datetime="2020-09-17T11:30:00+02:00">Sep 17, 2020</time>
-            <span class="fas fa-tags"></span>
-            <a href="/categories/oop/" class="tag">OOP</a>            <a href="/categories/pytest/" class="tag">pytest</a>            <a href="/categories/python/" class="tag">Python</a>            <a href="/categories/python3/" class="tag">Python3</a>            <a href="/categories/refactoring/" class="tag">refactoring</a>            <a href="/categories/tdd/" class="tag">TDD</a>            <a href="/categories/testing/" class="tag">testing</a>          </p>
-        </div>
-      </article>
-      <article class="card">
-        <a href="/blog/2020/09/15/tdd-in-python-with-pytest-part-3/" class="image">
-          <img src="/images/tdd-in-python-with-pytest-part-3.jpg" alt="tdd-in-python-with-pytest-part-3" />
-        </a>
-        <div class="card-body">
-          <a href="/blog/2020/09/15/tdd-in-python-with-pytest-part-3/"><h2 class="card-title">TDD in Python with pytest - Part 3</h2></a>
-	  <p class="article-info">
-            <time datetime="2020-09-15T08:00:00+02:00">Sep 15, 2020</time>
-            <span class="fas fa-tags"></span>
-            <a href="/categories/oop/" class="tag">OOP</a>            <a href="/categories/pytest/" class="tag">pytest</a>            <a href="/categories/python/" class="tag">Python</a>            <a href="/categories/python3/" class="tag">Python3</a>            <a href="/categories/refactoring/" class="tag">refactoring</a>            <a href="/categories/tdd/" class="tag">TDD</a>            <a href="/categories/testing/" class="tag">testing</a>          </p>
-        </div>
-      </article>
-      <article class="card">
-        <a href="/blog/2020/09/11/tdd-in-python-with-pytest-part-2/" class="image">
-          <img src="/images/tdd-in-python-with-pytest-part-2.jpg" alt="tdd-in-python-with-pytest-part-2" />
-        </a>
-        <div class="card-body">
-          <a href="/blog/2020/09/11/tdd-in-python-with-pytest-part-2/"><h2 class="card-title">TDD in Python with pytest - Part 2</h2></a>
-	  <p class="article-info">
-            <time datetime="2020-09-11T10:30:00+02:00">Sep 11, 2020</time>
-            <span class="fas fa-tags"></span>
-            <a href="/categories/oop/" class="tag">OOP</a>            <a href="/categories/pytest/" class="tag">pytest</a>            <a href="/categories/python/" class="tag">Python</a>            <a href="/categories/python3/" class="tag">Python3</a>            <a href="/categories/refactoring/" class="tag">refactoring</a>            <a href="/categories/tdd/" class="tag">TDD</a>            <a href="/categories/testing/" class="tag">testing</a>          </p>
-        </div>
-      </article>
-      <article class="card">
-        <a href="/blog/2017/07/21/refactoring-with-test-in-python-a-practical-example/" class="image">
-          <img src="/images/refactoring-with-tests-in-python.jpg" alt="refactoring-with-tests-in-python" />
-        </a>
-        <div class="card-body">
-          <a href="/blog/2017/07/21/refactoring-with-test-in-python-a-practical-example/"><h2 class="card-title">Refactoring with tests in Python: a practical example</h2></a>
-	  <p class="article-info">
-            <time datetime="2017-07-21T09:30:00+01:00">Jul 21, 2017</time>
-            <span class="fas fa-tags"></span>
-            <a href="/categories/oop/" class="tag">OOP</a>            <a href="/categories/pytest/" class="tag">pytest</a>            <a href="/categories/python/" class="tag">Python</a>            <a href="/categories/python3/" class="tag">Python3</a>            <a href="/categories/refactoring/" class="tag">refactoring</a>            <a href="/categories/tdd/" class="tag">TDD</a>            <a href="/categories/testing/" class="tag">testing</a>          </p>
-        </div>
-      </article>
-      <article class="card">
-        <a href="/blog/2016/09/27/python-mocks-a-gentle-introduction-part-2/" class="image">
-          <img src="/images/python-mocks.jpg" alt="python-mocks" />
-        </a>
-        <div class="card-body">
-          <a href="/blog/2016/09/27/python-mocks-a-gentle-introduction-part-2/"><h2 class="card-title">Python Mocks: a gentle introduction - Part 2</h2></a>
-	  <p class="article-info">
-            <time datetime="2016-09-27T09:00:00+00:00">Sep 27, 2016</time>
-            <span class="fas fa-tags"></span>
-            <a href="/categories/decorators/" class="tag">decorators</a>            <a href="/categories/oop/" class="tag">OOP</a>            <a href="/categories/pytest/" class="tag">pytest</a>            <a href="/categories/python/" class="tag">Python</a>            <a href="/categories/python2/" class="tag">Python2</a>            <a href="/categories/python3/" class="tag">Python3</a>            <a href="/categories/tdd/" class="tag">TDD</a>            <a href="/categories/testing/" class="tag">testing</a>          </p>
-        </div>
-      </article>
-      <article class="card">
-        <a href="/blog/2016/03/06/python-mocks-a-gentle-introduction-part-1/" class="image">
-          <img src="/images/python-mocks.jpg" alt="python-mocks" />
-        </a>
-        <div class="card-body">
-          <a href="/blog/2016/03/06/python-mocks-a-gentle-introduction-part-1/"><h2 class="card-title">Python Mocks: a gentle introduction - Part 1</h2></a>
-	  <p class="article-info">
-            <time datetime="2016-03-06T18:00:00+01:00">Mar 6, 2016</time>
-            <span class="fas fa-tags"></span>
-            <a href="/categories/decorators/" class="tag">decorators</a>            <a href="/categories/oop/" class="tag">OOP</a>            <a href="/categories/pytest/" class="tag">pytest</a>            <a href="/categories/python/" class="tag">Python</a>            <a href="/categories/python2/" class="tag">Python2</a>            <a href="/categories/python3/" class="tag">Python3</a>            <a href="/categories/tdd/" class="tag">TDD</a>            <a href="/categories/testing/" class="tag">testing</a>          </p>
-        </div>
-      </article>
-      <article class="card">
-        <a href="/blog/2015/05/13/python-oop-tdd-example-part1/" class="image">
-          <img src="/images/python-oop-tdd.jpg" alt="python-oop-tdd" />
-        </a>
-        <div class="card-body">
-          <a href="/blog/2015/05/13/python-oop-tdd-example-part1/"><h2 class="card-title">A simple example of Python OOP development (with TDD) - Part 1</h2></a>
-	  <p class="article-info">
-            <time datetime="2015-05-13T17:00:00+01:00">May 13, 2015</time>
-            <span class="fas fa-tags"></span>
-            <a href="/categories/oop/" class="tag">OOP</a>            <a href="/categories/pytest/" class="tag">pytest</a>            <a href="/categories/python/" class="tag">Python</a>            <a href="/categories/python3/" class="tag">Python3</a>            <a href="/categories/tdd/" class="tag">TDD</a>            <a href="/categories/testing/" class="tag">testing</a>          </p>
-        </div>
-      </article>
-      <article class="card">
-        <a href="/blog/2018/12/20/cabook/" class="image">
-          <img src="/images/cabook.jpg" alt="cabook" />
-        </a>
-        <div class="card-body">
-          <a href="/blog/2018/12/20/cabook/"><h2 class="card-title">Clean Architectures in Python: the book</h2></a>
-	  <p class="article-info">
-            <time datetime="2018-12-20T08:00:00+01:00">Dec 20, 2018</time>
-            <span class="fas fa-tags"></span>
-            <a href="/categories/oop/" class="tag">OOP</a>            <a href="/categories/python/" class="tag">Python</a>            <a href="/categories/python2/" class="tag">Python2</a>            <a href="/categories/python3/" class="tag">Python3</a>            <a href="/categories/tdd/" class="tag">TDD</a>            <a href="/categories/testing/" class="tag">testing</a>            <a href="/categories/architectures/" class="tag">architectures</a>          </p>
-        </div>
-      </article>
-      <article class="card">
-        <a href="/blog/2016/11/14/clean-architectures-in-python-a-step-by-step-example/" class="image">
-          <img src="/images/clean-architectures.jpg" alt="clean-architectures" />
-        </a>
-        <div class="card-body">
-          <a href="/blog/2016/11/14/clean-architectures-in-python-a-step-by-step-example/"><h2 class="card-title">Clean architectures in Python: a step-by-step example</h2></a>
-	  <p class="article-info">
-            <time datetime="2016-11-14T19:00:00+00:00">Nov 14, 2016</time>
-            <span class="fas fa-tags"></span>
-            <a href="/categories/oop/" class="tag">OOP</a>            <a href="/categories/pytest/" class="tag">pytest</a>            <a href="/categories/python/" class="tag">Python</a>            <a href="/categories/python2/" class="tag">Python2</a>            <a href="/categories/python3/" class="tag">Python3</a>            <a href="/categories/tdd/" class="tag">TDD</a>            <a href="/categories/architectures/" class="tag">architectures</a>          </p>
-        </div>
-      </article>
+  <section>
+    <header>
+      <h2>Related Posts</h2>
+    </header>
+    <div class="paginated-posts">
+      <div class="posts">
+	<article class="card">
+          <a href="/blog/2020/09/21/tdd-in-python-with-pytest-part-5/">
+            <img src="/images/tdd-in-python-with-pytest-part-5.jpg" alt="tdd-in-python-with-pytest-part-5" />
+          </a>
+          <div class="body">
+            <a href="/blog/2020/09/21/tdd-in-python-with-pytest-part-5/"><h2>TDD in Python with pytest - Part 5</h2></a>
+	    <div class="info">
+	      <p class="tags">
+		<a href="/categories/oop/" class="tag">OOP</a>
+		<a href="/categories/pytest/" class="tag">pytest</a>
+		<a href="/categories/python/" class="tag">Python</a>
+		<a href="/categories/python3/" class="tag">Python3</a>
+		<a href="/categories/refactoring/" class="tag">refactoring</a>
+		<a href="/categories/tdd/" class="tag">TDD</a>
+		<a href="/categories/testing/" class="tag">testing</a>
+              </p>
+              <time datetime="2020-09-21T10:30:00+02:00">Sep 21, 2020</time>
+	    </div>
+          </div>
+	</article>
+	<article class="card">
+          <a href="/blog/2020/09/17/tdd-in-python-with-pytest-part-4/">
+            <img src="/images/tdd-in-python-with-pytest-part-4.jpg" alt="tdd-in-python-with-pytest-part-4" />
+          </a>
+          <div class="body">
+            <a href="/blog/2020/09/17/tdd-in-python-with-pytest-part-4/"><h2>TDD in Python with pytest - Part 4</h2></a>
+	    <div class="info">
+	      <p class="tags">
+		<a href="/categories/oop/" class="tag">OOP</a>
+		<a href="/categories/pytest/" class="tag">pytest</a>
+		<a href="/categories/python/" class="tag">Python</a>
+		<a href="/categories/python3/" class="tag">Python3</a>
+		<a href="/categories/refactoring/" class="tag">refactoring</a>
+		<a href="/categories/tdd/" class="tag">TDD</a>
+		<a href="/categories/testing/" class="tag">testing</a>
+              </p>
+              <time datetime="2020-09-17T11:30:00+02:00">Sep 17, 2020</time>
+	    </div>
+          </div>
+	</article>
+	<article class="card">
+          <a href="/blog/2020/09/15/tdd-in-python-with-pytest-part-3/">
+            <img src="/images/tdd-in-python-with-pytest-part-3.jpg" alt="tdd-in-python-with-pytest-part-3" />
+          </a>
+          <div class="body">
+            <a href="/blog/2020/09/15/tdd-in-python-with-pytest-part-3/"><h2>TDD in Python with pytest - Part 3</h2></a>
+	    <div class="info">
+	      <p class="tags">
+		<a href="/categories/oop/" class="tag">OOP</a>
+		<a href="/categories/pytest/" class="tag">pytest</a>
+		<a href="/categories/python/" class="tag">Python</a>
+		<a href="/categories/python3/" class="tag">Python3</a>
+		<a href="/categories/refactoring/" class="tag">refactoring</a>
+		<a href="/categories/tdd/" class="tag">TDD</a>
+		<a href="/categories/testing/" class="tag">testing</a>
+              </p>
+              <time datetime="2020-09-15T08:00:00+02:00">Sep 15, 2020</time>
+	    </div>
+          </div>
+	</article>
+	<article class="card">
+          <a href="/blog/2020/09/11/tdd-in-python-with-pytest-part-2/">
+            <img src="/images/tdd-in-python-with-pytest-part-2.jpg" alt="tdd-in-python-with-pytest-part-2" />
+          </a>
+          <div class="body">
+            <a href="/blog/2020/09/11/tdd-in-python-with-pytest-part-2/"><h2>TDD in Python with pytest - Part 2</h2></a>
+	    <div class="info">
+	      <p class="tags">
+		<a href="/categories/oop/" class="tag">OOP</a>
+		<a href="/categories/pytest/" class="tag">pytest</a>
+		<a href="/categories/python/" class="tag">Python</a>
+		<a href="/categories/python3/" class="tag">Python3</a>
+		<a href="/categories/refactoring/" class="tag">refactoring</a>
+		<a href="/categories/tdd/" class="tag">TDD</a>
+		<a href="/categories/testing/" class="tag">testing</a>
+              </p>
+              <time datetime="2020-09-11T10:30:00+02:00">Sep 11, 2020</time>
+	    </div>
+          </div>
+	</article>
+	<article class="card">
+          <a href="/blog/2017/07/21/refactoring-with-test-in-python-a-practical-example/">
+            <img src="/images/refactoring-with-tests-in-python.jpg" alt="refactoring-with-tests-in-python" />
+          </a>
+          <div class="body">
+            <a href="/blog/2017/07/21/refactoring-with-test-in-python-a-practical-example/"><h2>Refactoring with tests in Python: a practical example</h2></a>
+	    <div class="info">
+	      <p class="tags">
+		<a href="/categories/oop/" class="tag">OOP</a>
+		<a href="/categories/pytest/" class="tag">pytest</a>
+		<a href="/categories/python/" class="tag">Python</a>
+		<a href="/categories/python3/" class="tag">Python3</a>
+		<a href="/categories/refactoring/" class="tag">refactoring</a>
+		<a href="/categories/tdd/" class="tag">TDD</a>
+		<a href="/categories/testing/" class="tag">testing</a>
+              </p>
+              <time datetime="2017-07-21T09:30:00+01:00">Jul 21, 2017</time>
+	    </div>
+          </div>
+	</article>
+	<article class="card">
+          <a href="/blog/2016/09/27/python-mocks-a-gentle-introduction-part-2/">
+            <img src="/images/python-mocks.jpg" alt="python-mocks" />
+          </a>
+          <div class="body">
+            <a href="/blog/2016/09/27/python-mocks-a-gentle-introduction-part-2/"><h2>Python Mocks: a gentle introduction - Part 2</h2></a>
+	    <div class="info">
+	      <p class="tags">
+		<a href="/categories/decorators/" class="tag">decorators</a>
+		<a href="/categories/oop/" class="tag">OOP</a>
+		<a href="/categories/pytest/" class="tag">pytest</a>
+		<a href="/categories/python/" class="tag">Python</a>
+		<a href="/categories/python2/" class="tag">Python2</a>
+		<a href="/categories/python3/" class="tag">Python3</a>
+		<a href="/categories/tdd/" class="tag">TDD</a>
+		<a href="/categories/testing/" class="tag">testing</a>
+              </p>
+              <time datetime="2016-09-27T09:00:00+00:00">Sep 27, 2016</time>
+	    </div>
+          </div>
+	</article>
+	<article class="card">
+          <a href="/blog/2016/03/06/python-mocks-a-gentle-introduction-part-1/">
+            <img src="/images/python-mocks.jpg" alt="python-mocks" />
+          </a>
+          <div class="body">
+            <a href="/blog/2016/03/06/python-mocks-a-gentle-introduction-part-1/"><h2>Python Mocks: a gentle introduction - Part 1</h2></a>
+	    <div class="info">
+	      <p class="tags">
+		<a href="/categories/decorators/" class="tag">decorators</a>
+		<a href="/categories/oop/" class="tag">OOP</a>
+		<a href="/categories/pytest/" class="tag">pytest</a>
+		<a href="/categories/python/" class="tag">Python</a>
+		<a href="/categories/python2/" class="tag">Python2</a>
+		<a href="/categories/python3/" class="tag">Python3</a>
+		<a href="/categories/tdd/" class="tag">TDD</a>
+		<a href="/categories/testing/" class="tag">testing</a>
+              </p>
+              <time datetime="2016-03-06T18:00:00+01:00">Mar 6, 2016</time>
+	    </div>
+          </div>
+	</article>
+	<article class="card">
+          <a href="/blog/2015/05/13/python-oop-tdd-example-part1/">
+            <img src="/images/python-oop-tdd.jpg" alt="python-oop-tdd" />
+          </a>
+          <div class="body">
+            <a href="/blog/2015/05/13/python-oop-tdd-example-part1/"><h2>A simple example of Python OOP development (with TDD) - Part 1</h2></a>
+	    <div class="info">
+	      <p class="tags">
+		<a href="/categories/oop/" class="tag">OOP</a>
+		<a href="/categories/pytest/" class="tag">pytest</a>
+		<a href="/categories/python/" class="tag">Python</a>
+		<a href="/categories/python3/" class="tag">Python3</a>
+		<a href="/categories/tdd/" class="tag">TDD</a>
+		<a href="/categories/testing/" class="tag">testing</a>
+              </p>
+              <time datetime="2015-05-13T17:00:00+01:00">May 13, 2015</time>
+	    </div>
+          </div>
+	</article>
+	<article class="card">
+          <a href="/blog/2018/12/20/cabook/">
+            <img src="/images/cabook.jpg" alt="cabook" />
+          </a>
+          <div class="body">
+            <a href="/blog/2018/12/20/cabook/"><h2>Clean Architectures in Python: the book</h2></a>
+	    <div class="info">
+	      <p class="tags">
+		<a href="/categories/oop/" class="tag">OOP</a>
+		<a href="/categories/python/" class="tag">Python</a>
+		<a href="/categories/python2/" class="tag">Python2</a>
+		<a href="/categories/python3/" class="tag">Python3</a>
+		<a href="/categories/tdd/" class="tag">TDD</a>
+		<a href="/categories/testing/" class="tag">testing</a>
+		<a href="/categories/architectures/" class="tag">architectures</a>
+              </p>
+              <time datetime="2018-12-20T08:00:00+01:00">Dec 20, 2018</time>
+	    </div>
+          </div>
+	</article>
+	<article class="card">
+          <a href="/blog/2016/11/14/clean-architectures-in-python-a-step-by-step-example/">
+            <img src="/images/clean-architectures.jpg" alt="clean-architectures" />
+          </a>
+          <div class="body">
+            <a href="/blog/2016/11/14/clean-architectures-in-python-a-step-by-step-example/"><h2>Clean architectures in Python: a step-by-step example</h2></a>
+	    <div class="info">
+	      <p class="tags">
+		<a href="/categories/oop/" class="tag">OOP</a>
+		<a href="/categories/pytest/" class="tag">pytest</a>
+		<a href="/categories/python/" class="tag">Python</a>
+		<a href="/categories/python2/" class="tag">Python2</a>
+		<a href="/categories/python3/" class="tag">Python3</a>
+		<a href="/categories/tdd/" class="tag">TDD</a>
+		<a href="/categories/architectures/" class="tag">architectures</a>
+              </p>
+              <time datetime="2016-11-14T19:00:00+00:00">Nov 14, 2016</time>
+	    </div>
+          </div>
+	</article>
+      </div>
     </div>
   </section>
+  
+</div>
 
+      </div>
+    </div>
+    <script src="/theme/js/packed.js?46a8f903"></script>
 
-
-  <!-- </article> -->
-
-						</div>
-					</div>
-
-				<!-- Sidebar -->
-					<div id="sidebar">
-<div class="inner">
-    <!-- Menu -->
-        <nav id="menu">
-            <header class="major">
-                <h2>Menu</h2>
-            </header>
-<ul>
-    <li><a href="/index.html">Homepage</a></li>
-    <li><a href="/pages/about.html">About</a></li>
-    <li><a href="/archives/index.html">Archives</a></li>
-</ul>        </nav>
-
-    <!-- Section -->
-        <section>
-            <header class="major">
-                <h2>Recent posts</h2>
-            </header>
-<div class="mini-posts">
-    <article>
-        <a href="/blog/2021/06/03/public-key-cryptography-openssh-private-keys/" class="image"><img src="/images/public-key-cryptography-openssh-private-keys.jpg" alt="public-key-cryptography-openssh-private-keys" /></a>
-        <p><strong>Public key cryptography: OpenSSH private keys</strong> <a href="/blog/2021/06/03/public-key-cryptography-openssh-private-keys/">Read</a></p> 
-    </article>
-    <article>
-        <a href="/blog/2021/05/25/stop-using-tools-as-if-they-were-solutions/" class="image"><img src="/images/stop-using-tools-as-if-they-were-solutions.jpg" alt="stop-using-tools-as-if-they-were-solutions" /></a>
-        <p><strong>Stop using tools as if they were solutions</strong> <a href="/blog/2021/05/25/stop-using-tools-as-if-they-were-solutions/">Read</a></p> 
-    </article>
-    <article>
-        <a href="/blog/2021/03/25/how-to-write-a-pelican-theme-for-your-static-website/" class="image"><img src="/images/how-to-write-a-pelican-theme-for-your-static-website.jpg" alt="how-to-write-a-pelican-theme-for-your-static-website" /></a>
-        <p><strong>How to write a Pelican theme for your static website</strong> <a href="/blog/2021/03/25/how-to-write-a-pelican-theme-for-your-static-website/">Read</a></p> 
-    </article>
-</div>        </section>
-
-    <!-- Section -->
-        <section>
-            <header class="major">
-                <h2>Categories</h2>
-            </header>
-<ul class="list-clean">
-    <li><a href="/category/programming/">Programming</a></li>
-    <li><a href="/category/projects/">Projects</a></li>
-    <li><a href="/category/retro/">Retro</a></li>
-</ul>
-        </section>
-
-    <!-- Section -->
-        <section>
-            <header class="major">
-                <h2>Feeds</h2>
-            </header>
-<ul class="list-clean">
-    <li><a href="/atom.xml"><i class="fas fa-rss"></i> All posts</a></li>
-
-
-    <li><a href="/category/programming/atom.xml"><i class="fas fa-rss"></i> All posts in category: Programming</a></li>
-</ul>        </section>
-
-    <!-- Section -->
-        <section>
-            <header class="major">
-                <h2>Tags</h2>
-            </header>
-<ul class="list-inline list-clean" id="tags-side">
-    <li class="tag font-size-2">
-        <a title="Posts about algorithms" href="/categories/algorithms/">algorithms</a>
-    </li>
-    <li class="tag font-size-2">
-        <a title="Posts about amiga" href="/categories/amiga/">amiga</a>
-    </li>
-    <li class="tag font-size-4">
-        <a title="Posts about AMQP" href="/categories/amqp/">AMQP</a>
-    </li>
-    <li class="tag font-size-3">
-        <a title="Posts about architectures" href="/categories/architectures/">architectures</a>
-    </li>
-    <li class="tag font-size-2">
-        <a title="Posts about assembly" href="/categories/assembly/">assembly</a>
-    </li>
-    <li class="tag font-size-2">
-        <a title="Posts about AWS" href="/categories/aws/">AWS</a>
-    </li>
-    <li class="tag font-size-3">
-        <a title="Posts about blogging" href="/categories/blogging/">blogging</a>
-    </li>
-    <li class="tag font-size-2">
-        <a title="Posts about C" href="/categories/c/">C</a>
-    </li>
-    <li class="tag font-size-4">
-        <a title="Posts about Clojure" href="/categories/clojure/">Clojure</a>
-    </li>
-    <li class="tag font-size-2">
-        <a title="Posts about compilers" href="/categories/compilers/">compilers</a>
-    </li>
-    <li class="tag font-size-2">
-        <a title="Posts about concurrent programming" href="/categories/concurrent-programming/">concurrent programming</a>
-    </li>
-    <li class="tag font-size-3">
-        <a title="Posts about cryptography" href="/categories/cryptography/">cryptography</a>
-    </li>
-    <li class="tag font-size-2">
-        <a title="Posts about decorators" href="/categories/decorators/">decorators</a>
-    </li>
-    <li class="tag font-size-4">
-        <a title="Posts about design" href="/categories/design/">design</a>
-    </li>
-    <li class="tag font-size-2">
-        <a title="Posts about Django" href="/categories/django/">Django</a>
-    </li>
-    <li class="tag font-size-3">
-        <a title="Posts about Docker" href="/categories/docker/">Docker</a>
-    </li>
-    <li class="tag font-size-4">
-        <a title="Posts about ed25519" href="/categories/ed25519/">ed25519</a>
-    </li>
-    <li class="tag font-size-4">
-        <a title="Posts about editor" href="/categories/editor/">editor</a>
-    </li>
-    <li class="tag font-size-4">
-        <a title="Posts about Emacs" href="/categories/emacs/">Emacs</a>
-    </li>
-    <li class="tag font-size-3">
-        <a title="Posts about Erlang" href="/categories/erlang/">Erlang</a>
-    </li>
-    <li class="tag font-size-3">
-        <a title="Posts about Flask" href="/categories/flask/">Flask</a>
-    </li>
-    <li class="tag font-size-1">
-        <a title="Posts about functional programming" href="/categories/functional-programming/">functional programming</a>
-    </li>
-    <li class="tag font-size-3">
-        <a title="Posts about generators" href="/categories/generators/">generators</a>
-    </li>
-    <li class="tag font-size-3">
-        <a title="Posts about Git" href="/categories/git/">Git</a>
-    </li>
-    <li class="tag font-size-4">
-        <a title="Posts about HTML" href="/categories/html/">HTML</a>
-    </li>
-    <li class="tag font-size-3">
-        <a title="Posts about HTTP" href="/categories/http/">HTTP</a>
-    </li>
-    <li class="tag font-size-3">
-        <a title="Posts about infrastructure" href="/categories/infrastructure/">infrastructure</a>
-    </li>
-    <li class="tag font-size-4">
-        <a title="Posts about JavaScript" href="/categories/javascript/">JavaScript</a>
-    </li>
-    <li class="tag font-size-4">
-        <a title="Posts about Lambda" href="/categories/lambda/">Lambda</a>
-    </li>
-    <li class="tag font-size-4">
-        <a title="Posts about M68000" href="/categories/m68000/">M68000</a>
-    </li>
-    <li class="tag font-size-3">
-        <a title="Posts about Markdown" href="/categories/markdown/">Markdown</a>
-    </li>
-    <li class="tag font-size-4">
-        <a title="Posts about Mau" href="/categories/mau/">Mau</a>
-    </li>
-    <li class="tag font-size-2">
-        <a title="Posts about metaclasses" href="/categories/metaclasses/">metaclasses</a>
-    </li>
-    <li class="tag font-size-2">
-        <a title="Posts about metaprogramming" href="/categories/metaprogramming/">metaprogramming</a>
-    </li>
-    <li class="tag font-size-3">
-        <a title="Posts about Notebook" href="/categories/notebook/">Notebook</a>
-    </li>
-    <li class="tag font-size-1">
-        <a title="Posts about OOP" href="/categories/oop/">OOP</a>
-    </li>
-    <li class="tag font-size-2">
-        <a title="Posts about operating systems" href="/categories/operating-systems/">operating systems</a>
-    </li>
-    <li class="tag font-size-3">
-        <a title="Posts about pelican" href="/categories/pelican/">pelican</a>
-    </li>
-    <li class="tag font-size-4">
-        <a title="Posts about Pika" href="/categories/pika/">Pika</a>
-    </li>
-    <li class="tag font-size-4">
-        <a title="Posts about Postage" href="/categories/postage/">Postage</a>
-    </li>
-    <li class="tag font-size-3">
-        <a title="Posts about Postgres" href="/categories/postgres/">Postgres</a>
-    </li>
-    <li class="tag font-size-1">
-        <a title="Posts about pytest" href="/categories/pytest/">pytest</a>
-    </li>
-    <li class="tag font-size-1">
-        <a title="Posts about Python" href="/categories/python/">Python</a>
-    </li>
-    <li class="tag font-size-2">
-        <a title="Posts about Python2" href="/categories/python2/">Python2</a>
-    </li>
-    <li class="tag font-size-1">
-        <a title="Posts about Python3" href="/categories/python3/">Python3</a>
-    </li>
-    <li class="tag font-size-3">
-        <a title="Posts about RabbitMQ" href="/categories/rabbitmq/">RabbitMQ</a>
-    </li>
-    <li class="tag font-size-2">
-        <a title="Posts about refactoring" href="/categories/refactoring/">refactoring</a>
-    </li>
-    <li class="tag font-size-2">
-        <a title="Posts about retroprogramming" href="/categories/retroprogramming/">retroprogramming</a>
-    </li>
-    <li class="tag font-size-3">
-        <a title="Posts about RSA" href="/categories/rsa/">RSA</a>
-    </li>
-    <li class="tag font-size-1">
-        <a title="Posts about Scala" href="/categories/scala/">Scala</a>
-    </li>
-    <li class="tag font-size-3">
-        <a title="Posts about SSH" href="/categories/ssh/">SSH</a>
-    </li>
-    <li class="tag font-size-3">
-        <a title="Posts about SSL" href="/categories/ssl/">SSL</a>
-    </li>
-    <li class="tag font-size-1">
-        <a title="Posts about TDD" href="/categories/tdd/">TDD</a>
-    </li>
-    <li class="tag font-size-3">
-        <a title="Posts about Terraform" href="/categories/terraform/">Terraform</a>
-    </li>
-    <li class="tag font-size-1">
-        <a title="Posts about testing" href="/categories/testing/">testing</a>
-    </li>
-    <li class="tag font-size-3">
-        <a title="Posts about tools" href="/categories/tools/">tools</a>
-    </li>
-    <li class="tag font-size-3">
-        <a title="Posts about versioning" href="/categories/versioning/">versioning</a>
-    </li>
-    <li class="tag font-size-4">
-        <a title="Posts about video" href="/categories/video/">video</a>
-    </li>
-    <li class="tag font-size-2">
-        <a title="Posts about WWW" href="/categories/www/">WWW</a>
-    </li>
-</ul>        </section>
-
-    <!-- Section -->
-        <section>
-            <header class="major">
-                <h2>Get in touch</h2>
-            </header>
-<ul class="contact">
-    
-    
-    
-    <li class="fa-twitter"><a href="https://twitter.com/thedigicat">Twitter</a></li>
-    
-    
-    
-    
-    <li class="fa-github"><a href="https://github.com/TheDigitalCatOnline">GitHub</a></li>
-    
-</ul>        </section>
-
-    <!-- Footer -->
-        <footer id="footer">
-            <p class="copyright">Editorial theme by: <a href="https://html5up.net">HTML5 UP</a>.</p>
-            <p class="copyright">Cover picture by: <a href="https://pxhere.com/en/photo/1428515">An Min @ pxhere.com</a></p>
-        </footer>
-
-</div>					</div>
-
-			</div>
-
-		<!-- Scripts -->
-			<script src="/theme/js/jquery.min.js"></script>
-			<script src="/theme/js/browser.min.js"></script>
-			<script src="/theme/js/breakpoints.min.js"></script>
-            <script src="/theme/js/packed.js?fa89ff81"></script>
-
-
-	</body>
+  </body>
 </html>
