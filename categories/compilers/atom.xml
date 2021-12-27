@@ -705,26 +705,22 @@ line : assignment | expression
 &lt;li&gt;&lt;strong&gt;Visitor&lt;/strong&gt;: the output of the parser is processed by a component that will either write the equivalent in another language or execute it.&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Command Line Interface (CLI)&lt;/strong&gt;: the whole stack can be directly used by a REPL (Read, Evaluate, Print Loop), a command line interface similar to the one Python provides. There each line is lexed, parsed, and visited, and the result is printed immediately.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;I will provide two classes: &lt;code&gt;Token&lt;/code&gt; and &lt;code&gt;TextBuffer&lt;/code&gt;. These will avoid you spending too much time in creating the basic tools, and allow you to get straight into the game. Since those classes come obviously with their own test suit you are free to develop them on your own, however, starting from the same tests that I used.&lt;/p&gt;
+&lt;p&gt;I will provide two classes: &lt;code&gt;Token&lt;/code&gt; and &lt;code&gt;TextBuffer&lt;/code&gt;. These will avoid you spending too much time to create the basic tools, and allow you to get straight into the game. Since those classes come obviously with their own test suite you are free to develop them on your own. You should however start from the same tests that I used, otherwise your interface might end up being incompatible witht he rest of the project.&lt;/p&gt;
 &lt;h2 id="initial-setup"&gt;Initial setup&lt;a class="headerlink" href="#initial-setup" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;I prepared &lt;a href="https://github.com/lgiordani/smallcalc"&gt;this repository&lt;/a&gt;, which contains everything you need to start the project.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ git clone https://github.com/lgiordani/smallcalc.git
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;I created that repository using the amazing &lt;a href="https://github.com/audreyr/cookiecutter"&gt;Cookiecutter&lt;/a&gt; project by Audrey Roy Greenfeld. The specific template I used is one that I created as a fork of the official one. You can find the source &lt;a href="https://github.com/lgiordani/cookiecutter-pypackage"&gt;on GitHub&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;Once you cloned the repository you can set up an environment with&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nb"&gt;cd&lt;/span&gt; smallcalc
-python3 -m venv venv3
-&lt;span class="nb"&gt;source&lt;/span&gt; venv3/bin/activate
-pip install -r requirements/test.txt
+&lt;p&gt;Once you cloned the repository, set up a Python virtual environment using your favourite method/tool and install the testing requirements&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;pip install -r requirements/test.txt
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;At this point you should be able to run the test suite. For this project we are going to use &lt;a href="http://www.pytest.org"&gt;py.test&lt;/a&gt;, so the command line is&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;py.test -svv
+&lt;p&gt;At this point you should be able to run the test suite. For this project we are going to use &lt;a href="http://www.pytest.org"&gt;pytest&lt;/a&gt;, so the command line is&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;pytest -svv
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;or, if you want to check your code coverage,&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;py.test -svv  --cov-report term-missing --cov&lt;span class="o"&gt;=&lt;/span&gt;smallcalc 
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;pytest -svv  --cov-report term-missing --cov&lt;span class="o"&gt;=&lt;/span&gt;smallcalc 
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;h2 id="tokens"&gt;Tokens&lt;a class="headerlink" href="#tokens" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
@@ -769,7 +765,7 @@ pip install -r requirements/test.txt
 &lt;p&gt;The value of a token is always a string, and shall be converted into a different type by an external object according to the value that the token assumes. For example the string &lt;code&gt;'123'&lt;/code&gt; can be interpreted as an integer, but could also be the name of a variable if our language supports such a feature.&lt;/p&gt;
 &lt;p&gt;Remember that everything you find in this class has been introduced to make one or more tests pass, so check the test suite to understand how the object can be used.&lt;/p&gt;
 &lt;h2 id="buffer"&gt;Buffer&lt;a class="headerlink" href="#buffer" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
-&lt;p&gt;The second element that you will find in the initial setup is the class &lt;code&gt;TextBuffer&lt;/code&gt;, that provides a very basic manager for an input text&lt;/p&gt;
+&lt;p&gt;The second element that you will find in the initial setup is the class &lt;code&gt;TextBuffer&lt;/code&gt;, that provides a very basic manager for an input text file&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;EOLError&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ne"&gt;ValueError&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
 
     &lt;span class="sd"&gt;&amp;quot;&amp;quot;&amp;quot; Signals that the buffer is reading after the end of a line.&amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
@@ -844,19 +840,19 @@ pip install -r requirements/test.txt
         &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;line&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;column&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;line&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;column&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;As happened for the &lt;code&gt;Token&lt;/code&gt; class, you can read the tests to understand how to use the class. Basically, however, the class can &lt;code&gt;load&lt;/code&gt; an input text and extract the &lt;code&gt;current_line&lt;/code&gt;, the &lt;code&gt;current_char&lt;/code&gt;, and the &lt;code&gt;next_char&lt;/code&gt;. You can also &lt;code&gt;skip&lt;/code&gt; a given number of characters, &lt;code&gt;goto&lt;/code&gt; a given position, extract the current &lt;code&gt;position&lt;/code&gt; and read the &lt;code&gt;tail&lt;/code&gt;, which is the remaining text from the current position on.&lt;/p&gt;
-&lt;p&gt;This class has not been optimized or designed to manage big files or continuous streams of text. This is perfectly fine for our current project, but be aware that for a real compiler you should implement something more powerful.&lt;/p&gt;
+&lt;p&gt;As happened for the &lt;code&gt;Token&lt;/code&gt; class, you can read the tests to understand how to use the class. Basically, however, the class can &lt;code&gt;load&lt;/code&gt; an input text and extract the &lt;code&gt;current_line&lt;/code&gt;, the &lt;code&gt;current_char&lt;/code&gt;, and the &lt;code&gt;next_char&lt;/code&gt;. You can also &lt;code&gt;skip&lt;/code&gt; a given number of characters, &lt;code&gt;goto&lt;/code&gt; a given position, extract the current &lt;code&gt;position&lt;/code&gt; and read the &lt;code&gt;tail&lt;/code&gt;, which is the remaining text from the current position to the end of the line.&lt;/p&gt;
+&lt;p&gt;This class has not been optimized or designed to manage big files or continuous streams of text. This is perfectly fine for our current project, but be aware that for a real compiler you might want to implement something more powerful.&lt;/p&gt;
 &lt;h2 id="cli"&gt;CLI&lt;a class="headerlink" href="#cli" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
-&lt;p&gt;The third element we will need for the first part of the tutorial (that is, while we will deal with a simple calculator), is a Command Line Interface. For the moment, it just echoes any text you will input, and gracefully exit when we press Ctrl+D. There are and there will be no tests for the CLI. Testing endpoints like this is complex and not always worth the effort, as in this case.&lt;/p&gt;
+&lt;p&gt;The third element I provide is a simple REPL (&lt;a href="https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop"&gt;Read–eval–print loop&lt;/a&gt;) that at the moment just echoes any text you will input and gracefully exit when we press Ctrl+D. There are and there will be no tests for the CLI. Testing endpoints like this is complex and not always worth the effort, as in this case.&lt;/p&gt;
 &lt;p&gt;The command line can be run from the project main directory with&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;python cli.py
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;h2 id="level-1-end-of-file"&gt;Level 1 - End of file&lt;a class="headerlink" href="#level-1-end-of-file" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;&lt;em&gt;"End? No, the journey doesn't end here."&lt;/em&gt; - The Lord of the Rings: The Return of the King (2003)&lt;/p&gt;
-&lt;p&gt;The first thing a Lexer shall be able to do is to load and process an empty text. This should return an &lt;code&gt;EOF&lt;/code&gt; token (&lt;code&gt;End Of File&lt;/code&gt;). &lt;code&gt;EOF&lt;/code&gt; is used to signal that the input buffer has ended and that there is no more text to process.&lt;/p&gt;
+&lt;p&gt;The first thing a Lexer shall be able to do is to load and process an empty text. This should return an &lt;code&gt;EOF&lt;/code&gt; (&lt;code&gt;End Of File&lt;/code&gt;) token. &lt;code&gt;EOF&lt;/code&gt; is used to signal that the input buffer has ended and that there is no more text to process.&lt;/p&gt;
 &lt;p&gt;The method &lt;code&gt;get_tokens&lt;/code&gt; returns all the tokens of the input stream in a single list.&lt;/p&gt;
-&lt;p&gt;Edit the &lt;code&gt;tests/test_calc_lexer.py&lt;/code&gt; to contain the following code&lt;/p&gt;
+&lt;p&gt;Add this code to &lt;code&gt;tests/test_calc_lexer.py&lt;/code&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;smallcalc&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;tok&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;token&lt;/span&gt;
 &lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;smallcalc&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;calc_lexer&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;clex&lt;/span&gt;
 
@@ -871,8 +867,9 @@ pip install -r requirements/test.txt
     &lt;span class="p"&gt;]&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
+&lt;p&gt;To avoid misleading errors you should also create the empty file &lt;code&gt;smallcalc/calc_lexer.py&lt;/code&gt;, as without that file pytest will raise an &lt;code&gt;ImportError&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;This is our first test, and if you run the test suite now you will see that it fails. This is expected, as there is no code to pass the test.&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ py.test -svv  --cov-report term-missing --cov&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nv"&gt;smallcalc&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ pytest -svv  --cov-report term-missing --cov&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nv"&gt;smallcalc&lt;/span&gt;
 &lt;span class="o"&gt;==================================&lt;/span&gt; &lt;span class="nv"&gt;FAILURES&lt;/span&gt; &lt;span class="o"&gt;===================================&lt;/span&gt;
 _______________________ test_get_tokens_understands_eof _______________________
 
@@ -885,11 +882,11 @@ tests/test_calc_lexer.py:6: &lt;span class="nv"&gt;AttributeError&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Implement now a class &lt;code&gt;CalcLexer&lt;/code&gt; in the file &lt;code&gt;smallcalc/calc_lexer.py&lt;/code&gt; that makes the test pass. Remember that you just need the code to pass this test. So do not implement complex systems now and go for the simplest solution (hint: the test expects that specific output).&lt;/p&gt;
-&lt;p&gt;The &lt;code&gt;EOF&lt;/code&gt; constant can be a simple string with the &lt;code&gt;'EOF'&lt;/code&gt; value.&lt;/p&gt;
-&lt;p&gt;It is worth executing the test suite with coverage (check the command line above), which will tell you if you overengineered your code. You should aim for 100% coverage, always.&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;EOF&lt;/code&gt; constant can be a simple string with the value &lt;code&gt;'EOF'&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;It is worth executing the test suite with coverage (check the command line above), which will tell you if you over-engineered your code. You should aim for 100% coverage, always.&lt;/p&gt;
 &lt;hr&gt;
 &lt;h3 id="solution"&gt;Solution&lt;a class="headerlink" href="#solution" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h3&gt;
-&lt;p&gt;The base class to pass the test leverages the provided &lt;code&gt;text_buffer.TextBuffer&lt;/code&gt; class, that exposes a method &lt;code&gt;load&lt;/code&gt;, directly composed here to &lt;code&gt;CalcLexer.load&lt;/code&gt;. As the test is not providing a text the easiest solution is just to return the tested token. I extracted &lt;code&gt;get_token&lt;/code&gt; from &lt;code&gt;get_tokens&lt;/code&gt; to have a method that is specifically focused on dealing with the current token. The file &lt;code&gt;smallcalc/calc_lexer.py&lt;/code&gt; is then&lt;/p&gt;
+&lt;p&gt;To pass the test, the class &lt;code&gt;CalcLexer&lt;/code&gt; can use the provided &lt;code&gt;text_buffer.TextBuffer&lt;/code&gt; class, that exposes a method &lt;code&gt;load&lt;/code&gt; and wrap it in &lt;code&gt;CalcLexer.load&lt;/code&gt;. The test is not providing any input so the easiest solution is just to return the required token. The test requires us to implement the method &lt;code&gt;get_tokens&lt;/code&gt;, but I preferred to isolate the code in a method called &lt;code&gt;get_token&lt;/code&gt; and to call the latter from &lt;code&gt;get_tokens&lt;/code&gt;. The file &lt;code&gt;smallcalc/calc_lexer.py&lt;/code&gt; is then&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;smallcalc&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;text_buffer&lt;/span&gt;
 &lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;smallcalc&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;tok&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;token&lt;/span&gt;
 
@@ -914,6 +911,12 @@ tests/test_calc_lexer.py:6: &lt;span class="nv"&gt;AttributeError&lt;/span&gt;
 
 &lt;hr&gt;
 &lt;p&gt;You can see here in practice what I mentioned in the introduction about TDD. The method &lt;code&gt;get_token&lt;/code&gt; returns a hardcoded &lt;code&gt;token.Token(EOF)&lt;/code&gt;, because &lt;em&gt;that is enough to pass the test&lt;/em&gt;. It is not enough to be a good Lexer, but if we write and pass the right tests, this will happen in time. Be smart, be strict: write the minimal code needed to pass the test.&lt;/p&gt;
+&lt;p&gt;Being really strict, however, this solution is already over-engineered. The code&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;get_tokens&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;token&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Token&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;EOF&lt;/span&gt;&lt;span class="p"&gt;)]&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;would be enough to pass the test. It would also be the first thing we change as soon as we add another test. So, let me amend the previous advice: be strict, with a pinch of salt.&lt;/p&gt;
 &lt;h2 id="level-2-single-digit-integers"&gt;Level 2 - Single digit integers&lt;a class="headerlink" href="#level-2-single-digit-integers" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;&lt;em&gt;"You're missing just a couple of digits there."&lt;/em&gt; - Iron Man (2008)&lt;/p&gt;
 &lt;p&gt;The requirement for this section is&lt;/p&gt;
@@ -945,7 +948,7 @@ integer: [0-9]
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Please note that now the lexer shall output both an &lt;code&gt;EOF&lt;/code&gt; and an &lt;code&gt;EOL&lt;/code&gt; token, as the current line of code ends. The biggest issue you have to face here is that when you recognise a token then you have to skip it in the source text.&lt;/p&gt;
-&lt;p&gt;After this test you may end up with some code duplication, as &lt;code&gt;get_token&lt;/code&gt; and &lt;code&gt;get_tokens&lt;/code&gt; perform similar tasks. If you haven't already, please use the first one in the second. It could also be worth doing some refactoring. Remember: you can confidently change your code, because as long as the tests pass your changes are correct! This is the true power of TDD.&lt;/p&gt;
+&lt;p&gt;After this test you may end up with some code duplication, as &lt;code&gt;get_token&lt;/code&gt; and &lt;code&gt;get_tokens&lt;/code&gt; perform similar tasks. If you haven't already, please call the former from the latter. It could also be worth doing some refactoring. Remember: you can confidently change your code, because as long as the tests pass your changes are correct! This is the true power of TDD.&lt;/p&gt;
 &lt;p&gt;If you refactor the code creating helper methods you should make them "private" by prefixing their name with an underscore. This also means that you do not need to test them, in principle (watch &lt;a href="https://www.youtube.com/watch?v=URSWYvyc42M"&gt;this talk&lt;/a&gt; by Sandy Metz on this subject).&lt;/p&gt;
 &lt;h3 id="parser"&gt;Parser&lt;a class="headerlink" href="#parser" title="Permanent link"&gt;&amp;para;&lt;/a&gt;&lt;/h3&gt;
 &lt;p&gt;Now that we have a working lexer that recognises integers let us work on the parser. This has to use the lexer to process a text and produce a tree of nodes that represent the syntactic structure of the processed code. Don't worry if it seems extremely complex, it is actually pretty simple if you follow the tests.&lt;/p&gt;

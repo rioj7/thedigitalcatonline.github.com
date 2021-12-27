@@ -475,7 +475,7 @@
   <header>
     <h1>Exploring the Amiga - Part 8</h1>
     <div class="post-info">
-      <p>By Leonardo Giordani - <i class="fas fa-calendar-alt"></i> <time datetime="2019-02-19T14:00:00+01:00"> 19/02/2019</time> <i class="fas fa-edit"></i> Updated on <time datetime="2021-02-26T08:00:00+00:00">Feb 26, 2021</time></p>
+      <p>By Leonardo Giordani - <i class="fas fa-calendar-alt"></i> <time datetime="2019-02-19T14:00:00+01:00"> 19/02/2019</time> <i class="fas fa-edit"></i> Updated on <time datetime="2021-12-20T08:00:00+00:00">Dec 20, 2021</time></p>
       <p class="tags">
 	<a class="tag category" href="/category/retro/" title="All posts in category Retro">Retro</a>
 	<a class="tag" href="/categories/assembly/">assembly</a>
@@ -632,7 +632,7 @@ InsertNode:
 00001452: 0082
 00001454: 4e75
 </pre></div>
-</div></div><p>since <code>fc1456</code> is listed as the address of the <code>RemLibrary</code> function. THe binary representation of these values is</p><div class="code"><div class="content"><div class="highlight"><pre><span></span>00001448: 0100 0001 1110 1110
+</div></div><p>since <code>fc1456</code> is listed as the address of the <code>RemLibrary</code> function. The binary representation of these values is</p><div class="code"><div class="content"><div class="highlight"><pre><span></span>00001448: 0100 0001 1110 1110
 0000144a: 0000 0001 0111 1010
 0000144c: 0110 0001 0000 0000
 0000144e: 0000 0010 0111 0000
@@ -640,7 +640,42 @@ InsertNode:
 00001452: 0000 0000 1000 0010
 00001454: 0100 1110 0111 0101
 </pre></div>
-</div></div><p>Now, the first 4 bits of any Motorola 68k instruction are the instruction code. While multiple instructions share the same 4 bits (for example <code>andi</code> and <code>subi</code>), those bits are never used for addressing or to specify modes, so they are a good starting point.</p><p>The instruction at <code>0x1448</code> starts with <code>0100</code> followed by a <code>0</code>, and this narrows the selection to either <code>lea</code> or <code>chk</code>. Both instructions use the following 3 bits to specify a register (<code>An</code> for <code>lea</code>, <code>Dn</code> for <code>chk</code>), but then the first has a fixed group <code>111</code>, while the second has a group <code>110</code>. This means that we are looking at a <code>lea</code>. The three bits I mentioned are <code>000</code>, which translates in <code>a0</code> as a target. The last 6 bits are the addressing mode and the register, and the cheat sheet tells us that <code>101 110</code> corresponds to Address Register Indirect with Displacement Mode on <code>a6</code>. <code>101</code> is labelled as <code>(d16, An)</code>, while <code>110</code> is the number 6. The following word is thus the <code>d16</code> displacement from <code>a6</code>, which means that <code>41ee 017a</code> translates to <code> lea 0x17a(a6),a0</code>.</p><p>The second instruction starts at <code>0x144c</code> with <code>0110</code>, which is the signature of all the branch commands: <code>bra</code>, <code>bsr</code>, and all the condition-based ones like <code>bgt</code>, <code>blt</code>, and so on. Since the following 4 bits are <code>0001</code> we know this is a <code>bsr</code>, branch to subroutine. Now, in this instruction the 8 least significant bits tell us what the displacement is, and thus the type of the operand (Programmer's Manual, section 4-59, page 163). In this case they are all <code>0</code>, which means a word displacement, which is in the next 16 bits. Pay attention that, as we discussed for <code>lea</code> in the <a href="https://www.thedigitalcatonline.com/blog/2018/05/28/exploring-the-amiga-1/">first post</a> the Program Counter contains the address of the first displacement word. In this case the displacement is <code>0x270</code> at address <code>0x144e</code>, so the branch address is the sum of the two, that is <code>0x16be</code>.</p><p>The third instruction is again a <code>bsr</code> and following the same process we find out that the branch address is the sum between <code>0x82</code> and <code>0x1452</code>, that is <code>0x14d4</code>. The final instruction is an <code>rts</code>, as we expected, and as the decompiler correctly told us.</p><p>The most important thing to keep in mind when manually reading instructions is the position of the Program Counter. As we already saw two times, with <code>lea</code> and with <code>bsr</code>, the PC moves as soon as the 16-bit instruction has been read, which means that when a displacement is given we have to use the address of the displacement itself as a base for our calculations.</p><h2 id="resources">Resources<a class="headerlink" href="#resources" title="Permanent link">¶</a></h2><ul><li>Motorola M68000 Family Programmer's Reference Manual - <a href="https://www.nxp.com/docs/en/reference-manual/M68000PRM.pdf">https://www.nxp.com/docs/en/reference-manual/M68000PRM.pdf</a></li><li>Motorola 68000 Opcodes Cheat Sheet - <a href="http://goldencrystal.free.fr/M68kOpcodes-v2.3.pdf">http://goldencrystal.free.fr/M68kOpcodes-v2.3.pdf</a></li></ul><h2 id="feedback">Feedback<a class="headerlink" href="#feedback" title="Permanent link">¶</a></h2><p>Feel free to reach me on <a href="https://twitter.com/thedigicat">Twitter</a> if you have questions. The <a href="https://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues">GitHub issues</a> page is the best place to submit corrections.</p>
+</div></div><p>Now, the first 4 bits of any Motorola 68k instruction are the instruction code. While multiple instructions share the same 4 bits (for example <code>andi</code> and <code>subi</code>), those bits are never used for addressing or to specify modes, so they are a good starting point.</p><p>The instruction at <code>0x1448</code> starts with <code>0100</code> followed by a <code>0</code>, and this narrows the selection to a bunch of instructions: some types of <code>move</code>, <code>negx</code>, <code>clr</code>, <code>neg</code>, <code>not</code>, <code>lea</code>, <code>chk</code>. Among these, only <code>lea</code> or <code>chk</code> can be followed by <code>0001</code>.</p><p>Both instructions use the following 3 bits to specify a register (<code>An</code> for <code>lea</code>, <code>Dn</code> for <code>chk</code>), but then the first has a fixed group <code>111</code>, while the second has a group <code>110</code>. This means that we are looking at a <code>lea</code>.</p><p>The three bits after <code>0100</code> are <code>000</code>, which translates to <code>a0</code> as a target. The last 6 bits are the addressing mode and the register, and the cheat sheet tells us that <code>101 110</code> corresponds to Address Register Indirect with Displacement Mode on <code>a6</code>. <code>101</code> is labelled as <code>(d16, An)</code>, while <code>110</code> is the number 6. The following word is thus the <code>d16</code> displacement from <code>a6</code>, which means that <code>41ee 017a</code> translates to <code> lea 0x17a(a6),a0</code>.</p><div class="code"><div class="content"><div class="highlight"><pre><span></span>lea   a0   (d16,An)         0x17a
+ |    |       |               |
+ v    v       v      |-----------------|
+0100 000 111 101 110 0000 0001 0111 1010
+          ^       ^
+	  |       |
+	fixed     a6
+
+00001448: 41ee 017a     lea 0x17a(a6),a0
+</pre></div>
+</div></div><p>The second instruction starts at <code>0x144c</code> with <code>0110</code>, which is the signature of all the branch commands: <code>bra</code>, <code>bsr</code>, and all the condition-based ones like <code>bgt</code>, <code>blt</code>, and so on. Since the following 4 bits are <code>0001</code> we know this is a <code>bsr</code>, branch to subroutine. Now, in this instruction the 8 least significant bits tell us what the displacement is, and thus the type of the operand (Programmer's Manual, section 4-59, page 163). In this case they are all <code>0</code>, which means a word displacement, which is in the next 16 bits. Pay attention that, as we discussed for <code>lea</code> in the <a href="https://www.thedigitalcatonline.com/blog/2018/05/28/exploring-the-amiga-1/">first post</a> the Program Counter contains the address of the first displacement word. In this case the displacement is <code>0x270</code> at address <code>0x144e</code>, so the branch address is the sum of the two, that is <code>0x16be</code>.</p><div class="code"><div class="content"><div class="highlight"><pre><span></span>   bsr   displacement
+    |         |
+|-------| |-------|
+0110 0001 0000 0000 0000 0010 0111 0000
+                    |-----------------|
+		             |
+			   0x270 (+ 0x144e = 0x16be)
+
+0000144c: 6100 0270     bsr.w 0x16be
+</pre></div>
+</div></div><p>The third instruction is again a <code>bsr</code> and following the same process we find out that the branch address is the sum between <code>0x82</code> and <code>0x1452</code>, that is <code>0x14d4</code>.</p><div class="code"><div class="content"><div class="highlight"><pre><span></span>   bsr   displacement
+    |         |
+|-------| |-------|
+0110 0001 0000 0000 0000 0000 1000 0010
+                    |-----------------|
+		             |
+			    0x82 (+ 0x1452 = 0x14d4)
+
+00001450: 6100 0082     bsr.w 0x14d4
+</pre></div>
+</div></div><p>The final instruction is an <code>rts</code>, as we expected, and as the decompiler correctly told us. The disassembled code is then what we used in the previous section</p><div class="code"><div class="content"><div class="highlight"><pre><span></span>00001448: 41ee 017a                 lea 0x17a(a6),a0
+0000144c: 6100 0270                 bsr.w 0x16be
+00001450: 6100 0082                 bsr.w 0x14d4
+00001454: 4e75                      rts     
+</pre></div>
+</div></div><p>The most important thing to keep in mind when manually reading instructions is the position of the Program Counter. As we already saw two times, with <code>lea</code> and with <code>bsr</code>, the PC moves as soon as the 16-bit instruction has been read, which means that when a displacement is given we have to use the address of the displacement itself as a base for our calculations.</p><h2 id="resources">Resources<a class="headerlink" href="#resources" title="Permanent link">¶</a></h2><ul><li>Motorola M68000 Family Programmer's Reference Manual - <a href="https://www.nxp.com/docs/en/reference-manual/M68000PRM.pdf">https://www.nxp.com/docs/en/reference-manual/M68000PRM.pdf</a></li><li>Motorola 68000 Opcodes Cheat Sheet - <a href="http://goldencrystal.free.fr/M68kOpcodes-v2.3.pdf">http://goldencrystal.free.fr/M68kOpcodes-v2.3.pdf</a></li></ul><h2 id="feedback">Feedback<a class="headerlink" href="#feedback" title="Permanent link">¶</a></h2><p>Feel free to reach me on <a href="https://twitter.com/thedigicat">Twitter</a> if you have questions. The <a href="https://github.com/TheDigitalCatOnline/thedigitalcatonline.github.com/issues">GitHub issues</a> page is the best place to submit corrections.</p>
   </div>
 
   <section class="links">
@@ -669,23 +704,6 @@ InsertNode:
     <div class="paginated-posts">
       <div class="posts">
 	<article class="card">
-          <a href="/blog/2018/05/28/exploring-the-amiga-1/">
-            <img src="/images/exploring-the-amiga-1.jpg" alt="exploring-the-amiga-1" />
-          </a>
-          <div class="body">
-            <a href="/blog/2018/05/28/exploring-the-amiga-1/"><h2>Exploring the Amiga - Part 1</h2></a>
-	    <div class="info">
-	      <p class="tags">
-		<a href="/categories/assembly/" class="tag">assembly</a>
-		<a href="/categories/amiga/" class="tag">amiga</a>
-		<a href="/categories/retroprogramming/" class="tag">retroprogramming</a>
-              </p>
-	      <p><i class="fas fa-calendar-alt"></i> <time datetime="2018-05-28T14:00:00+01:00">May 28, 2018</time></p>
-	      <p><i class="fas fa-edit"></i> Updated on <time datetime="2021-02-26T08:00:00+00:00">Feb 26, 2021</time></p>
-	    </div>
-          </div>
-	</article>
-	<article class="card">
           <a href="/blog/2018/05/28/exploring-the-amiga-2/">
             <img src="/images/exploring-the-amiga-2.jpg" alt="exploring-the-amiga-2" />
           </a>
@@ -698,6 +716,23 @@ InsertNode:
 		<a href="/categories/retroprogramming/" class="tag">retroprogramming</a>
               </p>
 	      <p><i class="fas fa-calendar-alt"></i> <time datetime="2018-05-28T15:00:00+01:00">May 28, 2018</time></p>
+	      <p><i class="fas fa-edit"></i> Updated on <time datetime="2021-12-21T08:00:00+00:00">Dec 21, 2021</time></p>
+	    </div>
+          </div>
+	</article>
+	<article class="card">
+          <a href="/blog/2018/05/28/exploring-the-amiga-1/">
+            <img src="/images/exploring-the-amiga-1.jpg" alt="exploring-the-amiga-1" />
+          </a>
+          <div class="body">
+            <a href="/blog/2018/05/28/exploring-the-amiga-1/"><h2>Exploring the Amiga - Part 1</h2></a>
+	    <div class="info">
+	      <p class="tags">
+		<a href="/categories/assembly/" class="tag">assembly</a>
+		<a href="/categories/amiga/" class="tag">amiga</a>
+		<a href="/categories/retroprogramming/" class="tag">retroprogramming</a>
+              </p>
+	      <p><i class="fas fa-calendar-alt"></i> <time datetime="2018-05-28T14:00:00+01:00">May 28, 2018</time></p>
 	      <p><i class="fas fa-edit"></i> Updated on <time datetime="2021-02-26T08:00:00+00:00">Feb 26, 2021</time></p>
 	    </div>
           </div>

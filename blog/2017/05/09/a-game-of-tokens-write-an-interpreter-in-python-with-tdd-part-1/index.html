@@ -538,26 +538,22 @@ line : assignment | expression
 <li><strong>Visitor</strong>: the output of the parser is processed by a component that will either write the equivalent in another language or execute it.</li>
 <li><strong>Command Line Interface (CLI)</strong>: the whole stack can be directly used by a REPL (Read, Evaluate, Print Loop), a command line interface similar to the one Python provides. There each line is lexed, parsed, and visited, and the result is printed immediately.</li>
 </ul>
-<p>I will provide two classes: <code>Token</code> and <code>TextBuffer</code>. These will avoid you spending too much time in creating the basic tools, and allow you to get straight into the game. Since those classes come obviously with their own test suit you are free to develop them on your own, however, starting from the same tests that I used.</p>
+<p>I will provide two classes: <code>Token</code> and <code>TextBuffer</code>. These will avoid you spending too much time to create the basic tools, and allow you to get straight into the game. Since those classes come obviously with their own test suite you are free to develop them on your own. You should however start from the same tests that I used, otherwise your interface might end up being incompatible witht he rest of the project.</p>
 <h2 id="initial-setup">Initial setup<a class="headerlink" href="#initial-setup" title="Permanent link">&para;</a></h2>
 <p>I prepared <a href="https://github.com/lgiordani/smallcalc">this repository</a>, which contains everything you need to start the project.</p>
 <div class="highlight"><pre><span></span><code>$ git clone https://github.com/lgiordani/smallcalc.git
 </code></pre></div>
 
-<p>I created that repository using the amazing <a href="https://github.com/audreyr/cookiecutter">Cookiecutter</a> project by Audrey Roy Greenfeld. The specific template I used is one that I created as a fork of the official one. You can find the source <a href="https://github.com/lgiordani/cookiecutter-pypackage">on GitHub</a>.</p>
-<p>Once you cloned the repository you can set up an environment with</p>
-<div class="highlight"><pre><span></span><code><span class="nb">cd</span> smallcalc
-python3 -m venv venv3
-<span class="nb">source</span> venv3/bin/activate
-pip install -r requirements/test.txt
+<p>Once you cloned the repository, set up a Python virtual environment using your favourite method/tool and install the testing requirements</p>
+<div class="highlight"><pre><span></span><code>pip install -r requirements/test.txt
 </code></pre></div>
 
-<p>At this point you should be able to run the test suite. For this project we are going to use <a href="http://www.pytest.org">py.test</a>, so the command line is</p>
-<div class="highlight"><pre><span></span><code>py.test -svv
+<p>At this point you should be able to run the test suite. For this project we are going to use <a href="http://www.pytest.org">pytest</a>, so the command line is</p>
+<div class="highlight"><pre><span></span><code>pytest -svv
 </code></pre></div>
 
 <p>or, if you want to check your code coverage,</p>
-<div class="highlight"><pre><span></span><code>py.test -svv  --cov-report term-missing --cov<span class="o">=</span>smallcalc 
+<div class="highlight"><pre><span></span><code>pytest -svv  --cov-report term-missing --cov<span class="o">=</span>smallcalc 
 </code></pre></div>
 
 <h2 id="tokens">Tokens<a class="headerlink" href="#tokens" title="Permanent link">&para;</a></h2>
@@ -602,7 +598,7 @@ pip install -r requirements/test.txt
 <p>The value of a token is always a string, and shall be converted into a different type by an external object according to the value that the token assumes. For example the string <code>'123'</code> can be interpreted as an integer, but could also be the name of a variable if our language supports such a feature.</p>
 <p>Remember that everything you find in this class has been introduced to make one or more tests pass, so check the test suite to understand how the object can be used.</p>
 <h2 id="buffer">Buffer<a class="headerlink" href="#buffer" title="Permanent link">&para;</a></h2>
-<p>The second element that you will find in the initial setup is the class <code>TextBuffer</code>, that provides a very basic manager for an input text</p>
+<p>The second element that you will find in the initial setup is the class <code>TextBuffer</code>, that provides a very basic manager for an input text file</p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">EOLError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
 
     <span class="sd">&quot;&quot;&quot; Signals that the buffer is reading after the end of a line.&quot;&quot;&quot;</span>
@@ -677,19 +673,19 @@ pip install -r requirements/test.txt
         <span class="bp">self</span><span class="o">.</span><span class="n">line</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">column</span> <span class="o">=</span> <span class="n">line</span><span class="p">,</span> <span class="n">column</span>
 </code></pre></div>
 
-<p>As happened for the <code>Token</code> class, you can read the tests to understand how to use the class. Basically, however, the class can <code>load</code> an input text and extract the <code>current_line</code>, the <code>current_char</code>, and the <code>next_char</code>. You can also <code>skip</code> a given number of characters, <code>goto</code> a given position, extract the current <code>position</code> and read the <code>tail</code>, which is the remaining text from the current position on.</p>
-<p>This class has not been optimized or designed to manage big files or continuous streams of text. This is perfectly fine for our current project, but be aware that for a real compiler you should implement something more powerful.</p>
+<p>As happened for the <code>Token</code> class, you can read the tests to understand how to use the class. Basically, however, the class can <code>load</code> an input text and extract the <code>current_line</code>, the <code>current_char</code>, and the <code>next_char</code>. You can also <code>skip</code> a given number of characters, <code>goto</code> a given position, extract the current <code>position</code> and read the <code>tail</code>, which is the remaining text from the current position to the end of the line.</p>
+<p>This class has not been optimized or designed to manage big files or continuous streams of text. This is perfectly fine for our current project, but be aware that for a real compiler you might want to implement something more powerful.</p>
 <h2 id="cli">CLI<a class="headerlink" href="#cli" title="Permanent link">&para;</a></h2>
-<p>The third element we will need for the first part of the tutorial (that is, while we will deal with a simple calculator), is a Command Line Interface. For the moment, it just echoes any text you will input, and gracefully exit when we press Ctrl+D. There are and there will be no tests for the CLI. Testing endpoints like this is complex and not always worth the effort, as in this case.</p>
+<p>The third element I provide is a simple REPL (<a href="https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop">Read–eval–print loop</a>) that at the moment just echoes any text you will input and gracefully exit when we press Ctrl+D. There are and there will be no tests for the CLI. Testing endpoints like this is complex and not always worth the effort, as in this case.</p>
 <p>The command line can be run from the project main directory with</p>
 <div class="highlight"><pre><span></span><code>python cli.py
 </code></pre></div>
 
 <h2 id="level-1-end-of-file">Level 1 - End of file<a class="headerlink" href="#level-1-end-of-file" title="Permanent link">&para;</a></h2>
 <p><em>"End? No, the journey doesn't end here."</em> - The Lord of the Rings: The Return of the King (2003)</p>
-<p>The first thing a Lexer shall be able to do is to load and process an empty text. This should return an <code>EOF</code> token (<code>End Of File</code>). <code>EOF</code> is used to signal that the input buffer has ended and that there is no more text to process.</p>
+<p>The first thing a Lexer shall be able to do is to load and process an empty text. This should return an <code>EOF</code> (<code>End Of File</code>) token. <code>EOF</code> is used to signal that the input buffer has ended and that there is no more text to process.</p>
 <p>The method <code>get_tokens</code> returns all the tokens of the input stream in a single list.</p>
-<p>Edit the <code>tests/test_calc_lexer.py</code> to contain the following code</p>
+<p>Add this code to <code>tests/test_calc_lexer.py</code></p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">smallcalc</span> <span class="kn">import</span> <span class="n">tok</span> <span class="k">as</span> <span class="n">token</span>
 <span class="kn">from</span> <span class="nn">smallcalc</span> <span class="kn">import</span> <span class="n">calc_lexer</span> <span class="k">as</span> <span class="n">clex</span>
 
@@ -704,8 +700,9 @@ pip install -r requirements/test.txt
     <span class="p">]</span>
 </code></pre></div>
 
+<p>To avoid misleading errors you should also create the empty file <code>smallcalc/calc_lexer.py</code>, as without that file pytest will raise an <code>ImportError</code>.</p>
 <p>This is our first test, and if you run the test suite now you will see that it fails. This is expected, as there is no code to pass the test.</p>
-<div class="highlight"><pre><span></span><code>$ py.test -svv  --cov-report term-missing --cov<span class="o">=</span><span class="nv">smallcalc</span>
+<div class="highlight"><pre><span></span><code>$ pytest -svv  --cov-report term-missing --cov<span class="o">=</span><span class="nv">smallcalc</span>
 <span class="o">==================================</span> <span class="nv">FAILURES</span> <span class="o">===================================</span>
 _______________________ test_get_tokens_understands_eof _______________________
 
@@ -718,11 +715,11 @@ tests/test_calc_lexer.py:6: <span class="nv">AttributeError</span>
 </code></pre></div>
 
 <p>Implement now a class <code>CalcLexer</code> in the file <code>smallcalc/calc_lexer.py</code> that makes the test pass. Remember that you just need the code to pass this test. So do not implement complex systems now and go for the simplest solution (hint: the test expects that specific output).</p>
-<p>The <code>EOF</code> constant can be a simple string with the <code>'EOF'</code> value.</p>
-<p>It is worth executing the test suite with coverage (check the command line above), which will tell you if you overengineered your code. You should aim for 100% coverage, always.</p>
+<p>The <code>EOF</code> constant can be a simple string with the value <code>'EOF'</code>.</p>
+<p>It is worth executing the test suite with coverage (check the command line above), which will tell you if you over-engineered your code. You should aim for 100% coverage, always.</p>
 <hr>
 <h3 id="solution">Solution<a class="headerlink" href="#solution" title="Permanent link">&para;</a></h3>
-<p>The base class to pass the test leverages the provided <code>text_buffer.TextBuffer</code> class, that exposes a method <code>load</code>, directly composed here to <code>CalcLexer.load</code>. As the test is not providing a text the easiest solution is just to return the tested token. I extracted <code>get_token</code> from <code>get_tokens</code> to have a method that is specifically focused on dealing with the current token. The file <code>smallcalc/calc_lexer.py</code> is then</p>
+<p>To pass the test, the class <code>CalcLexer</code> can use the provided <code>text_buffer.TextBuffer</code> class, that exposes a method <code>load</code> and wrap it in <code>CalcLexer.load</code>. The test is not providing any input so the easiest solution is just to return the required token. The test requires us to implement the method <code>get_tokens</code>, but I preferred to isolate the code in a method called <code>get_token</code> and to call the latter from <code>get_tokens</code>. The file <code>smallcalc/calc_lexer.py</code> is then</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">smallcalc</span> <span class="kn">import</span> <span class="n">text_buffer</span>
 <span class="kn">from</span> <span class="nn">smallcalc</span> <span class="kn">import</span> <span class="n">tok</span> <span class="k">as</span> <span class="n">token</span>
 
@@ -747,6 +744,12 @@ tests/test_calc_lexer.py:6: <span class="nv">AttributeError</span>
 
 <hr>
 <p>You can see here in practice what I mentioned in the introduction about TDD. The method <code>get_token</code> returns a hardcoded <code>token.Token(EOF)</code>, because <em>that is enough to pass the test</em>. It is not enough to be a good Lexer, but if we write and pass the right tests, this will happen in time. Be smart, be strict: write the minimal code needed to pass the test.</p>
+<p>Being really strict, however, this solution is already over-engineered. The code</p>
+<div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">get_tokens</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">token</span><span class="o">.</span><span class="n">Token</span><span class="p">(</span><span class="n">EOF</span><span class="p">)]</span>
+</code></pre></div>
+
+<p>would be enough to pass the test. It would also be the first thing we change as soon as we add another test. So, let me amend the previous advice: be strict, with a pinch of salt.</p>
 <h2 id="level-2-single-digit-integers">Level 2 - Single digit integers<a class="headerlink" href="#level-2-single-digit-integers" title="Permanent link">&para;</a></h2>
 <p><em>"You're missing just a couple of digits there."</em> - Iron Man (2008)</p>
 <p>The requirement for this section is</p>
@@ -778,7 +781,7 @@ integer: [0-9]
 </code></pre></div>
 
 <p>Please note that now the lexer shall output both an <code>EOF</code> and an <code>EOL</code> token, as the current line of code ends. The biggest issue you have to face here is that when you recognise a token then you have to skip it in the source text.</p>
-<p>After this test you may end up with some code duplication, as <code>get_token</code> and <code>get_tokens</code> perform similar tasks. If you haven't already, please use the first one in the second. It could also be worth doing some refactoring. Remember: you can confidently change your code, because as long as the tests pass your changes are correct! This is the true power of TDD.</p>
+<p>After this test you may end up with some code duplication, as <code>get_token</code> and <code>get_tokens</code> perform similar tasks. If you haven't already, please call the former from the latter. It could also be worth doing some refactoring. Remember: you can confidently change your code, because as long as the tests pass your changes are correct! This is the true power of TDD.</p>
 <p>If you refactor the code creating helper methods you should make them "private" by prefixing their name with an underscore. This also means that you do not need to test them, in principle (watch <a href="https://www.youtube.com/watch?v=URSWYvyc42M">this talk</a> by Sandy Metz on this subject).</p>
 <h3 id="parser">Parser<a class="headerlink" href="#parser" title="Permanent link">&para;</a></h3>
 <p>Now that we have a working lexer that recognises integers let us work on the parser. This has to use the lexer to process a text and produce a tree of nodes that represent the syntactic structure of the processed code. Don't worry if it seems extremely complex, it is actually pretty simple if you follow the tests.</p>
