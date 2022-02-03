@@ -940,7 +940,7 @@ Resource favicon.ico cannot be loaded
       <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">application</span>
 </code></pre></div>
 
-<p>As you can see the name <code>application</code> that we mentioned in the nginx configuration file is not a magic string, but is the name we assigned to the Gunicorn container in the Docker Compose configuration.</p>
+<p>As you can see the name <code>application</code> that we mentioned in the nginx configuration file is not a magic string, but is the name we assigned to the Gunicorn container in the Docker Compose configuration. Please note that nginx listens on port 80 inside the container, but the port is published as 8080 on the host.</p>
 <p>To create this infrastructure we need to install Docker Compose in our virtual environment through <code>pip install docker-compose</code>. I also created a file named <code>.env</code> with the name of the project</p>
 <div class="highlight"><pre><span></span><code><span class="nv">COMPOSE_PROJECT_NAME</span><span class="o">=</span>service
 </code></pre></div>
@@ -952,7 +952,7 @@ Creating service_application_1 ... <span class="k">done</span>
 Creating service_nginx_1       ... <span class="k">done</span>
 </code></pre></div>
 
-<p>If everything is working correctly, opening the browser and visiting <code>localhost</code> should show you the HTML page Flask is serving.</p>
+<p>If everything is working correctly, opening the browser and visiting <code>localhost:8080</code> should show you the HTML page Flask is serving.</p>
 <p>Through <code>docker-compose logs</code> we can check what services are doing. We can recognise the output of Gunicorn in the logs of the service named <code>application</code></p>
 <div class="highlight"><pre><span></span><code>$ docker-compose logs application
 Attaching to service_application_1
@@ -1007,7 +1007,7 @@ Attaching to service_nginx_1
 nginx_1        <span class="p">|</span> <span class="o">[</span><span class="m">14</span>/Feb/2020:09:00:16 +0000<span class="o">]</span> localhost to: <span class="m">192</span>.168.240.4:8000: GET / HTTP/1.1 <span class="m">200</span>
 </code></pre></div>
 
-<p>where you can spot <code>to: 192.168.240.4:8000</code> which is the IP address of one of the application containers. If you now visit the page again multiple times you should notice a change in the upstream address, something like</p>
+<p>where you can spot <code>to: 192.168.240.4:8000</code> which is the IP address of one of the application containers. Please note that the IP address you see might be different, as it depends on the Docker network settings. If you now visit the page again multiple times you should notice a change in the upstream address, something like</p>
 <div class="highlight"><pre><span></span><code>$ docker-compose logs -f nginx
 Attaching to service_nginx_1
 nginx_1        <span class="p">|</span> <span class="o">[</span><span class="m">14</span>/Feb/2020:09:00:16 +0000<span class="o">]</span> localhost to: <span class="m">192</span>.168.240.4:8000: GET / HTTP/1.1 <span class="m">200</span>
@@ -1018,7 +1018,10 @@ nginx_1        <span class="p">|</span> <span class="o">[</span><span class="m">
 </code></pre></div>
 
 <p>This shows that nginx is performing load balancing, but to tell the truth this is happening through Docker's DNS, and not by an explicit action performed by the web server. We can verify this accessing the nginx container and running <code>dig application</code> (you need to run <code>apt update</code> and <code>apt install dnsutils</code> to install <code>dig</code>)</p>
-<div class="highlight"><pre><span></span><code>root@99c2f348140e:/# dig application
+<div class="highlight"><pre><span></span><code>$ docker-compose <span class="nb">exec</span> nginx /bin/bash
+root@99c2f348140e:/# apt update
+root@99c2f348140e:/# apt install -y dnsutils
+root@99c2f348140e:/# dig application
 
 <span class="p">;</span> &lt;&lt;&gt;&gt; DiG <span class="m">9</span>.11.5-P4-5.1-Debian &lt;&lt;&gt;&gt; application
 <span class="p">;;</span> global options: +cmd
@@ -1264,7 +1267,7 @@ nginx_1         <span class="p">|</span> <span class="o">[</span><span class="m"
 		<a href="/categories/python/" class="tag">Python</a>
               </p>
 	      <p><i class="fas fa-calendar-alt"></i> <time datetime="2018-04-25T13:00:00+01:00">Apr 25, 2018</time></p>
-	      <p><i class="fas fa-edit"></i> Updated on <time datetime="2020-03-14T11:00:00+00:00">Mar 14, 2020</time></p>
+	      <p><i class="fas fa-edit"></i> Updated on <time datetime="2022-01-23T11:00:00+00:00">Jan 23, 2022</time></p>
 	    </div>
           </div>
 	</article>

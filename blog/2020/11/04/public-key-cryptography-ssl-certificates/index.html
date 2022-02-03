@@ -505,7 +505,7 @@
 <p>The story of SSL and TLS is rich of events and spans 25 years since its inception by Taher Elgamal at Netscape. In short, SSL had 3 major versions (the first of which was never publicly used), and was replaced by TLS in 1999. TLS itself has gone through 3 revisions at the time of writing, TLS 1.3 being the latest version available.</p>
 <p>The TLS/SSL nomenclature is one of many sources of confusion in the complicated world of security and applied cryptography. In this article I will use only the acronym TLS, but I went for SSL in the title because I wanted the subject matter to be recognisable also by developers that are not much into security and cryptography.</p>
 <h2 id="x509-certificates">X.509 certificates<a class="headerlink" href="#x509-certificates" title="Permanent link">&para;</a></h2>
-<p>While the problem of the identity in an insecure network can be solved in several ways, the solution embraced to secure the World Wide Web is based on a standard called <strong>X.509</strong>. When we mention SSL certificates, we usually mean X.509 certificates used in a TLS connection, such as that created by HTTPS.</p>
+<p>While the problem of the identity in an insecure network can be solved in several ways, the solution embraced to secure the World Wide Web is based on a standard called <strong>X.509</strong>. When we mention TLS certificates, we usually mean X.509 certificates used in a TLS connection, such as that created by HTTPS.</p>
 <p>X.509 is the ITU-T standard used to represent certificates, and has been chosen to be the standard used in the TLS protocol. The standard doesn't only define the binary structure of the certificate itself, but it also defines procedures to revoke the certificates, and establishes a hierarchical system of certification known as <strong>certificate path</strong>, or <strong>certificate chain</strong>.</p>
 <p>The structure of an X.509 certificate is expressed using <a href="https://en.wikipedia.org/wiki/Abstract_Syntax_Notation_One">ASN.1</a>, a notation used natively by the PEM format (discussed <a href="https://www.thedigitalcatonline.com/blog/2018/04/25/rsa-keys/">here</a>). You can read the full specification in <a href="https://tools.ietf.org/html/rfc2459">RFC 2459</a>, in particular <a href="https://tools.ietf.org/html/rfc2459#section-4">Section 4</a> "Certificate and Certificate Extensions Profile". I will refer to this later when I will have a look at a real certificate.</p>
 <h2 id="how-are-certificates-related-to-https">How are certificates related to HTTPS?<a class="headerlink" href="#how-are-certificates-related-to-https" title="Permanent link">&para;</a></h2>
@@ -514,7 +514,7 @@
 <p>Certificates come into play when the browser establishes the TLS connection, which is why you need to set-up HTTPS as part of your infrastructure and not in your web application. By the time the HTTP requests reach your application they are already decrypted and accessible in plain text, as the HTTP protocol mandates. We usually say that we "terminate TLS" when a component of our infrastructure manages certificates and decrypts HTTPS into HTTP.</p>
 <h2 id="how-do-certificates-work">How do certificates work?<a class="headerlink" href="#how-do-certificates-work" title="Permanent link">&para;</a></h2>
 <p>The X.509 standard establishes entities called <strong>Certificate Authorities</strong> (CAs), and creates a hierarchy of trust called <strong>chain</strong> between them. The idea is that there is a set of entities that are trusted worldwide by operating systems, browsers, and other network-related software, and that these entities can trust other entities, thus creating a trust network.</p>
-<p>While the market of Certificate Authorities is dominated by three major commercial players (see the <a href="https://w3techs.com/technologies/overview/ssl_certificate">usage statistics</a>)there are approximately 100 organisations operating worldwide, among which some non-profit ones. Not all of these are trusted by all operating systems or browsers, though.</p>
+<p>While the market of Certificate Authorities is dominated by three major commercial players (see the <a href="https://w3techs.com/technologies/overview/ssl_certificate">usage statistics</a>) there are approximately 100 organisations operating worldwide, among which some non-profit ones. Not all of these are trusted by all operating systems or browsers, though.</p>
 <p>The set of CAs trusted by an organisation is called <strong>root program</strong>. The Mozilla community runs a program that is independent from the hardware/software platform, aptly called <a href="https://wiki.mozilla.org/CA">Mozilla's CA Certificate Program</a> and uses data contained in the <a href="https://www.ccadb.org/">Common CA Database</a> (CCADB). Private companies such as Microsoft, Apple, and Oracle run their own root programs and software running on the respective platforms (Windows, macOS/iOS, Java) can decide to trust the CAs provided by those programs.</p>
 <p>In the open-source world, the Mozilla root program is by far the most influential and important source of information, being used by other software packages and Linux distributions.</p>
 <p>It is possible to create certificates that are not signed by any CA, and these are called <strong>self-signed certificates</strong>. Such certificates can be used with any software that relies on certificates, but it requires such a software to disable certificate checking with the Certificate Authorities. Self-signed certificates are obviously useful for testing purposes, but there are scenarios in which it might be desirable not to rely on the CAs and establish a private network of trust.</p>
@@ -953,7 +953,12 @@ error www-thedigitalcatonline-com.pem: verification failed
 
 <h2 id="low-level-certificate-validation-process">Low-level certificate validation process<a class="headerlink" href="#low-level-certificate-validation-process" title="Permanent link">&para;</a></h2>
 <p>Let's have a look at the signature process for x.509 certificates. The process depends on the specific algorithm used to sign the certificate, so I will use the certificate <code>Amazon Root CA 1</code> as an example, leaving to the reader the investigation about other algorithms.</p>
-<p>A signed certificate is made of two parts, the certificate itself and the signature. The signature contains an encrypted hash of the certificate. Being encrypted we can verify the signed using their public key, and once we decrypted it we can compare the hash with one that we create on the fly using the same algorithm.</p>
+<p>A signed certificate is made of two parts, the certificate itself and the signature. The signature contains an encrypted hash of the certificate, so the verification is done in three steps:</p>
+<ol>
+<li>Decrypt the encrypted hash using the public key</li>
+<li>Compute the hash of the certificate using the same algorithm</li>
+<li>Compare the hashes</li>
+</ol>
 <p>For the Amazon root certificate, we know the signature algorithm and value from the output of <code>openssl x509</code></p>
 <div class="highlight"><pre><span></span><code>$ openssl x509 -inform pem -in amazon-root-ca-1.pem  -noout -text
 [...]
@@ -1019,7 +1024,7 @@ db fb 2d 62 1b c5 c7 1e 54 e1 77 e0 67 c8 0f 9c
 03 82 01 01 00
 </code></pre></div>
 
-<p>and the ASN.1 parser tells us that those bytes represent an <code>OBJECT IDENTIFIER</code> which value is <code>2.16.840.1.101.3.4.2.1</code>. Now, object identifiers are not complicated per se, they are just a way to identify algorithms and other well known components in ASN.1 structures. The description of the field <a href="https://tools.ietf.org/html/rfc5280#section-4.1.1.2"><code>signatureAlgorithm</code></a> of an x.509 certificate mentions three other RFCs that contains descriptions of the available algorithms. In particular, <a href="https://tools.ietf.org/html/rfc4055#section-2.1">RFC 4055</a> contains the description of PKCS #1 one-way hash functions, one of which is</p>
+<p>and the ASN.1 parser tells us that those bytes represent an <code>OBJECT IDENTIFIER</code> which value is <code>2.16.840.1.101.3.4.2.1</code>. Now, object identifiers are not complicated per se, they are just a way to identify algorithms and other well known components in ASN.1 structures. The <a href="https://tools.ietf.org/html/rfc5280#section-4.1.1.2">description of the field</a> <code>signatureAlgorithm</code> of an x.509 certificate mentions three other RFCs that contains descriptions of the available algorithms. In particular, <a href="https://tools.ietf.org/html/rfc4055#section-2.1">RFC 4055</a> contains the description of PKCS #1 one-way hash functions, one of which is</p>
 <div class="highlight"><pre><span></span><code>id-sha256  OBJECT IDENTIFIER  ::=  { joint-iso-itu-t(2)
                      country(16) us(840) organization(1) gov(101)
                      csor(3) nistalgorithm(4) hashalgs(2) 1 }
@@ -1187,7 +1192,7 @@ fffffffffffffffffffff003031300d0609608648016503040201050004206fc
 		<a href="/categories/python/" class="tag">Python</a>
               </p>
 	      <p><i class="fas fa-calendar-alt"></i> <time datetime="2018-04-25T13:00:00+01:00">Apr 25, 2018</time></p>
-	      <p><i class="fas fa-edit"></i> Updated on <time datetime="2020-03-14T11:00:00+00:00">Mar 14, 2020</time></p>
+	      <p><i class="fas fa-edit"></i> Updated on <time datetime="2022-01-23T11:00:00+00:00">Jan 23, 2022</time></p>
 	    </div>
           </div>
 	</article>

@@ -440,7 +440,7 @@ Resource favicon.ico cannot be loaded
       &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;application&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;As you can see the name &lt;code&gt;application&lt;/code&gt; that we mentioned in the nginx configuration file is not a magic string, but is the name we assigned to the Gunicorn container in the Docker Compose configuration.&lt;/p&gt;
+&lt;p&gt;As you can see the name &lt;code&gt;application&lt;/code&gt; that we mentioned in the nginx configuration file is not a magic string, but is the name we assigned to the Gunicorn container in the Docker Compose configuration. Please note that nginx listens on port 80 inside the container, but the port is published as 8080 on the host.&lt;/p&gt;
 &lt;p&gt;To create this infrastructure we need to install Docker Compose in our virtual environment through &lt;code&gt;pip install docker-compose&lt;/code&gt;. I also created a file named &lt;code&gt;.env&lt;/code&gt; with the name of the project&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nv"&gt;COMPOSE_PROJECT_NAME&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;service
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
@@ -452,7 +452,7 @@ Creating service_application_1 ... &lt;span class="k"&gt;done&lt;/span&gt;
 Creating service_nginx_1       ... &lt;span class="k"&gt;done&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;If everything is working correctly, opening the browser and visiting &lt;code&gt;localhost&lt;/code&gt; should show you the HTML page Flask is serving.&lt;/p&gt;
+&lt;p&gt;If everything is working correctly, opening the browser and visiting &lt;code&gt;localhost:8080&lt;/code&gt; should show you the HTML page Flask is serving.&lt;/p&gt;
 &lt;p&gt;Through &lt;code&gt;docker-compose logs&lt;/code&gt; we can check what services are doing. We can recognise the output of Gunicorn in the logs of the service named &lt;code&gt;application&lt;/code&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ docker-compose logs application
 Attaching to service_application_1
@@ -507,7 +507,7 @@ Attaching to service_nginx_1
 nginx_1        &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;14&lt;/span&gt;/Feb/2020:09:00:16 +0000&lt;span class="o"&gt;]&lt;/span&gt; localhost to: &lt;span class="m"&gt;192&lt;/span&gt;.168.240.4:8000: GET / HTTP/1.1 &lt;span class="m"&gt;200&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;where you can spot &lt;code&gt;to: 192.168.240.4:8000&lt;/code&gt; which is the IP address of one of the application containers. If you now visit the page again multiple times you should notice a change in the upstream address, something like&lt;/p&gt;
+&lt;p&gt;where you can spot &lt;code&gt;to: 192.168.240.4:8000&lt;/code&gt; which is the IP address of one of the application containers. Please note that the IP address you see might be different, as it depends on the Docker network settings. If you now visit the page again multiple times you should notice a change in the upstream address, something like&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ docker-compose logs -f nginx
 Attaching to service_nginx_1
 nginx_1        &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;14&lt;/span&gt;/Feb/2020:09:00:16 +0000&lt;span class="o"&gt;]&lt;/span&gt; localhost to: &lt;span class="m"&gt;192&lt;/span&gt;.168.240.4:8000: GET / HTTP/1.1 &lt;span class="m"&gt;200&lt;/span&gt;
@@ -518,7 +518,10 @@ nginx_1        &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="o"&gt;[&lt;/
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;This shows that nginx is performing load balancing, but to tell the truth this is happening through Docker's DNS, and not by an explicit action performed by the web server. We can verify this accessing the nginx container and running &lt;code&gt;dig application&lt;/code&gt; (you need to run &lt;code&gt;apt update&lt;/code&gt; and &lt;code&gt;apt install dnsutils&lt;/code&gt; to install &lt;code&gt;dig&lt;/code&gt;)&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@99c2f348140e:/# dig application
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ docker-compose &lt;span class="nb"&gt;exec&lt;/span&gt; nginx /bin/bash
+root@99c2f348140e:/# apt update
+root@99c2f348140e:/# apt install -y dnsutils
+root@99c2f348140e:/# dig application
 
 &lt;span class="p"&gt;;&lt;/span&gt; &amp;lt;&amp;lt;&amp;gt;&amp;gt; DiG &lt;span class="m"&gt;9&lt;/span&gt;.11.5-P4-5.1-Debian &amp;lt;&amp;lt;&amp;gt;&amp;gt; application
 &lt;span class="p"&gt;;;&lt;/span&gt; global options: +cmd
